@@ -1,0 +1,93 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nginx-pvc
+spec:
+{% if provider and cloud_provider is defined and cloud_provider in ["aws", "azure", "gcp", "eks", "aks", "gke"] %}
+  storageClassName: shared-storage
+{% else %}
+  storageClassName: {{ storage_class_name }}
+{% endif %}
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+  labels:
+    app: nginx
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nginx
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - args:
+        - nginx; while true; do echo `date` `hostname` "</br>" >> /usr/share/nginx/html/index.html; sleep 3; done
+        command:
+        - sh
+        - -c
+        image: "docker.io/library/nginx"
+        imagePullPolicy: Always
+        name: nginx
+        ports:
+        - containerPort: 80
+          protocol: TCP
+        resources:
+          limits:
+            cpu: 200m
+            memory: 200Mi
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        securityContext:
+          privileged: false
+          readOnlyRootFilesystem: false
+          runAsNonRoot: false
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - name: webroot
+          mountPath: /usr/share/nginx/html
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: webroot
+        persistentVolumeClaim:
+          claimName: nginx-pvc
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: nginx
+spec:
+  selector:
+    app: nginx
+{% if provider == true %}
+  type: LoadBalancer
+{% else %}
+  type: NodePort
+{% endif %}
+  ports:
+  - name: nginx
+    port: 80
+    targetPort: 80

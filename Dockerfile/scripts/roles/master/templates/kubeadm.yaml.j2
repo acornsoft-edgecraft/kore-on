@@ -1,0 +1,120 @@
+apiVersion: kubeadm.k8s.io/v1beta2
+kind: InitConfiguration
+localAPIEndpoint:
+  advertiseAddress: {{ hostvars[inventory_hostname]['ip'] | default(hostvars[inventory_hostname]['ansible_default_ipv4']['address']) }}
+  bindPort: {{ api_secure_port }}
+{% if container_runtime == "containerd" %}
+nodeRegistration:
+  criSocket: /run/containerd/containerd.sock
+{% endif %}
+---
+apiVersion: kubeadm.k8s.io/v1beta2
+kind: ClusterConfiguration
+etcd:
+  external:
+    endpoints:
+{% set pk = groups['etcd'] %}
+{% for host in pk %}
+{%   if hostvars[host]['ip'] ==  hostvars[inventory_hostname]['ip'] %}
+    - https://{{ hostvars[host]['ip'] }}:2379
+{%   endif %}
+{% endfor %}
+{% for host in pk %}
+{%   if hostvars[host]['ip'] !=  hostvars[inventory_hostname]['ip'] %}
+    - https://{{ hostvars[host]['ip'] }}:2379
+{%   endif %}
+{% endfor %}
+    caFile: {{ cert_dir }}/etcd/ca.crt
+    certFile: {{ cert_dir }}/etcd/server.crt
+    keyFile: {{ cert_dir }}/etcd/server.key
+dns:
+  type: CoreDNS
+{% if closed_network and k8s_version is version('1.21.0','>=') %}
+  imageRepository: {{ registry_domain }}/coredns
+  imageTag: v1.8.0
+{% endif %}
+networking:
+  dnsDomain: cluster.local
+  serviceSubnet: {{ service_ip_range }}
+  podSubnet: {{ pod_ip_range }}
+kubernetesVersion: {{ k8s_version }}
+{% if haproxy == true %}
+controlPlaneEndpoint: {{ hostvars[groups['masters'][0]]['ip']  }}:{{ api_secure_port }}
+{% else %}
+controlPlaneEndpoint: {{ lb_ip }}:{{ lb_port }}
+{% endif %}
+certificatesDir: {{ cert_dir }}
+apiServer:
+  extraArgs:
+    bind-address: "0.0.0.0"
+    apiserver-count: "{{ groups['masters']|length }}"
+    secure-port: "{{ api_secure_port }}"
+    feature-gates: {{ kube_feature_gates|join(',') }}
+    default-not-ready-toleration-seconds: "30"
+    default-unreachable-toleration-seconds: "30"
+{% if encrypt_secret %}
+    encryption-provider-config: /etc/kubernetes/secrets_encryption.yaml
+{% endif %}
+{% if provider == true and cloud_provider in ["aws", "azure"] %}
+    cloud-provider: {{ cloud_provider }}
+{% endif %}
+{% if provider == true and cloud_provider in ["azure"] %}
+    cloud-config: "/etc/kubernetes/pki/cloud-config.json"
+{% endif %}
+{% if audit_log_enable %}
+    audit-log-maxage: "7"
+    audit-log-maxbackup: "10"
+    audit-log-maxsize: "100"
+    audit-log-path: /var/log/kubernetes/kubernetes-audit.log
+    audit-policy-file: /etc/kubernetes/audit-policy.yaml
+    audit-webhook-config-file: /etc/kubernetes/audit-webhook
+  extraVolumes:
+  - name: audit-policy
+    hostPath: /etc/kubernetes
+    mountPath: /etc/kubernetes
+    pathType: DirectoryOrCreate
+    readOnly: true
+  - name: k8s-audit
+    hostPath: {{ data_root_dir }}/k8s-audit
+    mountPath: /var/log/kubernetes
+    pathType: DirectoryOrCreate
+{% endif %}
+  certSANs:
+  - {{ lb_ip }}
+  - localhost
+  - 127.0.0.1
+controllerManager:
+  extraArgs:
+    address: "0.0.0.0"
+    node-monitor-period: 2s
+    node-monitor-grace-period: 16s
+    feature-gates: {{ kube_feature_gates|join(',') }}
+{% if provider == true and cloud_provider in ["aws", "azure"] %}
+    cloud-provider: {{ cloud_provider }}
+{% endif %}
+{% if provider == true and cloud_provider in ["azure"] %}
+    cloud-config: "/etc/kubernetes/pki/cloud-config.json"
+{% endif %}
+scheduler:
+  extraArgs:
+    address: "0.0.0.0"
+    feature-gates: {{ kube_feature_gates|join(',') }}
+{% if closed_network %}
+imageRepository: {{ registry_domain }}/google_containers
+{% else %}
+imageRepository: k8s.gcr.io
+{% endif %}
+
+---
+apiVersion: kubeproxy.config.k8s.io/v1alpha1
+kind: KubeProxyConfiguration
+featureGates: { {{ kubeproxy_feature_gates|join(',') }} }
+mode: {{ kube_proxy_mode }}
+---
+apiVersion: kubelet.config.k8s.io/v1beta1
+kind: KubeletConfiguration
+cgroupDriver: systemd
+nodeStatusUpdateFrequency: 4s
+readOnlyPort: 0
+clusterDNS:
+- {{ dns_ip }}

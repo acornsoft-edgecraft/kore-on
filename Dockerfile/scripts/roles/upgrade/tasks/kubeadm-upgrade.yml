@@ -1,0 +1,29 @@
+---
+- name: Upgrade first master
+  command: >-
+    timeout -k 600s 600s
+    kubeadm
+    upgrade apply -y v{{ k8s_version }}
+    --config={{ kube_config_dir }}/kubeadm.yaml
+    --ignore-preflight-errors=all
+    --allow-experimental-upgrades
+    --allow-release-candidate-upgrades
+    --etcd-upgrade=false
+    --certificate-renewal=false
+    --force
+  register: kubeadm_upgrade
+  # Retry is because upload config sometimes fails
+  retries: 3
+  when: inventory_hostname == groups['masters']|first and kubeadm_apiserver_crt.stat.exists
+  failed_when: kubeadm_upgrade.rc != 0 and "field is immutable" not in kubeadm_upgrade.stderr
+  notify: Master | restart kubelet
+
+- name: Upgrade other master
+  command: >-
+    timeout -k 600s 600s
+    kubeadm upgrade node
+    --certificate-renewal=false
+  register: kubeadm_upgrade
+  when: inventory_hostname != groups['masters']|first and kubeadm_apiserver_crt.stat.exists
+  failed_when: kubeadm_upgrade.rc != 0 and "field is immutable" not in kubeadm_upgrade.stderr
+  notify: Master | restart kubelet

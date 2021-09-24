@@ -1,0 +1,31 @@
+---
+etcd_access_addresses: |-
+  {% for node in groups['etcd'] -%}
+    {{ etcd_peer_url_scheme }}://{{ hostvars[node]['ip'] }}:2379{% if not loop.last %},{% endif %}
+  {%- endfor %}
+
+# AWS node name 분기 처리
+node_name: |-
+  {% if cloud_provider is defined and cloud_provider == "aws" -%}
+    {{ ansible_fqdn|lower }}
+  {%- else -%}
+    {{ ansible_hostname|lower }}
+  {%- endif %}
+
+#kube_feature_gates: |-
+#  [
+#    "TTLAfterFinished=true"
+#    ,"RemoveSelfLink=false"
+#    {%- if sctp_support is defined and sctp_support -%}
+#    ,"SCTPSupport=true"
+#    {%- endif -%}
+#  ]
+#
+#kubeproxy_feature_gates: |-
+#  [
+#    "TTLAfterFinished: true"
+#    {%- if sctp_support -%}
+#    , "SCTPSupport: true"
+#    {%- endif -%}
+#  ]
+

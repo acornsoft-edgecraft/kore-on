@@ -1,0 +1,3 @@
+---
+- import_tasks: registry.yml
+  when: registry_install

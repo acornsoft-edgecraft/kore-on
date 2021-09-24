@@ -1,0 +1,44 @@
+---
+- name: Create kubernetes cert directory
+  file: path={{ cert_dir }}/etcd state=directory
+
+- name: Slurp kubernetes ca certificate
+  slurp: src={{ master_cert_dir }}/{{ item }}
+  with_items:
+    - ca.crt
+    - ca.key
+  register: pki_certs
+  run_once: true
+  delegate_to: "{{ groups['sslhost'][0] }}"
+
+- name: Write kubernetes ca certificate to disk
+  copy: dest={{ cert_dir }}/{{ item.item }} content="{{ item.content | b64decode }}"
+  register: openssl_cert
+  with_items: "{{ pki_certs.results }}"
+  no_log: true
+
+# All etcd node have same ca.crt and ca.key file
+# Therefore, we create etcd ca.crt and ca.key into /opt/kubernetes/pki/etcd and distribute it to all etcd node
+- name: Read etcd ca.crt and ca.key from master cert dir
+  slurp: src={{ master_cert_dir }}/etcd/{{ item }}
+  with_items:
+    - ca.crt
+    - ca.key
+  register: etcd_pki_certs
+  run_once: true
+  delegate_to: "{{ groups['sslhost'][0] }}"
+
+- name: Write etcd ca.crt and ca.key to cert dir
+  copy: dest={{ cert_dir }}/etcd/{{ item.item }} content="{{ item.content | b64decode }}"
+  register: etcd_pki_certs
+  with_items: "{{ etcd_pki_certs.results }}"
+  no_log: true
+
+- name: Write registry certificate to disk
+  when: not registry_public_cert
+  get_url:
+    url: https://{{ registry_domain }}/ca.crt
+    dest: /etc/docker/certs.d/{{ registry_domain }}/ca.crt
+    mode: 0600
+    validate_certs: no
+  no_log: false

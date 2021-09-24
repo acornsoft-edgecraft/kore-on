@@ -1,0 +1,8 @@
+apiVersion: kubeadm.k8s.io/v1beta2
+kind: JoinConfiguration
+caCertPath: {{ cert_dir }}/ca.crt
+discovery:
+  bootstrapToken:
+    apiServerEndpoint: {{ api_lb_ip | replace("https://", "")}}
+    token: {{ kubeadm_token }}
+    unsafeSkipCAVerification: true

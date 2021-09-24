@@ -1,0 +1,15 @@
+---
+is_kube_master: "{{ inventory_hostname in groups['masters'] }}"
+is_registry: "{{ inventory_hostname in groups['registry'] }}"
+
+#etcd_access_addresses: |-
+#  {% for node in groups['etcd'] -%}
+#    {{ etcd_peer_url_scheme }}://{{ hostvars[node]['ip'] }}:2379{% if not loop.last %},{% endif %}
+#  {%- endfor %}
+
+etcd_access_addresses: |-
+  {{ etcd_peer_url_scheme }}://{{ hostvars[inventory_hostname]['ip'] | default(hostvars[inventory_hostname]['ansible_default_ipv4']['address']) }}:2379
+
+scripts_dir: "{{ install_dir }}/scripts"
+backup_dir: "{{ install_dir }}/backup"
+maxbackup_day: 7

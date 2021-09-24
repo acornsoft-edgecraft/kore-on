@@ -1,0 +1,142 @@
+#jinja2:variable_start_string:'[%' , variable_end_string:'%]'
+#!/bin/bash
+
+# Copyright Project Harbor Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# https://github.com/stonezdj/harbor/blob/backup_restore/tools/harbor-backup.sh
+
+CURRENT_DATE=`date '+%Y%m%d'`
+CURRENT_TIME=`date '+%Y%m%d_%H%M%S'`
+
+BACKUP_DIR="$1"
+MAXBACKUP_DAY="$2"
+HARBOR_DIR="[% registry_data_dir %]"
+
+error_exit() {
+    echo "error: ${1:-"unknown error"}" 1>&2
+    exit 1
+}
+
+create_dir(){
+    rm -rf ${BACKUP_DIR}/harbor
+    mkdir -p ${BACKUP_DIR}/harbor/db
+    mkdir -p ${BACKUP_DIR}/harbor/secret
+    chmod 777 ${BACKUP_DIR}/harbor/db
+    chmod 777 ${BACKUP_DIR}/harbor/secret
+}
+
+launch_db() {
+    if [ -n "$($DOCKER_CMD ps -q)" ]; then
+        echo "There is running container, please stop and remove it before backup"
+        exit 1
+    fi
+    $DOCKER_CMD run -d --name harbor-db -v ${BACKUP_DIR}:/backup -v ${harbor_db_path}:/var/lib/postgresql/data ${harbor_db_image} "postgres"
+}
+
+clean_db() {
+    $DOCKER_CMD stop harbor-db
+    $DOCKER_CMD rm harbor-db
+}
+
+wait_for_db_ready() {
+    set +e
+    TIMEOUT=12
+    while [ $TIMEOUT -gt 0 ]; do
+        $DOCKER_CMD exec harbor-db pg_isready | grep "accepting connections"
+        if [ $? -eq 0 ]; then
+                break
+        fi
+        TIMEOUT=$((TIMEOUT - 1))
+        sleep 5
+    done
+    if [ $TIMEOUT -eq 0 ]; then
+        echo "Harbor DB cannot reach within one minute."
+        clean_db
+        exit 1
+    fi
+    set -e
+}
+
+dump_database() {
+    $DOCKER_CMD exec harbor-db sh -c 'pg_dump -U postgres registry ' > ${BACKUP_DIR}/harbor/db/registry.back
+    $DOCKER_CMD exec harbor-db sh -c 'pg_dump -U postgres postgres ' > ${BACKUP_DIR}/harbor/db/postgres.back
+    $DOCKER_CMD exec harbor-db sh -c 'pg_dump -U postgres notarysigner ' > ${BACKUP_DIR}/harbor/db/notarysigner.back
+    $DOCKER_CMD exec harbor-db sh -c 'pg_dump -U postgres notaryserver ' > ${BACKUP_DIR}/harbor/db/notaryserver.back
+}
+
+backup_registry() {
+    cp -rf ${HARBOR_DIR}/registry  ${BACKUP_DIR}/harbor/
+}
+
+backup_chart_museum() {
+    if [ -d ${HARBOR_DIR}/chart_storage ]; then
+        cp -rf ${HARBOR_DIR}/chart_storage ${BACKUP_DIR}/harbor/
+    fi
+}
+
+backup_redis() {
+    if [ -d ${HARBOR_DIR}/redis ]; then
+        cp -rf ${HARBOR_DIR}/redis ${BACKUP_DIR}/harbor/
+    fi
+}
+
+backup_secret() {
+    if [ -f ${HARBOR_DIR}/secretkey ]; then
+        cp ${HARBOR_DIR}/secretkey ${BACKUP_DIR}/harbor/secret/
+    fi
+    if [ -f ${HARBOR_DIR}/defaultalias ]; then
+         cp ${HARBOR_DIR}/defaultalias ${BACKUP_DIR}/harbor/secret/
+    fi
+    # location changed after 1.8.0
+    if [ -d ${HARBOR_DIR}/secret/keys/ ]; then
+        cp -r ${HARBOR_DIR}/secret/keys/ ${BACKUP_DIR}/harbor/secret/
+    fi
+}
+
+create_tarball() {
+ 	cd ${BACKUP_DIR}
+    tar zcvf ${BACKUP_DIR}/harbor.$CURRENT_TIME.tgz harbor
+    rm -rf ${BACKUP_DIR}/harbor
+}
+
+main() {
+    if [ "$#" -ne 2 ]; then
+		echo "Usage: ./registry-backup.sh /path/to/backup/dir maxbackup_day"
+        error_exit "Illegal number of parameters. You must pass backup directory path and number of days to keep backups"
+    fi
+
+    set -ex
+
+    DOCKER_CMD=docker
+    harbor_db_image=$($DOCKER_CMD images goharbor/harbor-db --format "{{.Repository}}:{{.Tag}}" | head -1)
+    harbor_db_path="${HARBOR_DIR}/database"
+
+    create_dir
+#    launch_db
+#    wait_for_db_ready
+    dump_database
+#    backup_redis
+    backup_registry
+    backup_chart_museum
+    backup_secret
+    create_tarball
+#    clean_db
+
+	echo "find $BACKUP_DIR -name 'harbor.*.tgz' -mtime +`expr $MAXBACKUP_DAY - 1` | xargs rm -rf"
+	find $BACKUP_DIR -name "harbor.*.tgz" -mtime +`expr $MAXBACKUP_DAY - 1` | xargs rm -rf
+
+    echo "All Harbor data are backed up"
+}
+
+main "${@}"

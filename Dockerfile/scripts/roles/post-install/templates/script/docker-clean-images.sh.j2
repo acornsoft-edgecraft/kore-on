@@ -1,0 +1,52 @@
+#jinja2:variable_start_string:'[%' , variable_end_string:'%]'
+#!/bin/bash
+
+MAX_KEEP_CNT="$1"
+CURRENT_TIME=`date '+%Y%m%d_%H%M%S'`
+
+error_exit() {
+	echo "error: ${1:-"unknown error"}" 1>&2
+	exit 1
+}
+
+main() {
+	if [ "$#" -ne 1 ]; then
+		echo "Usage: ./clean-docker-images.sh max_keep_cnt"
+		error_exit "Illegal number of parameters. You must pass max number of keep images"
+	fi
+
+	echo "[$CURRENT_TIME]Delete old docker images to keep $MAX_KEEP_CNT tags for each repository"
+
+	i=0
+	tag_cnt=0
+	repo=""
+
+	# get docker images with id, repository, tag, createtime in descending
+	docker images --no-trunc --format '{{.ID}} {{.Repository}} {{.Tag}} {{.CreatedAt}}' | sort -r -k 2,2 -k 4,4r -k5,5r | while read line; do
+		IFS=' '
+		read -ra arr <<< "$line"
+
+		# skip first line
+		if [[ "$i" -eq 0 ]];then
+			repo="${arr[1]}"
+			((i++))
+			continue
+		fi
+
+		if [[ "${repo}" == "${arr[1]}" ]]; then
+			# same repository, tracking tag count
+			((++tag_cnt))
+
+			if [[ "$tag_cnt" -ge ${MAX_KEEP_CNT} ]]; then
+				echo "[DELETE] ${arr[0]} ${arr[1]} ${arr[2]}"
+				docker rmi -f "${arr[0]}"
+			fi
+		else
+			repo="${arr[1]}"
+			tag_cnt=0
+		fi
+
+	done
+}
+
+main "${@}"

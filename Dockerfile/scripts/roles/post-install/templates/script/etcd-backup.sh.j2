@@ -1,0 +1,50 @@
+#!/bin/sh
+
+# usage: etcd-backup.sh save_path days
+# ./etcd-backup.sh /nas/BACKUP/etcd 10
+
+export ETCDCTL_API=3
+
+ETCD_CERT="/etc/kubernetes/pki/etcd/peer.crt"
+ETCD_KEY="/etc/kubernetes/pki/etcd/peer.key"
+ETCD_CACERT="/etc/kubernetes/pki/etcd/ca.crt"
+
+ETCD_EP={{ etcd_access_addresses }}
+CURRENT_DATE=`date '+%Y%m%d'`
+CURRENT_TIME=`date '+%Y%m%d_%H%M%S'`
+
+ETCD_BACKDIR="$1"
+
+error_exit() {
+    echo "error: ${1:-"unknown error"}" 1>&2
+    exit 1
+}
+
+verify_prereqs() {
+    echo "Verifying Prerequisites"
+
+    if [ ! -d $ETCD_BACKDIR ]; then
+        error_exit "Can't access etcd backup directory $ETCD_BACKDIR"
+    fi
+}
+
+main() {
+    if [ "$#" -ne 2 ]; then
+		echo "./etcd-backup.sh /nas/BACKUP/ 10"
+        error_exit "Illegal number of parameters. You must pass backup directory path and number of days to keep backups"
+    fi
+
+    verify_prereqs
+
+    echo "Getting ready to backup to etcd($ETCD_BACKDIR)"
+
+    # etcd backup
+    /bin/etcdctl --endpoints="$ETCD_EP" snapshot save "$ETCD_BACKDIR/etcd_$CURRENT_TIME"
+
+    echo "find $ETCD_BACKDIR -name 'etcd*' -mtime +`expr $2 - 1` | xargs rm -rf"
+    find $ETCD_BACKDIR -name "etcd*" -mtime +`expr $2 - 1` | xargs rm -rf
+
+    echo "Backup completed."
+}
+
+main "${@}"

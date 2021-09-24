@@ -1,0 +1,37 @@
+---
+- name: Install python3, python3-pip
+  package:
+    name: ["python3", "python3-pip"]
+    state: present
+    update_cache: yes
+
+- name: Install requests python module
+  pip:
+    name: requests
+
+- name: Copy image upload script
+  template:
+    src: "upload.py.j2"
+    dest: "/tmp/upload.py"
+    mode: 0755
+
+- name: Copy register's scripts files
+  template:
+    src: "../../post-install/templates/script/registry-backup.sh.j2"
+    dest: "/tmp/registry-backup.sh"
+    mode: 0755
+
+- name: Copy local-repository scripts files
+  template:
+    src: "local-repository.sh.j2"
+    dest: "/tmp/local-repository.sh"
+    mode: 0755
+
+- name: Make local repository
+  shell: "/tmp/local-repository.sh {{ k8s_version }} /tmp"
+
+- name: Start image upload
+  shell: "/tmp/upload.py"
+
+- name: Archieve registry data
+  shell: "/tmp/registry-backup.sh /tmp 1"

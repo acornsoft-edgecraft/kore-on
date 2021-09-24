@@ -1,0 +1,16 @@
+---
+# Remove node
+- hosts: masters
+  roles:
+   - { role: node/remove-node, tags: remove-node }
+
+- hosts: all
+  gather_facts: false
+  tasks:
+    - add_host:
+        hostname: '{{ target }}'
+        ansible_host: '{{ target }}'
+
+- hosts: "{{ target }}"
+  roles:
+  - { role: reset, tags: remove-node }

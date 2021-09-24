@@ -1,0 +1,9 @@
+---
+# This playbook add specific nodes a kubernetes cluster.
+- hosts: node
+  roles:
+  - { role: yum-repo, tags: yum-repo }
+  - { role: initialize, tags: initialize }
+  - { role: cri, tags: cri }
+  - { role: haproxy, tags: haproxy }
+  - { role: node, tags: node }

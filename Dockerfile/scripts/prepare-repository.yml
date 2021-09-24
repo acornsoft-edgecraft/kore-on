@@ -1,0 +1,10 @@
+---
+# This playbook prepares local-repository and image-registry for air-gap env
+
+# registry
+- hosts: registry
+  roles:
+    - { role: yum-repo, tags: registry }
+    - { role: initialize, tags: initialize }
+    - { role: cri, tags: registry }
+    - { role: registry, tags: registry }

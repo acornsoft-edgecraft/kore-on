@@ -1,0 +1,2 @@
+---
+is_gpu_node: "{{ 'gpu-node' in groups and inventory_hostname in groups['gpu-node'] }}"

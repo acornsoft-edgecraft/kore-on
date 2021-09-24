@@ -1,0 +1,133 @@
+---
+- name: create etcd user
+  user:
+    name: etcd
+    shell: /sbin/nologin
+    comment: "etcd user"
+
+- name: Create etcd config directory
+  file:
+    path: "{{ etcd_conf_dir }}"
+    state: directory
+
+- name: create /var/lib/etcd
+  file:
+    path: /var/lib/etcd
+    state: directory
+    owner: etcd
+    mode: 0775
+
+- name: Create etcd download directory
+  file:
+    path: "{{ etcd_download_dir }}"
+    state: directory
+
+- name: Create etcd bin directory
+  file:
+    path: "{{ etcd_bin_dir }}"
+    state: directory
+
+- name: Create etcd data directory
+  file:
+    path: "{{ etcd_data_dir }}"
+    state: directory
+    owner: etcd
+    group: etcd
+
+- name: Copy etcd compressed file
+  copy:
+    src: "etcd-v{{ etcd_version }}-linux-amd64.tar.gz"
+    dest: "{{ etcd_download_dir }}/etcd-v{{ etcd_version }}-linux-amd64.tar.gz"
+    mode: 0755
+
+- name: Unzip etcd compressed file
+  unarchive:
+    src: "{{ etcd_download_dir }}/etcd-v{{ etcd_version }}-linux-amd64.tar.gz"
+    dest: "{{ etcd_download_dir }}/"
+    remote_src: yes
+    owner: "root"
+    group: "root"
+    creates: "{{ etcd_download_dir }}/etcd-v{{ etcd_version }}-linux-amd64/etcd"
+
+- name: Copy etcd binaries to destination directory
+  copy:
+    src: "{{ etcd_download_dir }}/etcd-v{{ etcd_version }}-linux-amd64/{{ item }}"
+    dest: "{{ etcd_bin_dir }}/{{ item }}"
+    mode: 0755
+    owner: root
+    group: root
+    remote_src: yes
+  with_items:
+    - etcd
+    - etcdctl
+
+- name: Create systemd unit file
+  copy:
+    src: etcd.service
+    dest: /etc/systemd/system/etcd.service
+    owner: root
+    group: root
+    mode: 0644
+  register: etcd_system_unit
+
+- name: Create etcd cert directory
+  file:
+    path: "{{ kube_config_dir }}"
+    state: directory
+  when: etcd_peer_url_scheme == 'https'
+
+- name: Write etcd config file
+  template:
+    src: etcd.conf.j2
+    dest: /etc/etcd/etcd.conf
+  register: etcd_config
+
+- name: Copy etcd openssl conf file to create certificate
+  template:
+    src: "openssl-etcd.conf.j2"
+    dest: "{{ master_cert_dir }}/openssl-etcd.conf"
+
+- stat:
+    path: "{{ cert_dir }}/etcd/server.crt"
+  register: etcd_cert_stat
+
+- name: Create etcd certificate
+  when: etcd_peer_url_scheme == 'https' and not etcd_cert_stat.stat.exists
+  shell: "{{ item }}"
+  no_log: true
+  with_items:
+    - "openssl genrsa -out {{ cert_dir }}/etcd/server.key 2048; chmod 644 {{ cert_dir }}/etcd/server.key"
+    - "openssl req -new -key {{ cert_dir }}/etcd/server.key -subj '/CN={{ node_name }}' |
+      openssl x509 -req -CA {{ cert_dir }}/etcd/ca.crt -CAkey {{ cert_dir }}/etcd/ca.key -CAcreateserial -out {{ cert_dir }}/etcd/server.crt -days {{ cert_validity_days }} -extensions v3_req_etcd -extfile {{ master_cert_dir }}/openssl-etcd.conf"
+
+    - "openssl genrsa -out {{ cert_dir }}/etcd/peer.key; chmod 644 {{ cert_dir }}/etcd/peer.key"
+    - "openssl req -new -key {{ cert_dir }}/etcd/peer.key -subj '/CN={{ node_name }}' |
+      openssl x509 -req -CA {{ cert_dir }}/etcd/ca.crt -CAkey {{ cert_dir }}/etcd/ca.key -CAcreateserial -out {{ cert_dir }}/etcd/peer.crt -days {{ cert_validity_days }} -extensions v3_req_etcd -extfile {{ master_cert_dir }}/openssl-etcd.conf"
+
+    - "openssl genrsa -out {{ cert_dir }}/etcd/healthcheck-client.key 2048; chmod 644 {{ cert_dir }}/etcd/healthcheck-client.key"
+    - "openssl req -new -key {{ cert_dir }}/etcd/healthcheck-client.key -subj '/O=system:masters/CN=kube-etcd-healthcheck-client' |
+      openssl x509 -req -CA {{ cert_dir }}/etcd/ca.crt -CAkey {{ cert_dir }}/etcd/ca.key -CAcreateserial -out {{ cert_dir }}/etcd/healthcheck-client.crt -days {{ cert_validity_days }} -extensions v3_req_client -extfile {{ master_cert_dir }}/openssl-etcd.conf"
+  register: etcd_cert
+
+- name: Reload systemd
+  systemd:
+    daemon_reload: true
+  when: etcd_system_unit.changed
+
+- name: Enable and start etcd
+  when: etcd_config.changed
+  systemd:
+    name: etcd
+    enabled: yes
+    state: started
+
+- name: Restart etcd
+  systemd:
+    name: etcd
+    state: restarted
+  when: etcd_system_unit.changed and etcd_config.changed and etcd_cert.changed
+  register: etcd_started
+
+- name: Set etcd's disk priority
+  shell: "ionice -c2 -n0 -p `pgrep etcd`"
+  when: etcd_started

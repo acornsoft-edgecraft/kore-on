@@ -1,0 +1,58 @@
+---
+- name: Create kubernetes cert directory
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+  - "{{ cert_dir }}/etcd"
+  - "{{ cert_dir }}/istio"
+
+- name: Slurp CA certificate
+  slurp: src={{ master_cert_dir }}/{{ item }}
+  with_items:
+    - ca.crt
+    - ca.key
+    - apiserver-etcd-client.key
+    - apiserver-etcd-client.crt
+    - front-proxy-ca.key
+    - front-proxy-ca.crt
+    - sa.key
+    - sa.pub
+  register: pki_certs
+  run_once: true
+  delegate_to: "{{ groups['sslhost'][0] }}"
+
+- name: Write CA certificate to disk
+  copy: dest={{ cert_dir }}/{{ item.item }} content="{{ item.content | b64decode }}"
+  with_items: "{{ pki_certs.results }}"
+  no_log: true
+
+- name: Check etcd server certification file existence
+  stat:
+    path: "{{ cert_dir }}/etcd/server.crt"
+  register: etcd_cert_stat
+
+- name: Slurp etcd certificate
+  when: not etcd_cert_stat.stat.exists
+  slurp: src={{ cert_dir }}/etcd/{{ item }}
+  with_items:
+    - ca.crt
+    - server.crt
+    - server.key
+  register: etcd_pki_certs
+  delegate_to: "{{ groups['etcd'][0] }}"
+
+- name: Write etcd certificate to disk
+  when: not etcd_cert_stat.stat.exists
+  copy: dest={{ cert_dir }}/etcd/{{ item.item }} content="{{ item.content | b64decode }}"
+  with_items: "{{ etcd_pki_certs.results }}"
+  no_log: true
+
+- name: Write registry certificate to disk
+  when: not registry_public_cert
+  get_url:
+    url: https://{{ registry_domain }}/ca.crt
+    dest: /etc/docker/certs.d/{{ registry_domain }}/ca.crt
+    mode: 0600
+    validate_certs: no
+  no_log: false

@@ -1,0 +1,65 @@
+#!/bin/sh
+
+# usage: cluster-backup.sh save_path days
+# ./cluster-backup.sh /nas/BACKUP/cluster 7
+
+export ETCDCTL_API=3
+export ETCDCTL_CERT=/etc/kubernetes/pki/etcd/peer.crt
+export ETCDCTL_CACERT=/etc/kubernetes/pki/etcd/ca.crt
+export ETCDCTL_KEY=/etc/kubernetes/pki/etcd/peer.key
+
+ETCD_EP={{ etcd_access_addresses }}
+CURRENT_DATE=`date '+%Y%m%d'`
+CURRENT_TIME=`date '+%Y%m%d_%H%M%S'`
+
+BACKDIR="$1"
+
+error_exit() {
+	echo "error: ${1:-"unknown error"}" 1>&2
+	exit 1
+}
+
+create_dir() {
+	rm -rf $BACKDIR/compressed
+	mkdir -p $BACKDIR/compressed/system
+}
+
+verify_prereqs() {
+	if [ ! -d $BACKDIR ]; then
+		error_exit "Can't access etcd backup directory $BACKDIR"
+	fi
+}
+
+main() {
+	if [ "$#" -ne 2 ]; then
+		echo "cluster-backup.sh /nas/BACKDIR/ 10"
+		error_exit "Illegal number of parameters. You must pass backup directory path and number of days to keep backups"
+	fi
+
+	verify_prereqs
+
+	create_dir
+
+	echo "Getting ready to backup to cluster to $BACKDIR $CURRENT_TIME"
+
+	# etcd backup
+	/bin/etcdctl --endpoints="$ETCD_EP" snapshot save "$BACKDIR/compressed/etcd_$CURRENT_TIME"
+	cp -f /etc/etcd/etcd.conf $BACKDIR/compressed
+	cp -f /etc/systemd/system/etcd.service $BACKDIR/compressed
+
+	# cluster config backup
+	cp -rf /etc/kubernetes $BACKDIR/compressed
+	cp -rf /opt/kubernetes $BACKDIR/compressed/system
+	cp /etc/sysconfig/kubelet $BACKDIR/compressed/system/etc_sysconfig_kubelet
+	cp /var/lib/kubelet/config.yaml $BACKDIR/compressed/system/var_lib_kubelet_config.yaml
+	cp /usr/lib/systemd/system/kubelet.service.d/10-kubeadm.conf $BACKDIR/compressed/system
+	cd $BACKDIR
+	tar -zcf $BACKDIR/cluster_$CURRENT_TIME.tar.gz compressed
+
+	find $BACKDIR -name "cluster*" -mtime +`expr $2 - 1` | xargs rm -rf
+	rm -rf $BACKDIR/compressed
+	echo "Backup completed."
+
+}
+
+main "${@}"

@@ -1,0 +1,9 @@
+---
+# This playbook upgrads kubernetes cluster.
+
+# Upgrade kubernetes cluster
+- hosts: cluster
+  roles:
+    - upgrade
+  tags:
+    - upgrade

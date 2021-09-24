@@ -1,0 +1,10 @@
+---
+- name: reload systemd
+  command: systemctl --system daemon-reload
+
+- name: restart etcd
+  systemd:
+    name: etcd
+    state: restarted
+  when: etcd_started.changed == false
+

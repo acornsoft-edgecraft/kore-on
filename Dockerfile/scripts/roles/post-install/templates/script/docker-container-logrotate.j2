@@ -1,0 +1,10 @@
+# Added by cube
+{{ data_root_dir }}/docker/containers/*/*.log {
+  daily
+  rotate 4
+  compress
+  size=1G
+  missingok
+  delaycompress
+  copytruncate
+}

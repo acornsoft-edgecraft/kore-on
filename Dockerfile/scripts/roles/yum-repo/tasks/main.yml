@@ -1,0 +1,8 @@
+---
+- include_tasks: closed-network.yml
+  when:
+    - closed_network
+
+- include_tasks: open-network.yml
+  when:
+    - not closed_network

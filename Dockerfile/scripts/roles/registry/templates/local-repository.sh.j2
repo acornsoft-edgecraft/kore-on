@@ -1,0 +1,117 @@
+#!/bin/bash
+
+CURRENT_DATE=`date '+%Y%m%d'`
+CURRENT_TIME=`date '+%Y%m%d_%H%M%S'`
+
+K8S_VERIONS="$1"
+BACKUP_DIR="$2"
+
+error_exit() {
+    echo "error: ${1:-"unknown error"}" 1>&2
+    exit 1
+}
+
+make_yum_repo(){
+    mkdir -p /data/localrepo
+    cd /data/localrepo
+
+    yum repolist
+    yum install -y createrepo
+    yum install -y yum-utils
+
+    yumdownloader --arch x86_64 --resolve  --downloaddir=. createrepo
+    yumdownloader --resolve --downloaddir=. yum-utils
+
+    yumdownloader --arch x86_64 --resolve --downloaddir=. jq
+    yumdownloader --alldeps --resolve --downloaddir=. nginx
+    yumdownloader --arch x86_64 --resolve --downloaddir=. telnet
+    yumdownloader --arch x86_64 --resolve --downloaddir=. net-tools
+    yumdownloader --arch x86_64 --resolve --downloaddir=. bind-utils
+    yumdownloader --alldeps --arch x86_64 --resolve --downloaddir=. python3
+
+    yumdownloader --arch x86_64 --resolve --downloaddir=. nfs-utils
+    yumdownloader --arch x86_64 --resolve --downloaddir=. ipvsadm
+    yumdownloader --arch x86_64 --resolve --downloaddir=. ipset
+    yumdownloader --arch x86_64 --resolve --downloaddir=. lksctp-tools
+    yumdownloader --arch x86_64 --resolve --downloaddir=. python3-libselinux
+    yumdownloader --arch x86_64 --resolve --downloaddir=. socat
+    yumdownloader --arch x86_64 --resolve --downloaddir=. conntrack-tools
+
+    yumdownloader --alldeps --enablerepo Docker-CE-Stable --arch x86_64 --resolve --downloaddir=. containerd.io-1.4.3
+    yumdownloader --enablerepo Docker-CE-Stable --arch x86_64 --resolve --downloaddir=. docker-ce-19.03.15 docker-ce-cli-19.03.15
+
+    for item in {"{{ kube_support_versions|join('","') }}"}; do
+        yumdownloader --arch x86_64 --resolve --downloaddir=. --disableexcludes=Kubernetes kubectl-${item} kubelet-${item} kubeadm-${item}
+    done
+
+    createrepo .
+
+    curl -O http://mirror.centos.org/centos/8-stream/AppStream/x86_64/os/Packages/modulemd-tools-0.7-4.el8.noarch.rpm
+    yum -y install modulemd-tools-0.7-4.el8.noarch.rpm
+
+    repo2module  -s stable -d . modules.yaml
+
+    modifyrepo_c --mdtype=modules modules.yaml repodata/
+}
+
+make_apt_repo(){
+    mkdir -p /data/localrepo
+    cd /data/localrepo
+
+    apt-get -y update
+    apt-get install -y -d --reinstall -o Dir::cache=/data/localrepo -o Dir::Cache::archives="./" nfs-common libnfsidmap2 libtirpc3 rpcbind keyutils libtirpc-common
+    apt-get install -y -d --reinstall -o Dir::cache=/data/localrepo -o Dir::Cache::archives="./" nfs-kernel-server
+    apt-get install -y -d --reinstall -o Dir::cache=/data/localrepo -o Dir::Cache::archives="./" nginx
+    apt-get install -y -d --reinstall -o Dir::cache=/data/localrepo -o Dir::Cache::archives="./" python3
+    apt-get install -y -d --reinstall -o Dir::cache=/data/localrepo -o Dir::Cache::archives="./" ipvsadm
+    apt-get install -y -d --reinstall -o Dir::cache=/data/localrepo -o Dir::Cache::archives="./" ipset
+
+    apt-get install -y -d --reinstall -o Dir::cache=/data/localrepo -o Dir::Cache::archives="./" containerd.io=1.4.3-2
+    apt-get install -y -d --reinstall -o Dir::cache=/data/localrepo -o Dir::Cache::archives="./" docker-ce=5:19.03.15~3-0~ubuntu-$(lsb_release -cs)
+    apt-get install -y -d --reinstall -o Dir::cache=/data/localrepo -o Dir::Cache::archives="./" docker-ce-cli=5:19.03.15~3-0~ubuntu-$(lsb_release -cs)
+
+    apt-get install -y -d --reinstall -o Dir::cache=/data/localrepo -o Dir::Cache::archives="./" jq
+    apt-get install -y -d --reinstall -o Dir::cache=/data/localrepo -o Dir::Cache::archives="./" libonig2
+    apt-get install -y -d --reinstall -o Dir::cache=/data/localrepo -o Dir::Cache::archives="./" telnet
+    apt-get install -y -d --reinstall -o Dir::cache=/data/localrepo -o Dir::Cache::archives="./" vim
+    apt-get install -y -d --reinstall -o Dir::cache=/data/localrepo -o Dir::Cache::archives="./" curl
+    apt-get install -y -d --reinstall -o Dir::cache=/data/localrepo -o Dir::Cache::archives="./" net-tools
+    apt-get install -y -d --reinstall -o Dir::cache=/data/localrepo -o Dir::Cache::archives="./" dnsutils
+
+    apt-get install -y -d --reinstall -o Dir::cache=/data/localrepo -o Dir::Cache::archives="./" dpkg-dev
+    apt-get install -y dpkg-dev
+
+    for item in {"{{ kube_support_versions|join('","') }}"}; do
+        apt-get install -y -d --reinstall -o Dir::cache=/data/localrepo -o Dir::Cache::archives="./" kubelet=${item}-00 kubeadm=${item}-00 kubectl=${item}-00
+    done
+
+    rm -rf lock partial pkgcache.bin srcpkgcache.bin Packages.gz
+
+    dpkg-scanpackages -m . | gzip -c > Packages.gz
+}
+
+
+create_tarball() {
+ 	cd /data/localrepo
+    tar -zcvf ${BACKUP_DIR}/local-repo.$CURRENT_TIME.tgz .
+}
+
+
+main() {
+    if [ "$#" -ne 2 ]; then
+        echo "Usage: ./local-repository.sh /path/to/backup/dir"
+        error_exit "Illegal number of parameters. You must pass k8s version and backup directory path"
+    fi
+
+    {% if ansible_os_family in ["CentOS", "RedHat"] -%}
+        make_yum_repo
+    {%- elif ansible_os_family in ["Ubuntu", "Debian"] -%}
+        make_apt_repo
+    {%- endif %}
+
+    create_tarball
+
+    echo "Completed"
+}
+
+main "${@}"

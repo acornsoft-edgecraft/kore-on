@@ -1,0 +1,33 @@
+---
+- name: Copy register's scripts files
+  template:
+    src: "../../post-install/templates/script/registry-restore.sh.j2"
+    dest: "/tmp/registry-restore.sh"
+    mode: 0755
+
+- name: Check harbor archieved file existence
+  stat:
+    path: "/tmp/{{ registry_archieve_file | basename}}"
+  register: harbor_archieved_file
+
+- name: Upload harbor archieved file
+  when:
+    - not harbor_archieved_file.stat.exists
+  copy:
+    src: "{{ inventory_dir }}/{{ registry_archieve_file }}"
+    dest: "/tmp/{{ registry_archieve_file | basename}}"
+
+- name: Stop harbor for restoring backup data
+  shell: "docker-compose down -v"
+  args:
+    chdir: "{{ harbor_install_dir }}"
+
+- name: Restore backup data
+  shell: "/tmp/registry-restore.sh /tmp/{{ registry_archieve_file | basename}} {{ registry_domain }} > {{ install_dir }}/harbor-restore.log"
+  args:
+    creates: "{{ install_dir }}/harbor-restore.log"
+
+- name: Starting harbor with backup data
+  shell: "docker-compose up -d"
+  args:
+    chdir: "{{ harbor_install_dir }}"

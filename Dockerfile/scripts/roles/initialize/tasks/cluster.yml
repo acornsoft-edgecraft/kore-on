@@ -1,0 +1,263 @@
+---
+- name: Swapoff
+  shell: "swapoff -a"
+  register: swap_off
+
+- name: Remove swapfile from /etc/fstab
+  mount:
+    name: "{{ item }}"
+    fstype: swap
+    state: absent
+  with_items:
+    - swap
+    - none
+
+- name: Disable firewalld
+  when: ansible_os_family in ["Ubuntu", "Debian"]
+  systemd:
+    name: ufw
+    enabled: false
+    state: stopped
+
+- name: Disable firewalld
+  when: ansible_os_family in ["CentOS", "RedHat"]
+  systemd:
+    name: firewalld
+    enabled: false
+    state: stopped
+  failed_when: false
+
+- name: Install NetworkManager
+  when: ansible_os_family in ["CentOS", "RedHat"]
+  yum:
+    name: NetworkManager
+    state: present
+    update_cache: yes
+
+# Calico module wt_u32을 load하기 위해 필요하나 4.18.0-193에서는 설치해도 not found 에러가 발생함.
+#- name: Install kernel-modules-extra
+#  when: ansible_os_family in ["CentOS", "RedHat"] and ansible_distribution_major_version|int == 8
+#  yum:
+#    name: kernel-modules-extra
+#    state: present
+#    update_cache: yes
+
+# -----------------------------------------------------------------------------------------------------
+# https://docs.projectcalico.org/v3.11/maintenance/troubleshooting#configure-networkmanager
+# To prevent NetworkManager from interfering with Calico interfaces
+- name: Check if host has NetworkManager
+  command: systemctl show NetworkManager
+  register: nm_check
+  failed_when: false
+  changed_when: false
+
+- name: Ensure NetworkManager conf.d dir
+  when: nm_check.rc == 0
+  file:
+    path: "/etc/NetworkManager/conf.d"
+    state: directory
+    recurse: yes
+
+- name: Prevent NetworkManager from managing Calico interfaces
+  when: nm_check.rc == 0
+  copy:
+    content: |
+      [keyfile]
+      unmanaged-devices=interface-name:cali*;interface-name:tunl*;interface-name:vxlan.calico
+    dest: /etc/NetworkManager/conf.d/calico.conf
+  notify: Reload NetworkManager
+
+# Disable NetworkManager DNS processing when RHEL 8
+- name: Disable NetworkManager DNS processing
+  when: nm_check.rc == 0 and ansible_distribution_major_version|int == 8
+  copy:
+    content: |
+      [main]
+      dns=none
+    dest: /etc/NetworkManager/conf.d/90-dns-none.conf
+  notify: Reload NetworkManager
+
+# --------------------------------------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------------------------------
+# kernel modules for Calico
+- name: Load kernel modules for Calico
+  modprobe:
+    name: "{{ item }}"
+    state: present
+  with_items:
+  - ip_set
+  - ip_tables
+  - ip6_tables
+  - ipt_REJECT
+  - ipt_set
+  - xt_addrtype
+  - xt_comment
+  - xt_conntrack
+  - xt_ipvs
+  - xt_mark
+  - xt_multiport
+  - xt_sctp
+  - xt_set
+  - ipip
+  - nf_conntrack_netlink
+  - ipt_rpfilter
+# Not found in Kernel 4.18.0-193
+#  - xt_u32
+#  - sctp
+# Not found in Kernel 3.10.0-1062.18.1
+#  - xt_icmp
+#  - xt_icmp6
+
+
+- name: Persist kernel modules for Calico
+  when: ansible_os_family in ["Ubuntu", "Debian"]
+  copy:
+    dest: /etc/modules
+    content: |-
+      ip_set
+      ip_tables
+      ip6_tables
+      ipt_REJECT
+      ipt_rpfilter
+      ipt_set
+      nf_conntrack_netlink
+      xt_addrtype
+      xt_comment
+      xt_conntrack
+      xt_ipvs
+      xt_mark
+      xt_multiport
+      xt_sctp
+      xt_set
+      ipip
+      nf_conntrack_netlink
+      ipt_rpfilter
+# Not found in Kernel 4.18.0-193
+#      xt_u32
+#      sctp
+# Not found in Kernel 3.10.0-1062.18.1
+#      xt_icmp
+#      xt_icmp6
+
+- name: Persist calico module
+  when: ansible_os_family in ["CentOS", "RedHat"]
+  copy:
+    dest: /etc/modules-load.d/calico.conf
+    content: |-
+      ip_set
+      ip_tables
+      ip6_tables
+      ipt_REJECT
+      ipt_rpfilter
+      ipt_set
+      nf_conntrack_netlink
+      xt_addrtype
+      xt_comment
+      xt_conntrack
+      xt_ipvs
+      xt_mark
+      xt_multiport
+      xt_sctp
+      xt_set
+      ipip
+      nf_conntrack_netlink
+      ipt_rpfilter
+# Not found in Kernel 4.18.0-193
+#      xt_u32
+#      sctp
+# Not found in Kernel 3.10.0-1062.18.1
+#      xt_icmp
+#      xt_icmp6
+# -----------------------------------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------------------------------
+# kube-proxy needs net.bridge.bridge-nf-call-iptables enabled when found if br_netfilter is not a module
+- name: Verify if br_netfilter module exists
+  shell: "modinfo br_netfilter"
+  register: modinfo_br_netfilter
+  failed_when: modinfo_br_netfilter.rc not in [0, 1]
+  changed_when: false
+
+- name: Enable br_netfilter module
+  modprobe:
+    name: br_netfilter
+    state: present
+  when: modinfo_br_netfilter.rc == 0
+
+- name: Persist br_netfilter module
+  copy:
+    dest: /etc/modules-load.d/cube-br_netfilter.conf
+    content: br_netfilter
+  when: modinfo_br_netfilter.rc == 0
+# -----------------------------------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------------------------------
+# IPVS configuration when kube_proxy_mode is ipvs
+- name: Modprode Kernel Module for IPVS
+  when: kube_proxy_mode == 'ipvs'
+  modprobe:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - ip_vs
+    - ip_vs_rr
+    - ip_vs_wrr
+    - ip_vs_sh
+    - nf_conntrack
+
+- name: Persist ip_vs modules
+  when: kube_proxy_mode == 'ipvs'
+  copy:
+    dest: /etc/modules-load.d/ipvs.conf
+    content: |
+      ip_vs
+      ip_vs_rr
+      ip_vs_wrr
+      ip_vs_sh
+      nf_conntrack
+
+- name: Install package for ipvs
+  when: kube_proxy_mode == 'ipvs'
+  package:
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+  with_items:
+    -  ipvsadm
+    -  ipset
+# -----------------------------------------------------------------------------------------------------
+
+- name: Check if bridge-nf-call-iptables key exists
+#  when: ansible_os_family in ["CentOS", "RedHat"]
+  command: "sysctl net.bridge.bridge-nf-call-iptables"
+  failed_when: false
+  changed_when: false
+  register: sysctl_bridge_nf_call_iptables
+
+- name: Enable bridge-nf-call tables
+  when: sysctl_bridge_nf_call_iptables.rc == 0
+  sysctl:
+    name: "{{ item }}"
+    state: present
+    value: "1"
+    reload: yes
+  with_items:
+    - net.bridge.bridge-nf-call-iptables
+    - net.bridge.bridge-nf-call-arptables
+    - net.bridge.bridge-nf-call-ip6tables
+
+- name: Create data directory
+  file:
+    path: "{{ data_root_dir }}"
+    state: directory
+
+- name: Create log directory
+  file:
+    path: "{{ data_root_dir }}/log"
+    state: directory
+
+- name: Create docker cert directory
+  file:
+    path: "/etc/docker/certs.d/{{ registry_domain }}"
+    state: directory

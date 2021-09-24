@@ -1,0 +1,19 @@
+apiVersion: v1
+clusters:
+- cluster:
+    certificate-authority-data: {{ ca_data.stdout | b64encode }}
+    server: https://{{ hostvars[inventory_hostname]['ip'] }}:{{ api_secure_port }}
+  name: kubernetes
+contexts:
+- context:
+    cluster: kubernetes
+    user: system:kube-scheduler
+  name: system:kube-scheduler@kubernetes
+current-context: system:kube-scheduler@kubernetes
+kind: Config
+preferences: {}
+users:
+- name: system:kube-scheduler
+  user:
+    client-certificate-data: {{ scheduler_crt_data.stdout | b64encode }}
+    client-key-data: {{ scheduler_key_data.stdout | b64encode }}

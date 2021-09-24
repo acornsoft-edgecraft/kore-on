@@ -1,0 +1,10 @@
+---
+# This playbook delete all loadbalancer and pvc for k8s
+
+# delete loadbalancer and pvc for public cloud
+- hosts: masters
+  gather_facts: false
+  roles:
+    - reset/destroy
+  tags:
+    - pre-destroy

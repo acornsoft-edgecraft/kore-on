@@ -1,0 +1,9 @@
+/var/log/harbor/*.log {
+  daily
+  rotate 7
+  compress
+  size=1G
+  missingok
+  delaycompress
+  copytruncate
+}

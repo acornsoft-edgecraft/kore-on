@@ -1,0 +1,14 @@
+---
+# This playbook get detail node
+
+- name: node | Get detail info
+  shell: "kubectl --kubeconfig={{ kubeadminconfig }} get nodes -o json | jq -r '[.items[].status.addresses]'"
+  delegate_to: "{{ groups['masters'][0] }}"
+  run_once: true
+  register: node_detail
+  failed_when: false
+
+- debug:
+    msg: "{{ node_detail.stdout }}"
+  run_once: true
+

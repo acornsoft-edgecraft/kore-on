@@ -1,0 +1,41 @@
+# Create addon directory -----------------------------------------------------
+- name: Create kubernetes addon directory
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+    - "{{ kube_addon_dir }}/test"
+    - "{{ kube_addon_dir }}/nfs-client-provisioner"
+  register: addon_dir
+# ----------------------------------------------------------------------------
+
+#- name: Copy helm binary
+#  copy:
+#    src: /usr/bin/helm
+#    dest: /usr/bin/helm
+#    mode: 0755
+#    owner: root
+#    group: root
+
+# Storage NFS ------------------------------------------------------------------
+- name: Storage NFS | Copy NFS config file
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ kube_addon_dir }}/{{ item.dest }}"
+    mode: 0644
+  with_items:
+    - { src: "nfs-client-provisioner/nfs-rbac.yaml.j2", dest: "nfs-client-provisioner/nfs-rbac.yaml" }
+    - { src: "nfs-client-provisioner/nfs-deploy.yaml.j2", dest: "nfs-client-provisioner/nfs-deploy.yaml" }
+    - { src: "nfs-client-provisioner/nfs-storageclass.yaml.j2", dest: "nfs-client-provisioner/nfs-storageclass.yaml" }
+  delegate_to: "{{ groups['masters'][0] }}"
+  run_once: true
+
+- name: Storage NFS | Create Storage NFS
+  when: nfs_ip != "" and storage_type == "nfs"
+  shell: "kubectl apply --kubeconfig={{ kubeadminconfig }} -f {{ kube_addon_dir }}/{{ item }}"
+  with_items:
+    - "nfs-client-provisioner/nfs-rbac.yaml"
+    - "nfs-client-provisioner/nfs-deploy.yaml"
+    - "nfs-client-provisioner/nfs-storageclass.yaml"
+  delegate_to: "{{ groups['masters'][0] }}"
+  run_once: true

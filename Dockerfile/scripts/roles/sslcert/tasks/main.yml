@@ -1,0 +1,50 @@
+---
+- name: Create ssl cert dir
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+    - "{{ master_cert_dir }}/etcd"
+  register: master_ssl_dir
+
+- name: Copy openssl conf file to create certificate
+  template:
+    src: "common-openssl.conf.j2"
+    dest: "{{ master_cert_dir }}/common-openssl.conf"
+
+- stat:
+    path: "{{ master_cert_dir }}/ca.key"
+  register: ca_key_stat
+
+- stat:
+    path: "{{ master_cert_dir }}/etcd/ca.key"
+  register: etcd_ca_key_stat
+
+- name: Create kubernetes certificates
+  when: not ca_key_stat.stat.exists
+  shell: "{{ item }}"
+  no_log: true
+  with_items:
+    - "openssl genrsa -out {{ master_cert_dir }}/ca.key 2048"
+    - "openssl req -x509 -new -nodes -key {{ master_cert_dir }}/ca.key -days {{ cert_validity_days }} -out {{ master_cert_dir }}/ca.crt -subj '/CN=kubernetes-ca' -extensions v3_ca -config {{ master_cert_dir }}/common-openssl.conf"
+
+    - "openssl genrsa -out {{ master_cert_dir }}/sa.key 2048"
+    - "openssl rsa -in {{ master_cert_dir }}/sa.key -outform PEM -pubout -out {{ master_cert_dir }}/sa.pub"
+
+    - "openssl req -new -key {{ master_cert_dir }}/sa.key -subj '/CN=system:kube-controller-manager' |
+      openssl x509 -req -CA {{ master_cert_dir }}/ca.crt -CAkey {{ master_cert_dir }}/ca.key -CAcreateserial -out {{ master_cert_dir }}/sa.crt -days {{ cert_validity_days }} -extensions v3_req_client -extfile {{ master_cert_dir }}/common-openssl.conf"
+
+    - "openssl genrsa -out {{ master_cert_dir }}/front-proxy-ca.key 2048"
+    - "openssl req -x509 -new -nodes -key {{ master_cert_dir }}/front-proxy-ca.key -days {{ cert_validity_days }} -out {{ master_cert_dir }}/front-proxy-ca.crt -subj '/CN=front-proxy-ca' -extensions v3_ca -config {{ master_cert_dir }}/common-openssl.conf"
+
+- name: Create etcd certificate
+  when: etcd_peer_url_scheme == 'https' and not etcd_ca_key_stat.stat.exists
+  shell: "{{ item }}"
+  no_log: true
+  with_items:
+    - "openssl genrsa -out {{ master_cert_dir }}/etcd/ca.key 2048"
+    - "openssl req -x509 -new -nodes -key {{ master_cert_dir }}/etcd/ca.key -days {{ cert_validity_days }} -out {{ master_cert_dir }}/etcd/ca.crt -subj '/CN=etcd-ca' -extensions v3_ca -config {{ master_cert_dir }}/common-openssl.conf"
+
+    - "openssl genrsa -out {{ master_cert_dir }}/apiserver-etcd-client.key 2048"
+    - "openssl req -new -key {{ master_cert_dir }}/apiserver-etcd-client.key -subj '/O=system:masters/CN=kube-apiserver-etcd-client' |
+      openssl x509 -req -CA {{ master_cert_dir }}/etcd/ca.crt -CAkey {{ master_cert_dir }}/etcd/ca.key -CAcreateserial -out {{ master_cert_dir }}/apiserver-etcd-client.crt -days {{ cert_validity_days }} -extensions v3_req_client -extfile {{ master_cert_dir }}/common-openssl.conf"

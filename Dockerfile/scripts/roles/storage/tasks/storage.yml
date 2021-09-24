@@ -1,0 +1,56 @@
+---
+- name: Ensure nfs mount directory
+  file:
+    path: "{{ nfs_volume_dir }}"
+    state: directory
+
+- name: Cluster | Disable firewalld
+  when: ansible_os_family in ["Ubuntu", "Debian"]
+  ufw:
+    state: disabled
+
+- name: Cluster | Disable firewalld
+  when: ansible_os_family in ["CentOS", "RedHat"]
+  systemd:
+    name: firewalld
+    enabled: false
+    state: stopped
+  failed_when: false
+
+- name: Copy exports file.
+  template:
+    src: exports.j2
+    dest: /etc/exports
+    owner: root
+    group: root
+    mode: 0644
+  notify: reload nfs
+
+- name: Install nfs server
+  when: ansible_os_family in ["Ubuntu", "Debian"]
+  apt:
+    name:
+      - nfs-common
+      - nfs-kernel-server
+    state: present
+    update_cache: yes
+
+- name: Install nfs server
+  when: ansible_os_family in ["CentOS", "RedHat"]
+  yum:
+    name: nfs-utils
+    state: present
+    update_cache: yes
+
+- name: Enable & start rpcbind
+  when: ansible_os_family in ["CentOS", "RedHat"]
+  systemd:
+    name: rpcbind
+    enabled: yes
+    state: started
+
+- name: "Enable & start {{ nfs_server_daemon }}"
+  systemd:
+    name: "{{ nfs_server_daemon }}"
+    enabled: yes
+    state: started

@@ -1,0 +1,264 @@
+---
+- name: Stop services
+  systemd:
+    name: "{{ item }}"
+    state: stopped
+  with_items:
+    - kubelet
+  failed_when: false
+  tags: ['services']
+
+- name: Remove all containers
+  when: container_runtime == "docker"
+  shell: "/usr/bin/docker ps -aq | xargs -r docker rm -fv"
+  tags: ['docker']
+
+- name: Gather mounted /var/run/netns dirs
+  when: container_runtime == 'containerd'
+  shell: "mount | grep /netns | awk '{print $3}' | tac"
+  check_mode: no
+  register: netns_dirs
+  tags: ['mounts']
+
+- name: Unmount /var/run/netns dirs
+  when: container_runtime == 'containerd'
+  command: umount {{item}}
+  with_items: '{{ netns_dirs.stdout_lines }}'
+  tags: ['mounts']
+
+- name: Kill all pods (containerd)
+  when: container_runtime == "containerd"
+  shell: "pkill containerd-shim"
+  failed_when: false
+
+#- name: Stop all cri containers (containerd)
+#  when: container_runtime == 'containerd'
+#  shell: "set -o pipefail && crictl ps -q | xargs -r crictl -t 60s stop"
+#  args:
+#    executable: /bin/bash
+#  register: remove_all_cri_containers
+#  retries: 5
+#  until: remove_all_cri_containers.rc == 0
+#  delay: 5
+#  ignore_errors: true
+#
+#- name: Force remove all cri containers (containerd)
+#  when: container_runtime == 'containerd'
+#  command: "crictl rm -a -f"
+#  register: remove_all_cri_containers
+#  retries: 5
+#  until: remove_all_cri_containers.rc == 0
+#  delay: 5
+#
+#- name: Stop all cri pods (containerd)
+#  when: container_runtime == 'containerd'
+#  shell: "set -o pipefail && crictl pods -q | xargs -r crictl -t 60s stopp"
+#  args:
+#    executable: /bin/bash
+#  register: remove_all_cri_containers
+#  retries: 5
+#  until: remove_all_cri_containers.rc == 0
+#  delay: 5
+#  ignore_errors: true
+#
+#- name: Force remove all cri pods (containerd)
+#  when: container_runtime == 'containerd'
+#  command: "crictl rmp -a -f"
+#  register: remove_all_cri_containers
+#  retries: 5
+#  until: remove_all_cri_containers.rc == 0
+#  delay: 5
+
+- name: Gather mounted kubelet dirs
+  shell: "mount | grep {{ data_root_dir }}/kubelet | awk '{print $3}' | tac"
+  check_mode: no
+  register: mounted_dirs
+
+- name: Unmount kubelet dirs
+  command: umount {{item}}
+  with_items: '{{ mounted_dirs.stdout_lines }}'
+
+- name: Gather mounted /run/containerd dirs
+  shell: "mount | grep /run/containerd | awk '{print $3}' | tac"
+  check_mode: no
+  register: containerd_mounted_dirs
+
+- name: Unmount /run/containerd dirs
+  command: umount -l {{item}}
+  with_items: '{{ containerd_mounted_dirs.stdout_lines }}'
+
+- name: Stop etcd services
+  systemd:
+    name: "{{ item }}"
+    state: stopped
+  with_items:
+    - etcd
+    - dockerd
+    - containerd
+  failed_when: false
+  tags: ['services']
+
+- name: Remove etcd, docker, kubelet service file
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - /etc/systemd/system/kubelet.service.d
+    - /etc/systemd/system/kubelet.service
+    - /etc/systemd/system/etcd.service
+    - /lib/systemd/system/docker.service
+    - /usr/lib/systemd/system/containerd.service
+    - /etc/default/kubelet
+    - /etc/default/docker
+    - /etc/systemd/system/docker
+    - /etc/sysconfig/kubelet
+  register: service_file_removed
+  tags: ['services']
+
+- name: Flush iptables
+  iptables:
+    table: "{{ item }}"
+    flush: yes
+  with_items:
+    - filter
+    - nat
+    - mangle
+  when: flush_iptables|bool
+  tags: ['iptables']
+
+- name: Clear IPVS virtual server table
+  when: kube_proxy_mode == 'ipvs'
+  shell: "ipvsadm -C"
+  failed_when: false
+
+- name: check kube-ipvs0 network device
+  stat:
+    path: /sys/class/net/kube-ipvs0
+  register: kube_ipvs0
+
+- name: Remove kube-ipvs0
+  command: "ip link del kube-ipvs0"
+  when:
+    - kube_proxy_mode == 'ipvs'
+    - kube_ipvs0.stat.exists
+
+- name: Delete some files and directories
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - /etc/kubernetes
+    - /opt/kubernetes
+    - /var/lib/kubelet
+    - /var/lib/etcd
+    - /opt/cni
+    - /etc/cni/net.d
+    - /var/lib/cni
+    - /var/lib/calico
+    - /var/log/pods
+    - /var/run/netns
+    - /run/containerd
+    - /etc/docker/certs.d
+    - /etc/docker/daemon.json
+    - /etc/docker/key.json
+    - /etc/etcd
+    - /etc/apt/sources.list.d/kubernetes.list
+    - /etc/apt/sources.list.d/docker.list
+    - /etc/apt/sources.list.d/nvidia-docker.list
+    - /etc/apt/sources.list.d/local.list
+    - /etc/yum.repos.d/docker.repo
+    - /etc/yum.repos.d/kubernetes.repo
+    - /etc/yum.repos.d/nvidia-docker.repo
+    - /etc/modules-load.d/calico.conf
+    - /etc/modules-load.d/cube-br_netfilter.conf
+    - /etc/modules
+    - /etc/NetworkManager/conf.d/calico.conf
+    - /etc/containerd
+    - /var/lib/containerd
+    - /usr/bin/crictl
+    - "{{ data_root_dir }}/etcd"
+    - "{{ data_root_dir }}/kubelet"
+    - "{{ data_root_dir }}/docker"
+    - "{{ data_root_dir }}/log"
+    - "{{ data_root_dir }}/k8s-audit"
+    - "{{ data_root_dir }}/containerd"
+    - "{{ install_dir }}"
+    - /etc/cron.d/etcd-backup
+  tags: ['files']
+
+- name: Remove kubernetes, etcd, docker package
+  when: ansible_os_family in ["Ubuntu", "Debian"]
+  apt:
+    name: ['kubelet', 'kubectl', 'kubeadm', 'kubernetes-cni', 'docker-ce', 'docker-ce-cli', 'docker-ce-selinux', 'lksctp-tools', 'containerd.io', 'container-selinux']
+    state: absent
+    purge: yes
+    force: yes
+  register: packages_removed
+  tags: ['services']
+
+
+- name: Remove kubernetes, etcd, docker package
+  when: ansible_os_family in ["CentOS", "RedHat"]
+  yum:
+    name: ['kubelet', 'kubectl', 'kubeadm', 'kubernetes-cni', 'docker-ce', 'docker-ce-cli', 'docker-ce-selinux', 'lksctp-tools', 'containerd.io', 'container-selinux']
+    state: absent
+  register: packages_removed
+  tags: ['services']
+
+- name: Check /etc/yum.repos.d.bak directory existence (offline install)
+  when:
+    - ansible_os_family in ["CentOS", "RedHat"]
+    - closed_network
+  stat:
+    path: /etc/yum.repos.d.bak
+  register: yum_backup_dir_exist
+
+- name: Restore /etc/yum.repos.d.bak directory (offline install)
+  when:
+    - ansible_os_family in ["CentOS", "RedHat"]
+    - closed_network
+    - yum_backup_dir_exist.stat.exists
+  command: "{{ item }}"
+  with_items:
+  - rm -rf /etc/yum.repos.d
+  - mv /etc/yum.repos.d.bak /etc/yum.repos.d
+
+- name: Check /etc/apt/sources.list.bak existence (offline install)
+  when:
+    - ansible_os_family in ["Ubuntu", "Debian"]
+    - closed_network
+  stat:
+    path: /etc/apt/sources.list.bak
+  register: sources_list_bak_stat
+
+- name: Restore /etc/apt/sources.list file (offline install)
+  when:
+    - ansible_os_family in ["Ubuntu", "Debian"]
+    - closed_network
+    - sources_list_bak_stat.stat.exists
+  command: "{{ item }}"
+  with_items:
+    - mv /etc/apt/sources.list.bak /etc/apt/sources.list
+
+- name: systemctl daemon-reload
+  systemd:
+    daemon_reload: yes
+  when: service_file_removed.changed or packages_removed.changed
+
+- name: Restart network
+  systemd:
+    name: >-
+      {% if ansible_os_family == "RedHat" -%}
+      {%- if ansible_distribution_major_version|int == 8 -%}
+      NetworkManager
+      {%- else -%}
+      network
+      {%- endif -%}
+      {%- elif ansible_distribution == "Ubuntu" and ansible_distribution_release == "bionic" -%}
+      systemd-networkd
+      {%- endif %}
+    state: restarted
+  failed_when: false
+  tags:
+    - service
+    - network

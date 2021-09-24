@@ -1,0 +1,53 @@
+[ req ]
+distinguished_name = req_distinguished_name
+[req_distinguished_name]
+
+[ v3_ca ]
+basicConstraints = critical, CA:TRUE
+keyUsage = critical, digitalSignature, keyEncipherment, keyCertSign
+
+[ v3_req_server ]
+basicConstraints = CA:FALSE
+keyUsage = critical, digitalSignature, keyEncipherment
+extendedKeyUsage = serverAuth
+
+[ v3_req_client ]
+basicConstraints = CA:FALSE
+keyUsage = critical, digitalSignature, keyEncipherment
+extendedKeyUsage = clientAuth
+
+[ v3_req_apiserver ]
+basicConstraints = CA:FALSE
+keyUsage = critical, digitalSignature, keyEncipherment
+extendedKeyUsage = serverAuth
+subjectAltName = @alt_names_cluster
+
+[ alt_names_cluster ]
+DNS.1 = kubernetes
+DNS.2 = kubernetes.default
+DNS.3 = kubernetes.default.svc
+DNS.4 = kubernetes.default.svc.cluster.local
+DNS.5 = localhost
+{% if not lb_ip | ipaddr() -%}
+DNS.6 = {{ lb_ip }}
+{% endif -%}
+{% for san in api_sans -%}
+{%   set idx = loop.index  %}
+{% if not san | ipaddr() -%}
+DNS.{{ idx+6 }} = {{ san }}
+{% endif -%}
+{%   if not loop.last -%}{%- endif -%}
+{% endfor %}
+IP.1 = 127.0.0.1
+IP.2 = {{ hostvars[inventory_hostname]['ip'] | default(hostvars[inventory_hostname]['ansible_default_ipv4']['address']) }}
+IP.3 = {{ kubernetes_service_ip }}
+{% if lb_ip | ipaddr() -%}
+IP.4 = {{ lb_ip }}
+{% endif -%}
+{% for san in api_sans -%}
+{%   set idx = loop.index  %}
+{% if san | ipaddr() -%}
+IP.{{ idx+4 }} = {{ san }}
+{% endif -%}
+{%   if not loop.last -%}{%- endif -%}
+{% endfor %}

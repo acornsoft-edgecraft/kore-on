@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cube-config
+  namespace: kube-system
+data:
+  lastUpdateDate: {{ ansible_date_time.iso8601 }}
+  clusterConfiguration: |
+    {{ cube_toml }}

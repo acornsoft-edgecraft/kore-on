@@ -1,0 +1,60 @@
+---
+- name: Stop nfs server service
+  when: ansible_os_family in ["Ubuntu", "Debian"]
+  systemd:
+    name: "{{ item }}"
+    state: stopped
+  with_items:
+    - nfs-kernel-server
+  failed_when: false
+  tags: ['services']
+
+- name: Stop nfs server service
+  when: ansible_os_family in ["CentOS", "RedHat"]
+  systemd:
+    name: "{{ item }}"
+    state: stopped
+  with_items:
+    - nfs-server
+    - rpcbind
+  failed_when: false
+  tags: ['services']
+
+- name: Remove nfs exports file
+  file:
+    path: "/etc/exports"
+    state: absent
+  tags: ['services']
+
+- name: Delete some files and directories
+  when:
+  - not ((nfs_volume_dir is undefined) or (nfs_volume_dir is none) or (nfs_volume_dir|trim == ''))
+  shell: "rm -rf {{ item }}"
+  with_items:
+    - "{{ nfs_volume_dir }}/*"
+    - /etc/exports
+  tags: ['files']
+
+- name: Remove nfs-common, nfs-kernel-server package
+  when: ansible_os_family in ["Ubuntu", "Debian"]
+  apt:
+    name: ['nfs-common', 'nfs-kernel-server']
+    state: absent
+    purge: yes
+    force: yes
+  register: packages_removed
+  tags: ['services']
+
+
+- name: Remove nfs-utils package
+  when: ansible_os_family in ["CentOS", "RedHat"]
+  yum:
+    name: ['nfs-utils']
+    state: absent
+  register: packages_removed
+  tags: ['services']
+
+- name: systemctl daemon-reload
+  systemd:
+    daemon_reload: yes
+  when: packages_removed.changed

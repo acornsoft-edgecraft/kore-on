@@ -1,0 +1,393 @@
+---
+- name: Create acloud-user cert directory
+  file:
+    path: "{{ kube_config_dir }}/acloud"
+    state: directory
+
+- stat:
+    path: "{{ cert_dir }}/apiserver.key"
+  register: apiserver_key_stat
+
+- name: Create kubernetes certificates for each node
+  when: not apiserver_key_stat.stat.exists
+  shell: "{{ item }}"
+  no_log: true
+  with_items:
+    - "openssl genrsa -out {{ cert_dir }}/apiserver.key 2048"
+    - "openssl req -new -key {{ cert_dir }}/apiserver.key -subj '/CN=kube-apiserver' |
+        openssl x509 -req -CA {{ cert_dir }}/ca.crt -CAkey {{ cert_dir }}/ca.key -CAcreateserial -out {{ cert_dir }}/apiserver.crt -days {{ cert_validity_days }} -extensions v3_req_apiserver -extfile {{ master_cert_dir }}/common-openssl.conf"
+
+    - "openssl genrsa -out {{ cert_dir }}/apiserver-kubelet-client.key 2048"
+    - "openssl req -new -key {{ cert_dir }}/apiserver-kubelet-client.key -subj '/CN=kube-apiserver-kubelet-client/O=system:masters' |
+        openssl x509 -req -CA {{ cert_dir }}/ca.crt -CAkey {{ cert_dir }}/ca.key -CAcreateserial -out {{ cert_dir }}/apiserver-kubelet-client.crt -days {{ cert_validity_days }} -extensions v3_req_client -extfile {{ master_cert_dir }}/common-openssl.conf"
+
+    - "openssl genrsa -out {{ cert_dir }}/front-proxy-client.key 2048"
+    - "openssl req -new -key {{ cert_dir }}/front-proxy-client.key -subj '/CN=front-proxy-client' |
+        openssl x509 -req -CA {{ cert_dir }}/front-proxy-ca.crt -CAkey {{ cert_dir }}/front-proxy-ca.key -CAcreateserial -out {{ cert_dir }}/front-proxy-client.crt -days {{ cert_validity_days }} -extensions v3_req_client -extfile {{ master_cert_dir }}/common-openssl.conf"
+
+    - "openssl genrsa -out {{ cert_dir }}/admin.key 2048"
+    - "openssl req -new -key {{ cert_dir }}/admin.key -subj '/O=system:masters/CN=kubernetes-admin' |
+        openssl x509 -req -CA {{ cert_dir }}/ca.crt -CAkey {{ cert_dir }}/ca.key -CAcreateserial -out {{ cert_dir }}/admin.crt -days {{ cert_validity_days }} -extensions v3_req_client -extfile {{ master_cert_dir }}/common-openssl.conf"
+
+    - "openssl genrsa -out {{ cert_dir }}/controller-manager.key 2048"
+    - "openssl req -new -key {{ cert_dir }}/controller-manager.key -subj '/CN=system:kube-controller-manager' |
+        openssl x509 -req -CA {{ cert_dir }}/ca.crt -CAkey {{ cert_dir }}/ca.key -CAcreateserial -out {{ cert_dir }}/controller-manager.crt -days {{ cert_validity_days }} -extensions v3_req_client -extfile {{ master_cert_dir }}/common-openssl.conf"
+
+    - "openssl genrsa -out {{ cert_dir }}/scheduler.key 2048"
+    - "openssl req -new -key {{ cert_dir }}/scheduler.key -subj '/CN=system:kube-scheduler' |
+        openssl x509 -req -CA {{ cert_dir }}/ca.crt -CAkey {{ cert_dir }}/ca.key -CAcreateserial -out {{ cert_dir }}/scheduler.crt -days {{ cert_validity_days }} -extensions v3_req_client -extfile {{ master_cert_dir }}/common-openssl.conf"
+
+    - "openssl genrsa -out {{ kube_config_dir }}/acloud/acloud-client.key 2048"
+    - "openssl req -new -key {{ kube_config_dir }}/acloud/acloud-client.key -subj '/CN=acloud-client' |
+        openssl x509 -req -CA {{ cert_dir }}/ca.crt -CAkey {{ cert_dir }}/ca.key -CAcreateserial -out {{ kube_config_dir }}/acloud/acloud-client.crt -days {{ cert_validity_days }} -extensions v3_req_client -extfile {{ master_cert_dir }}/common-openssl.conf"
+
+# For ubuntu     -------------------------------------------------------------
+- name: Install Kubernetes packages (kubectl, kubelet)
+  when: ansible_os_family in ["Ubuntu", "Debian"]
+  apt:
+    name: ['kubectl={{ k8s_version }}-00', 'kubelet={{ k8s_version }}-00', 'kubeadm={{ k8s_version }}-00']
+    state: present
+
+- name: Prevent auto-upgrade Kubernetes packages
+  when: ansible_os_family in ["Ubuntu", "Debian"]
+  dpkg_selections:
+    name: "{{ item }}"
+    selection: hold
+  with_items:
+    - kubectl
+    - kubelet
+    - kubeadm
+# ----------------------------------------------------------------------------
+
+# For Centos     -------------------------------------------------------------
+- name: Install Kubernetes packages (kubectl, kubelet)
+  when:
+    - ansible_distribution in ["CentOS", "RedHat"]
+    - not closed_network
+  yum:
+    name: ['kubectl-{{ k8s_version }}', 'kubelet-{{ k8s_version }}', 'kubeadm-{{ k8s_version }}']
+    state: present
+    update_cache: yes
+    disable_excludes: Kubernetes
+
+- name: Install Kubernetes packages (kubectl, kubelet)
+  when:
+    - ansible_distribution in ["CentOS", "RedHat"]
+    - closed_network
+  yum:
+    name: ['kubectl-{{ k8s_version }}', 'kubelet-{{ k8s_version }}', 'kubeadm-{{ k8s_version }}']
+    state: present
+    update_cache: yes
+# ----------------------------------------------------------------------------
+
+- name: Install utils
+  package:
+    name: jq
+    state: present
+
+- name: Copy cloud-config file
+  when: cloud_provider == "azure"
+  template:
+    src: "cloud-config.json.j2"
+    dest: "{{ cert_dir }}/cloud-config.json"
+
+- name: Copy k8s audit-policy.yaml
+  when: audit_log_enable
+  template:
+    src: "{{ item }}"
+    dest: "/etc/kubernetes/{{ item }}"
+  with_items:
+    - audit-policy.yaml
+    - audit-webhook
+
+- name: Copy secrets_encryption.yaml
+  when: encrypt_secret
+  template:
+    src: "{{ item }}"
+    dest: "/etc/kubernetes/{{ item }}"
+  with_items:
+    - secrets_encryption.yaml
+
+- name: Check if admin.conf exists
+  stat:
+    path: "{{ kube_config_dir }}/admin.conf"
+  register: admin_conf
+
+- name: Check if acloud-client-kubeconfig exists
+  stat:
+    path: "{{ kube_config_dir }}/acloud/acloud-client-kubeconfig"
+  register: acloud_client_conf
+
+- name: Create kubelet directory
+  file:
+    path: /var/lib/kubelet
+    state: directory
+
+- name: Copy kubeadm conf file
+  template:
+    src: "kubeadm.yaml.j2"
+    dest: "{{ kube_config_dir }}/kubeadm.yaml"
+  notify:
+   - Master | wait for kube-scheduler
+   - Master | wait for kube-controller-manager
+   - Master | wait for the apiserver to be running
+
+- name: Copy kubelet extra config file
+  template:
+    src: "kubeadm.kubelet.j2"
+    dest: >-
+      {% if ansible_os_family in ["Ubuntu", "Debian"] -%}
+      /etc/default/kubelet
+      {%- elif ansible_os_family in ["CentOS", "RedHat"] -%}
+      /etc/sysconfig/kubelet
+      {%- endif %}
+    owner: root
+    group: root
+    mode: 0755
+  register: kubelet_service
+
+- name: systemctl daemon-reload
+  systemd:
+    daemon_reload: yes
+  when: kubelet_service.changed
+
+- name: Start and enable kubelet on master node
+  service:
+    name: kubelet
+    enabled: yes
+    state: restarted
+  register: kubelet_start_node
+
+- name: kubeadm init
+  when : not admin_conf.stat.exists
+  command: "kubeadm init --config='{{ kube_config_dir }}/kubeadm.yaml' --ignore-preflight-errors=all"
+  register: kubeadm
+
+- name: Get ca.crt
+  shell: "cat {{ cert_dir }}/ca.crt"
+  register: ca_data
+  delegate_to: "{{ groups['masters'][0] }}"
+  run_once: true
+
+- name: Get admin.crt
+  shell: "cat {{ cert_dir }}/admin.crt"
+  register: admin_crt_data
+
+- name: Get admin.key
+  shell: "cat {{ cert_dir }}/admin.key"
+  register: admin_key_data
+
+- name: Get controller-manager.crt
+  shell: "cat {{ cert_dir }}/controller-manager.crt"
+  register: controller_manager_crt_data
+
+- name: Get controller-manager.key
+  shell: "cat {{ cert_dir }}/controller-manager.key"
+  register: controller_manager_key_data
+
+- name: Get scheduler.crt
+  shell: "cat {{ cert_dir }}/scheduler.crt"
+  register: scheduler_crt_data
+
+- name: Get scheduler.key
+  shell: "cat {{ cert_dir }}/scheduler.key"
+  register: scheduler_key_data
+
+- name: Copy control-plane config file
+  when : not admin_conf.stat.exists
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ kube_config_dir }}/{{ item.dest }}"
+  with_items:
+  - { src: "admin.conf.j2", dest: "admin.conf" }
+  - { src: "controller-manager.conf.j2", dest: "controller-manager.conf" }
+  - { src: "scheduler.conf.j2", dest: "scheduler.conf" }
+  notify:
+  - Master | wait for kube-scheduler
+  - Master | wait for kube-controller-manager
+  - Master | wait for the apiserver to be running
+
+- name: Create acloud-client cert files
+  when: not acloud_client_conf.stat.exists
+  shell: "{{ item }}"
+  no_log: true
+  with_items:
+  - "openssl genrsa -out {{ kube_config_dir }}/acloud/acloud-client.key 2048"
+  - "openssl req -new -key {{ kube_config_dir }}/acloud/acloud-client.key -subj '/CN=acloud-client' |
+        openssl x509 -req -CA {{ cert_dir }}/ca.crt -CAkey {{ cert_dir }}/ca.key -CAcreateserial -out {{ kube_config_dir }}/acloud/acloud-client.crt -days {{ cert_validity_days }} -extensions v3_req_client -extfile {{ master_cert_dir }}/common-openssl.conf"
+  delegate_to: "{{ groups['masters'][0] }}"
+  run_once: true
+
+- name: Get acloud-client-cert
+  shell: "cat {{ kube_config_dir }}/acloud/acloud-client.crt"
+  register: acloud_client_crt_data
+  delegate_to: "{{ groups['masters'][0] }}"
+  run_once: true
+
+- name: Get acloud-client-key
+  shell: "cat {{ kube_config_dir }}/acloud/acloud-client.key"
+  register: acloud_client_key_data
+  delegate_to: "{{ groups['masters'][0] }}"
+  run_once: true
+
+- name: Set fact dashboard proxy certificate
+  when: not acloud_client_conf.stat.exists
+  set_fact:
+    acloud_client_ca_crt: "{{ ca_data.stdout }}"
+    acloud_client_crt: "{{ acloud_client_crt_data.stdout }}"
+    acloud_client_key: "{{ acloud_client_key_data.stdout }}"
+  delegate_to: "{{ groups['masters'][0] }}"
+  run_once: true
+
+- name: Copy acloud-client-kubeconfig config file
+  when : not acloud_client_conf.stat.exists
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ kube_config_dir }}/{{ item.dest }}"
+  with_items:
+  - { src: "acloud-client-kubeconfig.j2", dest: "acloud/acloud-client-kubeconfig" }
+  - { src: "acloud-client-crb.yaml.j2", dest: "acloud/acloud-client-crb.yaml" }
+  delegate_to: "{{ groups['masters'][0] }}"
+  run_once: true
+
+#- debug: msg="{{kubeadm.stdout}}"
+
+- name: Wait for kubelet bootstrap to create config
+  wait_for:
+    path: "{{ kube_config_dir }}/kubelet.conf"
+    delay: 1
+    timeout: 60
+
+- name: Update kubelet.conf
+  command: "{{ item }}"
+  with_items:
+    -  "sed -i 's#server:.*#server: https://{{ hostvars[inventory_hostname]['ip'] }}:{{ api_secure_port }}#g' {{ kube_config_dir }}/kubelet.conf"
+    -  "sed -i 's#client-certificate-data:.*#client-certificate: /var/lib/kubelet/pki/kubelet-client-current.pem#g' {{ kube_config_dir }}/kubelet.conf"
+    -  "sed -i 's#client-key-data:.*#client-key: /var/lib/kubelet/pki/kubelet-client-current.pem#g' {{ kube_config_dir }}/kubelet.conf"
+  notify: restart kubelet
+
+- name: Apply acloud-client clusterrole
+  when: not acloud_client_conf.stat.exists
+  shell: "kubectl --kubeconfig={{ kubeadminconfig }} apply -f {{ kube_config_dir }}/{{ item }}"
+  with_items:
+  - "acloud/acloud-client-crb.yaml"
+  delegate_to: "{{ groups['masters'][0] }}"
+  run_once: true
+
+- name: Get kubeconfig file
+  fetch:
+    src: /etc/kubernetes/acloud/acloud-client-kubeconfig
+    dest: "{{ inventory_dir }}/acloud-client-kubeconfig"
+    flat: yes
+  delegate_to: "{{ groups['masters'][0] }}"
+  run_once: true
+
+- name: Add alias to .base_profile
+  when: ansible_os_family in ["Ubuntu", "Debian"]
+  blockinfile:
+    dest: /root/.profile
+    marker: "## {mark} added by knit --------------------"
+    block: |
+      export ETCDCTL_API=3
+      export ETCDCTL_CACERT=/etc/kubernetes/pki/etcd/ca.crt
+      export ETCDCTL_CERT=/etc/kubernetes/pki/etcd/peer.crt
+      export ETCDCTL_KEY=/etc/kubernetes/pki/etcd/peer.key
+
+      export KUBECONFIG=/etc/kubernetes/admin.conf
+
+      alias ll='ls -al'
+      alias etcdlet="etcdctl --endpoints={{ etcd_access_addresses }} "
+      alias psg="ps -ef | grep "
+      alias wp="watch -n1 'kubectl get pods --all-namespaces -o wide'"
+      alias k="kubectl "
+
+- name: Add alias to .base_profile
+  when: ansible_distribution in ["CentOS", "RedHat"]
+  blockinfile:
+    dest: /root/.bash_profile
+    marker: "## {mark} added by knit --------------------"
+    block: |
+      export ETCDCTL_API=3
+      export ETCDCTL_CACERT=/etc/kubernetes/pki/etcd/ca.crt
+      export ETCDCTL_CERT=/etc/kubernetes/pki/etcd/peer.crt
+      export ETCDCTL_KEY=/etc/kubernetes/pki/etcd/peer.key
+
+      export KUBECONFIG=/etc/kubernetes/admin.conf
+
+      alias ll='ls -al'
+      alias etcdlet="etcdctl --endpoints={{ etcd_access_addresses }} "
+      alias psg="ps -ef | grep "
+      alias wp="watch -n1 'kubectl get pods --all-namespaces -o wide'"
+      alias k="kubectl "
+      alias cert="openssl x509 -text -noout -in "
+
+# Untaint Master node ---------------------------------------------------------
+- name: ADDON | Untaint master node
+  when: not master_isolated
+  shell: "kubectl --kubeconfig={{ kubeadminconfig }} taint nodes {{ item }} node-role.kubernetes.io/master:NoSchedule-"
+  with_items: "{{ node_name }}"
+  failed_when: false
+
+# Create kubernetes core addon directory -----------------------------------------------------
+- name: Create kubernetes core addon directory
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+  - "{{ kube_addon_dir }}/calico"
+  - "{{ kube_addon_dir }}/metrics-server"
+  register: addon_dir
+# ----------------------------------------------------------------------------
+
+# Calico ------------------------------------------------------------------
+- name: Calico | Copy calico config file
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ kube_addon_dir }}/{{ item.dest }}"
+  with_items:
+  - { src: "calico/calico.yaml.j2", dest: "calico/calico.yaml" }
+  delegate_to: "{{ groups['masters'][0] }}"
+  run_once: true
+
+- name: Calico | Create calico
+  shell: "kubectl apply --kubeconfig={{ kubeadminconfig }} -f {{ kube_addon_dir }}/{{ item }}"
+  with_items:
+  - "calico/calico.yaml"
+  delegate_to: "{{ groups['masters'][0] }}"
+  run_once: true
+# ---------------------------------------------------------------------------
+
+- name: MetricsServer | Copy metrics-server config file
+  when: metrics_server
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ kube_addon_dir }}/{{ item.dest }}"
+  with_items:
+  - { src: "metrics-server/metrics-server-rbac.yaml.j2", dest: "metrics-server/metrics-server-rbac.yaml" }
+  - { src: "metrics-server/metrics-server-controller.yaml.j2", dest: "metrics-server/metrics-server-controller.yaml" }
+  delegate_to: "{{ groups['masters'][0] }}"
+  run_once: true
+
+- name: MetricsServer | Create MetricsServer
+  when:
+  - cloud_provider != "gke"
+  shell: "kubectl apply --kubeconfig={{ kubeadminconfig }} -f {{ kube_addon_dir }}/{{ item }}"
+  with_items:
+  - "metrics-server/metrics-server-rbac.yaml"
+  - "metrics-server/metrics-server-controller.yaml"
+  delegate_to: "{{ groups['masters'][0] }}"
+  run_once: true
+# ---------------------------------------------------------------------------
+
+- name: Update kube-proxy configmap
+  when: haproxy
+  shell: "kubectl --kubeconfig={{ kubeadminconfig }} get cm kube-proxy -n kube-system -o yaml | sed 's#server:.*#server: https://localhost:6443#g' | kubectl --kubeconfig={{ kubeadminconfig }} apply -f -"
+  delegate_to: "{{ groups['masters'][0] }}"
+  run_once: true
+
+- name: Restart kube-proxy
+  when: haproxy
+  shell: "kubectl --kubeconfig={{ kubeadminconfig }} delete pods -n kube-system -l k8s-app=kube-proxy"
+  delegate_to: "{{ groups['masters'][0] }}"
+  run_once: true
+  ignore_errors: true

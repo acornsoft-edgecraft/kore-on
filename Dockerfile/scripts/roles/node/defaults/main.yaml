@@ -1,0 +1,13 @@
+---
+node_group: node
+
+is_kube_master: "{{ inventory_hostname in groups['masters'] }}"
+is_gpu_node: "{{ 'gpu-node' in groups and inventory_hostname in groups['gpu-node'] }}"
+
+# AWS node name 분기 처리
+node_name: |-
+  {% if cloud_provider is defined and cloud_provider == "aws" -%}
+    {{ ansible_fqdn|lower }}
+  {%- else -%}
+    {{ ansible_hostname|lower }}
+  {%- endif %}

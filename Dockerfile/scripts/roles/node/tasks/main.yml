@@ -1,0 +1,150 @@
+---
+# For ubuntu     -------------------------------------------------------------
+- name: Unhold Kubernetes packages (ubuntu)
+  when: ansible_os_family in ["Ubuntu", "Debian"]
+  dpkg_selections:
+    name: "{{ item }}"
+    selection: install
+  with_items:
+    - kubectl
+    - kubelet
+    - kubeadm
+  failed_when: false
+
+- name: Install Kubernetes packages (kubectl, kubelet)
+  when: ansible_os_family in ["Ubuntu", "Debian"] and not is_kube_master
+  apt:
+    name: ['kubectl={{ k8s_version }}-00', 'kubelet={{ k8s_version }}-00', 'kubeadm={{ k8s_version }}-00']
+    state: present
+
+- name: Prevent auto-upgrade Kubernetes packages
+  when: ansible_os_family in ["Ubuntu", "Debian"] and not is_kube_master
+  dpkg_selections:
+    name: "{{ item }}"
+    selection: hold
+  with_items:
+    - kubectl
+    - kubelet
+    - kubeadm
+# ----------------------------------------------------------------------------
+
+# For Centos     -------------------------------------------------------------
+- name: Install Kubernetes packages (kubectl, kubelet)
+  when:
+    - ansible_distribution in ["CentOS", "RedHat"]
+    - not closed_network
+    - not is_kube_master
+  yum:
+    name: ['kubectl-{{ k8s_version }}', 'kubelet-{{ k8s_version }}', 'kubeadm-{{ k8s_version }}']
+    state: present
+    update_cache: yes
+    disable_excludes: Kubernetes
+
+- name: Install Kubernetes packages (kubectl, kubelet)
+  when:
+    - ansible_distribution in ["CentOS", "RedHat"]
+    - closed_network
+    - not is_kube_master
+  yum:
+    name: ['kubectl-{{ k8s_version }}', 'kubelet-{{ k8s_version }}', 'kubeadm-{{ k8s_version }}']
+    state: present
+    update_cache: yes
+# ----------------------------------------------------------------------------
+
+- name: Check if kubelet.conf exists
+  stat:
+    path: "{{ kube_config_dir }}/kubelet.conf"
+  register: kubelet_conf
+
+- name: Create kubelet directory
+  when: not is_kube_master
+  file:
+    path: /var/lib/kubelet
+    state: directory
+
+- name: Calculate kubeadm CA cert hash
+  when: not kubelet_conf.stat.exists
+  shell: openssl x509 -pubkey -in {{ master_cert_dir }}/ca.crt | openssl rsa -pubin -outform der 2>/dev/null | openssl dgst -sha256 -hex | sed 's/^.* //'
+  register: kubeadm_ca_hash
+  delegate_to: "{{ groups['masters'][0] }}"
+  run_once: true
+
+- name: Create kubeadm token for joining nodes with 24h expiration (default)
+  when: not kubelet_conf.stat.exists
+  command: "kubeadm token create"
+  run_once: true
+  register: temp_token
+  delegate_to: "{{ groups['masters'][0] }}"
+
+- name: Copy kubeadm client config
+  when:
+    - not is_kube_master
+    - not kubelet_conf.stat.exists
+  template:
+    src: "kubeadm-client.conf.j2"
+    dest: "{{ kube_config_dir }}/kubeadm-client.conf"
+  vars:
+    kubeadm_token: "{{ temp_token.stdout}}"
+  register: kubeadm_client_conf
+
+- name: Copy cloud-config file
+  when: cloud_provider == "azure" and not is_kube_master
+  template:
+    src: "cloud-config.json.j2"
+    dest: "{{ cert_dir }}/cloud-config.json"
+  register: cloud-config
+
+- name: Copy kubelet extra config file
+  template:
+    src: "kubeadm.kubelet.j2"
+    dest: >-
+      {% if ansible_os_family in ["Ubuntu", "Debian"] -%}
+      /etc/default/kubelet
+      {%- elif ansible_os_family in ["CentOS", "RedHat"] -%}
+      /etc/sysconfig/kubelet
+      {%- endif %}
+    owner: root
+    group: root
+    mode: 0755
+  register: kubelet_service
+
+- name: systemctl daemon-reload
+  systemd:
+    daemon_reload: yes
+  when: kubelet_service.changed and not is_kube_master
+
+- name: Start and enable kubelet on worker node
+  when: not is_kube_master
+  systemd:
+    name: kubelet
+    enabled: yes
+    state: started
+  register: kubelet_start_node
+
+- name: Join to cluster
+  when :
+    - not is_kube_master
+    - (kubeadm_client_conf.changed and not kubelet_conf.stat.exists)
+  command: kubeadm join --config {{ kube_config_dir }}/kubeadm-client.conf --ignore-preflight-errors=all
+  register: kubeadm_join
+
+- name: Wait for kubelet bootstrap to create config
+  when: not is_kube_master
+  wait_for:
+    path: "{{ kube_config_dir }}/kubelet.conf"
+    delay: 1
+    timeout: 60
+
+- name: Update server field in kubelet kubeconfig
+  when: not haproxy and not is_kube_master
+  command: "sed -i 's#server:.*#server: {{ api_lb_ip }}#g' {{ kube_config_dir }}/kubelet.conf"
+  notify: restart kubelet
+
+- name: Update server field in kubelet kubeconfig (haproxy)
+  when: haproxy and not is_kube_master
+  command: "sed -i 's#server:.*#server: https://localhost:{{ haproxy_port }}#g' {{ kube_config_dir }}/kubelet.conf"
+  notify: restart kubelet
+
+- name: kubectl label node
+  command: "kubectl --kubeconfig={{ kubeadminconfig }} label node {{ node_name }} node-role.kubernetes.io/node='' --overwrite"
+  delegate_to: "{{ groups['masters'][0] }}"

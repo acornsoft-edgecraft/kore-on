@@ -1,0 +1,22 @@
+---
+# clean master and worker node
+- hosts: cluster
+  roles:
+    - reset
+  tags:
+    - reset-cluster
+
+# clean private registry
+- hosts: registry
+  roles:
+  - reset/registry
+  tags:
+  - reset-registry
+
+# clean storage
+- hosts: storage
+  roles:
+  - reset/storage
+  tags:
+  - reset-storage
+

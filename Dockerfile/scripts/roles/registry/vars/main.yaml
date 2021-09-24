@@ -1,0 +1,5 @@
+# Registry
+registry_id: "admin"
+registry_passwd: "Pass0000@"
+
+basic_auth: "{{ registry_id }}:{{ registry_passwd }}"

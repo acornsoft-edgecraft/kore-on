@@ -1,0 +1,16 @@
+---
+- debug:
+    msg: "INFO: Clean up file ...\n"
+  run_once: true
+
+- name: Delete some files and directories
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+  - /storage
+  tags: ['files']
+
+- debug:
+    msg: "INFO: Clean up file done\n"
+  run_once: true

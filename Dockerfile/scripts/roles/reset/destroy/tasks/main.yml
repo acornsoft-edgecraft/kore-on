@@ -1,0 +1,71 @@
+---
+# This playbook delete k8s services of loadbalancer type and pvc
+
+#- debug:
+#    msg: "INFO: Destroy user load-balancer service ...\n"
+#  run_once: true
+
+- name: Find loadbalancer type services
+  when: cloud_provider in ['aws', 'azure']
+  shell: "kubectl --kubeconfig={{ kubeadminconfig }} get svc --all-namespaces -o custom-columns=NAME:metadata.name,NAMESPACE:metadata.namespace,TYPE:spec.type | grep LoadBalancer | awk '{print $1, \"-n \" $2}'"
+  register: lbtype_services
+  delegate_to: "{{ groups['masters'][0] }}"
+  run_once: true
+  failed_when: false
+  tags: pre-destroy
+
+- name: Delete services of loadbalancer type
+  shell: "kubectl --kubeconfig={{ kubeadminconfig }} delete svc {{ item }}"
+  with_items:
+    - "{{ lbtype_services.stdout_lines }}"
+  when:  cloud_provider in ['aws', 'azure']
+  delegate_to: "{{ groups['masters'][0] }}"
+  run_once: true
+  failed_when: false
+  tags: pre-destroy
+
+#- debug:
+#    msg: "INFO: Destroy user load-balancer service is done\n"
+#  run_once: true
+
+
+#- name: Find Persistence Volume Claim
+#  shell: "kubectl --kubeconfig={{ kubeadminconfig }} get pvc --no-headers --all-namespaces -o custom-columns=NAME:metadata.name,NAMESPACE:metadata.namespace | awk '{print $1, \"-n \" $2}'"
+#  register: pvcs
+#  delegate_to: "{{ groups['masters'][0] }}"
+#  run_once: true
+#  failed_when: false
+#  tags: pre-destroy
+#
+#- name: Delete Persistence Volume Claim
+#  shell: "kubectl --kubeconfig={{ kubeadminconfig }} delete pvc {{ item }}"
+#  with_items:
+#    - "{{ pvcs.stdout_lines }}"
+#  delegate_to: "{{ groups['masters'][0] }}"
+#  run_once: true
+#  failed_when: false
+#  tags: pre-destroy
+
+
+#- name: delete services of loadbalancer type
+#  shell: "kubectl delete svc $(kubectl get svc --all-namespaces -o custom-columns=NAME:metadata.name,NAMESPACE:metadata.namespace,TYPE:spec.type | grep LoadBalancer | awk '{print $1, \"-n \" $2}')"
+#  delegate_to: "{{ groups['masters'][0] }}"
+#  failed_when: false
+#  become: yes
+#  tags: pre-destroy
+#
+#- name: Delete deployment having persistence volume
+#  when:
+#    - cloud_provider in [ 'aws', 'azure', 'rovius' ]
+#  shell: "kubectl delete deployments $(kubectl get deployment --all-namespaces -o custom-columns=NAME:metadata.name,NAMESPACE:metadata.namespace,PVTYPE:spec.template.spec | grep persistentVolumeClaim |  awk '{print $1, \"-n \",$2}')"
+#  delegate_to: "{{ groups['masters'][0] }}"
+#  failed_when: false
+#  tags: pre-destroy
+#
+#- name: Delete pvcs
+#  when:
+#    - cloud_provider in [ 'onpremise' ]
+#  shell: "kubectl delete pvc $(kubectl get pvc --no-headers --all-namespaces -o custom-columns=NAME:metadata.name,NAMESPACE:metadata.namespace | awk '{print $1, \"-n \" $2}')"
+#  delegate_to: "{{ groups['masters'][0] }}"
+#  failed_when: false
+#  tags: pre-destroy

@@ -1,0 +1,156 @@
+# Extract rpm/deb archived files and start nginx service for serving to all nodes
+
+- name: disable selinux
+  when: ansible_os_family in ["CentOS", "RedHat"]
+  selinux:
+    policy: targeted
+    state: disabled
+  no_log: true
+
+- name: Create local repository directory
+  file:
+    path: "/data/localrepo"
+    state: directory
+
+- name: Check local-repo tgz existence
+  stat:
+    path: "/tmp/{{ local_repository_archieve_file | basename}}"
+  register: local_repo_archieved_file
+
+- name: Upload local-repo archieved file
+  when:
+    - not local_repo_archieved_file.stat.exists
+  copy:
+    src: "{{ inventory_dir }}/{{ local_repository_archieve_file }}"
+    dest: "/tmp/{{ local_repository_archieve_file | basename}}"
+
+- name: Extract local repository archieve file into /data/localrepo
+  unarchive:
+    src: "/tmp/{{ local_repository_archieve_file | basename}}"
+    dest: "/data/localrepo"
+    remote_src: yes
+    owner: "root"
+    group: "root"
+    creates: "/data/localrepo/repodata"
+
+- name: Upload nginx rpm file
+  when:
+    - ansible_os_family in ["CentOS", "RedHat"]
+  copy:
+    src: "nginx-1.20.1-1.el8.ngx.x86_64.rpm"
+    dest: "/tmp/nginx-1.20.1-1.el8.ngx.x86_64.rpm"
+
+- name: Upload nginx deb file
+  when:
+    - ansible_os_family in ["Ubuntu", "Debian"]
+  copy:
+    src: "nginx_1.20.1-1~focal_amd64.deb"
+    dest: "/tmp/nginx_1.20.1-1~focal_amd64.deb"
+
+
+- name: Install nginx for serving local repository
+  when:
+    - ansible_os_family in ["CentOS", "RedHat"]
+  yum:
+    name: /tmp/nginx-1.20.1-1.el8.ngx.x86_64.rpm
+    disable_gpg_check: yes
+    state: present
+
+- name: Install nginx for serving local repository
+  when:
+    - ansible_os_family in ["Ubuntu", "Debian"]
+  apt:
+    deb: /tmp/nginx_1.20.1-1~focal_amd64.deb
+    state: present
+
+- name: Update nginx.conf
+  when:
+    - ansible_os_family in ["CentOS", "RedHat"]
+  command: "{{ item }}"
+  with_items:
+    -  "sed -i 's# 80;# 8080;#g' /etc/nginx/conf.d/default.conf"
+    -  "sed -i 's#/usr/share/nginx/html#/data/localrepo#g' /etc/nginx/conf.d/default.conf"
+
+- name: Update nginx.conf
+  when:
+    - ansible_os_family in ["Ubuntu", "Debian"]
+  command: "{{ item }}"
+  with_items:
+    -  "sed -i 's# 80;# 8080;#g' /etc/nginx/conf.d/default.conf"
+    -  "sed -i 's#/usr/share/nginx/html#/data/localrepo#g' /etc/nginx/conf.d/default.conf"
+
+
+- name: Start and enable nginx
+  service:
+    name: nginx
+    enabled: yes
+    state: restarted
+
+
+# RHEL, Centos------------------------------------------------------------------
+- name: Check local.repo file existence
+  when:
+    - ansible_os_family in ["CentOS", "RedHat"]
+  stat:
+    path: /etc/yum.repos.d/local.repo
+  register: local_repo_file
+
+- name: Backup /etc/yum.repos.d directory
+  when:
+    - ansible_os_family in ["CentOS", "RedHat"]
+    - not local_repo_file.stat.exists
+  command: mv /etc/yum.repos.d /etc/yum.repos.d.bak
+  ignore_errors: True
+
+- name: Create /etc/yum.repos.d directory
+  when:
+    - ansible_os_family in ["CentOS", "RedHat"]
+    - not local_repo_file.stat.exists
+  file:
+    path: /etc/yum.repos.d
+    state: directory
+    owner: root
+    mode: 0755
+
+- name: Apply local repostory (offline install)
+  when:
+    - ansible_os_family in ["CentOS", "RedHat"]
+  template:
+    src: "local.repo.j2"
+    dest: "/etc/yum.repos.d/local.repo"
+    backup: true
+
+# Ubuntu ----------------------------------------------------------------------
+- name: Check /etc/apt/sources.list existence
+  when:
+    - ansible_os_family in ["Ubuntu", "Debian"]
+  stat:
+    path: /etc/apt/sources.list
+  register: sources_list_stat
+
+- name: Backup /etc/apt/sources.list
+  when:
+    - ansible_os_family in ["Ubuntu", "Debian"]
+    - sources_list_stat.stat.exists
+  command: mv /etc/apt/sources.list /etc/apt/sources.list.bak
+  ignore_errors: True
+
+- name: Adding local repository
+  when:
+    - ansible_os_family in ["Ubuntu", "Debian"]
+  apt_repository:
+    repo: deb [trusted=yes] {{ local_repository }} ./
+    state: present
+    filename: 'local'
+# ----------------------------------------------------------------------------
+
+- name: yum clean
+  when:
+    - ansible_os_family in ["CentOS", "RedHat"]
+  shell: "{{ item }}"
+  with_items:
+    - "rm -f /tmp/yum_save_tx*"
+    - "rm -f /var/lib/rpm/__*"
+    - "rpm --rebuilddb"
+    - "yum clean all"
+  no_log: true

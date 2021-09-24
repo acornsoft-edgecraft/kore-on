@@ -1,0 +1,168 @@
+# Create scripts directory
+- name: Create scripts directory
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+    - "{{ scripts_dir }}"
+    - "{{ backup_dir }}/db"
+    - "{{ backup_dir }}/cluster"
+    - "{{ backup_dir }}/registry"
+    - "{{ kube_addon_dir }}/test"
+
+#  Deploy test application to check installation validation
+- name: Copy test application config file
+  when: is_kube_master
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ kube_addon_dir }}/{{ item.dest }}"
+  with_items:
+    - { src: "dnsutils.yaml.j2", dest: "test/dnsutils.yaml" }
+    - { src: "nginx.yaml.j2", dest: "test/nginx.yaml" }
+  delegate_to: "{{ groups['masters'][0] }}"
+  run_once: true
+
+# Scripts for cluster --------------------------------------------------------------
+- name: Copy master's scripts files
+  when: is_kube_master
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ scripts_dir }}/{{ item.dest }}"
+    mode: 0755
+  with_items:
+    - { src: "script/cluster-backup.sh.j2", dest: "cluster-backup.sh" }
+    - { src: "script/docker-clean-images.sh.j2", dest: "docker-clean-images.sh" }
+
+- name: Copy docker container log rotate file
+  when: container_runtime == 'docker'
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ scripts_dir }}/{{ item.dest }}"
+    mode: 0644
+  with_items:
+    - { src: "script/docker-container-logrotate.j2", dest: "docker-container-logrotate" }
+
+- name: Add cron job for cluster backup
+  when: is_kube_master
+  cron:
+    name: "cluster backup"
+    minute: "55"
+    hour: "23"
+    job: "{{ scripts_dir }}/cluster-backup.sh {{ backup_dir }}/cluster {{ maxbackup_day }} >> {{ backup_dir }}/cluster/cluster-backup.log 2>&1"
+    cron_file: cluster-backup
+    user: root
+
+- name: Add cron job for docker container log rotation
+  when: container_runtime == 'docker'
+  cron:
+    name: "log rotate for docker container"
+    minute: "55"
+    hour: "23"
+    job: "/usr/sbin/logrotate -fv {{ scripts_dir }}/docker-container-logrotate > /dev/null 2>&1"
+    cron_file: docker-logrotate
+    user: root
+
+- name: Add cron job for docker image clean
+  when: container_runtime == 'docker'
+  cron:
+    name: "docker image clean"
+    minute: "55"
+    hour: "23"
+    job: "{{ scripts_dir }}/docker-clean-images.sh 5 > {{ backup_dir }}/cluster/docker-clean-image.log 2>&1 "
+    cron_file: docker-clean-image
+    user: root
+# -----------------------------------------------------------------------------------------
+
+# Scripts for registry --------------------------------------------------------------
+- name: Copy register's scripts files
+  when: registry_install and is_registry
+  copy:
+    src: "{{ item }}"
+    dest: "{{ scripts_dir }}/{{ item }}"
+    mode: 0755
+  with_items:
+    - "slack.sh"
+
+- name: Copy harbor log rotate file
+  when: registry_install and is_registry
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ scripts_dir }}/{{ item.dest }}"
+    mode: 0644
+  with_items:
+    - { src: "script/harbor_log_rotate.j2", dest: "harbor_log_rotate" }
+
+- name: Copy register's scripts files
+  when: registry_install and is_registry
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ scripts_dir }}/{{ item.dest }}"
+    mode: 0755
+  with_items:
+    - { src: "script/chk_harbor.sh.j2", dest: "chk_harbor.sh" }
+    - { src: "script/registry-backup.sh.j2", dest: "registry-backup.sh" }
+    - { src: "script/registry-restore.sh.j2", dest: "registry-restore.sh" }
+
+- name: Add cron job for checking registry liveness
+  when: registry_install and is_registry
+  cron:
+    name: "check registry liveness"
+    job: "{{ scripts_dir }}/chk_harbor.sh >> {{ scripts_dir }}/chk_harbor.log 2>&1"
+    cron_file: check-registry-liveness
+    user: root
+    disabled: yes
+
+- name: Add cron job to rotate registry's logs
+  when: registry_install and is_registry
+  cron:
+    name: "registry log rotation"
+    minute: "0"
+    hour: "4"
+    job: "/usr/sbin/logrotate -fv {{ scripts_dir }}/harbor_log_rotate > /dev/null 2>&1"
+    cron_file: registry-logrotation
+    user: root
+
+- name: Add cron job to registry backup
+  when: registry_install and is_registry
+  cron:
+    name: "backup registry"
+    minute: "55"
+    hour: "23"
+    job: "{{ scripts_dir }}/registry-backup.sh {{ backup_dir }}/registry {{ maxbackup_day }} >> {{ backup_dir }}/harbor.log 2>&1"
+    cron_file: registry-backup
+    user: root
+# -----------------------------------------------------------------------------------------
+
+# Create cube-config configmap -------------------------------------------------------------
+#- name: Check cluster is running
+#  shell: "kubectl --kubeconfig={{ kubeadminconfig }} cluster-info"
+#  register: check_cluster_health
+#  failed_when: false
+#  delegate_to: "{{ groups['masters'][0] }}"
+#  run_once: true
+#
+#- name: Set fact cube.toml
+#  when: check_cluster_health.rc == 0
+#  set_fact:
+#    cube_toml: "{{ lookup('file', 'files/cube.toml') | b64encode }}"
+#  delegate_to: "{{ groups['masters'][0] }}"
+#  run_once: true
+#
+#- name: Copy cube-config config file
+#  when: check_cluster_health.rc == 0
+#  template:
+#    src: "{{ item.src }}"
+#    dest: "{{ kube_config_dir }}/{{ item.dest }}"
+#  with_items:
+#    - { src: "cube-config-cm.yaml.j2", dest: "cube-config-cm.yaml" }
+#  delegate_to: "{{ groups['masters'][0] }}"
+#  run_once: true
+#
+#- name: Create cube-config configmap
+#  when: check_cluster_health.rc == 0
+#  shell: "kubectl apply --kubeconfig={{ kubeadminconfig }} -f {{ kube_config_dir }}/{{ item }}"
+#  with_items:
+#    - "cube-config-cm.yaml"
+#  delegate_to: "{{ groups['masters'][0] }}"
+#  run_once: true
+# --------------------------------------------------------------------------------------------

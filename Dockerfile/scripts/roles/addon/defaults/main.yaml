@@ -1,0 +1,55 @@
+---
+# nfs-provisioner mount dir
+nfs_ip:
+nfs_mountdir:
+
+# prometheus-rules.yaml
+# cluster_display_name: "Acornsoft"
+
+# AWS node name 분기 처리
+node_name: |-
+  {% if cloud_provider is defined and cloud_provider == "aws" -%}
+    {{ ansible_fqdn|lower }}
+  {%- else -%}
+    {{ ansible_hostname|lower }}
+  {%- endif %}
+
+# Get default storage class name for each cloud provider
+cloud_provider_default_sc_name: |-
+  {% if cloud_provider is defined and cloud_provider in ["aws", "azure"] -%}
+    default
+  {%- elif cloud_provider == "gke" -%}
+    standard
+  {%- elif cloud_provider == "tke" -%}
+    cbs
+  {%- endif %}
+
+# shared-storage 생성 여부.
+create_shared_storage_flag: |-
+  {% if efs_file_system_id != "" or storage_account != "" or cloud_provider == "gke" -%}
+    true
+  {%- else -%}
+    false
+  {%- endif %}
+
+is_exist_gpu_node: "{{ 'gpu-node' in groups and groups['gpu-node']|length > 0 }}"
+#is_exist_multi_nic_node: "{{ 'multi-nic-node' in groups and groups['multi-nic-node']|length > 0 }}"
+
+#2019082 오현석 수정
+is_exist_multi_nic_node: "{{ multus_install }}"
+
+
+# alertmanager-cm.yaml
+smtp_smarthost: ""
+smtp_from: ""
+smtp_auth_username: ""
+smtp_auth_password: ""
+smtp_require_tls: "false"
+slack_api_url: ""
+email_receivers: [""]
+
+# azure storageaccounttype for azure-disk storageclass
+# Standard_LRS or Premium_LRS
+storage_account_type: Standard_LRS
+
+addon_manager_ns: "{{ release_name }}-addon"

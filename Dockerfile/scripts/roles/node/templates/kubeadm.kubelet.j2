@@ -1,0 +1,26 @@
+KUBELET_EXTRA_ARGS="--root-dir={{ data_root_dir }}//kubelet \
+--log-dir={{ data_root_dir }}/log \
+--logtostderr=false \
+--v=2 \
+{% if container_runtime == "containerd" %}
+--container-runtime=remote \
+--runtime-request-timeout=15m \
+--container-runtime-endpoint=unix:///run/containerd/containerd.sock \
+{% endif %}
+{% if provider == true and cloud_provider in ['aws', 'azure'] %}
+--cloud-provider={{ cloud_provider }} \
+{% endif %}
+{% if provider == true and cloud_provider in ['azure'] %}
+--cloud-config=/etc/kubernetes/pki/cloud-config.json \
+{% endif %}
+{% if hostvars[inventory_hostname]['taints'] is defined %}
+--register-with-taints={{ hostvars[inventory_hostname]['taints'] }} \
+{% endif %}
+{% if is_gpu_node %}
+--feature-gates=KubeletPodResources=true \
+--node-labels=nvidia.com/gpu={{ ansible_hostname|lower }},cube.acornsoft.io/clusterid={{ cluster_id }}"
+{% elif hostvars[inventory_hostname]['labels'] is defined %}
+--node-labels={{ hostvars[inventory_hostname]['labels'] }},cube.acornsoft.io/clusterid={{ cluster_id }}"
+{% else %}
+--node-labels=cube.acornsoft.io/clusterid={{ cluster_id }}"
+{% endif %}

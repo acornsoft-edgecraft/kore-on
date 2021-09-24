@@ -1,0 +1,19 @@
+---
+- name: Copy kubelet extra config file
+  template:
+    src: "kubeadm.kubelet.j2"
+    dest: >-
+      {% if ansible_os_family in ["Ubuntu", "Debian"] -%}
+      /etc/default/kubelet
+      {%- elif ansible_os_family in ["CentOS", "RedHat"] -%}
+      /etc/sysconfig/kubelet
+      {%- endif %}
+    owner: root
+    group: root
+    mode: 0755
+  register: kubelet_service
+
+- name: systemctl daemon-reload
+  systemd:
+    daemon_reload: yes
+  when: kubelet_service.changed and not is_kube_master
