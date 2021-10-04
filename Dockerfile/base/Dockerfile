@@ -1,6 +1,6 @@
 FROM alpine:3.12
 
-MAINTAINER Cloud, Jung <cloud.jung@acornsoft.io>
+LABEL maintainer="cloud.jung@acornsoft.io"
 
 ENV ANSIBLE_VERSION 2.9.7
 ENV HELM_VERSION 3.6.3
