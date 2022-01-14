@@ -35,7 +35,7 @@ mycluster
 
   - Copy sample inventory files and modify it according to your environment
 ```bash
-$ docker run -it --name=knit --rm -v ${PWD}:/knit/work regi.k3.acornsoft.io/k3lab/knit:1.1.0 cp -R /knit/inventory/sample mycluster
+$ docker run -it --name=knit --rm -v ${PWD}:/knit/work regi.k3.acornsoft.io/k3lab/knit:1.1.1 cp -R /knit/inventory/sample mycluster
 $ cp local-repo.20210726_120901.tgz mycluster
 $ cp harbor.20210726_122024.tgz mycluster
 ```
@@ -148,7 +148,7 @@ haproxy: true
    
       
 ```bash
-$ docker run -it --name=knit --rm -v ${PWD}:/knit/work regi.k3.acornsoft.io/k3lab/knit:1.1.0 /bin/bash
+$ docker run -it --name=knit --rm -v ${PWD}:/knit/work regi.k3.acornsoft.io/k3lab/knit:1.1.1 /bin/bash
 
 # 대상 장비 접속 여부 확인하기(필수)
 $ ansible -i mycluster/inventory.ini -u root --private-key id_rsa  all -m ping
