@@ -1,6 +1,6 @@
-# Knit
+# kore-on
 
-Knit automates k8s installation tasks for on-premise.
+kore-on automates k8s installation tasks for on-premise.
 It also provides upgrade cluster and scale up/down worker nodes.
 
 ## Features
