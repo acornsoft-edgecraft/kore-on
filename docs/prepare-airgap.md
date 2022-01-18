@@ -3,7 +3,7 @@
 ## Deploy k8s cluster to VM
 1. Make clean working directory.
 ```bash
-$ mkdir /tmp/knit; cd /tmp/knit
+$ mkdir /tmp/koreon; cd /tmp/koreon
 ```
 
 2. Generate ssh key and copy it to target servers
