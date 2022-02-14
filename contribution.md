@@ -135,6 +135,9 @@ $ git fetch upstream
 $ git rebase upstream/develop
 ```
 
+**(또는)** VS Code에서 remote repository - upstream rebase 하기  
+![VS Code에서 upstream rebase-1](docs/images/github-upstram-rebase-1.png)
+![VS Code에서 upstream rebase-1](docs/images/github-upstram-rebase-2.png)
 
 ### 리뷰 승인 및 Pull Request를 merge 
 1) 같은 feature를 개발하는 동료에게 리뷰 승인을 받은 후 자신의 Pull Request를 merge합니다. 만약 혼자 feature를 개발한다면 1~2명의 동료에게 리뷰 승인을 받은 후 Pull Request를 merge합니다.
