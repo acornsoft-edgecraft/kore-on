@@ -136,7 +136,11 @@ $ git rebase upstream/develop
 ```
 
 **(또는)** VS Code에서 remote repository - upstream rebase 하기  
+1. Fetch
+![VS Code에서 upstream fetch](docs/images/github-upstram-fetch.png)
+2. Rebase
 ![VS Code에서 upstream rebase-1](docs/images/github-upstram-rebase-1.png)
+3. Confirm rebase
 ![VS Code에서 upstream rebase-1](docs/images/github-upstram-rebase-2.png)
 
 ### 리뷰 승인 및 Pull Request를 merge 
