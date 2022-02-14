@@ -1,5 +1,9 @@
-# Deploy kubernetes cluster using knit container
+- [Deploy kubernetes cluster using knit container](#deploy-kubernetes-cluster-using-knit-container)
+  - [Create VM with vagrant and virtualbox](#create-vm-with-vagrant-and-virtualbox)
+  - [페쇄망을 위한 local-repo, registry 백업 파일 만들기](#페쇄망을-위한-local-repo-registry-백업-파일-만들기)
+  - [Deploy k8s cluster to VM](#deploy-k8s-cluster-to-vm)
 
+# Deploy kubernetes cluster using knit container
 ## Create VM with vagrant and virtualbox
 
  [vagrant를 이용한 vm 생성](vagrant-virtualbox.md)
@@ -259,5 +263,6 @@ $ ansible-playbook -i mycluster/inventory.ini -u root --private-key id_rsa -e re
 
   - 클러스터 삭제하기
 ```bash
-$ ansible-playbook -i mycluster/inventory.ini -u root --private-key id_rsa ../scripts/reset.yml
+# optional [reset-cluster/reset-registry/reset-storage]
+$ ansible-playbook -i mycluster/inventory.ini -u root --private-key id_rsa --tags reset-cluster ../scripts/reset.yml
 ```
