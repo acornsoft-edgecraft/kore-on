@@ -129,7 +129,7 @@ $ git rebase -i HEAD~3
    
 
 
-3) **(필수)** 리모트 repository의 최신소스를 forked repository develop branch와 동기화(rebase)
+2) **(필수)** 리모트 repository의 최신소스를 forked repository develop branch와 동기화(rebase)
 ```sh
 $ git fetch upstream
 $ git rebase upstream/develop
