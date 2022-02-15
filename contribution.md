@@ -126,10 +126,16 @@ $ git rebase -i HEAD~3
 -  마지막으로 원본 커밋으로 강제 푸시를 수행하여 기존 커밋을 모두 단일 커밋으로 교체합니다.
 ![vs_code_squashing_force_push](docs/images/vs_code_squashing_force_push.png)
 
-   
+**(참고)** VS Code에서 [Gitlens Interactive Rebase Editor](https://github.com/gitkraken/vscode-gitlens#interactive-rebase-editor-) 사용 하기  
+
+- VS Code를 기본 Git 편집기로 설정
+  - ```$ git config --global core.editor "code --wait"```
+- 또는 rebase에만 영향을 미치려면 VS Code를 Git rebase 편집기로 설정하십시오.
+  - ```$ git config --global sequence.editor "code --wait"```  
+![Gitlens Interactive Rebase Editor ](docs/images/gitlens-interactive-rebase-editor.png)
 
 
-2) **(필수)** 리모트 repository의 최신소스를 forked repository develop branch와 동기화(rebase)
+1) **(필수)** 리모트 repository의 최신소스를 forked repository develop branch와 동기화(rebase)
 ```sh
 $ git fetch upstream
 $ git rebase upstream/develop
