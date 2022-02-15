@@ -1,9 +1,9 @@
-- [Deploy kubernetes cluster using knit container](#deploy-kubernetes-cluster-using-knit-container)
+- [Deploy kubernetes cluster using kore-on container](#deploy-kubernetes-cluster-using-kore-on-container)
   - [Create VM with vagrant and virtualbox](#create-vm-with-vagrant-and-virtualbox)
   - [페쇄망을 위한 local-repo, registry 백업 파일 만들기](#페쇄망을-위한-local-repo-registry-백업-파일-만들기)
   - [Deploy k8s cluster to VM](#deploy-k8s-cluster-to-vm)
 
-# Deploy kubernetes cluster using knit container
+# Deploy kubernetes cluster using kore-on container
 ## Create VM with vagrant and virtualbox
 
  [vagrant를 이용한 vm 생성](vagrant-virtualbox.md)
@@ -39,7 +39,7 @@ mycluster
 
   - Copy sample inventory files and modify it according to your environment
 ```bash
-$ docker run -it --name=knit --rm -v ${PWD}:/knit/work regi.k3.acornsoft.io/k3lab/knit:1.1.1 cp -R /knit/inventory/sample mycluster
+$ docker run -it --name=koreon --rm -v ${PWD}:/koreon/work regi.k3.acornsoft.io/k3lab/koreon:1.1.1 cp -R /koreon/inventory/sample mycluster
 $ cp local-repo.20210726_120901.tgz mycluster
 $ cp harbor.20210726_122024.tgz mycluster
 ```
@@ -92,7 +92,7 @@ cloud_provider: onpremise
 cluster_name: test-cluster
 
 # install directories
-install_dir: /var/lib/knit
+install_dir: /var/lib/koreon
 data_root_dir: /data
 
 # kubernetes options
@@ -152,7 +152,7 @@ haproxy: true
    
       
 ```bash
-$ docker run -it --name=knit --rm -v ${PWD}:/knit/work regi.k3.acornsoft.io/k3lab/knit:1.1.1 /bin/bash
+$ docker run -it --name=koreon --rm -v ${PWD}:/koreon/work regi.k3.acornsoft.io/k3lab/koreon:1.1.1 /bin/bash
 
 # 대상 장비 접속 여부 확인하기(필수)
 $ ansible -i mycluster/inventory.ini -u root --private-key id_rsa  all -m ping
