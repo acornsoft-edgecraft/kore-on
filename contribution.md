@@ -8,6 +8,7 @@
   - [Pull Request Work Process](#pull-request-work-process)
     - [Fork & Clone](#fork--clone)
     - [개발 준비](#개발-준비)
+    - [개발 완료후 repository 동기화(fetch/rebase)](#개발-완료후-repository-동기화fetchrebase)
     - [개발 완료 후 Pull Request 생성](#개발-완료-후-pull-request-생성)
     - [리뷰 승인 및 Pull Request를 merge](#리뷰-승인-및-pull-request를-merge)
 
@@ -58,11 +59,12 @@ vscode를 사용한 Github Contribution 방법 소개
 
 2) vscode에 fork된 repository를 연동(git clone) 한다.
 ```sh
-$ git clone https://github.com/kore3lab/kore-on.git
+$ git clone https://github.com/<forked-user>/kore-on.git
 $ git remote -v
-origin  https://github.com/xxxxx/kore-on.git (fetch)
-origin  https://github.com/xxxxx/kore-on.git (push)
+origin  https://github.com/<forked-user>/kore-on.git (fetch)
+origin  https://github.com/<forked-user>/kore-on.git (push)
 ```
+
 ![github clone](./docs/images/github-clone.png)
 
 3) 원격 저장소(프로젝트의 원래 저장소)를 설정한다.
@@ -87,25 +89,79 @@ $ git branch
   master
 ```
 
-2) 리모트 최신소스를 forked repository develop branch와 동기화 (rebase)
+2) 리모트(upstream) 최신소스를 forked(origin) repository develop branch와 동기화 한다.
+```sh
+$ git fetch upstream
+$ git merge upstream/develop
+$ git push 
+```
 
 3) 작업할 브랜치를 생성하고, 해당 브랜치로 이동한다.
-   - 로컬 Branch 생성: git plugin -> 분기 만들기 -> 분기 이름(예: feature/featureA)
-   - github(fork repository) Branch 게시: 로컬에 생성된 Branch를 github에 생성 하기 위해서는 분기 게시를 한다.
+   - 로컬에서 feature branch 생성: git plugin -> 분기 만들기 -> 분기 이름(예: feature/feature name)
+   - fork repository(origin)에 feature branch 게시: 로컬에 생성된 Branch를 github에 생성 하기 위해서는 분기 게시를 한다.
     ```sh
     $ git branch
-    * master
+    * develop
+      master
   
     $ git switch -c feature/haproxy
     ```
    ![Create local branch](./docs/images/create-branch.png)
 
 
+> **[참고]**
+> 2번 3번 항목을 vscode의 gitlens를 사용해서할 수 있다.
+> - fectch
+> ![1. fectch](docs/images/vs_code_gitlens_fecth.png)
+> - switch branch
+> ![2. switch-1](docs/images/vs_code_gitlens_switch-1.png)
+> - feature branch name 
+> ![2. switch-1](docs/images/vs_code_gitlens_switch-2.png)
+> - local branch 생성
+> ![2. switch-1](docs/images/vs_code_gitlens_switch-3.png)
+> - local branch up to remote(origin) repository
+> ![2. switch-1](docs/images/vs_code_gitlens_switch-4.png)
+> - remote(origin) repository 선택
+> ![2. switch-1](docs/images/vs_code_gitlens_switch-5.png)
+> - remote brantch 생성 확인
+> ![2. switch-1](docs/images/vs_code_gitlens_switch-6.png)
+
+
+### 개발 완료후 repository 동기화(fetch/rebase)
+로컬에서 개발이 완료되면 origin(forked) repository와 upstream repository를 동기화 시킨다.  
+전반적인 flow는 아래와 같다.
+
+
+- 로컬 개발 완료후 origin(forked) repository의 feature/featureA branch에 push 한다.
+```sh
+$ git branch
+  develop
+* feature/contribution
+  master
+  
+$ git commit -m "commit messages.."
+$ git push
+```
+**(또는)** vscode에서 commit/push 한다.
+
+- 리모트 upstream(원본) repository와 동기화(fetch/rebase)
+- > 참고
+  - upstream의 변경 정보를 가져와서 충돌 체크한다. 이때 병합 내용이 있으면 수정후 rebase를 완료 한다.
+
 ### 개발 완료 후 Pull Request 생성
 Pull Request를 생성 하기 위한 전반적인 flow는 아래와 같다.
 
 - 로컬 개발 완료
-- 리모트 upstream repository develop branch와 forked repository develop branch를 최신소스로 동기화(fech/rebase)
+- 리모트(upstream) repository develop branch와 forked repository feature branch를 최신소스로 동기화(fetch/rebase)
+  ```sh
+  $ git branch
+    develop
+  * feature/contribution
+    master
+
+  $ git fetch upstream
+  $ git rebase upstream/develop
+  ```
 - 리모트 origin(forked) repository develop 브랜치와 리모트 origin feature/username 브랜치 merge
 
 1) **(필수)** 개발된 로컬 branch의 commit을 업무에 맞도록 정리(squash) 작업 수행
