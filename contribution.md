@@ -90,7 +90,7 @@ $ git branch
 2) 리모트 최신소스를 forked repository develop branch와 동기화 (rebase)
 
 3) 작업할 브랜치를 생성하고, 해당 브랜치로 이동한다.
-   - 로컬 Branch 생성: git plugin -> 분기 만들기 -> 분기 이름(예: feature/username)
+   - 로컬 Branch 생성: git plugin -> 분기 만들기 -> 분기 이름(예: feature/featureA)
    - github(fork repository) Branch 게시: 로컬에 생성된 Branch를 github에 생성 하기 위해서는 분기 게시를 한다.
     ```sh
     $ git branch
