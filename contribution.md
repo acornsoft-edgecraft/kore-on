@@ -106,7 +106,7 @@ Pull Request를 생성 하기 위한 전반적인 flow는 아래와 같다.
 
 - 로컬 개발 완료
 - 리모트 upstream repository develop branch와 forked repository develop branch를 최신소스로 동기화(fech/rebase)
-- 리모트 origin(forked) repository develop 브랜치와 리모트 origin feature/username 브랜치 merge
+- 리모트 origin(forked) repository develop 브랜치와 리모트 origin feature/featureA 브랜치 merge
 
 1) **(필수)** 개발된 로컬 branch의 commit을 업무에 맞도록 정리(squash) 작업 수행
    1) 충돌 해결을 미연에 방지 효과
