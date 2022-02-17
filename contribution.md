@@ -54,6 +54,12 @@ vscode를 사용한 Github Contribution 방법 소개
 - GitHub Pull Requests and Issues
 
 ## Pull Request Work Process
+```sh
+1. 원본 저장소를 Fork & Clone
+2. 개발 준비
+3. 원본 repository 동기화(fetch/rebase)
+4. pull request 요청
+```
 
 ### Fork & Clone
 1) 원본 Repository([kore3lab/kore-on](https://github.com/kore3lab/kore-on)) 의 우측 상단 "Fork" 버튼을 눌러 fork repository(girhub-user/kore-on) 생성.
@@ -86,24 +92,17 @@ upstream        https://github.com/kore3lab/kore-on.git (push)
 1) develop branch로 이동
 ```sh
 $ git checkout develop
-$ git branch
+$ git branch --list
 
 * develop
   master
 ```
 
-2) 리모트(upstream) 최신소스를 forked(origin) repository develop branch와 동기화 한다.
-```sh
-$ git fetch upstream
-$ git merge upstream/develop
-$ git push 
-```
-
-3) 작업할 브랜치를 생성하고, 해당 브랜치로 이동한다.
+2) 작업할 feature 브랜치를 생성하고, 해당 브랜치로 이동한다.
    - 로컬에서 feature branch 생성: git plugin -> 분기 만들기 -> 분기 이름(예: feature/feature name)
-   - fork repository(origin)에 feature branch 게시: 로컬에 생성된 Branch를 github에 생성 하기 위해서는 분기 게시를 한다.
+   - remote origin(forked) repository에 feature branch 게시: 로컬에 생성된 Branch를 github에 생성 하기 위해서는 분기 게시를 한다.
     ```sh
-    $ git branch
+    $ git branch --list
     * develop
       master
   
