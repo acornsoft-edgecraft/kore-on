@@ -4,19 +4,19 @@
     - [Summary](#summary)
   - [Contributing](#contributing)
   - [Pull Request를 위한 전반적인 Flow](#pull-request를-위한-전반적인-flow)
-  - [install pugin for vscode - optionall](#install-pugin-for-vscode---optionall)
+  - [(optionall) Install pugin for vscode](#optionall-install-pugin-for-vscode)
   - [Pull Request Work Process](#pull-request-work-process)
     - [Fork & Clone](#fork--clone)
     - [개발 준비](#개발-준비)
     - [개발 완료후 repository 동기화(fetch/rebase)](#개발-완료후-repository-동기화fetchrebase)
         - [1. 로컬 개발 완료후 origin(forked) repository의 feature/featureA branch에 commit/push 한다.](#1-로컬-개발-완료후-originforked-repository의-featurefeaturea-branch에-commitpush-한다)
-        - [2. 개발 완료후 commit내용 합치는 작업을 한다(Squash) - optional](#2-개발-완료후-commit내용-합치는-작업을-한다squash---optional)
+        - [2. (optional) 개발 완료후 commit내용 합치는 작업을 한다(Squash)](#2-optional-개발-완료후-commit내용-합치는-작업을-한다squash)
         - [3. remote(upstream) repository와 동기화 한다.](#3-remoteupstream-repository와-동기화-한다)
     - [소스 동기화 완료후 Pull Request 생성 - Vscode](#소스-동기화-완료후-pull-request-생성---vscode)
     - [리뷰 승인 확인 및 feature branch 삭제](#리뷰-승인-확인-및-feature-branch-삭제)
 
 # Contributor Guide with Vscode
-vscode를 사용한 Github Contribution 방법 소개
+Vscode를 사용한 Github Contribution 방법 소개
 
 ## Branch 전략
 
@@ -47,8 +47,8 @@ vscode를 사용한 Github Contribution 방법 소개
 4) push한 commit을 원본 repository 에 pull requests 한다. 
 
 
-## install pugin for vscode - optionall
-
+## (optionall) Install pugin for vscode
+Vscode에서 사용하는 Git 관련 플러그인들은 아래와 같이 제공 된다.
 - GitLens
 - Git Graph
 - GitHub Pull Requests and Issues
@@ -164,7 +164,7 @@ $ git push
 **(또는)** vscode에서 commit/push 한다.  
 ![변경 내용 동기화](docs/images/vs_code_sync_origin.png)
 
-##### 2. 개발 완료후 commit내용 합치는 작업을 한다(Squash) - optional
+##### 2. (optional) 개발 완료후 commit내용 합치는 작업을 한다(Squash)
 오픈 소스나, 여러 사람이 같이 작업하는 소스코드인 경우, 커밋 이력이 많아지고 복잡해져서, 커밋 이력을 추적하는 것이 힘들어지게 됩니다. 
 Git의 Squash 기능은 이것을 방지하기 위해 여러번 커밋한 이력을 하나의 커밋 이력으로 만드는데 사용합니다.  
 정확히 이야기해서 git squash 라는 명령어는 없습니다. interactive rebase를 하는데 필요한 명령어 중 하나입니다.  
@@ -218,7 +218,7 @@ $ $ git branch
 ## 1. 원본(upstream)을 fetch 한다.
 $ git fetch upstream
 
-## 2. rebase 로 base를 교체한다.
+## 2. 로컬 브렌치(feature/featureA)에 upstream/develop의 commit내용을 rebase한다. - .git 디렉토리에 저장 된다.
 $ git rebase upstream/develop
 
 ## 3. 이때 병합 충돌이 나면 충돌을 해결하고 base를 재구성 한다. 
@@ -230,9 +230,49 @@ $ git push
 
 **(참고)** 병합 충돌 해결 절차 - Vscode
 ```sh
-1. Vscode의 병합 페이지에서 충돌을 해결한다.
-2. 
+1. Vscode의 병합 수정 페이지에서 충돌을 해결한다.
+2. 변경 사항을 스테이징 한다.
+3. rebase --continue 한다.
+4. 변경 사항을 확인 한다.
 ```
+
+- 원본(upstream)을 fetch 한다.
+![upstream repository rebase](docs/images/vs_code_rebase_upstream-0.png)
+<br/>
+- 로컬 브렌치(feature/featureA)에 upstream/develop의 commit내용을 rebase한다.
+  - rebase 항목이 있으면 선택창이 활성화 된다. 여기에서도 Interative Rebase를 선택 하면 커밋로그를 합칠수 있다(optional).
+![upstream repository rebase](docs/images/vs_code_rebase_upstream-1.png)
+![upstream repository rebase](docs/images/vs_code_rebase_upstream-2.png)
+<br/>
+- 병합 충돌이 있으면 해결 해야 한다.
+  -  충돌 소스를 수정 페이지 에서 수정 한다.
+     -  Accept Current Change는 upstream 저장소 내용으로 변경 된다.
+     -  Accept Incoming Change는 origin 저장소 내용으로 변경 된다.
+  -  변경된 내용을 스테이징 한다.
+     -  변경되 내용이 스테이징된 변경 사항으로 활성화 된다.
+  - rebase중인 항목을 완료 해야 한다.
+    - 열린 편집기 파일을 close 하면 완료 처리가 된다.
+    ```sh
+    $ git rebase --continue
+    [HEAD 분리됨 c566396] contribution 작성중
+    8 files changed, 65 insertions(+), 9 deletions(-)
+    create mode 100644 docs/images/vs_code_gitlens_fecth.png
+    create mode 100644 docs/images/vs_code_gitlens_switch-1.png
+    create mode 100644 docs/images/vs_code_gitlens_switch-2.png
+    create mode 100644 docs/images/vs_code_gitlens_switch-3.png
+    create mode 100644 docs/images/vs_code_gitlens_switch-4.png
+    create mode 100644 docs/images/vs_code_gitlens_switch-5.png
+    create mode 100644 docs/images/vs_code_gitlens_switch-6.png
+    힌트: 편집기가 파일을 닫기를 기다리는 중입니다... 
+    ```
+  - Git Graph 플러그인을 사용해서 이력을 확인 할 수 있다.
+  
+![upstream repository rebase](docs/images/vs_code_rebase_upstream-3.png)
+![upstream repository rebase](docs/images/vs_code_rebase_upstream-4.png)
+![upstream repository rebase](docs/images/vs_code_rebase_upstream-5.png)
+![upstream repository rebase](docs/images/vs_code_rebase_upstream-6.png)
+![upstream repository rebase](docs/images/vs_code_rebase_upstream-7.png)
+![upstream repository rebase](docs/images/vs_code_rebase_upstream-8.png)
 
 
 
@@ -240,7 +280,7 @@ $ git push
 remote(upstream) repository와 동기화가 완료되면 pull request를 생성 해서 reviewers 에게 확인/승인을 받는다.
 ```sh
 1. github fork 저장소에서 생성 할 수 있다.
-2. vscode에서 GitHub Pull Requests and Issues 플러그인을 사용해서 할 수 있다.
+2. Vscode에서 GitHub Pull Requests and Issues 플러그인을 사용해서 할 수 있다.
 ```
 
 - Gitlens에서 요쳥
@@ -258,6 +298,6 @@ remote(upstream) repository와 동기화가 완료되면 pull request를 생성 
 
 
 ### 리뷰 승인 확인 및 feature branch 삭제
-1) 동료에게 리뷰 승인을 받은 후 로컬에서 자신의 feature branch를 삭제 한다.
+1) 동료에게 리뷰 승인을 받은 후에는 로컬에서 자신의 feature branch를 삭제 한다.
 
-2) fork repository의 feature 브랜치들을 삭제 한다. 
+2) fork repository의 feature 브랜치들을 삭제 한다. - optional
