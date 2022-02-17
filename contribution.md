@@ -9,7 +9,10 @@
     - [Fork & Clone](#fork--clone)
     - [개발 준비](#개발-준비)
     - [개발 완료후 repository 동기화(fetch/rebase)](#개발-완료후-repository-동기화fetchrebase)
-    - [개발 완료 후 Pull Request 생성](#개발-완료-후-pull-request-생성)
+        - [1. 로컬 개발 완료후 origin(forked) repository의 feature/featureA branch에 commit/push 한다.](#1-로컬-개발-완료후-originforked-repository의-featurefeaturea-branch에-commitpush-한다)
+        - [2. 개발 완료후 commit내용 합치는 작업을 한다(Squash) - optional](#2-개발-완료후-commit내용-합치는-작업을-한다squash---optional)
+        - [3. remote(upstream) repository와 동기화 한다.](#3-remoteupstream-repository와-동기화-한다)
+    - [소스 동기화 완료후 Pull Request 요청](#소스-동기화-완료후-pull-request-요청)
     - [리뷰 승인 및 Pull Request를 merge](#리뷰-승인-및-pull-request를-merge)
 
 # Contributor Guide with Vscode
@@ -130,9 +133,14 @@ $ git push
 ### 개발 완료후 repository 동기화(fetch/rebase)
 로컬에서 개발이 완료되면 origin(forked) repository와 upstream repository를 동기화 시킨다.  
 전반적인 flow는 아래와 같다.
+```sh
+1. 로컬 개발 완료후 origin(forked) repository 동기화 한다. - commit/push
+2. 개발 완료후 commit내용 합치는 작업을 한다(Squash). - optional
+3. remote(upstream) repository 동기화 한다. - fetch/rebase
+4. rebase할때 병합 충돌이 있다면 해결 한다. - rebase --continue
+```
 
-
-- 로컬 개발 완료후 origin(forked) repository의 feature/featureA branch에 push 한다.
+##### 1. 로컬 개발 완료후 origin(forked) repository의 feature/featureA branch에 commit/push 한다.
 ```sh
 $ git branch
   develop
@@ -142,14 +150,79 @@ $ git branch
 $ git commit -m "commit messages.."
 $ git push
 ```
-**(또는)** vscode에서 commit/push 한다.
+**(또는)** vscode에서 commit/push 한다.  
+![변경 내용 동기화](docs/images/vs_code_sync_origin.png)
 
-- 리모트 upstream(원본) repository와 동기화(fetch/rebase)
-- > 참고
-  - upstream의 변경 정보를 가져와서 충돌 체크한다. 이때 병합 내용이 있으면 수정후 rebase를 완료 한다.
+##### 2. 개발 완료후 commit내용 합치는 작업을 한다(Squash) - optional
+오픈 소스나, 여러 사람이 같이 작업하는 소스코드인 경우, 커밋 이력이 많아지고 복잡해져서, 커밋 이력을 추적하는 것이 힘들어지게 됩니다. 
+Git의 Squash 기능은 이것을 방지하기 위해 여러번 커밋한 이력을 하나의 커밋 이력으로 만드는데 사용합니다.  
+정확히 이야기해서 git squash 라는 명령어는 없습니다. interactive rebase를 하는데 필요한 명령어 중 하나입니다.  
+[커밋 합치기(squash)](https://meetup.toast.com/posts/39) 섹션 또는, [VS Code에서 Git 스쿼시 커밋](https://dannyherran.com/2020/06/git-squash-commit-vs-code/) 섹션을 참고 한다.
 
-### 개발 완료 후 Pull Request 생성
-Pull Request를 생성 하기 위한 전반적인 flow는 아래와 같다.
+
+```sh
+$ git log --pretty=oneline
+d442427eae836f15e94f5df0445c70081df79a3e Task 3/3
+26395437be53e4e6e68f83aa98560ef93838aaa0 Task 2/3
+7c6535580a038e9dcfaa72a98e04848812da9aee Task 1/3
+2260a88777c247c31170ff6074d95569ac557afb Initial commit
+
+## 최근 3개의 커밋을 interactive rebase 한다. - vi 에디터에서 편집
+$ git rebase -i HEAD~3
+
+## 확인
+$ git log --pretty=oneline
+9833ca676c5a24361c1cc36fb173746328dfac3a Task 1/3 ~ 3/3
+2260a88777c247c31170ff6074d95569ac557afb Initial commit
+```
+
+**(또는)** VS Code에서 Git 스쿼시 한다. (GitGraph plugin 사용)
+-  GitGraph 로그로 이동하여 유지하려는 커밋보다 이전 커밋을 마우스 오른쪽 버튼으로 클릭합니다. 예를 들어 모든 커밋을 빨간색으로 스쿼시하려면 녹색 커밋을 마우스 오른쪽 버튼으로 클릭한 다음 "현재 분기를 이 커밋으로 재설정..."을 선택합니다.
+![VS Code에서 Git 스쿼시 커밋_1](docs/images/vs_code_squashing_1.png)
+
+-  그러면 왼쪽에 이전에 있었던 모든 커밋에 속하는 단계적 변경 사항이 표시됩니다. "모두 커밋 ..."으로 진행하십시오.
+![vs_code_squashing_commit_all](docs/images/vs_code_squashing_commit_all.png)
+
+-  마지막으로 원본 커밋으로 강제 푸시를 수행하여 기존 커밋을 모두 단일 커밋으로 교체합니다.
+![vs_code_squashing_force_push](docs/images/vs_code_squashing_force_push.png)
+
+**(참고)** vi 에디터 대신 VS Code에서 [Gitlens Interactive Rebase Editor](https://github.com/gitkraken/vscode-gitlens#interactive-rebase-editor-) 사용 하기  
+
+- VS Code를 기본 Git 편집기로 설정
+  - ```$ git config --global core.editor "code --wait"```
+- 또는 rebase에만 영향을 미치려면 VS Code를 Git rebase 편집기로 설정하십시오.
+  - ```$ git config --global sequence.editor "code --wait"```  
+![Gitlens Interactive Rebase Editor ](docs/images/gitlens-interactive-rebase-editor.png)
+
+##### 3. remote(upstream) repository와 동기화 한다.
+fetch/rebase를 사용해서 fork한 저장소를 최신 원본과 동기화 한다(commit base를 재 구성).  
+[git rebase를 이해하기](https://junwoo45.github.io/2019-10-23-rebase/)를 참고.
+
+```sh
+$ $ git branch
+  develop
+* feature/contribution
+  master
+
+## 1. 원본(upstream)을 fetch 한다.
+$ git fetch upstream
+
+## 2. rebase 로 base를 교체한다.
+$ git rebase upstream/develop
+
+## 3. 이때 병합 충돌이 나면 충돌을 해결하고 base를 재구성 한다. 
+$ git rebase --continue
+
+## fork한 저장소에 push 한다.
+$ git push
+```
+
+**(참고)** 병합 충돌 해결 절차 - Vscode
+
+
+
+### 소스 동기화 완료후 Pull Request 요청
+remote(upstream) repository와 동기화가 완료되면 pull request를 생성 해서 reviewers 에게 확인/승인을 받는다.
 
 - 로컬 개발 완료
 - 리모트(upstream) repository develop branch와 forked repository feature branch를 최신소스로 동기화(fetch/rebase)
@@ -172,24 +245,6 @@ Pull Request를 생성 하기 위한 전반적인 flow는 아래와 같다.
 $ git log --pretty=oneline
 $ git rebase -i HEAD~3
 ```
-**(또는)** VS Code에서 Git 스쿼시 커밋 (GitGraph plugin 사용)
--  GitGraph 로그로 이동하여 유지하려는 커밋보다 이전 커밋을 마우스 오른쪽 버튼으로 클릭합니다. 예를 들어 모든 커밋을 빨간색으로 스쿼시하려면 녹색 커밋을 마우스 오른쪽 버튼으로 클릭한 다음 "현재 분기를 이 커밋으로 재설정..."을 선택합니다.
-![VS Code에서 Git 스쿼시 커밋_1](docs/images/vs_code_squashing_1.png)
-
--  그러면 왼쪽에 이전에 있었던 모든 커밋에 속하는 단계적 변경 사항이 표시됩니다. "모두 커밋 ..."으로 진행하십시오.
-![vs_code_squashing_commit_all](docs/images/vs_code_squashing_commit_all.png)
-
--  마지막으로 원본 커밋으로 강제 푸시를 수행하여 기존 커밋을 모두 단일 커밋으로 교체합니다.
-![vs_code_squashing_force_push](docs/images/vs_code_squashing_force_push.png)
-
-**(참고)** VS Code에서 [Gitlens Interactive Rebase Editor](https://github.com/gitkraken/vscode-gitlens#interactive-rebase-editor-) 사용 하기  
-
-- VS Code를 기본 Git 편집기로 설정
-  - ```$ git config --global core.editor "code --wait"```
-- 또는 rebase에만 영향을 미치려면 VS Code를 Git rebase 편집기로 설정하십시오.
-  - ```$ git config --global sequence.editor "code --wait"```  
-![Gitlens Interactive Rebase Editor ](docs/images/gitlens-interactive-rebase-editor.png)
-
 
 1) **(필수)** 리모트 repository의 최신소스를 forked repository develop branch와 동기화(rebase)
 ```sh
