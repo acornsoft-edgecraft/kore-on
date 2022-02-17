@@ -12,8 +12,8 @@
         - [1. 로컬 개발 완료후 origin(forked) repository의 feature/featureA branch에 commit/push 한다.](#1-로컬-개발-완료후-originforked-repository의-featurefeaturea-branch에-commitpush-한다)
         - [2. 개발 완료후 commit내용 합치는 작업을 한다(Squash) - optional](#2-개발-완료후-commit내용-합치는-작업을-한다squash---optional)
         - [3. remote(upstream) repository와 동기화 한다.](#3-remoteupstream-repository와-동기화-한다)
-    - [소스 동기화 완료후 Pull Request 요청](#소스-동기화-완료후-pull-request-요청)
-    - [리뷰 승인 및 Pull Request를 merge](#리뷰-승인-및-pull-request를-merge)
+    - [소스 동기화 완료후 Pull Request 생성 - Vscode](#소스-동기화-완료후-pull-request-생성---vscode)
+    - [리뷰 승인 확인 및 feature branch 삭제](#리뷰-승인-확인-및-feature-branch-삭제)
 
 # Contributor Guide with Vscode
 vscode를 사용한 Github Contribution 방법 소개
@@ -97,8 +97,20 @@ $ git branch --list
 * develop
   master
 ```
+2) remoet upstream(원본) develop branch와 동기화(fetch/rebase)  
+개발 전에 origin develop branch를 최신 소스로 동기화 한다. 
+```sh
+$ git branch --list
 
-2) 작업할 feature 브랜치를 생성하고, 해당 브랜치로 이동한다.
+* develop
+  master
+
+$ git fetch upstream
+$ git rebase upstream/develop
+$ git push
+```
+
+3) 작업할 feature 브랜치를 생성하고, 해당 브랜치로 이동한다.
    - 로컬에서 feature branch 생성: git plugin -> 분기 만들기 -> 분기 이름(예: feature/feature name)
    - remote origin(forked) repository에 feature branch 게시: 로컬에 생성된 Branch를 github에 생성 하기 위해서는 분기 게시를 한다.
     ```sh
@@ -217,49 +229,35 @@ $ git push
 ```
 
 **(참고)** 병합 충돌 해결 절차 - Vscode
+```sh
+1. Vscode의 병합 페이지에서 충돌을 해결한다.
+2. 
+```
 
 
 
-### 소스 동기화 완료후 Pull Request 요청
+### 소스 동기화 완료후 Pull Request 생성 - Vscode
 remote(upstream) repository와 동기화가 완료되면 pull request를 생성 해서 reviewers 에게 확인/승인을 받는다.
-
-- 로컬 개발 완료
-- 리모트(upstream) repository develop branch와 forked repository feature branch를 최신소스로 동기화(fetch/rebase)
-  ```sh
-  $ git branch
-    develop
-  * feature/contribution
-    master
-
-  $ git fetch upstream
-  $ git rebase upstream/develop
-  ```
-- 리모트 origin(forked) repository develop 브랜치와 리모트 origin feature/username 브랜치 merge
-
-1) **(필수)** 개발된 로컬 branch의 commit을 업무에 맞도록 정리(squash) 작업 수행
-   1) 충돌 해결을 미연에 방지 효과
-   2) [커밋 합치기(squash)](https://meetup.toast.com/posts/39) 섹션 참조 또는, [VS Code에서 Git 스쿼시 커밋](https://dannyherran.com/2020/06/git-squash-commit-vs-code/) 섹션 참조
 ```sh
-# Git Squash
-$ git log --pretty=oneline
-$ git rebase -i HEAD~3
+1. github fork 저장소에서 생성 할 수 있다.
+2. vscode에서 GitHub Pull Requests and Issues 플러그인을 사용해서 할 수 있다.
 ```
 
-1) **(필수)** 리모트 repository의 최신소스를 forked repository develop branch와 동기화(rebase)
-```sh
-$ git fetch upstream
-$ git rebase upstream/develop
-```
+- Gitlens에서 요쳥
+![vs_code_pr_create](docs/images/vs_code_pr_create-1.png)
+<br/>
 
-**(또는)** VS Code에서 remote repository - upstream rebase 하기  
-1. Fetch
-![VS Code에서 upstream fetch](docs/images/github-upstram-fetch.png)
-2. Rebase
-![VS Code에서 upstream rebase-1](docs/images/github-upstram-rebase-1.png)
-3. Confirm rebase
-![VS Code에서 upstream rebase-1](docs/images/github-upstram-rebase-2.png)
+- GitHub Built In 또는 Vscode Plugin 선택
+![vs_code_pr_create](docs/images/vs_code_pr_create-2.png)
+<br/>
 
-### 리뷰 승인 및 Pull Request를 merge 
-1) 같은 feature를 개발하는 동료에게 리뷰 승인을 받은 후 자신의 Pull Request를 merge합니다. 만약 혼자 feature를 개발한다면 1~2명의 동료에게 리뷰 승인을 받은 후 Pull Request를 merge합니다.
+- pull request를 요청할 저장소/브렌치 지정
+![vs_code_pr_create](docs/images/vs_code_pr_create-3.png)
 
-2) fork repository의 작업 브랜치들은 Pull Request를 요청 후 merge와 함께 삭제합니다. feature 브랜치 역시 develop 브랜치에 merge 되면 바로 삭제하고 있습니다.
+
+
+
+### 리뷰 승인 확인 및 feature branch 삭제
+1) 동료에게 리뷰 승인을 받은 후 로컬에서 자신의 feature branch를 삭제 한다.
+
+2) fork repository의 feature 브랜치들을 삭제 한다. 
