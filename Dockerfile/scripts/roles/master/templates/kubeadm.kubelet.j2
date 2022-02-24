@@ -7,10 +7,4 @@ KUBELET_EXTRA_ARGS="--root-dir={{ data_root_dir }}/kubelet \
 --runtime-request-timeout=15m \
 --container-runtime-endpoint=unix:///run/containerd/containerd.sock \
 {% endif %}
-{% if provider == true and cloud_provider in ['aws', 'azure'] %}
---cloud-provider={{ cloud_provider }} \
-{% endif %}
-{% if provider == true and cloud_provider in ['azure'] %}
---cloud-config=/etc/kubernetes/pki/cloud-config.json \
-{% endif %}
---node-labels=cube.acornsoft.io/role=master,cube.acornsoft.io/clusterid={{ cluster_id }}"
+--node-labels=koreon.acornsoft.io/role=master,koreon.acornsoft.io/clusterid={{ cluster_id }},koreon.acornsoft.io/ansible_ssh_host={{ ansible_ssh_host }}"

@@ -85,12 +85,6 @@
     name: jq
     state: present
 
-- name: Copy cloud-config file
-  when: cloud_provider == "azure"
-  template:
-    src: "cloud-config.json.j2"
-    dest: "{{ cert_dir }}/cloud-config.json"
-
 - name: Copy k8s audit-policy.yaml
   when: audit_log_enable
   template:
@@ -369,8 +363,6 @@
   run_once: true
 
 - name: MetricsServer | Create MetricsServer
-  when:
-  - cloud_provider != "gke"
   shell: "kubectl apply --kubeconfig={{ kubeadminconfig }} -f {{ kube_addon_dir }}/{{ item }}"
   with_items:
   - "metrics-server/metrics-server-rbac.yaml"

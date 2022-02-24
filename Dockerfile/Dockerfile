@@ -1,13 +1,13 @@
 FROM regi.k3.acornsoft.io/k3lab/knit-base:1.0
 
-ENV ANSIBLE_CONFIG=/knit/scripts/ansible.cfg
+ENV ANSIBLE_CONFIG=/koreon/scripts/ansible.cfg
 
-COPY scripts /knit/scripts
-COPY inventory /knit/inventory
-COPY entrypoint.sh /knit/entrypoint.sh
+COPY scripts /koreon/scripts
+COPY inventory /koreon/inventory
+COPY entrypoint.sh /koreon/entrypoint.sh
 
-RUN chmod +x /knit/entrypoint.sh
+RUN chmod +x /koreon/entrypoint.sh
 RUN rm -rf /sbin/apk
 
-WORKDIR /knit/work
-ENTRYPOINT ["/knit/entrypoint.sh"]
+WORKDIR /koreon/work
+ENTRYPOINT ["/koreon/entrypoint.sh"]

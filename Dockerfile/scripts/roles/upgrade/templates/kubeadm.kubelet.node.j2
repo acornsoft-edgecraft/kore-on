@@ -1,16 +1,4 @@
 KUBELET_EXTRA_ARGS="--log-dir={{ data_root_dir }}/log \
 --logtostderr=false \
 --v=2 \
-{% if provider == true and cloud_provider in ['aws', 'azure'] %}
---cloud-provider={{ cloud_provider }} \
-{% endif %}
-{% if provider == true and cloud_provider in ['azure'] %}
---cloud-config=/etc/kubernetes/pki/cloud-config.json \
-{% endif %}
-{%  if is_gpu_node %}
---feature-gates=KubeletPodResources=true \
---register-with-taints=nvidia.com/gpu='':NoSchedule \
---node-labels=nvidia.com/gpu='',node-role.kubernetes.io/node='',cube.acornsoft.io/clusterid={{ cluster_id }}"
-{% else %}
---node-labels=cube.acornsoft.io/clusterid={{ cluster_id }}"
-{% endif %}
+--node-labels=koreon.acornsoft.io/clusterid={{ cluster_id }}"

@@ -133,7 +133,7 @@
     user: root
 # -----------------------------------------------------------------------------------------
 
-# Create cube-config configmap -------------------------------------------------------------
+# Create koreon-config configmap -------------------------------------------------------------
 #- name: Check cluster is running
 #  shell: "kubectl --kubeconfig={{ kubeadminconfig }} cluster-info"
 #  register: check_cluster_health
@@ -141,28 +141,28 @@
 #  delegate_to: "{{ groups['masters'][0] }}"
 #  run_once: true
 #
-#- name: Set fact cube.toml
+#- name: Set fact koreon.toml
 #  when: check_cluster_health.rc == 0
 #  set_fact:
-#    cube_toml: "{{ lookup('file', 'files/cube.toml') | b64encode }}"
+#    koreon_toml: "{{ lookup('file', 'files/koreon.toml') | b64encode }}"
 #  delegate_to: "{{ groups['masters'][0] }}"
 #  run_once: true
 #
-#- name: Copy cube-config config file
+#- name: Copy koreon-config config file
 #  when: check_cluster_health.rc == 0
 #  template:
 #    src: "{{ item.src }}"
 #    dest: "{{ kube_config_dir }}/{{ item.dest }}"
 #  with_items:
-#    - { src: "cube-config-cm.yaml.j2", dest: "cube-config-cm.yaml" }
+#    - { src: "koreon-config-cm.yaml.j2", dest: "koreon-config-cm.yaml" }
 #  delegate_to: "{{ groups['masters'][0] }}"
 #  run_once: true
 #
-#- name: Create cube-config configmap
+#- name: Create koreon-config configmap
 #  when: check_cluster_health.rc == 0
 #  shell: "kubectl apply --kubeconfig={{ kubeadminconfig }} -f {{ kube_config_dir }}/{{ item }}"
 #  with_items:
-#    - "cube-config-cm.yaml"
+#    - "koreon-config-cm.yaml"
 #  delegate_to: "{{ groups['masters'][0] }}"
 #  run_once: true
 # --------------------------------------------------------------------------------------------

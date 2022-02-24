@@ -14,6 +14,7 @@ lb_ip:
 lb_port: 6443
 pod_ip_range: 10.0.0.0/16
 service_ip_range: 172.20.0.0/16
+node_port_range: 30000-32767
 
 # for air gap installation
 closed_network: false
@@ -46,3 +47,9 @@ nfs_volume_dir:
 
 # for internal load-balancer
 haproxy: true
+
+# Calico network mode
+vxlan_mode: false
+
+# option for preparing local-repo and registry (do not modify when fully understand this flag)
+archive_repo: false

@@ -19,11 +19,7 @@ subjectAltName = @alt_names_registry
 
 [ alt_names_registry ]
 DNS.1 = localhost
-{% if cloud_provider == 'aws' %}
-DNS.2 = {{ ansible_fqdn }}
-{% else %}
 DNS.2 = {{ ansible_hostname }}
-{% endif %}
 {% if not registry_domain | ipaddr() -%}
 DNS.3 = {{ registry_domain }}
 {% endif -%}

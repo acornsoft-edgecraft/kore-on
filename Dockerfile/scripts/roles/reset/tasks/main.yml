@@ -170,7 +170,7 @@
     - /etc/yum.repos.d/kubernetes.repo
     - /etc/yum.repos.d/nvidia-docker.repo
     - /etc/modules-load.d/calico.conf
-    - /etc/modules-load.d/cube-br_netfilter.conf
+    - /etc/modules-load.d/br_netfilter.conf
     - /etc/modules
     - /etc/NetworkManager/conf.d/calico.conf
     - /etc/containerd

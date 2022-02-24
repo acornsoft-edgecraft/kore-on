@@ -3653,12 +3653,21 @@ spec:
             # Auto-detect the BGP IP address.
             - name: IP
               value: "autodetect"
+{% if vxlan_mode %}              
+            # Disable IPIP
+            - name: CALICO_IPV4POOL_IPIP
+              value: "Always"
+            # Enable VXLAN on the default IP pool.
+            - name: CALICO_IPV4POOL_VXLAN
+              value: "Never"
+{% else %}              
             # Enable IPIP
             - name: CALICO_IPV4POOL_IPIP
               value: "Always"
-            # Enable or Disable VXLAN on the default IP pool.
+            # Disable VXLAN on the default IP pool.
             - name: CALICO_IPV4POOL_VXLAN
               value: "Never"
+{% endif %}
             # Set MTU for tunnel device used if ipip is enabled
             - name: FELIX_IPINIPMTU
               valueFrom:
