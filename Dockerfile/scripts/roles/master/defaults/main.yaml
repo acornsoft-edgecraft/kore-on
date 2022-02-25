@@ -4,5 +4,4 @@ etcd_access_addresses: |-
     {{ etcd_peer_url_scheme }}://{{ hostvars[node]['ip'] }}:2379{% if not loop.last %},{% endif %}
   {%- endfor %}
 
-# AWS node name 분기 처리
-node_name: {{ ansible_hostname|lower }}
+node_name: "{{ ansible_hostname|lower }}"

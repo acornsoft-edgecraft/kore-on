@@ -14,19 +14,19 @@
 
 - name: Check local-repo tgz existence
   stat:
-    path: "/tmp/{{ local_repository_archieve_file | basename}}"
-  register: local_repo_archieved_file
+    path: "/tmp/{{ local_repository_archive_file | basename}}"
+  register: local_repo_archived_file
 
-- name: Upload local-repo archieved file
+- name: Upload local-repo archived file
   when:
-    - not local_repo_archieved_file.stat.exists
+    - not local_repo_archived_file.stat.exists
   copy:
-    src: "{{ inventory_dir }}/{{ local_repository_archieve_file }}"
-    dest: "/tmp/{{ local_repository_archieve_file | basename}}"
+    src: "{{ inventory_dir }}/{{ local_repository_archive_file }}"
+    dest: "/tmp/{{ local_repository_archive_file | basename}}"
 
-- name: Extract local repository archieve file into /data/localrepo
+- name: Extract local repository archive file into /data/localrepo
   unarchive:
-    src: "/tmp/{{ local_repository_archieve_file | basename}}"
+    src: "/tmp/{{ local_repository_archive_file | basename}}"
     dest: "/data/localrepo"
     remote_src: yes
     owner: "root"

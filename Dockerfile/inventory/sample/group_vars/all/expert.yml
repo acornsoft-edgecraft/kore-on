@@ -47,7 +47,6 @@ haproxy_health_check_port: 8081
 metrics_server: true
 addon_install: true
 
-api_sans: []
 storage_class_name: default-storage
 storage_type: nfs
 
@@ -64,13 +63,11 @@ kube_support_versions:
     "1.21.2"
   ]
 
-kube_feature_gates: |-
-    [
+kube_feature_gates: [
       "TTLAfterFinished=true"
       ,"RemoveSelfLink=false"
     ]
 
-kubeproxy_feature_gates: |-
-    [
+kubeproxy_feature_gates: [
       "TTLAfterFinished: true"
     ]

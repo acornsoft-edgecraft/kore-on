@@ -86,7 +86,7 @@ service_ip_range: 172.20.0.0/16
 # for air gap installation
 closed_network: false      <---- (주의) 압축파일 생성시에는 internet 가능한 환경임.
 local_repository: http://192.168.77.194:8080
-local_repository_archieve_file:
+local_repository_archive_file:
 
 # option for master isolation
 master_isolated: false
@@ -105,7 +105,7 @@ registry_data_dir: /data/harbor
 registry: 192.168.77.194
 registry_domain: 192.168.77.194
 registry_public_cert: false
-registry_archieve_file:
+registry_archive_file:
 
 # option for NFS storage
 storage_install: true

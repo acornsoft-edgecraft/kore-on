@@ -21,4 +21,5 @@ etcd_initial_cluster_token: etcd-k8-cluster
 
 etcd_data_dir: "{{ data_root_dir }}/etcd"
 
-node_name: {{ ansible_hostname|lower }}
+# AWS node name 분기 처리
+node_name: "{{ ansible_hostname|lower }}"

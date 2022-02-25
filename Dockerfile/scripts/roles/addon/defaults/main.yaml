@@ -1,4 +1,4 @@
 ---
-node_name: {{ ansible_hostname|lower }}
+node_name: "{{ ansible_hostname|lower }}"
 
 addon_manager_ns: "{{ release_name }}-addon"

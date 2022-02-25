@@ -5,17 +5,17 @@
     dest: "/tmp/registry-restore.sh"
     mode: 0755
 
-- name: Check harbor archieved file existence
+- name: Check harbor archived file existence
   stat:
-    path: "/tmp/{{ registry_archieve_file | basename}}"
-  register: harbor_archieved_file
+    path: "/tmp/{{ registry_archive_file | basename}}"
+  register: harbor_archived_file
 
-- name: Upload harbor archieved file
+- name: Upload harbor archived file
   when:
-    - not harbor_archieved_file.stat.exists
+    - not harbor_archived_file.stat.exists
   copy:
-    src: "{{ inventory_dir }}/{{ registry_archieve_file }}"
-    dest: "/tmp/{{ registry_archieve_file | basename}}"
+    src: "{{ inventory_dir }}/{{ registry_archive_file }}"
+    dest: "/tmp/{{ registry_archive_file | basename}}"
 
 - name: Stop harbor for restoring backup data
   shell: "docker-compose down -v"
@@ -23,7 +23,7 @@
     chdir: "{{ harbor_install_dir }}"
 
 - name: Restore backup data
-  shell: "/tmp/registry-restore.sh /tmp/{{ registry_archieve_file | basename}} {{ registry_domain }} > {{ install_dir }}/harbor-restore.log"
+  shell: "/tmp/registry-restore.sh /tmp/{{ registry_archive_file | basename}} {{ registry_domain }} > {{ install_dir }}/harbor-restore.log"
   args:
     creates: "{{ install_dir }}/harbor-restore.log"
 

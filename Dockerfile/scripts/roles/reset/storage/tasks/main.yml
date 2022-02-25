@@ -45,7 +45,6 @@
   register: packages_removed
   tags: ['services']
 
-
 - name: Remove nfs-utils package
   when: ansible_os_family in ["CentOS", "RedHat"]
   yum:
@@ -53,6 +52,41 @@
     state: absent
   register: packages_removed
   tags: ['services']
+
+- name: Check /etc/yum.repos.d.bak directory existence (offline install)
+  when:
+    - ansible_os_family in ["CentOS", "RedHat"]
+    - closed_network
+  stat:
+    path: /etc/yum.repos.d.bak
+  register: yum_backup_dir_exist
+
+- name: Restore /etc/yum.repos.d.bak directory (offline install)
+  when:
+    - ansible_os_family in ["CentOS", "RedHat"]
+    - closed_network
+    - yum_backup_dir_exist.stat.exists
+  command: "{{ item }}"
+  with_items:
+  - rm -rf /etc/yum.repos.d
+  - mv /etc/yum.repos.d.bak /etc/yum.repos.d
+
+- name: Check /etc/apt/sources.list.bak existence (offline install)
+  when:
+    - ansible_os_family in ["Ubuntu", "Debian"]
+    - closed_network
+  stat:
+    path: /etc/apt/sources.list.bak
+  register: sources_list_bak_stat
+
+- name: Restore /etc/apt/sources.list file (offline install)
+  when:
+    - ansible_os_family in ["Ubuntu", "Debian"]
+    - closed_network
+    - sources_list_bak_stat.stat.exists
+  command: "{{ item }}"
+  with_items:
+    - mv /etc/apt/sources.list.bak /etc/apt/sources.list  
 
 - name: systemctl daemon-reload
   systemd:
