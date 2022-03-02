@@ -46,3 +46,20 @@ clean:
 	rm -f ${TARGETDIR}/linux/koreon
 	rm -f ${TARGETDIR}/windows/koreon_windows_${VERSION}.exe
 	rm -f ${TARGETDIR}/windows/koreon.exe
+
+linux-ctl:
+	@echo "Make linux binary ..."
+
+	GOOS=linux GOARCH=${GOARCH} go build ${BUILD_OPTIONS} -o ${TARGETDIR}/koreonctl_linux_${VERSION}
+	ln -s ${TARGETDIR}/koreonctl_linux_${VERSION} ~/gows/bin/linux/koreonctl
+
+darwin-ctl:
+	@echo "Make darwin binary ..."
+	rm -f ${TARGETDIR}/koreonctl_darwin_${VERSION}
+	rm -f ~/gows/bin/darwin/koreonctl
+	GOOS=darwin GOARCH=${GOARCH} go build ${BUILD_OPTIONS} -o ${TARGETDIR}/koreonctl_darwin_${VERSION}
+	ln -s ${TARGETDIR}/koreonctl_darwin_${VERSION} ~/gows/bin/darwin/koreonctl
+
+template:
+	@echo "make template.go file ..."
+	sh -c "./make_template_go.sh"
