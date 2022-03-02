@@ -15,8 +15,6 @@ api_kubelet_client_cert: /etc/kubernetes/pki/apiserver-kubelet-client.crt
 proxy_ca_cert: /etc/kubernetes/pki/front-proxy-ca.crt
 proxy_client_key: /etc/kubernetes/pki/front-proxy-client.key
 proxy_client_cert: /etc/kubernetes/pki/front-proxy-client.crt
-dashboard_cert: /etc/kubernetes/pki/dashboard.crt
-dashboard_key: /etc/kubernetes/pki/dashboard.key
 kubeadminconfig: /etc/kubernetes/admin.conf
 api_image: gcr.io/google_containers/kube-apiserver-amd64:{{ k8s_version }}
 controller_image: gcr.io/google_containers/kube-controller-manager-amd64:{{ k8s_version }}
@@ -28,7 +26,6 @@ kubernetes_service_ip: "{{ service_ip_range|ipaddr('net')|ipaddr(1)|ipaddr('addr
 dns_ip: "{{ service_ip_range|ipaddr('net')|ipaddr(10)|ipaddr('address') }}"
 api_secure_port: 6443
 api_insecure_port: 8080
-
 
 # etcd certificate
 etcd_peer_url_scheme: https
@@ -46,59 +43,12 @@ haproxy_dir: /etc/haproxy
 haproxy_port: 6443
 haproxy_health_check_port: 8081
 
-# option for preparing local-repo and registry (do not modify when fully understand this flag)
-archive_repo: false
-
 # addons
 metrics_server: true
 addon_install: true
-prometheus_rules_lang: ko
-ingress: true
-ingress_http_external_port: 30001
-ingress_https_external_port: 30002
-yum_proxy: ""
 
-subscription_id: ""
-client_id: ""
-client_secret: ""
-tenant_id: ""
-resource_group: ""
-location: local
-vnet_name: ""
-subnet_name: ""
-security_group_name: ""
-primary_availability_set_name: ""
-route_table_name: ""
-efs_file_system_id: ""
-storage_account: ""
-yum_kubernetes_url: ""
-api_sans: []
-single_volume_dir: ""
-single_volume_size: 0
-shared_volume_dir: ""
-static_volume_dir: ""
-cluster_type: small
-base64_controller_secret: ""
-base64_monitoring_secret: ""
-base64_cluster_seq: ""
-base64_cluster_id: ""
 storage_class_name: default-storage
 storage_type: nfs
-sctp_support: false
-multus_install: false
-device_name: ""
-device_ven: ""
-device_dev: ""
-device_driver: ""
-ingress_type: Deployment
-fs_type: xfs
-mirror_count: 1
-perf_tier: best-effort
-volume_binding_mode: WaitForFirstConsumer
-istio_install: false
-
-dashboard_public_cert: false
-ha_type: ""
 
 kube_support_versions:
   [
@@ -113,19 +63,11 @@ kube_support_versions:
     "1.21.2"
   ]
 
-kube_feature_gates: |-
-    [
+kube_feature_gates: [
       "TTLAfterFinished=true"
       ,"RemoveSelfLink=false"
-      {%- if sctp_support is defined and sctp_support -%}
-      ,"SCTPSupport=true"
-      {%- endif -%}
     ]
 
-kubeproxy_feature_gates: |-
-    [
+kubeproxy_feature_gates: [
       "TTLAfterFinished: true"
-      {%- if sctp_support -%}
-      , "SCTPSupport: true"
-      {%- endif -%}
     ]

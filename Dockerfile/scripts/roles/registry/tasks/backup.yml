@@ -33,5 +33,5 @@
 - name: Start image upload
   shell: "/tmp/upload.py"
 
-- name: Archieve registry data
+- name: Archive registry data
   shell: "/tmp/registry-backup.sh /tmp 1"

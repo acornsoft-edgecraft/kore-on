@@ -87,13 +87,6 @@
     kubeadm_token: "{{ temp_token.stdout}}"
   register: kubeadm_client_conf
 
-- name: Copy cloud-config file
-  when: cloud_provider == "azure" and not is_kube_master
-  template:
-    src: "cloud-config.json.j2"
-    dest: "{{ cert_dir }}/cloud-config.json"
-  register: cloud-config
-
 - name: Copy kubelet extra config file
   template:
     src: "kubeadm.kubelet.j2"

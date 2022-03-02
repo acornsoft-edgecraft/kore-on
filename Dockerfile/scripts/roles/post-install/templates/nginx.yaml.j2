@@ -3,11 +3,7 @@ kind: PersistentVolumeClaim
 metadata:
   name: nginx-pvc
 spec:
-{% if provider and cloud_provider is defined and cloud_provider in ["aws", "azure", "gcp", "eks", "aks", "gke"] %}
-  storageClassName: shared-storage
-{% else %}
   storageClassName: {{ storage_class_name }}
-{% endif %}
   accessModes:
   - ReadWriteMany
   resources:
@@ -82,11 +78,7 @@ metadata:
 spec:
   selector:
     app: nginx
-{% if provider == true %}
-  type: LoadBalancer
-{% else %}
   type: NodePort
-{% endif %}
   ports:
   - name: nginx
     port: 80

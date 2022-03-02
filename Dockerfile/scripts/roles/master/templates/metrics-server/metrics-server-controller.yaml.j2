@@ -60,13 +60,11 @@ spec:
               matchLabels:
                 k8s-app: metrics-server
             topologyKey: kubernetes.io/hostname
-{% if cluster_type is defined and cluster_type != "kaas" %}
       tolerations:
       - key: node-role.kubernetes.io/master
         effect: NoSchedule
       nodeSelector:
         node-role.kubernetes.io/master: ''
-{% endif %}
       priorityClassName: system-cluster-critical
       serviceAccountName: metrics-server
       containers:

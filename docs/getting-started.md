@@ -107,7 +107,7 @@ service_ip_range: 172.20.0.0/16
 # for air gap installation
 closed_network: true
 local_repository: http://192.168.77.194:8080
-local_repository_archieve_file: local-repo.20210726_120901.tgz
+local_repository_archive_file: local-repo.20210726_120901.tgz
 
 # option for master isolation
 master_isolated: false
@@ -126,7 +126,7 @@ registry_data_dir: /data/harbor
 registry: 192.168.77.194
 registry_domain: 192.168.77.194
 registry_public_cert: false
-registry_archieve_file: harbor.20210726_122024.tgz
+registry_archive_file: harbor.20210726_122024.tgz
 
 # option for NFS storage
 storage_install: true

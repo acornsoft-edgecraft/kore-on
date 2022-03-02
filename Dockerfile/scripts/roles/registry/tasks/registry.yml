@@ -130,7 +130,7 @@
   blockinfile:
     path: "{{ harbor_install_dir }}/common/config/nginx/nginx.conf"
     insertafter: "chunked_transfer_encoding on;"
-    marker: "## {mark} added by cube --------------------"
+    marker: "## {mark} added by koreon --------------------"
     block: |
           location /ca.crt {
             alias /etc/nginx/cert/ca.crt;

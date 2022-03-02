@@ -52,14 +52,9 @@ apiServer:
     feature-gates: {{ kube_feature_gates|join(',') }}
     default-not-ready-toleration-seconds: "30"
     default-unreachable-toleration-seconds: "30"
+    service-node-port-range: {{ node_port_range }} 
 {% if encrypt_secret %}
     encryption-provider-config: /etc/kubernetes/secrets_encryption.yaml
-{% endif %}
-{% if provider == true and cloud_provider in ["aws", "azure"] %}
-    cloud-provider: {{ cloud_provider }}
-{% endif %}
-{% if provider == true and cloud_provider in ["azure"] %}
-    cloud-config: "/etc/kubernetes/pki/cloud-config.json"
 {% endif %}
 {% if audit_log_enable %}
     audit-log-maxage: "7"
@@ -89,12 +84,6 @@ controllerManager:
     node-monitor-period: 2s
     node-monitor-grace-period: 16s
     feature-gates: {{ kube_feature_gates|join(',') }}
-{% if provider == true and cloud_provider in ["aws", "azure"] %}
-    cloud-provider: {{ cloud_provider }}
-{% endif %}
-{% if provider == true and cloud_provider in ["azure"] %}
-    cloud-config: "/etc/kubernetes/pki/cloud-config.json"
-{% endif %}
 scheduler:
   extraArgs:
     address: "0.0.0.0"

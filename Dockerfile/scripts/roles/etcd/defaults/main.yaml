@@ -22,9 +22,4 @@ etcd_initial_cluster_token: etcd-k8-cluster
 etcd_data_dir: "{{ data_root_dir }}/etcd"
 
 # AWS node name 분기 처리
-node_name: |-
-  {% if cloud_provider is defined and cloud_provider == "aws" -%}
-    {{ ansible_fqdn|lower }}
-  {%- else -%}
-    {{ ansible_hostname|lower }}
-  {%- endif %}
+node_name: "{{ ansible_hostname|lower }}"

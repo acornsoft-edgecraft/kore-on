@@ -35,17 +35,3 @@
     name: "nfs-utils"
     state: present
     update_cache: yes
-
-- name: Install lksctp-tools
-  when: sctp_support
-  package:
-    name: "lksctp-tools"
-    state: present
-    update_cache: yes
-
-- name: Install cifs-utils
-  when: cloud_provider == "azure" and storage_type == "azurefile"
-  package:
-    name: "cifs-utils"
-    state: present
-    update_cache: yes
