@@ -10,7 +10,7 @@ BUILD_DATE = `date +'%Y-%m-%dT%H:%M:%S'`
 BUILD_OPTIONS = -ldflags "-X main.Version=$(VERSION) -X main.CommitId=$(GIT_COMMIT) -X main.BuildDate=$(BUILD_DATE)"
 GOARCH=amd64
 
-all: docker
+all: darwin-ctl docker
 
 getfiles:
 	@echo "Get necessary files ..."
