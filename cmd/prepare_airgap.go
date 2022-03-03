@@ -100,6 +100,10 @@ func (c *strPrepareAirgapCmd) prepareAirgap(workDir string, koreonToml model.Kor
 		commandArgs = append(commandArgs, "-D")
 	}
 
+	if koreonToml.Koreon.DebugMode {
+		fmt.Printf("%s \n", commandArgs)
+	}
+
 	err := syscall.Exec(conf.DockerBin, commandArgs, os.Environ())
 	if err != nil {
 		log.Printf("Command finished with error: %v", err)

@@ -4,25 +4,21 @@ import (
 	"bufio"
 	cryptornad "crypto/rand"
 	"fmt"
-	"path/filepath"
-	"regexp"
-
-	//"github.com/briandowns/spinner"
 	"github.com/hhkbp2/go-logging"
-	"kore-on/pkg/conf"
-	"kore-on/pkg/model"
-	"runtime"
-
 	"gopkg.in/yaml.v2"
 	"io"
 	"io/ioutil"
+	"kore-on/pkg/conf"
+	"kore-on/pkg/model"
 	"math/big"
-	//"math/rand"
 	"net"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"regexp"
+	"runtime"
 	"strings"
-	//"time"
+	"syscall"
 )
 
 var logger = logging.GetLogger("utils")
@@ -654,6 +650,95 @@ func IsSupportK8sVersion(version string) bool {
 		}
 	}
 	return isSupport
+}
+
+func ExecKoreonCmd(commandArgs []string, isStep bool, debugMode bool) error {
+	var err error
+
+	if isStep {
+
+		if debugMode {
+			fmt.Printf("syscall.Exec name %s \n", commandArgs[0])
+			fmt.Printf("syscall.Exec arg %s \n", commandArgs[1:])
+		}
+
+		err = syscall.Exec(commandArgs[0], commandArgs, os.Environ())
+	} else {
+		if debugMode {
+			fmt.Printf("exec.Command name %s \n", commandArgs[0])
+			fmt.Printf("exec.Command arg %s \n", commandArgs[1:])
+		}
+		//
+		cmd := exec.Command(commandArgs[0], commandArgs[1:]...)
+
+		stderr, err := cmd.StderrPipe()
+		if err != nil {
+			return err
+		}
+		stdout, err := cmd.StdoutPipe()
+		if err != nil {
+			return err
+		}
+
+		chStdOut := make(chan string)
+		chStdErr := make(chan string)
+
+		go func() {
+			merged := io.Reader(stdout)
+			scanner := bufio.NewScanner(merged)
+			for scanner.Scan() {
+				m := scanner.Text()
+				//fmt.Println("gofunc-stdout " + m)
+				text := strings.TrimSpace(m)
+				chStdOut <- text
+			}
+
+		}()
+
+		go func() {
+			merged := io.Reader(stderr)
+			scanner := bufio.NewScanner(merged)
+			for scanner.Scan() {
+				m := scanner.Text()
+				//fmt.Println("gofunc-stderr "+ m)
+				text := strings.TrimSpace(m)
+				chStdErr <- text
+			}
+		}()
+
+		go func() {
+			for {
+				select {
+				case line := <-chStdOut:
+					text := strings.TrimSpace(line)
+
+					if strings.Contains(text, "Failed to connect") {
+						fmt.Fprintf(os.Stderr, "%s\n", text)
+					} else {
+						fmt.Println(fmt.Sprintf("%s", text))
+					}
+				case line := <-chStdErr:
+					text := strings.TrimSpace(line)
+					fmt.Fprintf(os.Stderr, "%s\n", text)
+
+				}
+			}
+		}()
+
+		err = cmd.Start()
+		if err != nil {
+			logger.Errorf("command start: %s", err.Error())
+			return err
+		}
+
+		err = cmd.Wait()
+		if err != nil {
+			logger.Errorf("command wait: %s", err.Error())
+			return err
+		}
+	}
+
+	return err
 }
 
 func CheckError(err error) {
