@@ -21,7 +21,7 @@
   when:
     - not local_repo_archived_file.stat.exists
   copy:
-    src: "{{ inventory_dir }}/{{ local_repository_archive_file }}"
+    src: "{{ inventory_dir }}/files/{{ local_repository_archive_file }}"
     dest: "/tmp/{{ local_repository_archive_file | basename}}"
 
 - name: Extract local repository archive file into /data/localrepo
