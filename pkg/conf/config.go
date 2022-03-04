@@ -53,10 +53,8 @@ const (
 const (
 	RepoFile       = "repo-backup.tgz"
 	HarborFile     = "harbor-backup.tgz"
-	SSLRegistryCrt = "ssl_registry.crt"
-	SSLRegistryKey = "ssl_registry.key"
+	SSLRegistryCrt = "harbor.crt"
+	SSLRegistryKey = "harbor.key"
 	IdRsa          = "id_rsa"
-	HarborCrt      = "harbor.crt"
-	HarborKey      = "harbor.key"
 	DockerBin      = "/usr/local/bin/docker"
 )
