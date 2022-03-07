@@ -139,7 +139,7 @@ func CopyFilePreWork(workDir string, koreonToml model.KoreonToml, cmd string) er
 	//레지스트리 설치 여부
 	if koreonToml.PrivateRegistry.Install {
 		//레지스트리 공인 인증서 사용하는 경우 인증서 파일이 있어야 함.
-		if isPrivateRegistryPublicCert && cmd == conf.CMD_CREATE {
+		if isPrivateRegistryPublicCert && (cmd == conf.CMD_CREATE || cmd == conf.CMD_PREPARE_AIREGAP) {
 
 			if !FileExists(regiSslCert) {
 				PrintError(fmt.Sprintf("registry ssl-certificate : %s file is not found", regiSslCert))
@@ -179,7 +179,7 @@ func CopyFilePreWork(workDir string, koreonToml model.KoreonToml, cmd string) er
 
 		CopyFile0600(koreonToml.NodePool.Security.PrivateKeyPath, idRsa) //private-key-path copy
 
-		if isPrivateRegistryPublicCert && cmd == conf.CMD_CREATE {
+		if isPrivateRegistryPublicCert && (cmd == conf.CMD_CREATE || cmd == conf.CMD_PREPARE_AIREGAP) {
 			CopyFile0600(regiSslCert, sslRegistryCrt)
 			CopyFile0600(regiSslCertKey, sslRegistryKey)
 		}
@@ -484,9 +484,6 @@ func CreateBasicYaml(destDir string, koreonToml model.KoreonToml, command string
 	//NodePool
 	allYaml.DataRootDir = "/data"
 
-	regiPath := fmt.Sprintf("%s/roles/registry/files", destDir)
-	//sshPath := fmt.Sprintf("%s/roles/master/files", destDir)
-
 	allYaml.ClusterName = koreonToml.Koreon.ClusterName
 
 	clusterID, _ := NewUUID()
@@ -562,11 +559,6 @@ func CreateBasicYaml(destDir string, koreonToml model.KoreonToml, command string
 
 	//registry
 	isPrivateRegistryPubicCert := koreonToml.PrivateRegistry.PublicCert
-	if isPrivateRegistryPubicCert {
-		os.MkdirAll(regiPath, os.ModePerm)
-		CopyFile(conf.KoreonDestDir+"/"+conf.SSLRegistryCrt, regiPath+"/"+conf.HarborCrt)
-		CopyFile(conf.KoreonDestDir+"/"+conf.SSLRegistryKey, regiPath+"/"+conf.HarborKey)
-	}
 
 	//os.MkdirAll(sshPath, os.ModePerm)
 	//CopyFile(conf.KoreonDestDir+"/"+conf.IdRsa, sshPath+"/"+conf.IdRsa)
@@ -595,8 +587,8 @@ func CreateBasicYaml(destDir string, koreonToml model.KoreonToml, command string
 
 	if koreonToml.Koreon.ClosedNetwork {
 		allYaml.LocalRepository = fmt.Sprintf("http://%s:8080", koreonToml.PrivateRegistry.RegistryIP)
-		allYaml.LocalRepositoryArchiveFile = conf.KoreonDestDir + "/" + conf.RepoFile
-		allYaml.RegistryArchiveFile = conf.KoreonDestDir + "/" + conf.HarborFile
+		allYaml.LocalRepositoryArchiveFile = conf.RepoFile
+		allYaml.RegistryArchiveFile = conf.HarborFile
 	}
 
 	b, _ := yaml.Marshal(allYaml)

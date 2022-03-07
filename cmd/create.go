@@ -85,7 +85,7 @@ func (c *strCreateCmd) create(workDir string, koreonToml model.KoreonToml) error
 		"-v",
 		fmt.Sprintf("%s:%s", workDir, conf.WorkDir),
 		"-v",
-		fmt.Sprintf("%s:%s", workDir+"/"+conf.KoreonDestDir, conf.Inventory+"/"+conf.KoreonDestDir),
+		fmt.Sprintf("%s:%s", workDir+"/"+conf.KoreonDestDir, conf.Inventory+"/files"),
 		"-v",
 		fmt.Sprintf("%s:%s", inventoryFilePath, conf.InventoryIni),
 		"-v",
