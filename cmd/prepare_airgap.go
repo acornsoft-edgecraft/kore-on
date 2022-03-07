@@ -51,6 +51,14 @@ func (c *strPrepareAirgapCmd) run() error {
 }
 
 func (c *strPrepareAirgapCmd) prepareAirgap(workDir string, koreonToml model.KoreonToml) error {
+
+	//validation
+	if koreonToml.PrivateRegistry.PublicCert {
+		utils.PrintError("The prepare-airgap command does not support public certificates.")
+		os.Exit(1)
+		return nil
+	}
+
 	// # 1
 	utils.CheckDocker()
 
