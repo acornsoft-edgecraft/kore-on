@@ -570,7 +570,7 @@ func CreateBasicYaml(destDir string, koreonToml model.KoreonToml, command string
 	allYaml.RegistryInstall = koreonToml.PrivateRegistry.Install
 	allYaml.RegistryDataDir = koreonToml.PrivateRegistry.DataDir
 	allYaml.Registry = registryIP
-	allYaml.RegistryDomain = registryDomain
+	allYaml.RegistryDomain = strings.Replace(registryDomain, "https://", "", -1)
 	allYaml.RegistryPublicCert = isPrivateRegistryPubicCert
 
 	if koreonToml.PrivateRegistry.RegistryDomain != "" {
