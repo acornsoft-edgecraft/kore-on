@@ -1,15 +1,14 @@
 package conf
 
 const Template = `#koreon.toml
-#koreon.toml
 [koreon]
-cluster-name = "ml-central2"
+cluster-name = ""
 #cert-validity-days = 3650
 
 #closed-network = true
-#local-repository = "http://192.168.1.251:8080"
-#local-repository-archive-file = "/Users/okpiri/git/kore-on/work/local-repo.20220224_071700.tgz"
-#install-dir = "/var/lib/knit"
+#local-repository = "http://192.168.88.145:8080"
+#local-repository-archive-file = "/tmp/koreon/local-repo.20220224_071700.tgz"
+#install-dir = "/var/lib/koreon"
 #debug-mode = true
 
 [kubernetes]
@@ -35,7 +34,7 @@ encrypt-secret = true
 
 [node-pool.security]
 ssh-user-id = "centos"
-private-key-path = "/Users/okpiri/cert/hostacloud/id_rsa"
+private-key-path = "/tmp/cert/id_rsa"
 
 [node-pool.master]
 ip = ["192.168.88.141"]
@@ -52,7 +51,7 @@ private-ip = ["172.33.88.142", "172.33.88.143"]
 [shared-storage]
 install = false
 storage-ip = "192.168.88.11"
-volume-dir = "/data/nvme/mlops/161"
+volume-dir = "/data/cluster"
 volume-size = 1000
 
 
@@ -61,7 +60,7 @@ install = true
 registry-ip = "192.168.88.145"
 data-dir = "/data/harbor"
 public-cert = false
-registry-archive-file = "/Users/okpiri/git/kore-on/work/harbor.20220224_072307.tgz"
+registry-archive-file = "/tmp/koreon/harbor.20220224_072307.tgz"
 
 [private-registry.cert-file]
 ssl-certificate = ""
