@@ -4,7 +4,7 @@ on:
     inputs:
       version:
         description: 'Version (optional)'
-        required: false
+        required: true
   push:
     tags:
       - v*
