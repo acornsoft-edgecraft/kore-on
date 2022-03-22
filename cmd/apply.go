@@ -200,6 +200,8 @@ func (c *strApplyCmd) run() error {
 		//업그레이드
 		if isUpgrade {
 			inventoryFilePath := utils.CreateInventoryFile(workDir, koreonToml, nil)
+			upgradeMsg := fmt.Sprintf("Upgrade from Kubernetes 1.%v.%v to %s ...", minor, patch, koreonK8sVersion)
+			utils.PrintInfo(fmt.Sprintf(conf.SUCCESS_FORMAT, "\n"+upgradeMsg))
 			err := upgrade(workDir, inventoryFilePath, basicFilePath, sshId, c, koreonToml.Koreon.DebugMode)
 			if err != nil {
 				log.Printf("Command finished with error: %v", err)
