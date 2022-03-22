@@ -38,6 +38,8 @@ jobs:
         run: |
           GOOS=linux GOARCH=amd64 go build -o bin/linux/amd64/koreonctl -ldflags="-X 'github.com/acornsoft-edgecraft/kore-on/app.BuildTime=$(date -u +%FT%T%Z)' -X 'github.com/acornsoft-edgecraft/kore-on/app.BuildVersion=${{ steps.variables.outputs.version }}'" .
           GOOS=darwin GOARCH=amd64 go build -o bin/darwin/amd64/koreonctl -ldflags="-X 'github.com/acornsoft-edgecraft/kore-on/app.BuildTime=$(date -u +%FT%T%Z)' -X 'github.com/acornsoft-edgecraft/kore-on/app.BuildVersion=${{ steps.variables.outputs.version }}'" .
+          chmod +x bin/linux/amd64/koreonctl
+          chmod +x bin/darwin/amd64/koreonctl          
       - name: Release
         uses: actions/create-release@v1
         id: create_release
