@@ -60,7 +60,7 @@ install = true
 registry-ip = "192.168.88.145"
 data-dir = "/data/harbor"
 public-cert = false
-registry-archive-file = "/tmp/koreon/harbor.20220224_072307.tgz"
+#registry-archive-file = "/tmp/koreon/harbor.20220224_072307.tgz"
 
 [private-registry.cert-file]
 ssl-certificate = ""
