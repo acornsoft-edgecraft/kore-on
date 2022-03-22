@@ -138,7 +138,9 @@ ssl-certificate = ""
 ssl-certificate-key = ""
 ```
 <br/>
+
   - Create kubernetes HA cluster using koreon
+
 ```bash
 $ koreonctl create
 ```  
