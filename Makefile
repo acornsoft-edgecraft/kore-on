@@ -5,7 +5,7 @@ TARGETDIR=~/gows/bin
 REGI_SVR=regi.k3.acornsoft.io
 
 GIT_COMMIT = `git rev-parse HEAD`
-VERSION = 1.1.3
+VERSION = v1.1.3
 BUILD_DATE = `date +'%Y-%m-%dT%H:%M:%S'`
 BUILD_OPTIONS = -ldflags "-X main.Version=$(VERSION) -X main.CommitId=$(GIT_COMMIT) -X main.BuildDate=$(BUILD_DATE)"
 GOARCH=amd64
