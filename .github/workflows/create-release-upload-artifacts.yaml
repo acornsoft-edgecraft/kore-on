@@ -36,8 +36,8 @@ jobs:
           go-version: ^1.17.0
       - name: Build artifacts
         run: |
-          GOOS=linux GOARCH=amd64 go build -o bin/linux/amd64/koreonctl -ldflags="-X 'main.BuildDate=${{ steps.variables.outputs.version }}' -X 'main.CommitId=$(git rev-parse HEAD)' -X 'main.BuildDate=$(date -u +%FT%T%Z)'" .
-          GOOS=darwin GOARCH=amd64 go build -o bin/darwin/amd64/koreonctl -ldflags="-X 'main.BuildDate=${{ steps.variables.outputs.version }}' -X 'main.CommitId=$(git rev-parse HEAD)' -X 'main.BuildDate=$(date -u +%FT%T%Z)'" .
+          GOOS=linux GOARCH=amd64 go build -o bin/linux/amd64/koreonctl -ldflags="-X 'main.Version=${{ steps.variables.outputs.version }}' -X 'main.CommitId=$(git rev-parse HEAD)' -X 'main.BuildDate=$(date -u +%FT%T%Z)'" .
+          GOOS=darwin GOARCH=amd64 go build -o bin/darwin/amd64/koreonctl -ldflags="-X 'main.Version=${{ steps.variables.outputs.version }}' -X 'main.CommitId=$(git rev-parse HEAD)' -X 'main.BuildDate=$(date -u +%FT%T%Z)'" .
           chmod +x bin/linux/amd64/koreonctl
           chmod +x bin/darwin/amd64/koreonctl          
       - name: Release
