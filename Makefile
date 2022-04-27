@@ -1,6 +1,6 @@
 # Directory
 ROOTDIR=${PWD}
-TARGETDIR=~/gows/bin
+TARGETDIR=${ROOTDIR}/gows/bin
 
 REGI_SVR=regi.k3.acornsoft.io
 
@@ -10,7 +10,8 @@ BUILD_DATE = `date +'%Y-%m-%dT%H:%M:%S'`
 BUILD_OPTIONS = -ldflags "-X main.Version=$(VERSION) -X main.CommitId=$(GIT_COMMIT) -X main.BuildDate=$(BUILD_DATE)"
 GOARCH=amd64
 
-all: darwin-ctl docker
+
+all: clean darwin-ctl linux-ctl docker
 
 getfiles:
 	@echo "Get necessary files ..."
@@ -21,15 +22,15 @@ getfiles:
 	curl -L https://github.com/etcd-io/etcd/releases/download/v3.4.16/etcd-v3.4.16-linux-amd64.tar.gz -o ./Dockerfile/scripts/files/etcd-v3.4.16-linux-amd64.tar.gz
 	curl -L https://github.com/goharbor/harbor/releases/download/v2.3.0/harbor-offline-installer-v2.3.0.tgz -o ./Dockerfile/scripts/files/harbor-offline-installer-v2.3.0.tgz
 
-darwin:
-	@echo "Make darwin binary ..."
-	cd ${ROOTDIR}/koreon && GOOS=darwin GOARCH=${GOARCH} go build ${BUILD_OPTIONS} -o ${TARGETDIR}/darwin/koreon_darwin_${VERSION}
-	ln -s ${TARGETDIR}/darwin/koreon_darwin_${VERSION} ${TARGETDIR}/darwin/koreon
-
-linux:
+linux-ctl:
 	@echo "Make linux binary ..."
-	cd ${ROOTDIR}/koreon && GOOS=linux GOARCH=${GOARCH} go build ${BUILD_OPTIONS} -o ${TARGETDIR}/linux/koreon_linux_${VERSION}
-	ln -s ${TARGETDIR}/linux/koreon_linux_${VERSION} ~/gows/bin/linux/koreon
+	GOOS=linux GOARCH=${GOARCH} go build ${BUILD_OPTIONS} -o ${TARGETDIR}/koreonctl_linux_${VERSION}
+	ln -s ${TARGETDIR}/koreonctl_linux_${VERSION} ${TARGETDIR}/linux/koreonctl
+
+darwin-ctl:
+	@echo "Make darwin binary ..."
+	GOOS=darwin GOARCH=${GOARCH} go build ${BUILD_OPTIONS} -o ${TARGETDIR}/koreonctl_darwin_${VERSION}
+	ln -s ${TARGETDIR}/koreonctl_darwin_${VERSION} ${TARGETDIR}/darwin/koreonctl
 
 docker:
 	@echo "Make docker image ..."
@@ -40,25 +41,9 @@ pushimage:
 	docker push ${REGI_SVR}/k3lab/koreon:${VERSION}
 
 clean:
-	rm -f ${TARGETDIR}/darwin/koreon_darwin_${VERSION}
-	rm -f ${TARGETDIR}/darwin/koreon
-	rm -f ${TARGETDIR}/linux/koreon_linux_${VERSION}
-	rm -f ${TARGETDIR}/linux/koreon
-	rm -f ${TARGETDIR}/windows/koreon_windows_${VERSION}.exe
-	rm -f ${TARGETDIR}/windows/koreon.exe
-
-linux-ctl:
-	@echo "Make linux binary ..."
-
-	GOOS=linux GOARCH=${GOARCH} go build ${BUILD_OPTIONS} -o ${TARGETDIR}/koreonctl_linux_${VERSION}
-	ln -s ${TARGETDIR}/koreonctl_linux_${VERSION} ~/gows/bin/linux/koreonctl
-
-darwin-ctl:
-	@echo "Make darwin binary ..."
-	rm -f ${TARGETDIR}/koreonctl_darwin_${VERSION}
-	rm -f ~/gows/bin/darwin/koreonctl
-	GOOS=darwin GOARCH=${GOARCH} go build ${BUILD_OPTIONS} -o ${TARGETDIR}/koreonctl_darwin_${VERSION}
-	ln -s ${TARGETDIR}/koreonctl_darwin_${VERSION} ~/gows/bin/darwin/koreonctl
+	rm -rf ${TARGETDIR}
+	mkdir -p ${TARGETDIR}/darwin
+	mkdir -p ${TARGETDIR}/linux
 
 template:
 	@echo "make template.go file ..."
