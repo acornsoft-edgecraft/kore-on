@@ -239,11 +239,13 @@ $ git push
 - 원본(upstream)을 fetch 한다.
 ![upstream repository rebase](docs/images/vs_code_rebase_upstream-0.png)
 <br/>
-- 로컬 브렌치(feature/featureA)에 upstream/develop의 commit내용을 rebase한다.
-  - rebase 항목이 있으면 선택창이 활성화 된다. 여기에서도 Interative Rebase를 선택 하면 커밋로그를 합칠수 있다(optional).
+
+- 로컬 브렌치(feature/featureA)에 upstream/develop의 commit내용을 rebase한다.  
+  - rebase 항목이 있으면 선택창이 활성화 된다. 여기에서도 Interative Rebase를 선택 하면 커밋로그를 합칠수 있다(optional).  
 ![upstream repository rebase](docs/images/vs_code_rebase_upstream-1.png)
 ![upstream repository rebase](docs/images/vs_code_rebase_upstream-2.png)
 <br/>
+
 - 병합 충돌이 있으면 해결 해야 한다.
   -  충돌 소스를 수정 페이지 에서 수정 한다.
      -  Accept Current Change는 upstream 저장소 내용으로 변경 된다.
