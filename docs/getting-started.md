@@ -19,7 +19,7 @@ Koreon은 On-premise 환경에서 Kubernetes cluster의 생성, worker node 추�
 ## Supported Components
 
 - Core
-  - [kubernetes](https://github.com/kubernetes/kubernetes/tree/master/CHANGELOG) v1.19.10-v1.19.12, v1.20.6-v1.20.8, v1.21.0-v1.21.2
+  - [kubernetes](https://github.com/kubernetes/kubernetes/tree/master/CHANGELOG) v1.20.6-v1.20.8, v1.21.0-v1.21.12, v1.22.1-v1.22.9
   - [etcd](https://github.com/etcd-io/etcd/releases) v3.4.16
   - [docker-compose](https://github.com/docker/compose/releases) v1.29.2  
   - [docker](https://www.docker.com/) v19.03.15
