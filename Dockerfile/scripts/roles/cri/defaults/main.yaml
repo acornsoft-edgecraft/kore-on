@@ -5,6 +5,8 @@ is_gpu_node: "{{ 'gpu-node' in groups and inventory_hostname in groups['gpu-node
 # Get kubernetes major version (i.e. 1.20.2 => 1.20)
 kube_major_version: "v{{ k8s_version | regex_replace('^([0-9])+\\.([0-9]+)\\.[0-9]+', '\\1.\\2') }}"
 crictl_supported_versions:
+  v1.23: "v1.23.0"
+  v1.22: "v1.22.0"
   v1.21: "v1.21.0"
   v1.20: "v1.20.0"
   v1.19: "v1.19.0"
