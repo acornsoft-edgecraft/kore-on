@@ -62,6 +62,8 @@ func ValidateKoreonTomlConfig(workDir string) (model.KoreonToml, bool) {
 
 	privateRegistryInstall := koreonToml.PrivateRegistry.Install
 	privateRegistryRegistryIP := koreonToml.PrivateRegistry.RegistryIP
+	privateRegistryRegistryDomain := koreonToml.PrivateRegistry.RegistryDomain
+
 	privateRegistryDataDir := koreonToml.PrivateRegistry.DataDir
 	isPrivateRegistryPublicCert := koreonToml.PrivateRegistry.PublicCert
 	privateRegistryCrt := koreonToml.PrivateRegistry.CertFile.SslCertificate
@@ -144,6 +146,11 @@ func ValidateKoreonTomlConfig(workDir string) (model.KoreonToml, bool) {
 
 			if privateRegistryKey == "" {
 				PrintError("private-registry.cert-file > ssl-certificate-key is required.")
+				errorCnt++
+			}
+
+			if privateRegistryRegistryDomain == "" {
+				PrintError("private-registry > registry-domain is required.")
 				errorCnt++
 			}
 		}

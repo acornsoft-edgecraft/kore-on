@@ -14,6 +14,9 @@ require (
 )
 
 require (
+	github.com/apenella/go-ansible v1.1.5 // indirect
+	github.com/apenella/go-common-utils/data v0.0.0-20210528133155-34ba915e28c8 // indirect
+	github.com/apenella/go-common-utils/error v0.0.0-20210528133155-34ba915e28c8 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/go-logr/logr v1.2.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect

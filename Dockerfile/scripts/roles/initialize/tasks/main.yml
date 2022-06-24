@@ -10,6 +10,18 @@
     - "yum clean all"
   no_log: true
 
+- name: apt cache clean
+  when:
+    - ansible_os_family in ["Ubuntu", "Debian"]
+  shell: "{{ item }}"
+  with_items:
+    - "rm -f /var/lib/apt/lists/lock"
+    - "rm -f /var/cache/apt/archives/lock"
+    - "rm -f /var/lib/dpkg/lock*"
+    - "dpkg --configure -a"
+    - "apt update"
+  no_log: true  
+
 - name: disable selinux
   when: ansible_os_family in ["CentOS", "RedHat"]
   selinux:

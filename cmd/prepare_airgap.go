@@ -51,10 +51,18 @@ func (c *strPrepareAirgapCmd) run() error {
 }
 
 func (c *strPrepareAirgapCmd) prepareAirgap(workDir string, koreonToml model.KoreonToml) error {
+
+	//validation
+	if koreonToml.PrivateRegistry.PublicCert {
+		utils.PrintError("The prepare-airgap command does not support public certificates.")
+		os.Exit(1)
+		return nil
+	}
+
 	// # 1
 	utils.CheckDocker()
 
-	utils.CopyFilePreWork(workDir, koreonToml, conf.CMD_DESTROY)
+	utils.CopyFilePreWork(workDir, koreonToml, conf.CMD_PREPARE_AIREGAP)
 
 	inventoryFilePath := utils.CreateInventoryFile(workDir, koreonToml, nil)
 
@@ -71,6 +79,8 @@ func (c *strPrepareAirgapCmd) prepareAirgap(workDir string, koreonToml model.Kor
 		"-v",
 		fmt.Sprintf("%s:%s", workDir, conf.WorkDir),
 		"-v",
+		fmt.Sprintf("%s:%s", workDir+"/"+conf.KoreonDestDir, conf.Inventory+"/files"),
+		"-v",
 		fmt.Sprintf("%s:%s", inventoryFilePath, conf.InventoryIni),
 		"-v",
 		fmt.Sprintf("%s:%s", basicFilePath, conf.BasicYaml),
@@ -84,8 +94,6 @@ func (c *strPrepareAirgapCmd) prepareAirgap(workDir string, koreonToml model.Kor
 		conf.KoreonDestDir + "/" + conf.IdRsa,
 		conf.PrepareAirgapYaml,
 	}
-
-	fmt.Printf("%s \n", commandArgs)
 
 	if c.verbose {
 		commandArgs = append(commandArgs, "-v")

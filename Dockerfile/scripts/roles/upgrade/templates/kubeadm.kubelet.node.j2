@@ -1,4 +1,5 @@
-KUBELET_EXTRA_ARGS="--log-dir={{ data_root_dir }}/log \
+KUBELET_EXTRA_ARGS="--root-dir={{ data_root_dir }}/kubelet \
+--log-dir={{ data_root_dir }}/log \
 --logtostderr=false \
 --v=2 \
 --node-labels=koreon.acornsoft.io/clusterid={{ cluster_id }}"
