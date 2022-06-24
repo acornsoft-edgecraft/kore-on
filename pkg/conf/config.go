@@ -32,6 +32,9 @@ var SupportK8SVersion = []string{
 	"1.19.10", "1.19.11", "1.19.12",
 	"1.20.6", "1.20.7", "1.20.8",
 	"1.21.0", "1.21.1", "1.21.2",
+	"1.21.9", "1.21.10", "1.21.11",
+	"1.22.1", "1.22.7", "1.22.8",
+	"1.23.1", "1.23.2", "1.23.3", "1.23.4", "1.23.5",
 }
 
 const (
@@ -53,10 +56,8 @@ const (
 const (
 	RepoFile       = "repo-backup.tgz"
 	HarborFile     = "harbor-backup.tgz"
-	SSLRegistryCrt = "ssl_registry.crt"
-	SSLRegistryKey = "ssl_registry.key"
+	SSLRegistryCrt = "harbor.crt"
+	SSLRegistryKey = "harbor.key"
 	IdRsa          = "id_rsa"
-	HarborCrt      = "harbor.crt"
-	HarborKey      = "harbor.key"
 	DockerBin      = "/usr/local/bin/docker"
 )

@@ -8,6 +8,7 @@ import (
 	"gopkg.in/yaml.v2"
 	v12 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
 	"kore-on/pkg/conf"
 	"kore-on/pkg/model"
@@ -16,9 +17,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"syscall"
-
-	"k8s.io/client-go/kubernetes"
 )
 
 type strApplyCmd struct {
@@ -51,7 +49,7 @@ func (c *strApplyCmd) run() error {
 		fmt.Println("nothing to changed. exit")
 		os.Exit(1)
 	}
-
+	applyCnt := 0
 	isUpgrade := false
 	var addMap = make(map[string]string)
 	var delMap = make(map[string]string)
@@ -152,8 +150,26 @@ func (c *strApplyCmd) run() error {
 		}
 	}
 
-	if len(addMap) == 0 && len(delMap) == 0 && !isUpgrade {
+	if koreonToml.Koreon.DebugMode {
+		fmt.Println(fmt.Sprintf("add node %v", addMap))
+		fmt.Println(fmt.Sprintf("del node %v", delMap))
+		fmt.Println(fmt.Sprintf("upgrade kubernetes 1.%v.%v -> %v", minor, patch, koreonK8sVersion))
+	}
+
+	if len(addMap) > 0 {
+		applyCnt += 1
+	}
+	if len(delMap) > 0 {
+		applyCnt += 1
+	}
+	if isUpgrade {
+		applyCnt += 1
+	}
+
+	if applyCnt == 0 {
 		utils.PrintInfo(fmt.Sprintf("There is no worker node to added or deleted."))
+	} else if applyCnt > 1 && c.step {
+		utils.PrintInfo(fmt.Sprintf("The step option is only available in one function."))
 	} else {
 		// 공통
 		sshId := koreonToml.NodePool.Security.SSHUserID
@@ -162,28 +178,44 @@ func (c *strApplyCmd) run() error {
 		//노드 추가
 		if len(addMap) > 0 {
 			inventoryFilePath := utils.CreateInventoryFile(workDir, koreonToml, addMap)
-			addNode(workDir, inventoryFilePath, basicFilePath, sshId, addMap, c, koreonToml.Koreon.DebugMode)
+			err := addNode(workDir, inventoryFilePath, basicFilePath, sshId, addMap, c, koreonToml.Koreon.DebugMode)
+			if err != nil {
+				log.Printf("Command finished with error: %v", err)
+			} else {
+				fmt.Println(fmt.Sprintf("end add node %v", addMap))
+			}
 		}
 
 		//노드 삭제
 		if len(delMap) > 0 {
 			inventoryFilePath := utils.CreateInventoryFile(workDir, koreonToml, nil)
-			removeNode(workDir, inventoryFilePath, basicFilePath, sshId, delMap, c, koreonToml.Koreon.DebugMode)
+			err := removeNode(workDir, inventoryFilePath, basicFilePath, sshId, delMap, c, koreonToml.Koreon.DebugMode)
+			if err != nil {
+				log.Printf("Command finished with error: %v", err)
+			} else {
+				fmt.Println(fmt.Sprintf("end add node %v", addMap))
+			}
 		}
 
 		//업그레이드
 		if isUpgrade {
 			inventoryFilePath := utils.CreateInventoryFile(workDir, koreonToml, nil)
-			upgrade(workDir, inventoryFilePath, basicFilePath, sshId, c, koreonToml.Koreon.DebugMode)
+			upgradeMsg := fmt.Sprintf("Upgrade from Kubernetes 1.%v.%v to %s ...", minor, patch, koreonK8sVersion)
+			utils.PrintInfo(fmt.Sprintf(conf.SUCCESS_FORMAT, "\n"+upgradeMsg))
+			err := upgrade(workDir, inventoryFilePath, basicFilePath, sshId, c, koreonToml.Koreon.DebugMode)
+			if err != nil {
+				log.Printf("Command finished with error: %v", err)
+			}
 		}
 	}
-
 	return nil
 }
 
 func addNode(workDir string, inventoryFilePath string, basicFilePath string, sshId string, addMap map[string]string, c *strApplyCmd, debugMode bool) error {
-
-	fmt.Println(fmt.Sprintf("add node %v", addMap))
+	itOption := "-t"
+	if c.step {
+		itOption = "-it"
+	}
 	commandArgs := []string{
 		"docker",
 		"run",
@@ -191,7 +223,7 @@ func addNode(workDir string, inventoryFilePath string, basicFilePath string, ssh
 		conf.KoreonImageName,
 		"--rm",
 		"--privileged",
-		"-it",
+		itOption,
 		"-v",
 		fmt.Sprintf("%s:%s", workDir, conf.WorkDir),
 		"-v",
@@ -222,20 +254,17 @@ func addNode(workDir string, inventoryFilePath string, basicFilePath string, ssh
 		commandArgs = append(commandArgs, "-D")
 	}
 
-	if debugMode {
-		fmt.Printf("%s \n", commandArgs)
-	}
+	err := utils.ExecKoreonCmd(commandArgs, c.step, debugMode)
 
-	err := syscall.Exec(conf.DockerBin, commandArgs, os.Environ())
-	if err != nil {
-		log.Printf("Command finished with error: %v", err)
-	}
 	return err
 }
 
 func removeNode(workDir string, inventoryFilePath string, basicFilePath string, sshId string, delMap map[string]string, c *strApplyCmd, debugMode bool) error {
-	fmt.Println(fmt.Sprintf("del node %v", delMap))
-	var err error
+
+	itOption := "-t"
+	if c.step {
+		itOption = "-it"
+	}
 
 	for delNodeName, ip := range delMap {
 		delIp := strings.Split(ip, ":")[2]
@@ -253,7 +282,7 @@ func removeNode(workDir string, inventoryFilePath string, basicFilePath string, 
 			conf.KoreonImageName,
 			"--rm",
 			"--privileged",
-			"-it",
+			itOption,
 			"-v",
 			fmt.Sprintf("%s:%s", workDir, conf.WorkDir),
 			"-v",
@@ -288,19 +317,21 @@ func removeNode(workDir string, inventoryFilePath string, basicFilePath string, 
 			commandArgs = append(commandArgs, "-D")
 		}
 
-		if debugMode {
-			fmt.Printf("%s \n", commandArgs)
-		}
-
-		err = syscall.Exec(conf.DockerBin, commandArgs, os.Environ())
+		err := utils.ExecKoreonCmd(commandArgs, c.step, debugMode)
 		if err != nil {
-			log.Printf("Command finished with error: %v", err)
+			return err
 		}
 	}
-	return err
+	return nil
 }
 
-func upgrade(workDir string, inventoryFilePath string, basicFilePath string, sshId string, c *strApplyCmd, debugMode bool) {
+func upgrade(workDir string, inventoryFilePath string, basicFilePath string, sshId string, c *strApplyCmd, debugMode bool) error {
+
+	itOption := "-t"
+	if c.step {
+		itOption = "-it"
+	}
+
 	commandArgs := []string{
 		"docker",
 		"run",
@@ -308,7 +339,7 @@ func upgrade(workDir string, inventoryFilePath string, basicFilePath string, ssh
 		conf.KoreonImageName,
 		"--rm",
 		"--privileged",
-		"-it",
+		itOption,
 		"-v",
 		fmt.Sprintf("%s:%s", workDir, conf.WorkDir),
 		"-v",
@@ -339,15 +370,9 @@ func upgrade(workDir string, inventoryFilePath string, basicFilePath string, ssh
 		commandArgs = append(commandArgs, "-D")
 	}
 
-	if debugMode {
-		fmt.Printf("%s \n", commandArgs)
-	}
+	err := utils.ExecKoreonCmd(commandArgs, c.step, debugMode)
 
-	err := syscall.Exec(conf.DockerBin, commandArgs, os.Environ())
-	if err != nil {
-		log.Printf("Command finished with error: %v", err)
-	}
-
+	return err
 }
 
 func getNodes(client *kubernetes.Clientset) map[string]string {

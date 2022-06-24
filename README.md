@@ -23,7 +23,7 @@ Documentation is in the `/docs` directory
 ## Supported Components
 
 - Core
-  - [kubernetes](https://github.com/kubernetes/kubernetes/tree/master/CHANGELOG) v1.19.10-v1.19.12, v1.20.6-v1.20.8, v1.21.0-v1.21.2
+  - [kubernetes](https://github.com/kubernetes/kubernetes/tree/master/CHANGELOG) v1.20.6-v1.20.8, v1.21.0-v1.21.12, v1.22.1-v1.22.9, v1.23.1-v1.23.5
   - [etcd](https://github.com/etcd-io/etcd/releases) v3.4.16
   - [docker-compose](https://github.com/docker/compose/releases) v1.29.2  
   - [docker](https://www.docker.com/) v19.03.15
@@ -31,7 +31,7 @@ Documentation is in the `/docs` directory
   - [crictl](https://github.com/kubernetes-sigs/cri-tools) v1.19.0, v1.20.0, v1.21.0
   
 - Network Plugin
-  - [calico](https://github.com/projectcalico/calico/releases) v3.19.1
+  - [calico](https://github.com/projectcalico/calico/releases) v3.19.1, v3.20, v3.21, v3.22, v3.23
   
 - Application
   - [coredns](https://github.com/coredns/coredns) v1.7.0, v1.8.0
@@ -43,3 +43,5 @@ Documentation is in the `/docs` directory
   
 ## Required packages
  * docker runtime
+
+## 

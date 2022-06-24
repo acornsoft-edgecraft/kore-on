@@ -4,25 +4,21 @@ import (
 	"bufio"
 	cryptornad "crypto/rand"
 	"fmt"
-	"path/filepath"
-	"regexp"
-
-	//"github.com/briandowns/spinner"
 	"github.com/hhkbp2/go-logging"
-	"kore-on/pkg/conf"
-	"kore-on/pkg/model"
-	"runtime"
-
 	"gopkg.in/yaml.v2"
 	"io"
 	"io/ioutil"
+	"kore-on/pkg/conf"
+	"kore-on/pkg/model"
 	"math/big"
-	//"math/rand"
 	"net"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"regexp"
+	"runtime"
 	"strings"
-	//"time"
+	"syscall"
 )
 
 var logger = logging.GetLogger("utils")
@@ -143,7 +139,7 @@ func CopyFilePreWork(workDir string, koreonToml model.KoreonToml, cmd string) er
 	//레지스트리 설치 여부
 	if koreonToml.PrivateRegistry.Install {
 		//레지스트리 공인 인증서 사용하는 경우 인증서 파일이 있어야 함.
-		if isPrivateRegistryPublicCert && cmd == conf.CMD_CREATE {
+		if isPrivateRegistryPublicCert && (cmd == conf.CMD_CREATE || cmd == conf.CMD_PREPARE_AIREGAP) {
 
 			if !FileExists(regiSslCert) {
 				PrintError(fmt.Sprintf("registry ssl-certificate : %s file is not found", regiSslCert))
@@ -183,7 +179,7 @@ func CopyFilePreWork(workDir string, koreonToml model.KoreonToml, cmd string) er
 
 		CopyFile0600(koreonToml.NodePool.Security.PrivateKeyPath, idRsa) //private-key-path copy
 
-		if isPrivateRegistryPublicCert && cmd == conf.CMD_CREATE {
+		if isPrivateRegistryPublicCert && (cmd == conf.CMD_CREATE || cmd == conf.CMD_PREPARE_AIREGAP) {
 			CopyFile0600(regiSslCert, sslRegistryCrt)
 			CopyFile0600(regiSslCertKey, sslRegistryKey)
 		}
@@ -488,9 +484,6 @@ func CreateBasicYaml(destDir string, koreonToml model.KoreonToml, command string
 	//NodePool
 	allYaml.DataRootDir = "/data"
 
-	regiPath := fmt.Sprintf("%s/roles/registry/files", destDir)
-	//sshPath := fmt.Sprintf("%s/roles/master/files", destDir)
-
 	allYaml.ClusterName = koreonToml.Koreon.ClusterName
 
 	clusterID, _ := NewUUID()
@@ -566,11 +559,6 @@ func CreateBasicYaml(destDir string, koreonToml model.KoreonToml, command string
 
 	//registry
 	isPrivateRegistryPubicCert := koreonToml.PrivateRegistry.PublicCert
-	if isPrivateRegistryPubicCert {
-		os.MkdirAll(regiPath, os.ModePerm)
-		CopyFile(conf.KoreonDestDir+"/"+conf.SSLRegistryCrt, regiPath+"/"+conf.HarborCrt)
-		CopyFile(conf.KoreonDestDir+"/"+conf.SSLRegistryKey, regiPath+"/"+conf.HarborKey)
-	}
 
 	//os.MkdirAll(sshPath, os.ModePerm)
 	//CopyFile(conf.KoreonDestDir+"/"+conf.IdRsa, sshPath+"/"+conf.IdRsa)
@@ -582,7 +570,7 @@ func CreateBasicYaml(destDir string, koreonToml model.KoreonToml, command string
 	allYaml.RegistryInstall = koreonToml.PrivateRegistry.Install
 	allYaml.RegistryDataDir = koreonToml.PrivateRegistry.DataDir
 	allYaml.Registry = registryIP
-	allYaml.RegistryDomain = registryDomain
+	allYaml.RegistryDomain = strings.Replace(registryDomain, "https://", "", -1)
 	allYaml.RegistryPublicCert = isPrivateRegistryPubicCert
 
 	if koreonToml.PrivateRegistry.RegistryDomain != "" {
@@ -599,8 +587,8 @@ func CreateBasicYaml(destDir string, koreonToml model.KoreonToml, command string
 
 	if koreonToml.Koreon.ClosedNetwork {
 		allYaml.LocalRepository = fmt.Sprintf("http://%s:8080", koreonToml.PrivateRegistry.RegistryIP)
-		allYaml.LocalRepositoryArchiveFile = conf.KoreonDestDir + "/" + conf.RepoFile
-		allYaml.RegistryArchiveFile = conf.KoreonDestDir + "/" + conf.HarborFile
+		allYaml.LocalRepositoryArchiveFile = conf.RepoFile
+		allYaml.RegistryArchiveFile = conf.HarborFile
 	}
 
 	b, _ := yaml.Marshal(allYaml)
@@ -654,6 +642,95 @@ func IsSupportK8sVersion(version string) bool {
 		}
 	}
 	return isSupport
+}
+
+func ExecKoreonCmd(commandArgs []string, isStep bool, debugMode bool) error {
+	var err error
+
+	if isStep {
+
+		if debugMode {
+			fmt.Printf("syscall.Exec name %s \n", commandArgs[0])
+			fmt.Printf("syscall.Exec arg %s \n", commandArgs[1:])
+		}
+
+		err = syscall.Exec(commandArgs[0], commandArgs, os.Environ())
+	} else {
+		if debugMode {
+			fmt.Printf("exec.Command name %s \n", commandArgs[0])
+			fmt.Printf("exec.Command arg %s \n", commandArgs[1:])
+		}
+		//
+		cmd := exec.Command(commandArgs[0], commandArgs[1:]...)
+
+		stderr, err := cmd.StderrPipe()
+		if err != nil {
+			return err
+		}
+		stdout, err := cmd.StdoutPipe()
+		if err != nil {
+			return err
+		}
+
+		chStdOut := make(chan string)
+		chStdErr := make(chan string)
+
+		go func() {
+			merged := io.Reader(stdout)
+			scanner := bufio.NewScanner(merged)
+			for scanner.Scan() {
+				m := scanner.Text()
+				//fmt.Println("gofunc-stdout " + m)
+				text := strings.TrimSpace(m)
+				chStdOut <- text
+			}
+
+		}()
+
+		go func() {
+			merged := io.Reader(stderr)
+			scanner := bufio.NewScanner(merged)
+			for scanner.Scan() {
+				m := scanner.Text()
+				//fmt.Println("gofunc-stderr "+ m)
+				text := strings.TrimSpace(m)
+				chStdErr <- text
+			}
+		}()
+
+		go func() {
+			for {
+				select {
+				case line := <-chStdOut:
+					text := strings.TrimSpace(line)
+
+					if strings.Contains(text, "Failed to connect") {
+						fmt.Fprintf(os.Stderr, "%s\n", text)
+					} else {
+						fmt.Println(fmt.Sprintf("%s", text))
+					}
+				case line := <-chStdErr:
+					text := strings.TrimSpace(line)
+					fmt.Fprintf(os.Stderr, "%s\n", text)
+
+				}
+			}
+		}()
+
+		err = cmd.Start()
+		if err != nil {
+			logger.Errorf("command start: %s", err.Error())
+			return err
+		}
+
+		err = cmd.Wait()
+		if err != nil {
+			logger.Errorf("command wait: %s", err.Error())
+			return err
+		}
+	}
+
+	return err
 }
 
 func CheckError(err error) {

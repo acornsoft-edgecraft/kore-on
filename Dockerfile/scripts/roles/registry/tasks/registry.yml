@@ -71,11 +71,11 @@
 - name: Copy registry public certificate file
   when: registry_public_cert
   copy:
-    src: "{{ item.src }}"
+    src: "{{ inventory_dir }}/{{ item.src }}"
     dest: "{{ harbor_cert_dir }}/{{ item.dest }}"
   with_items:
-    - { src: "harbor.crt", dest: "harbor.crt" }
-    - { src: "harbor.key", dest: "harbor.key" }
+    - { src: "files/harbor.crt", dest: "harbor.crt" }
+    - { src: "files/harbor.key", dest: "harbor.key" }
 
 - name: Copy harbor.yml file
   template:

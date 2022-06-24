@@ -1,0 +1,70 @@
+name: Create a release and upload artifacts
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version (optional)'
+        required: true
+  push:
+    tags:
+      - v*
+jobs:
+  build_release:
+    name: build_release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set variables
+        id: variables
+        run: |
+          VERSION="${{ github.event.inputs.version }}"
+          if [[ $VERSION == "" ]]; then
+            GITHUB_REF="${{ github.ref }}"
+            if [[ $GITHUB_REF == refs/tags/* ]]; then
+              VERSION=${GITHUB_REF#refs/tags/}
+            elif [[ $GITHUB_REF == refs/heads/* ]]; then
+              VERSION="$(echo ${GITHUB_REF#refs/heads/} | sed -r 's#/+#-#g')-$(date '+%Y%m%d')"
+            elif [[ $GITHUB_REF == refs/pull/* ]]; then
+              VERSION="pr-${{ github.event.number }}"
+            fi
+          fi
+          echo ::set-output name=version::${VERSION}
+      - name: Check out the repository
+        uses: actions/checkout@v2
+      - name: Setup Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ^1.17.0
+      - name: Build artifacts
+        run: |
+          GOOS=linux GOARCH=amd64 go build -o bin/linux/amd64/koreonctl -ldflags="-X 'main.Version=${{ steps.variables.outputs.version }}' -X 'main.CommitId=$(git rev-parse HEAD)' -X 'main.BuildDate=$(date -u +%FT%T%Z)'" .
+          GOOS=darwin GOARCH=amd64 go build -o bin/darwin/amd64/koreonctl -ldflags="-X 'main.Version=${{ steps.variables.outputs.version }}' -X 'main.CommitId=$(git rev-parse HEAD)' -X 'main.BuildDate=$(date -u +%FT%T%Z)'" .
+          chmod +x bin/linux/amd64/koreonctl
+          chmod +x bin/darwin/amd64/koreonctl          
+      - name: Release
+        uses: actions/create-release@v1
+        id: create_release
+        with:
+          draft: false
+          prerelease: false
+          release_name: Release ${{ steps.variables.outputs.version }}
+          tag_name: ${{ steps.variables.outputs.version }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - name: Upload linux artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: bin/linux/amd64/koreonctl
+          asset_name: koreonctl-linux-amd64
+          asset_content_type: application/octet-stream
+      - name: Upload darwin artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: bin/darwin/amd64/koreonctl
+          asset_name: koreonctl-darwin-amd64
+          asset_content_type: application/octet-stream
