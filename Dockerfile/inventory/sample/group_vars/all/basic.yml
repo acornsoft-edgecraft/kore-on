@@ -49,6 +49,9 @@ nfs_volume_dir:
 # for internal load-balancer
 haproxy: true
 
+# Calico version
+calico_version: latest
+
 # Calico network mode
 vxlan_mode: false
 

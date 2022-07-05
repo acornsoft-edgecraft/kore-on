@@ -53,6 +53,9 @@ type BasicYaml struct {
 	Haproxy bool `yaml:"haproxy"`
 
 	//# Calico network mode
+	CalicoVersion bool `yaml:"calico_version"`
+
+	//# Calico network mode
 	VxlanMode bool `yaml:"vxlan_mode"`
 
 	//# option for preparing local-repo and registry (do not modify when fully understand this flag)
