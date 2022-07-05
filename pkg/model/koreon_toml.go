@@ -18,12 +18,17 @@ type KoreonToml struct {
 		Version          string   `toml:"version,omitempty"`
 		ContainerRuntime string   `toml:"container-runtime"`
 		KubeProxyMode    string   `toml:"kube-proxy-mode"`
-		VxlanMode        bool     `toml:"vxlan-mode"`
+		CalicoVersion    string   `toml:"calico-version"`
 		ServiceCidr      string   `toml:"service-cidr,omitempty"`
 		PodCidr          string   `toml:"pod-cidr,omitempty"`
 		NodePortRange    string   `toml:"node-port-range,omitempty"`
 		AuditLogEnable   bool     `toml:"audit-log-enable"`
 		ApiSans          []string `toml:"api-sans,omitempty"`
+
+		Calico struct {
+			Version   string `toml:"version,omitempty"`
+			VxlanMode bool   `toml:"vxlan-mode"`
+		} `toml:"calico,omitempty"`
 
 		Etcd struct {
 			IP            []string `toml:"ip,omitempty"`
