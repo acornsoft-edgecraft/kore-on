@@ -44,4 +44,5 @@ Documentation is in the `/docs` directory
 ## Required packages
  * docker runtime
 
-## 
+## go-ansible 
+Go-ansible is a package for running ansible-playbook or ansible commands from Golang applications.
