@@ -13,13 +13,15 @@ cluster-name = "koreon-cluster"
 version = "1.19.10"
 #container-runtime = "containerd" #docker,containerd
 #kube-proxy-mode = "ipvs"
-#vxlan-mode = true
 #service-cidr ="10.96.0.0/12"
 #pod-cidr="10.32.0.0/12"
 #node-port-range="30000-32767"
 #audit-log-enable = true
 #api-sans = ["192.168.1.9"]
 
+[kubernetes.calico]
+version = "latest"
+#vxlan-mode = true
 
 [kubernetes.etcd]
 ip = ["192.168.88.141"]
