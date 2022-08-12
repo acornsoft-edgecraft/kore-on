@@ -50,3 +50,4 @@ clean:
 template:
 	@echo "make template.go file ..."
 	sh -c "./make_template_go.sh"
+	
