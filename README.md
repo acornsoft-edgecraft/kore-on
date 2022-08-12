@@ -40,6 +40,7 @@ Documentation is in the `/docs` directory
   
 - Registry
   - [harbor](https://github.com/goharbor/harbor/releases) v2.3.0
+  - harbor proxy mirroring
   
 ## Required packages
  * docker runtime
