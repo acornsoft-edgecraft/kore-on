@@ -30,7 +30,7 @@ func NewProviderOpenstackCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   Name,
 		Short: "Launch the " + Name,
-		Long:  Name + " serves webhook endpoints for resources in the garden cluster.",
+		Long:  Name + " automates k8s installation tasks for openstack.",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return opts.run(cmd.Context())
