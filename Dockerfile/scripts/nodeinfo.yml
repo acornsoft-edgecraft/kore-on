@@ -1,7 +1,0 @@
----
-# This playbook add specific nodes a kubernetes cluster.
-
-- hosts: masters
-  gather_facts: false
-  roles:
-    - { role: node/detail, tags: nodeinfo }

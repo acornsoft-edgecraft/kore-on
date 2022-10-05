@@ -1,0 +1,26 @@
+---
+- name: yum clean
+  shell: "{{ item }}"
+  with_items:
+    - "rm -f /tmp/yum_save_tx*"
+    - "rm -f /var/lib/rpm/__*"
+    - "rpm --rebuilddb"
+    - "yum clean all"
+  #no_log: true
+
+- name: disable selinux
+  selinux:
+    policy: targeted
+    state: disabled
+  #no_log: true
+
+- name: Kernel configuration
+  include_tasks: cluster-centos.yml
+  when:
+    - inventory_hostname in groups['cluster']
+
+- name: Install nfs-utils
+  yum:
+    name: "nfs-utils"
+    state: present
+    update_cache: yes

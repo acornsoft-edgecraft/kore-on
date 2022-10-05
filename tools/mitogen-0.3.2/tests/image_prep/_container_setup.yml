@@ -1,0 +1,204 @@
+
+- hosts: all
+  strategy: linear
+  gather_facts: false
+  tasks:
+    - name: Install bootstrap packages
+      raw: |
+        set -o errexit
+        set -o nounset
+        if type -p yum; then
+          yum -y install {{ bootstrap_packages | join(' ') }}
+        else
+          apt-get -y update
+          apt-get -y --no-install-recommends install {{ bootstrap_packages | join(' ') }}
+        fi
+      when: bootstrap_packages | length
+
+- hosts: all
+  strategy: mitogen_free
+  # Resource limitation, my laptop freezes doing every container concurrently
+  serial: 4
+  # Can't gather facts before here.
+  gather_facts: true
+  vars:
+    distro: "{{ansible_distribution}}"
+  tasks:
+    - when: ansible_virtualization_type != "docker"
+      meta: end_play
+
+    - name: Ensure requisite apt packages are installed
+      apt:
+        name: "{{ common_packages + packages }}"
+        state: present
+        install_recommends: false
+        update_cache: true
+      when: ansible_pkg_mgr == 'apt'
+
+    - name: Ensure requisite yum packages are installed
+      yum:
+        name: "{{ common_packages + packages }}"
+        state: present
+        update_cache: true
+      when: ansible_pkg_mgr == 'yum'
+
+    - name: Ensure requisite dnf packages are installed
+      dnf:
+        name: "{{ common_packages + packages }}"
+        state: present
+        update_cache: true
+      when: ansible_pkg_mgr == 'dnf'
+
+    - name: Clean up package cache
+      vars:
+        clean_command:
+          apt: apt-get clean
+          yum: yum clean all
+          dnf: dnf clean all
+      command: "{{ clean_command[ansible_pkg_mgr] }}"
+      args:
+        warn: false
+
+    - name: Clean up apt package lists
+      shell: rm -rf {{item}}/*
+      with_items:
+      - /var/cache/apt
+      - /var/lib/apt/lists
+      when: ansible_pkg_mgr == 'apt'
+
+    - name: Configure /usr/bin/python
+      command: alternatives --set python /usr/bin/python3.8
+      args:
+        creates: /usr/bin/python
+      when: inventory_hostname in ["centos8"]
+
+    - name: Enable UTF-8 locale on Debian
+      copy:
+        dest: /etc/locale.gen
+        content: |
+          en_US.UTF-8 UTF-8
+          fr_FR.UTF-8 UTF-8
+      when: ansible_pkg_mgr == 'apt'
+
+    - name: Generate UTF-8 locale on Debian
+      shell: locale-gen
+      when: ansible_pkg_mgr == 'apt'
+
+    - name: Write Unicode into /etc/environment
+      copy:
+        dest: /etc/environment
+        content: "UNICODE_SNOWMAN=\u2603\n"
+
+    - name: Install prebuilt 'doas' binary
+      unarchive:
+        dest: /
+        src: ../data/docker/doas-debian.tar.gz
+
+    - name: Make prebuilt 'doas' binary executable
+      file:
+        path: /usr/local/bin/doas
+        mode: 'u=rwxs,go=rx'
+        owner: root
+        group: root
+
+    - name: Install doas.conf
+      copy:
+        dest: /etc/doas.conf
+        content: |
+          permit :mitogen__group
+          permit :root
+
+    - name: Set root user password and shell
+      user:
+        name: root
+        password: "{{ 'rootpassword' | password_hash('sha256') }}"
+        shell: /bin/bash
+
+    - name: Ensure /var/run/sshd exists
+      file:
+        path: /var/run/sshd
+        state: directory
+
+    - name: Generate SSH host key
+      command: ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key
+      args:
+        creates: /etc/ssh/ssh_host_rsa_key
+
+    - name: Ensure correct sudo group exists
+      group:
+        name: "{{sudo_group[distro]}}"
+
+    - name: Ensure /etc/sentinel exists
+      copy:
+        dest: /etc/sentinel
+        content: |
+          i-am-mitogen-test-docker-image
+
+    - copy:
+        dest: /etc/ssh/banner.txt
+        src: ../data/docker/ssh_login_banner.txt
+
+    - name: Ensure /etc/sudoers.d exists
+      file:
+        state: directory
+        path: /etc/sudoers.d
+        mode: 'u=rwx,go='
+
+    - name: Install test-related sudo rules
+      blockinfile:
+        path: /etc/sudoers
+        block: |
+          # https://www.toofishes.net/blog/trouble-sudoers-or-last-entry-wins/
+          %mitogen__sudo_nopw ALL=(ALL:ALL) NOPASSWD:ALL
+          mitogen__has_sudo_nopw ALL = (mitogen__pw_required) ALL
+          mitogen__has_sudo_nopw ALL = (mitogen__require_tty_pw_required) ALL
+
+          Defaults>mitogen__pw_required targetpw
+          Defaults>mitogen__require_tty requiretty
+          Defaults>mitogen__require_tty_pw_required requiretty,targetpw
+
+    - name: Prevent permission denied errors.
+      file:
+        path: /etc/sudoers.d/README
+        state: absent
+
+    - name: Install CentOS wheel sudo rule
+      lineinfile:
+        path: /etc/sudoers
+        regexp: '#* *%wheel +ALL=(ALL) +ALL'
+        line: "%wheel  ALL=(ALL)       ALL"
+      when: ansible_os_family == 'RedHat'
+
+    - name: Enable SSH banner
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        line: Banner /etc/ssh/banner.txt
+
+    - name: Allow remote SSH root login
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        line: PermitRootLogin yes
+        regexp: '.*PermitRootLogin.*'
+
+    - name: Allow remote SSH root login
+      lineinfile:
+        path: /etc/pam.d/sshd
+        regexp: '.*session.*required.*pam_loginuid.so'
+        line: session optional pam_loginuid.so
+
+    # Normally this would be removed by systemd-networkd-wait-online. If
+    # present ssh works only for root. The message displayed is
+    # > System is booting up. Unprivileged users are not permitted to log in
+    # > yet. Please come back later. For technical details, see pam_nologin(8).
+    - name: Remove login lockout
+      file:
+        path: /run/nologin
+        state: absent
+
+    - name: Install convenience script for running an straced Python
+      copy:
+        mode: 'u+rwx,go=rx'
+        dest: /usr/local/bin/pywrap
+        content: |
+         #!/bin/bash
+         exec strace -ff -o /tmp/pywrap$$.trace python2.7 "$@"'

@@ -1,0 +1,11 @@
+# This file is no longer used by CI jobs, it's mostly for interactive use.
+# Instead CI jobs grab the relevant sub-requirement.
+
+# mitogen_tests
+-r tests/requirements.txt
+
+# ansible_tests
+-r tests/ansible/requirements.txt
+
+# readthedocs
+-r docs/requirements.txt

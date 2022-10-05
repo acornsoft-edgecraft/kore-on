@@ -1,18 +1,22 @@
+/*
+Copyright © 2022 NAME HERE <EMAIL ADDRESS>
+*/
 package cmd
 
 import (
-	"github.com/hhkbp2/go-logging"
-	"github.com/spf13/cobra"
 	"os"
-)
 
-var logger = logging.GetLogger("command")
+	baremetal "cube/cmd/provider-baremetal"
+	common "cube/cmd/provider-common"
+
+	"github.com/spf13/cobra"
+)
 
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
-	Use:   "koreonctl",
+	Use:   "cube",
 	Short: "Install kubernetes cluster to on-premise system with registry and storage system",
-	Long:  `koreonctl, It install kubernetes cluster.`,
+	Long:  `cube, It install kubernetes cluster.`,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -25,11 +29,8 @@ func Execute() {
 
 func init() {
 	RootCmd.AddCommand(
-		versionCmd,
-		initCmd(),
-		createCmd(),
-		destroyCmd(),
-		applyCmd(),
-		prepareAirgapCmd(),
+		common.InitCmd(),
+		baremetal.CreateCmd(),
+		baremetal.ApplyCmd(),
 	)
 }

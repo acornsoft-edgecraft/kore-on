@@ -1,0 +1,15 @@
+# Test transfers made via FileService.
+---
+
+- name: integration/connection/put_large_file.yml
+  hosts: test-targets
+  gather_facts: no
+  any_errors_fatal: true
+  vars:
+    file_name: large-file
+    file_size: 512
+  tasks:
+  - include: _put_file.yml
+  tags:
+    - put_file
+    - put_large_file

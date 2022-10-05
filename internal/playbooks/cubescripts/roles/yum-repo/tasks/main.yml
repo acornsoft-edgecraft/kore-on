@@ -1,0 +1,14 @@
+---
+- include_tasks: closed-network.yml
+  when:
+    - closed_network
+
+- debug:
+    msg: "{{ param | default('') }}"
+
+- include_tasks: open-network.yml
+  vars:
+    # param: "{{ param | default('') }}"
+    param: ""
+  when:
+    - not closed_network

@@ -1,0 +1,6 @@
+---
+# Upgrade Kubernetes Cluster
+- hosts: cluster
+  become: true
+  roles:
+    - { role: upgrade, tags: upgrade }

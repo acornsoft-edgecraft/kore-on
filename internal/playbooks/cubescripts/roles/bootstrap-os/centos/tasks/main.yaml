@@ -1,0 +1,19 @@
+---
+- name: Bootstrap For CentOS
+  become: true
+  include: bootstrap-centos.yaml
+  tags: centos
+  when:
+    - ansible_distribution in ["CentOS", "RedHat"]
+
+- name: Bootstrap For Ubuntu
+  include_tasks: 
+    file: bootstrap-ubuntu.yaml
+    apply:
+      become: true
+  when:
+    - ansible_distribution in ["Ubuntu", "Debian"]
+
+- name: Initialize For Cluster
+  include_role:
+    name: initialize

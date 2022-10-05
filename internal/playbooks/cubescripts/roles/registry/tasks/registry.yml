@@ -1,0 +1,155 @@
+---
+# Create Registry directory
+- name: Registry | Create registry directory
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+    - "{{ install_dir }}/harbor"
+    - "{{ install_dir }}/cert"
+    - "{{ registry_data_dir }}/cert"
+    - "/etc/docker/certs.d/{{ registry_domain }}"
+
+# Upload harbor offline installer and extract it when not exist
+- name: Check harbor tgz existence
+  stat:
+    path: "{{ harbor_install_dir }}/{{ harbor_offline_file }}"
+  register: harbor_tgz_stat
+
+- name: Copy harbor offline installer and extract it
+  when: not harbor_tgz_stat.stat.exists
+  unarchive:
+    src: "{{ harbor_offline_installer_file }}"
+    dest: "{{ install_dir }}"
+
+# Upload docker-compose binary
+- name: Check docker-compose existence
+  stat:
+    path: /usr/local/bin/docker-compose
+  register: docker_compose_stat
+
+- name: Get docker-compose binary
+  when: not docker_compose_stat.stat.exists
+  copy:
+    src: "docker-compose-{{ docker_compose_version }}-Linux-x86_64"
+    dest: /usr/local/bin/docker-compose
+    mode: 0755
+  register: get_docker_compose
+
+- name: Create docker-compose symbolic link
+  when: not docker_compose_stat.stat.exists and get_docker_compose.changed
+  file:
+    src: /usr/local/bin/docker-compose
+    dest: /usr/bin/docker-compose
+    state: link
+
+# Create ssl certification files for harbor if not exist
+- name: Copy registry openssl conf file to create certificate
+  template:
+    src: "openssl.conf.j2"
+    dest: "{{ harbor_cert_work_dir }}/openssl.conf"
+  register: ssl_config
+
+- name: Check registry private ca file existence
+  stat:
+    path: "{{ harbor_cert_dir }}/ca.crt"
+  when: not registry_public_cert
+  register: registry_ca_stat
+
+- name: Create registry private certificate
+  when: not registry_public_cert and not registry_ca_stat.stat.exists
+  shell: "{{ item }}"
+  no_log: true
+  with_items:
+    - "openssl genrsa -out {{ harbor_cert_work_dir }}/ca.key 2048"
+    - "openssl req -x509 -new -nodes -key {{ harbor_cert_work_dir }}/ca.key -days {{ cert_validity_days }} -out {{ harbor_cert_dir }}/ca.crt -subj '/CN=harbor-ca' -extensions v3_ca -config {{ harbor_cert_work_dir }}/openssl.conf"
+    - "openssl genrsa -out {{ harbor_cert_dir }}/harbor.key 2048"
+    - "openssl req -new -key {{ harbor_cert_dir }}/harbor.key -subj '/CN=harbor' |
+      openssl x509 -req -CA {{ harbor_cert_dir }}/ca.crt -CAkey {{ harbor_cert_work_dir }}/ca.key -CAcreateserial -out {{ harbor_cert_dir }}/harbor.crt -days {{ cert_validity_days }} -extensions v3_req_server -extfile {{ harbor_cert_work_dir }}/openssl.conf"
+  register: registry_cert
+
+- name: Copy registry public certificate file
+  when: registry_public_cert
+  copy:
+    src: "{{ inventory_dir }}/{{ item.src }}"
+    dest: "{{ harbor_cert_dir }}/{{ item.dest }}"
+  with_items:
+    - { src: "files/harbor.crt", dest: "harbor.crt" }
+    - { src: "files/harbor.key", dest: "harbor.key" }
+
+- name: Copy harbor.yml file
+  template:
+    src: >-
+      {% if harbor_version is version('v2.2.1', '<=') -%}
+      harbor.yml.j2
+      {%- else -%}
+      harbor2.yml.j2
+      {%- endif %}
+    dest: "{{ harbor_install_dir }}/harbor.yml"
+
+# Install harbor
+- name: Run harbor install script
+  ansible.builtin.shell: >-
+    ./install.sh
+    {% if harbor_version is version('v2.2.1', '<=') -%}
+    --with-clair
+    {%- else %}
+    --with-trivy
+    {%- endif %}
+    --with-chartmuseum > {{ harbor_install_dir }}/harbor-install.log
+  args:
+    chdir: "{{ harbor_install_dir }}"
+
+- name: "Copy ca.crt file to /etc/docker/certs.d/{{ registry_domain }}"
+  when: not registry_public_cert
+  copy:
+    src: "{{ harbor_cert_dir }}/ca.crt"
+    dest: "/etc/docker/certs.d/{{ registry_domain }}"
+    remote_src: yes
+
+- stat:
+    path: "{{ harbor_install_dir }}/common/config/nginx/cert/ca.crt"
+  register: nginx_ca_stat
+
+- name: Create nginx cert directory
+  when: not registry_public_cert and not nginx_ca_stat.stat.exists
+  file:
+    path: "{{ harbor_install_dir }}/common/config/nginx/cert"
+    state: directory
+
+- name: Copy ca.crt to harbor nginx conf dir
+  when: not registry_public_cert and not nginx_ca_stat.stat.exists
+  copy:
+    src: "{{ harbor_cert_dir }}/ca.crt"
+    dest: "{{ harbor_install_dir }}/common/config/nginx/cert/ca.crt"
+    remote_src: yes
+
+- name: Add nginx location for ca.crt download
+  when: not registry_public_cert and not nginx_ca_stat.stat.exists
+  blockinfile:
+    path: "{{ harbor_install_dir }}/common/config/nginx/nginx.conf"
+    insertafter: "chunked_transfer_encoding on;"
+    marker: "## {mark} added by koreon --------------------"
+    block: |
+          location /ca.crt {
+            alias /etc/nginx/cert/ca.crt;
+          }
+
+- name: Reload nginx configuration
+  when: not registry_public_cert and not nginx_ca_stat.stat.exists
+  shell: "docker-compose exec -T proxy nginx -s reload"
+  args:
+    chdir: "{{ harbor_install_dir }}"
+
+- import_tasks: backup.yml
+  when: archive_repo
+
+# Scripts for restoring registry data when closed-network
+- name: Check harbor restore log existence
+  when: closed_network
+  stat:
+    path: "{{ install_dir }}/harbor-restore.log"
+  register: restore_log_stat
+
+- import_tasks: restore.yml
+  when: closed_network and not restore_log_stat.stat.exists

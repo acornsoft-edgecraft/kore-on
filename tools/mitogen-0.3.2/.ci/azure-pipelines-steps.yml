@@ -1,0 +1,22 @@
+
+parameters:
+  name: ''
+  pool: ''
+  sign: false
+
+steps:
+- task: UsePythonVersion@0
+  displayName: Install python
+  inputs:
+    versionSpec: '$(python.version)'
+  condition: ne(variables['python.version'], '')
+
+- script: python -mpip install tox
+  displayName: Install tooling
+
+- script: python -mtox -e "$(tox.env)"
+  displayName: "Run tests"
+  env:
+    AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+    AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
+    AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)

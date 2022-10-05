@@ -1,0 +1,34 @@
+# issue #397, #454: newer Ansibles rely on atexit to cleanup their temporary
+# directories. Ensure atexit handlers calling shutil.rmtree() run during runner
+# completion.
+
+- name: integration/runner/atexit.yml
+  hosts: test-targets
+  gather_facts: false
+  any_errors_fatal: false
+  vars:
+    path: /tmp/atexit-should-delete-this
+  tasks:
+
+    #
+    # Verify a run with a healthy atexit handler. Broken handlers cause an
+    # exception to be raised.
+    #
+
+    - custom_python_run_script:
+        script: |
+          import atexit, shutil
+          path = '{{path}}'
+          os.mkdir(path, int('777', 8))
+          atexit.register(shutil.rmtree, path)
+
+    - stat:
+        path: "{{path}}"
+      register: out
+
+    - assert:
+        that:
+        - not out.stat.exists
+        fail_msg: out={{out}}
+  tags:
+    - atexit

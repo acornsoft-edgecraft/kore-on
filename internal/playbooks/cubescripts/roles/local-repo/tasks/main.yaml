@@ -1,0 +1,14 @@
+---
+- name: Install Repo for OS
+  become: true
+  include: install-repo-centos.yaml
+  tags: centos
+  when: 
+    - ansible_distribution in ["CentOS", "RedHat"]
+
+- name: Install Repo for OS
+  become: true
+  include: install-repo-ubuntu.yaml
+  tags: ubuntu
+  when: 
+    - ansible_distribution in ["Ubuntu", "Debian"]

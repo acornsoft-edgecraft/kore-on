@@ -1,0 +1,27 @@
+# issue #527: catch exceptions from crashy modules.
+
+- name: integration/runner/crashy_new_style_module.yml
+  hosts: test-targets
+  tasks:
+    - custom_python_run_script:
+        script: kaboom
+      register: out
+      ignore_errors: true
+
+    - name: Check error report
+      vars:
+        msg_pattern: "MODULE FAILURE(?:\nSee stdout/stderr for the exact error)?"
+        # (?s) -> . matches any character, even newlines
+        tb_pattern:  "(?s)Traceback \\(most recent call last\\).+NameError: name 'kaboom' is not defined"
+      assert:
+        that:
+        - not out.changed
+        - out.rc == 1
+        # https://github.com/ansible/ansible/commit/62d8c8fde6a76d9c567ded381e9b34dad69afcd6
+        - out.msg is match(msg_pattern)
+        - (out.module_stdout == "" and out.module_stderr is search(tb_pattern))
+          or
+          (out.module_stdout is search(tb_pattern) and out.module_stderr is match("Shared connection to localhost closed."))
+        fail_msg: out={{out}}
+  tags:
+    - crashy_new_style_module
