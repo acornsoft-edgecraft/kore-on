@@ -1,0 +1,26 @@
+---
+
+# Install registry
+- hosts: registry
+  become: true
+  roles:
+    # - { role: yum-repo, tags: registry }
+    - { role: cri, tags: registry }
+    - { role: registry, tags: registry }
+    # - { role: post-install, tags: registry }
+
+# - hosts: registry
+#   become: true
+#   tasks:
+#     - name: Test Shell
+#       shell: >-
+#         ./install.sh
+#         --with-trivy
+#         --with-chartmuseum > /var/lib/knit/harbor/harbor-install.log
+#       args:
+#         chdir: "/var/lib/knit/harbor"
+#         # creates: "/var/lib/knit/harbor/harbor-install.log"
+#       register: my_output
+    
+#     - debug:
+#         msg: "{{ my_output }}"

@@ -1,0 +1,37 @@
+
+# issue #251: local_action with mitogen_via= builds wrong stack.
+
+- hosts: cd-newuser-normal-normal
+  tasks:
+    - meta: end_play
+      when: not is_mitogen
+
+    - local_action: mitogen_get_stack
+      become: true
+      register: out
+
+    - assert_equal:
+        left: out.result
+        right: [
+          {
+            'kwargs': {
+              'python_path': ["{{ansible_playbook_python}}"],
+            },
+            'method': 'local',
+          },
+          {
+            'enable_lru': true,
+            'kwargs': {
+              'connect_timeout': 10,
+              'python_path': ["{{ansible_playbook_python}}"],
+              'remote_name': null,
+              'password': null,
+              'username': 'root',
+              'sudo_path': 'sudo',
+              'sudo_args': ['-H', '-S', '-n'],
+            },
+            'method': 'sudo',
+          }
+        ]
+  tags:
+    - local_action

@@ -1,0 +1,7 @@
+---
+# Test debug
+- hosts: all
+  tasks:
+    - debug: 
+        # msg: "{{ 'aaa' if (ansible_os_family == 'redhat') else (ansible_os_family | lower) }}"
+        msg: "{{ false  if (ansible_os_family in ['RedHat']) }}"

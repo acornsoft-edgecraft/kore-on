@@ -1,9 +1,0 @@
----
-
-- hosts: all
-
-  tasks:
-    - name: ansibleplaybook-custom-transformer
-      debug:
-        msg: Your are running 'ansibleplaybook-custom-transformer' example
-

@@ -1,0 +1,14 @@
+---
+# Test Shell Scripts
+
+- hosts: registry
+  become: true
+  tasks:
+    - name: Test Shell
+      ansible.builtin.shell: ls
+      register: my_output
+      args:
+        chdir: "/var/lib/knit/harbor"
+    
+    - debug:
+        msg: "{{ my_output }}"

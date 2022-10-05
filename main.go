@@ -1,18 +1,23 @@
+/*
+Copyright © 2022 NAME HERE <EMAIL ADDRESS>
+*/
 package main
 
 import (
-	"kore-on/cmd"
-	"kore-on/pkg/conf"
+	"cube/cmd"
+	"fmt"
+	"time"
 )
- 
-var Version = "unknown_version"
-var CommitId = "unknown_commitid"
-var BuildDate = "unknown_builddate"
+
+func timeElapsed() func() {
+	start := time.Now()
+	return func() {
+		timeElapsed := time.Since(start)
+		fmt.Println("This function took", timeElapsed, "time")
+	}
+}
 
 func main() {
-	conf.Version = Version
-	conf.CommitId = CommitId
-	conf.BuildDate = BuildDate
-
+	defer timeElapsed()()
 	cmd.Execute()
 }

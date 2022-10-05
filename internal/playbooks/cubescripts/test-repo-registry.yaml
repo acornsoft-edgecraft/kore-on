@@ -1,0 +1,7 @@
+---
+## Test Registry repo 중복 제거
+- hosts: registry
+  become: true
+  tasks:
+    - debug:
+        msg: "{{ not  inventory_hostname in groups['node'] }}"

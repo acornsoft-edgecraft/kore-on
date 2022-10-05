@@ -1,0 +1,122 @@
+---
+# For ubuntu     -------------------------------------------------------------
+- name: Add Kubernetes APT GPG key
+  when:
+    - ansible_os_family in ["Ubuntu", "Debian"]
+    - not closed_network
+  apt_key:
+    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    state: present
+
+- name: Adding Kubernetes repository
+  when:
+    - ansible_os_family in ["Ubuntu", "Debian"]
+    - not closed_network
+  apt_repository:
+    repo: deb http://apt.kubernetes.io/ kubernetes-xenial main
+    state: present
+    filename: 'kubernetes'
+
+- name: Add Docker-ce APT GPG key
+  when:
+    - ansible_os_family in ["Ubuntu", "Debian"]
+    - not closed_network
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+
+- name: Adding Docker-ce repository
+  when:
+    - ansible_os_family in ["Ubuntu", "Debian"]
+    - not closed_network
+  apt_repository:
+    repo: deb [arch=amd64] https://download.docker.com/linux/{{ansible_distribution|lower}} {{ansible_distribution_release}} stable
+    state: present
+    filename: 'docker'
+# ----------------------------------------------------------------
+
+# For Centos     -------------------------------------------------------------
+- name: Yum Repo update
+  vars:
+    found_repo_files: []
+  block:
+    - name: Backup /etc/yum.repos.d directory
+      copy:
+        src: "/etc/yum.repos.d"
+        dest: "/etc/yum.repos.d.bak"
+        remote_src: yes
+        owner: root
+        mode: 0755
+    - name: Find the files
+      find:
+        paths: "/etc/yum.repos.d"
+        file_type: file
+        recurse: yes
+        patterns:
+          - 'CentOS-*.repo'
+      register: repos_d
+    - name: Change CentOS baseurl
+      shell: "{{ item }}"
+      loop:
+        - "sed -i 's/^mirrorlist/#mirrorlist/' /etc/yum.repos.d/CentOS-*"
+        - "sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.epel.cloud|g' /etc/yum.repos.d/CentOS-*"
+      when:
+        - repos_d.matched
+        - ansible_os_family in ["CentOS"]
+    # - name: Compile repository list
+    #   set_fact:
+    #     found_repo_files: "{{ found_repo_files }} + [ '{{ item.path }}' ]"
+    #   loop_control:
+    #     label: "{{ item.path }}"
+    #   with_items:
+    #     - "{{ repos_d.files }}"
+    # - debug:
+    #     msg: "{{ found_repo_files }}"
+  when:
+    - ansible_os_family in ["CentOS", "RedHat"]
+    - not inventory_hostname in groups['node']
+
+- name: Install epel
+  when:
+    - ansible_os_family in ["CentOS", "RedHat"]
+    - not closed_network
+  yum:
+    name: epel-release
+    state: latest
+
+- name: Adding Kubernetes repository
+  when:
+    - ansible_os_family in ["CentOS", "RedHat"]
+    - not closed_network
+  yum_repository:
+    name: Kubernetes
+    description: Kubernetes repo
+    file: kubernetes
+    baseurl: "http://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64"
+    enabled: yes
+    gpgcheck: yes
+    repo_gpgcheck: yes
+    exclude: kube*
+    gpgkey:
+      - "http://packages.cloud.google.com/yum/doc/yum-key.gpg"
+      - "http://packages.cloud.google.com/yum/doc/rpm-package-key.gpg"
+  notify: yum-clean-metadata
+
+- debug:
+    msg: "{{ param }}"
+
+- name: Adding Docker-ce repository
+  yum_repository:
+    name: Docker-CE-Stable
+    description: Docker-ce repo
+    file: docker
+    baseurl: https://download.docker.com/linux/centos/$releasever/$basearch/stable
+    enabled: yes
+    gpgcheck: yes
+    repo_gpgcheck: no
+    gpgkey: https://download.docker.com/linux/centos/gpg
+  notify: yum-clean-metadata
+  when:
+    - ansible_os_family in ["CentOS", "RedHat"]
+    - not closed_network
+# ----------------------------------------------------------------

@@ -1,0 +1,11 @@
+\.idea/
+\.DS_Store
+cubescripts.iml
+
+scripts/
+sec_install/
+examples/
+
+deploy_test/
+roles/addon/defaults/main.yaml.org
+roles/acloud/defaults/main-somac.yaml

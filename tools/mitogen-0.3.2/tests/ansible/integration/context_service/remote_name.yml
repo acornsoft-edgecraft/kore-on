@@ -1,0 +1,34 @@
+# issue #581: ensure mitogen_mask_remote_name is respected.
+
+- name: integration/context_service/remote_name.yml
+  hosts: test-targets[0]
+  any_errors_fatal: true
+  tasks:
+  - meta: end_play
+    when: not is_mitogen
+
+  # Too much hassle to make this work for OSX
+  - meta: end_play
+    when: ansible_system != 'Linux'
+
+  - shell: 'cat /proc/$PPID/cmdline | tr \\0 \\n'
+    register: out
+  - debug: var=out
+
+  - assert:
+      that:
+      - out.stdout is match('.*python([0-9.]+)?\(mitogen:[a-z]+@[^:]+:[0-9]+\)')
+      fail_msg: out={{out}}
+
+  - shell: 'cat /proc/$PPID/cmdline | tr \\0 \\n'
+    register: out
+    vars:
+      mitogen_mask_remote_name: true
+  - debug: var=out
+
+  - assert:
+      that:
+      - out.stdout is match('.*python([0-9.]+)?\(mitogen:ansible\)')
+      fail_msg: out={{out}}
+  tags:
+    - remote_name
