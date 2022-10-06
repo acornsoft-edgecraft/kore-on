@@ -1,0 +1,37 @@
+---
+- name: set mydistribution
+  ansible.builtin.set_fact:
+    mydistribution: "{{ 'centos' if (ansible_os_family == 'RedHat') else (ansible_os_family | lower) }}"
+
+- name: Add signing key
+  ansible.builtin.rpm_key:
+    key: "https://download.docker.com/linux/{{ mydistribution }}/gpg"
+    state: present
+  when:
+    - ansible_os_family is defined
+    - ansible_os_family in ['Debian', 'Ubuntu']
+
+- name: Add docker repository into repo.d list
+  ansible.builtin.yum_repository:
+    name: Docker-CE-Stable
+    description: Docker-ce repository
+    file: docker-ce
+    baseurl: "https://download.docker.com/linux/{{ mydistribution }}/$releasever/$basearch/stable"
+    enabled: yes
+    gpgcheck: yes
+    repo_gpgcheck: no
+    gpgkey: "https://download.docker.com/linux/{{ mydistribution }}/gpg"
+
+- name: Add kubernetes repository into repo.d list for ["CentOS", "RedHat"]
+  ansible.builtin.yum_repository:
+    name: Kubernetes
+    description: Kubernetes repository
+    file: kubernetes
+    baseurl: "https://packages.cloud.google.com/yum/repos/kubernetes-el7-$basearch"
+    enabled: yes
+    gpgcheck: yes
+    repo_gpgcheck: no
+    exclude: kubelet kubeadm kubectl
+    gpgkey:
+      - http://packages.cloud.google.com/yum/doc/yum-key.gpg
+      - http://packages.cloud.google.com/yum/doc/rpm-package-key.gpg

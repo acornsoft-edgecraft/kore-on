@@ -1,10 +1,11 @@
 ---
 - name: Bootstrap For CentOS
-  become: true
-  include: bootstrap-centos.yaml
-  tags: centos
+  include_tasks: 
+    file: bootstrap-centos.yaml
+    apply:
+      tags: centos
   when:
-    - ansible_distribution in ["CentOS", "RedHat"]
+    - ansible_distribution in ["CentOS"]
 
 - name: Bootstrap For Ubuntu
   include_tasks: 
