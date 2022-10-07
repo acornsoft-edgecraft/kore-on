@@ -1,0 +1,30 @@
+---
+- name : Add repository into repo.d list
+  ansible.builtin.include_role:
+    name: package-down/add-repo
+
+- name: Create local repository directory
+  file:
+    path: "/data/localrepo"
+    state: directory
+    owner: "{{ loacl_repo_user | default('root') }}"
+    group: "{{ loacl_repo_group | default('root') }}"
+    mode: "{{ loacl_repo_umask | default('0755') }}"
+  register: localrepo
+
+- debug:
+    msg: "{{ ansible_pkg_mgr }}"
+
+# - debug:
+#     msg: "{{ item.key }}{{ '-' if (item.value) }}{{ item.value }}"
+#   with_dict: "{{ packages }}"
+
+- name: Download Packages
+  ansible.builtin.yum:
+    name: "{{ item.key }}{{ '-' if (item.value) and (item.value != 'latest') }}{{ None if (item.value == 'latest') else (item.value)  }}"
+    state: latest
+    download_only: yes
+    download_dir: "{{ localrepo.path }}"
+  with_dict: "{{ packages }}"
+  when:
+    - not localrepo.failed

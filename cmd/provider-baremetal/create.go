@@ -19,6 +19,7 @@ type strCreateCmd struct {
 	inventory     string
 	playbookFiles []string
 	privateKey    string
+	user          string
 }
 
 func CreateCmd() *cobra.Command {
@@ -34,9 +35,9 @@ func CreateCmd() *cobra.Command {
 		},
 	}
 
-	create.inventory = "./internal/playbooks/cubescripts/inventories/inventory.ini"
+	create.inventory = "./internal/playbooks/koreon-playbook/inventories/inventory.ini"
 	create.playbookFiles = []string{
-		"./internal/playbooks/cubescripts/cluster.yaml",
+		"./internal/playbooks/koreon-playbook/cluster.yaml",
 	}
 
 	f := cmd.Flags()
@@ -44,6 +45,7 @@ func CreateCmd() *cobra.Command {
 	f.BoolVarP(&create.step, "step", "", false, "step")
 	f.BoolVarP(&create.dryRun, "dry-run", "d", false, "dryRun")
 	f.StringVarP(&create.privateKey, "private-key", "p", "", "Specify ansible playbook privateKey")
+	f.StringVarP(&create.user, "user", "u", "", "SSH login user")
 
 	return cmd
 }
@@ -58,6 +60,14 @@ func (c *strCreateCmd) run() error {
 		return fmt.Errorf("[ERROR]: %s", "To run ansible-playbook an inventory must be specified")
 	}
 
+	if len(c.privateKey) < 1 {
+		return fmt.Errorf("[ERROR]: %s", "To run ansible-playbook an privateKey must be specified")
+	}
+
+	if len(c.user) < 1 {
+		return fmt.Errorf("[ERROR]: %s", "To run ansible-playbook an ssh login user must be specified")
+	}
+
 	// vars, err := varListToMap(extravars)
 	// if err != nil {
 	// 	return errors.New("(commandHandler)", "Error parsing extra variables", err)
@@ -65,8 +75,8 @@ func (c *strCreateCmd) run() error {
 
 	ansiblePlaybookConnectionOptions := &options.AnsibleConnectionOptions{
 		// Connection: "ssh",
-		PrivateKey: "/Users/dongmook/DEV_WORKS/cert_ssh/rhel/cloud-user",
-		User:       "cloud-user",
+		PrivateKey: c.privateKey,
+		User:       c.user,
 	}
 	// if connectionLocal {
 	// 	ansiblePlaybookConnectionOptions.Connection = "local"

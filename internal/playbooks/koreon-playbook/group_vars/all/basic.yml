@@ -18,7 +18,7 @@ node_port_range: 30000-32767
 api_sans: [192.168.77.234]
 
 # for air gap installation
-closed_network: true
+closed_network: false
 local_repository:
 local_repository_archieve_file:
 

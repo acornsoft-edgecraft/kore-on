@@ -1,0 +1,13 @@
+---
+# Air-gap Local Repository
+- hosts: package-download
+  become: true
+  gather_facts: true
+  vars_files:
+    - group_vars/package-download/{{ ansible_os_family | lower }}.yaml
+  tasks:
+    - name: Air-Gap | Package Download
+      include_role:
+        name: kore-on/air-gap
+      # when:
+      #   - a is defined
