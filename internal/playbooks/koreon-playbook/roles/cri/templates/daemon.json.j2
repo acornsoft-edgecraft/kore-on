@@ -5,7 +5,8 @@
   "log-opts": {
     "max-size": "100m"
   },
-  "storage-driver": "overlay2"
+  "storage-driver": "overlay2",
+  "iptables": false
 {%-  if ansible_os_family in ["CentOS", "RedHat"] -%}
   ,
   "storage-opts": [

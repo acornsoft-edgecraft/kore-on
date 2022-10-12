@@ -1,0 +1,27 @@
+---
+- hosts: masters[0]
+  gather_facts: false
+  become: yes
+  vars:
+    remotefile: "/Users/dongmook/github-workspace/edgecraft/kore-on/tmp/metrics-server.crt"
+
+  tasks:
+  - name: MetricsServer | Kubelet CSR Pending find
+    shell: "kubectl --kubeconfig={{ kubeadminconfig }} get csr | grep Pending | awk '{print $1}'"
+    delegate_to: "{{ groups['masters'][0] }}"
+    run_once: true
+    register: kubelet_csr
+
+  - debug:
+      msg: "{{ item }}"
+    with_items: "{{ kubelet_csr.stdout }}"
+    when:
+      - kubelet_csr.stdout != ""
+
+  - name: MetricsServer | Kubelet CSR approve
+    command: "kubectl --kubeconfig={{ kubeadminconfig }} certificate approve {{ item }}"
+    with_items: "{{ kubelet_csr.stdout }}"
+    delegate_to: "{{ groups['masters'][0] }}"
+    run_once: true
+    when:
+      - kubelet_csr.stdout != ""

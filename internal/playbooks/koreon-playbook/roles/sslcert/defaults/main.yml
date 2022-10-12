@@ -1,3 +1,9 @@
 ---
 #openssl_extra_ips: ["14.52.93.202"]
 openssl_extra_ips: ""
+
+key_size: 2048
+key_type: RSA # Others include DSA, ECC, Ed25519, Ed448, X25519, X448
+
+dns_server:
+  - metrics-server.kube-system.svc

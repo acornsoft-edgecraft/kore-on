@@ -32,6 +32,12 @@
 # For Centos
 # yum repository에 enabled=no로 되어 있으므로 enablerepo=Docker-CE-Stable 로 활성화 한다.
 # disable_gpg_check=yes 로 설정하여 GPG key 정확성을 check하는 인터렉션을 방지한다.
+- name: yum clean packages
+  command: yum clean packages
+  ignore_errors: true
+  when:
+    - ansible_distribution in ["CentOS", "RedHat"]
+
 - name: Install Docker (Centos, RedHat)
   when:
     - ansible_distribution in ["CentOS", "RedHat"]
@@ -43,15 +49,14 @@
     disable_gpg_check: yes
 
 - name: Install Docker (Centos, RedHat)
-  when:
-    - ansible_distribution in ["CentOS", "RedHat"]
-    - not closed_network
   yum:
     name: ['docker-ce-19.03.15', 'docker-ce-cli-19.03.15']
     state: present
-    update_cache: yes
     enablerepo: Docker-CE-Stable
     disable_gpg_check: yes
+  when:
+    - ansible_distribution in ["CentOS", "RedHat"]
+    - not closed_network
 
 # If GPU node  -------------------------------------------------------------
 #  Refer to https://nvidia.github.io/nvidia-docker/

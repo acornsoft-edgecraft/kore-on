@@ -1,0 +1,7 @@
+---
+# install ssl cert
+- hosts: sslhost
+  become: true
+  gather_facts: false
+  roles:
+    - { role: sslcert, tags: sslcert }

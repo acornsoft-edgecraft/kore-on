@@ -1,6 +1,6 @@
 ---
 # Test debug
-- hosts: all
+- hosts: package-download
   become: true
   gather_facts: false
   tasks:

@@ -1,4 +1,4 @@
-apiVersion: kubeadm.k8s.io/v1beta2
+apiVersion: kubeadm.k8s.io/v1beta3
 kind: InitConfiguration
 localAPIEndpoint:
   advertiseAddress: {{ hostvars[inventory_hostname]['ip'] | default(hostvars[inventory_hostname]['ansible_default_ipv4']['address']) }}
@@ -8,7 +8,7 @@ nodeRegistration:
   criSocket: /run/containerd/containerd.sock
 {% endif %}
 ---
-apiVersion: kubeadm.k8s.io/v1beta2
+apiVersion: kubeadm.k8s.io/v1beta3
 kind: ClusterConfiguration
 etcd:
   external:
@@ -29,7 +29,7 @@ etcd:
     keyFile: {{ cert_dir }}/etcd/server.key
 dns:
   type: CoreDNS
-{% if closed_network and k8s_version is version('1.21.0','>=') %}
+{% if closed_network and k8s_version is version('v1.21.0','>=') %}
   imageRepository: {{ registry_domain }}/coredns
   imageTag: v1.8.0
 {% endif %}
@@ -107,3 +107,5 @@ nodeStatusUpdateFrequency: 4s
 readOnlyPort: 0
 clusterDNS:
 - {{ dns_ip }}
+rotateCertificates: true
+serverTLSBootstrap: true

@@ -45,7 +45,7 @@
 - name: Install Kubernetes packages (kubectl, kubelet)
   when: ansible_os_family in ["Ubuntu", "Debian"]
   apt:
-    name: ['kubectl={{ k8s_version }}-00', 'kubelet={{ k8s_version }}-00', 'kubeadm={{ k8s_version }}-00']
+    name: ['kubectl={{ k8s_version_int }}-00', 'kubelet={{ k8s_version_int }}-00', 'kubeadm={{ k8s_version_int }}-00']
     state: present
 
 - name: Prevent auto-upgrade Kubernetes packages
@@ -65,7 +65,7 @@
     - ansible_distribution in ["CentOS", "RedHat"]
     - not closed_network
   yum:
-    name: ['kubectl-{{ k8s_version }}', 'kubelet-{{ k8s_version }}', 'kubeadm-{{ k8s_version }}']
+    name: ['kubectl-{{ k8s_version_int }}', 'kubelet-{{ k8s_version_int }}', 'kubeadm-{{ k8s_version_int }}']
     state: present
     update_cache: yes
     disable_excludes: Kubernetes
@@ -75,7 +75,7 @@
     - ansible_distribution in ["CentOS", "RedHat"]
     - closed_network
   yum:
-    name: ['kubectl-{{ k8s_version }}', 'kubelet-{{ k8s_version }}', 'kubeadm-{{ k8s_version }}']
+    name: ['kubectl-{{ k8s_version_int }}', 'kubelet-{{ k8s_version_int }}', 'kubeadm-{{ k8s_version_int }}']
     state: present
     update_cache: yes
 # ----------------------------------------------------------------------------
@@ -119,7 +119,7 @@
 
 - name: Copy kubeadm conf file
   template:
-    src: "kubeadm.yaml.j2"
+    src: "{{ 'kubernetes/kubeadm.yaml.j2' if (k8s_version is version('v1.24.1', '<')) else 'kubernetes/kubeadm-'+(k8s_major_version)+'.yaml.j2' }}"
     dest: "{{ kube_config_dir }}/kubeadm.yaml"
   notify:
    - Master | wait for kube-scheduler
@@ -318,7 +318,7 @@
 # Untaint Master node ---------------------------------------------------------
 - name: ADDON | Untaint master node
   when: not master_isolated
-  shell: "kubectl --kubeconfig={{ kubeadminconfig }} taint nodes {{ item }} node-role.kubernetes.io/master:NoSchedule-"
+  shell: "kubectl --kubeconfig={{ kubeadminconfig }} taint nodes {{ item }} node-role.kubernetes.io/control-plane:NoSchedule-"
   with_items: "{{ node_name }}"
   failed_when: false
 
@@ -351,22 +351,43 @@
   run_once: true
 # ---------------------------------------------------------------------------
 
+# MetricsServer ------------------------------------------------------------------
+- name: MetricsServer | Kubelet CSR Pending find
+  shell: "kubectl --kubeconfig={{ kubeadminconfig }} get csr | grep Pending | awk '{print $1}'"
+  delegate_to: "{{ groups['masters'][0] }}"
+  run_once: true
+  register: kubelet_csr
+
+- name: MetricsServer | Kubelet CSR approve
+  command: "kubectl --kubeconfig={{ kubeadminconfig }} certificate approve {{ item }}"
+  with_items: "{{ kubelet_csr.stdout }}"
+  delegate_to: "{{ groups['masters'][0] }}"
+  run_once: true
+  when:
+    - kubelet_csr.stdout != ""
+
 - name: MetricsServer | Copy metrics-server config file
   when: metrics_server
   template:
     src: "{{ item.src }}"
     dest: "{{ kube_addon_dir }}/{{ item.dest }}"
   with_items:
-  - { src: "metrics-server/metrics-server-rbac.yaml.j2", dest: "metrics-server/metrics-server-rbac.yaml" }
-  - { src: "metrics-server/metrics-server-controller.yaml.j2", dest: "metrics-server/metrics-server-controller.yaml" }
+  - { src: "metrics-server/metrics-server-v0.6.1.yaml.j2", dest: "metrics-server/metrics-server.yaml" }
+  delegate_to: "{{ groups['masters'][0] }}"
+  run_once: true
+
+- name: MetricsServer | Create MetricsServer Secret
+  shell: >
+    kubectl -n kube-system --kubeconfig={{ kubeadminconfig }} create secret tls metrics-server-certs
+    --cert="{{ cert_dir }}/metrics-server/metrics-server.crt"
+    --key="{{ cert_dir }}/metrics-server/metrics-server.key"
   delegate_to: "{{ groups['masters'][0] }}"
   run_once: true
 
 - name: MetricsServer | Create MetricsServer
   shell: "kubectl apply --kubeconfig={{ kubeadminconfig }} -f {{ kube_addon_dir }}/{{ item }}"
   with_items:
-  - "metrics-server/metrics-server-rbac.yaml"
-  - "metrics-server/metrics-server-controller.yaml"
+  - "metrics-server/metrics-server.yaml"
   delegate_to: "{{ groups['masters'][0] }}"
   run_once: true
 # ---------------------------------------------------------------------------

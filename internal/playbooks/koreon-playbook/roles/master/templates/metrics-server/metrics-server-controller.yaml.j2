@@ -63,8 +63,10 @@ spec:
       tolerations:
       - key: node-role.kubernetes.io/master
         effect: NoSchedule
+      - key: node-role.kubernetes.io/control-plane
+        effect: NoSchedule
       nodeSelector:
-        node-role.kubernetes.io/master: ''
+        kubernetes.io/os: linux
       priorityClassName: system-cluster-critical
       serviceAccountName: metrics-server
       containers:
@@ -75,7 +77,7 @@ spec:
         - --kubelet-use-node-status-port
         - --metric-resolution=15s
         - --kubelet-insecure-tls
-        image: k8s.gcr.io/metrics-server/metrics-server:v0.5.0
+        image: gcr.io/k8s-staging-metrics-server/metrics-server:master
         imagePullPolicy: IfNotPresent
         livenessProbe:
           failureThreshold: 3

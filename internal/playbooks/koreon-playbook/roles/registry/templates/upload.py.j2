@@ -4,7 +4,7 @@ import requests, json, os
 
 if __name__ == '__main__':
 
-    k8s_versions = [ "{{ kube_support_versions|join('","') }}" ]
+    k8s_versions = [ "{{ kube_support_versions | list }}" ]
     registry_version = "{{ harbor_version }}"
     registry_ip = "{{ registry }}"
     registry_id = "{{ registry_id }}"
@@ -36,10 +36,10 @@ if __name__ == '__main__':
     ]
 
     for ver in k8s_versions:
-        images.append(f"k8s.gcr.io/kube-apiserver:v{ver}")
-        images.append(f"k8s.gcr.io/kube-controller-manager:v{ver}")
-        images.append(f"k8s.gcr.io/kube-scheduler:v{ver}")
-        images.append(f"k8s.gcr.io/kube-proxy:v{ver}")
+        images.append(f"k8s.gcr.io/kube-apiserver:{ver}")
+        images.append(f"k8s.gcr.io/kube-controller-manager:{ver}")
+        images.append(f"k8s.gcr.io/kube-scheduler:{ver}")
+        images.append(f"k8s.gcr.io/kube-proxy:{ver}")
 
     headers = {
         'accept': 'application/json',

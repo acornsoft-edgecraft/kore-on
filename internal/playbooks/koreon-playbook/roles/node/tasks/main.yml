@@ -14,7 +14,7 @@
 - name: Install Kubernetes packages (kubectl, kubelet)
   when: ansible_os_family in ["Ubuntu", "Debian"] and not is_kube_master
   apt:
-    name: ['kubectl={{ k8s_version }}-00', 'kubelet={{ k8s_version }}-00', 'kubeadm={{ k8s_version }}-00']
+    name: ['kubectl={{ k8s_version_int }}-00', 'kubelet={{ k8s_version_int }}-00', 'kubeadm={{ k8s_version_int }}-00']
     state: present
 
 - name: Prevent auto-upgrade Kubernetes packages
@@ -35,7 +35,7 @@
     - not closed_network
     - not is_kube_master
   yum:
-    name: ['kubectl-{{ k8s_version }}', 'kubelet-{{ k8s_version }}', 'kubeadm-{{ k8s_version }}']
+    name: ['kubectl-{{ k8s_version_int }}', 'kubelet-{{ k8s_version_int }}', 'kubeadm-{{ k8s_version_int }}']
     state: present
     update_cache: yes
     disable_excludes: Kubernetes
@@ -46,7 +46,7 @@
     - closed_network
     - not is_kube_master
   yum:
-    name: ['kubectl-{{ k8s_version }}', 'kubelet-{{ k8s_version }}', 'kubeadm-{{ k8s_version }}']
+    name: ['kubectl-{{ k8s_version_int }}', 'kubelet-{{ k8s_version_int }}', 'kubeadm-{{ k8s_version_int }}']
     state: present
     update_cache: yes
 # ----------------------------------------------------------------------------

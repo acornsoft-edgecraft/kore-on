@@ -1,6 +1,6 @@
 # ipunt key is package name
 # input value is package version if empty then latest
 
-pacakages:
+packages:
   ## common packages
   - nfs-utls:

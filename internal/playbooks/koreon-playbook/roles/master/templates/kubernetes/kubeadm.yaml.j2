@@ -30,7 +30,7 @@ etcd:
 dns:
   type: CoreDNS
 {% if closed_network and k8s_version is version('v1.21.0','>=') %}
-  imageRepository: {{ registry_domain }}
+  imageRepository: {{ registry_domain }}/coredns
   imageTag: v1.8.0
 {% endif %}
 networking:
@@ -52,6 +52,7 @@ apiServer:
     feature-gates: {{ kube_feature_gates|join(',') }}
     default-not-ready-toleration-seconds: "30"
     default-unreachable-toleration-seconds: "30"
+    service-node-port-range: {{ node_port_range }} 
 {% if encrypt_secret %}
     encryption-provider-config: /etc/kubernetes/secrets_encryption.yaml
 {% endif %}
@@ -106,3 +107,5 @@ nodeStatusUpdateFrequency: 4s
 readOnlyPort: 0
 clusterDNS:
 - {{ dns_ip }}
+rotateCertificates: true
+serverTLSBootstrap: true
