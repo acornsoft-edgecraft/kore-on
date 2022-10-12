@@ -124,6 +124,7 @@
     - nat
     - mangle
   when: flush_iptables|bool
+  failed_when: false
   tags: ['iptables']
 
 - name: Clear IPVS virtual server table

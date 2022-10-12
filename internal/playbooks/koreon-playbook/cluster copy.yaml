@@ -1,4 +1,85 @@
 ---
-- hosts: all
+# This playbook deploys a kubernetes cluster with platform applications
+
+# Configure local-repository for air-gap env
+- hosts: registry
+  become: true
   roles:
-    - { role: bootstrap-os }
+    - { role: yum-repo/local-repo, tags: yum-repo }
+
+# Configure system package repository
+- hosts: all
+  become: true
+  roles:
+    - { role: yum-repo, tags: yum-repo }
+    
+- hosts: cluster
+  become: true
+  roles:
+    - { role: initialize, tags: initialize }
+
+# Install cri
+- hosts: cluster
+  become: true
+  roles:
+    - { role: cri, tags: cri, vars: { param: "cluster" } }
+
+# Configure storage
+- hosts: storage
+  become: true
+  roles:
+    - { role: storage, tags: storage }
+
+# Install registry
+- hosts: registry
+  become: true
+  roles:
+    - { role: yum-repo, tags: registry, vars: { param: "registry" } }
+    - { role: cri, tags: registry, vars: { param: "registry" } }
+    - { role: registry, tags: registry }
+    - { role: post-install, tags: registry }
+
+# install ssl cert
+- hosts: sslhost
+  become: true
+  gather_facts: false
+  roles:
+    - { role: sslcert, tags: sslcert }
+
+# Install etcd
+- hosts: etcd
+  become: true
+  roles:
+    - { role: etcd, tags: etcd }
+
+# install haproxy
+- hosts: node
+  become: true
+  roles:
+    - { role: haproxy, tags: haproxy }
+
+# install kubernetes master services
+- hosts: masters
+  become: true
+  roles:
+    - { role: master, tags: master }
+
+# install kubernetes on the nodes
+- hosts: node
+  become: true
+  roles:
+    - { role: node, tags: node }
+
+# install kubernetes addon services
+- hosts: masters[0]
+  become: true
+  gather_facts: false
+  roles:
+    - { role: addon, tags: addon }
+
+# Post-install
+- hosts: masters:node
+  become: true
+  gather_facts: false
+  roles:
+    - { role: post-install, tags: post-install }

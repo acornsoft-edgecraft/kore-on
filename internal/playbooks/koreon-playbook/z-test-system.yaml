@@ -1,0 +1,13 @@
+---
+- hosts: masters
+  become: true
+  tasks:
+    - name: check service
+      service_facts:
+
+    - name: debug
+      debug:
+        msg: "asdfasdf"
+      with_dict: "{{ ansible_facts.services }}"
+      when:
+        - item.key in ['sshd.service']

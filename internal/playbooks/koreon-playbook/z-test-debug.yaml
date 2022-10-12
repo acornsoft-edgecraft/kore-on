@@ -1,7 +1,8 @@
 ---
 # Test debug
-- hosts: all
+- hosts: registry
   tasks:
     - debug: 
         # msg: "{{ 'aaa' if (ansible_os_family == 'redhat') else (ansible_os_family | lower) }}"
-        msg: "{{ false  if (ansible_os_family in ['RedHat']) }}"
+        # msg: "{{ false  if (ansible_os_family in ['RedHat']) }}"
+        msg: "{{ install_dir }}/harbor"

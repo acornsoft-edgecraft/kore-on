@@ -9,3 +9,6 @@ harbor_install_dir: "{{ install_dir }}/harbor"
 harbor_offline_installer_file: harbor-offline-installer-{{ harbor_version }}.tgz
 harbor_offline_file: harbor.{{ harbor_version }}.tar.gz
 harbor_download_url: https://github.com/goharbor/harbor/releases/download/{{ harbor_version }}/{{ harbor_offline_installer_file }}
+
+# Get kubernetes version type int
+k8s_version_int: "{{ k8s_version | regex_replace('^v', '') }}"

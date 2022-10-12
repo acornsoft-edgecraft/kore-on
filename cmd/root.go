@@ -32,5 +32,7 @@ func init() {
 		common.InitCmd(),
 		baremetal.CreateCmd(),
 		baremetal.ApplyCmd(),
+		baremetal.DestroyCmd(),
+		baremetal.TestCmd(),
 	)
 }

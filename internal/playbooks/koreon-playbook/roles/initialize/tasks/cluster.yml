@@ -32,7 +32,7 @@
   yum:
     name: NetworkManager
     state: present
-    update_cache: yes
+    # update_cache: yes
 
 # Calico module wt_u32을 load하기 위해 필요하나 4.18.0-193에서는 설치해도 not found 에러가 발생함.
 #- name: Install kernel-modules-extra

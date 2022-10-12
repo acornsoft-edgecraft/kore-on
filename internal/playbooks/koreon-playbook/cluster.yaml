@@ -12,17 +12,7 @@
   become: true
   roles:
     - { role: yum-repo, tags: yum-repo }
-
-# - hosts: storage
-#   become: true
-#   roles:
-#     - { role: yum-repo, tags: yum-repo }
-
-# - hosts: registry
-#   become: true
-#   roles:
-#     - { role: yum-repo, tags: yum-repo }
-
+    
 - hosts: cluster
   become: true
   roles:

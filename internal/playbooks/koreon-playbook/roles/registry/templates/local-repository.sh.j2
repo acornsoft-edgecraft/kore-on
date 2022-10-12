@@ -40,7 +40,7 @@ make_yum_repo(){
     yumdownloader --alldeps --enablerepo Docker-CE-Stable --arch x86_64 --resolve --downloaddir=. containerd.io-1.4.3
     yumdownloader --enablerepo Docker-CE-Stable --arch x86_64 --resolve --downloaddir=. docker-ce-19.03.15 docker-ce-cli-19.03.15
 
-    for item in {"{{ kube_support_versions|join('","') }}"}; do
+    for item in {"{{ kube_support_versions | map('regex_replace', '^v', '') | list }}"}; do
         yumdownloader --arch x86_64 --resolve --downloaddir=. --disableexcludes=Kubernetes kubectl-${item} kubelet-${item} kubeadm-${item}
     done
 
@@ -81,7 +81,7 @@ make_apt_repo(){
     apt-get install -y -d --reinstall -o Dir::cache=/data/localrepo -o Dir::Cache::archives="./" dpkg-dev
     apt-get install -y dpkg-dev
 
-    for item in {"{{ kube_support_versions|join('","') }}"}; do
+    for item in {"{{ kube_support_versions | map('regex_replace', '^v', '') | list }}"}; do
         apt-get install -y -d --reinstall -o Dir::cache=/data/localrepo -o Dir::Cache::archives="./" kubelet=${item}-00 kubeadm=${item}-00 kubectl=${item}-00
     done
 

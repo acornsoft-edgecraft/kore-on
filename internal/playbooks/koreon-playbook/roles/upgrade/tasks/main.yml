@@ -15,7 +15,7 @@
 - name: Install Kubernetes packages (kubectl, kubelet)
   when: ansible_os_family in ["Ubuntu", "Debian"]
   apt:
-    name: "kubeadm={{ k8s_version }}-00"
+    name: "kubeadm={{ k8s_version_int }}-00"
     state: present
 
 - name: Prevent auto-upgrade Kubernetes packages
@@ -31,7 +31,7 @@
     - ansible_distribution in ["CentOS", "RedHat"]
     - not closed_network
   yum:
-    name: "kubeadm-{{ k8s_version }}"
+    name: "kubeadm-{{ k8s_version_int }}"
     state: present
     update_cache: yes
     disable_excludes: Kubernetes
@@ -41,7 +41,7 @@
     - ansible_distribution in ["CentOS", "RedHat"]
     - closed_network
   yum:
-    name: "kubeadm-{{ k8s_version }}"
+    name: "kubeadm-{{ k8s_version_int }}"
     state: present
     update_cache: yes
 # ----------------------------------------------------------------------------
@@ -50,7 +50,7 @@
 #  when:
 #    - not closed_network
 #  get_url:
-#    url: https://dl.k8s.io/release/v{{ k8s_version }}/bin/linux/amd64/kubeadm
+#    url: https://dl.k8s.io/release/{{ k8s_version }}/bin/linux/amd64/kubeadm
 #    dest: /tmp/kubeadm_{{ k8s_version }}
 #    mode: 0755
 #
@@ -58,7 +58,7 @@
 #  when:
 #    - closed_network
 #  get_url:
-#    url: "{{ local_repository }}/release/v{{ k8s_version }}/bin/linux/amd64/kubeadm"
+#    url: "{{ local_repository }}/release/{{ k8s_version }}/bin/linux/amd64/kubeadm"
 #    dest: /tmp/kubeadm_{{ k8s_version }}
 #    mode: 0755
 #
@@ -92,7 +92,7 @@
 - name: Update Kubernetes packages (kubectl, kubelet)
   when: ansible_os_family in ["Ubuntu", "Debian"]
   apt:
-    name: ['kubectl={{ k8s_version }}-00', 'kubelet={{ k8s_version }}-00']
+    name: ['kubectl={{ k8s_version_int }}-00', 'kubelet={{ k8s_version_int }}-00']
     update_cache: yes
     only_upgrade: yes
   register: masterpackage
@@ -110,7 +110,7 @@
 - name: Update Kubernetes packages (kubectl, kubelet)
   when: ansible_os_family in ["CentOS", "RedHat"]
   yum:
-    name: ['kubectl-{{ k8s_version }}', 'kubelet-{{ k8s_version }}']
+    name: ['kubectl-{{ k8s_version_int }}', 'kubelet-{{ k8s_version_int }}']
     state: present
     update_cache: yes
     disable_excludes: Kubernetes
