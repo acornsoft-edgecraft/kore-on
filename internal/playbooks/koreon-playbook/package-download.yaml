@@ -7,7 +7,5 @@
     - group_vars/package-download/{{ ansible_os_family | lower }}.yaml
   tasks:
     - name: Air-Gap | Package Download
-      include_role:
+      ansible.builtin.include_role:
         name: kore-on/air-gap
-      # when:
-      #   - a is defined

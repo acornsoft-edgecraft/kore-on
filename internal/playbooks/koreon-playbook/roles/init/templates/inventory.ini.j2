@@ -1,0 +1,69 @@
+## Inventory
+## - All nodes IP Address and Internal IP Address 
+[all]
+{% for IP in NodePool.Master.IP %}
+master-{{ loop.index }}                 ansible_ssh_host={{ IP }}  ip={{ NodePool.Master.PrivateIP[loop.index-1]  }}
+{% endfor %}
+{% if Kubernetes.Etcd.ExternalEtcd%}
+{%   for IP in Kubernetes.Etcd.IP %}
+etcd-{{ loop.index }}                   ansible_ssh_host={{ IP }}  ip={{ Kubernetes.Etcd.PrivateIP[loop.index-1]  }}
+{%   endfor %}
+{% endif%}
+{% for IP in NodePool.Node.IP %}
+node-{{ loop.index }}                   ansible_ssh_host={{ IP }}  ip={{ NodePool.Node.PrivateIP[loop.index-1]  }}
+{% endfor %}
+{%- if (PrivateRegistry.Install | default(false)) and (SharedStorage.Install | default(false)) %}
+{%   if PrivateRegistry.RegistryIP == SharedStorage.StorageIP %}
+node-regi-storage        ansible_ssh_host={{ PrivateRegistry.RegistryIP }}  ip={{ PrivateRegistry.PrivateIP  }}
+{%   else %}
+node-regi                ansible_ssh_host={{ PrivateRegistry.RegistryIP }}  ip={{ PrivateRegistry.PrivateIP  }}
+node-storage             ansible_ssh_host={{ SharedStorage.StorageIP }}  ip={{ SharedStorage.PrivateIP  }}
+{%   endif %}
+{% elif (PrivateRegistry.Install | default(false)) %}
+node-regi                ansible_ssh_host={{ PrivateRegistry.RegistryIP }}  ip={{ PrivateRegistry.PrivateIP  }}
+{% elif (SharedStorage.Install | default(false)) %}
+node-storage             ansible_ssh_host={{ SharedStorage.StorageIP }}  ip={{ SharedStorage.PrivateIP  }}
+{%- endif %}
+
+[masters]
+{% for IP in NodePool.Master.IP %}
+master-{{ loop.index }}
+{% endfor %}
+
+[etcd]
+{% if Kubernetes.Etcd.ExternalEtcd%}
+{%   for IP in Kubernetes.Etcd.IP %}
+etcd-{{ loop.index }}
+{%   endfor %}
+{% else %}
+{%   for IP in NodePool.Master.IP %}
+master-{{ loop.index }}
+{%   endfor %}
+{% endif%}
+
+[node]
+{% for IP in NodePool.Node.IP %}
+node-{{ loop.index }}
+{% endfor %}
+
+[storage]
+{% if PrivateRegistry.Install and SharedStorage.Install and PrivateRegistry.RegistryIP == SharedStorage.StorageIP %}
+node-regi-storage
+{% else %}
+{{'node-storage' if SharedStorage.Install}}
+{% endif %}
+
+[registry]
+{% if PrivateRegistry.Install and SharedStorage.Install and PrivateRegistry.RegistryIP == SharedStorage.StorageIP %}
+node-regi-storage
+{% else %}
+{{'node-regi' if PrivateRegistry.Install}}
+{% endif %}
+
+[cluster:children]
+masters
+node
+
+[local_repo]
+
+[package_download]

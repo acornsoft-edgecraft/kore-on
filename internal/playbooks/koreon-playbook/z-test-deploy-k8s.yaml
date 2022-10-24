@@ -1,0 +1,28 @@
+---
+- hosts: masters[0]
+  gather_facts: false
+  become: yes
+  vars:
+    remotefile: "/Users/dongmook/github-workspace/edgecraft/kore-on/tmp/metrics-server.crt"
+
+  tasks:
+  # - name: kubesphere k8s install provisionercapabilities crd in cluster
+  #   kubernetes.core.k8s:
+  #     # name: "{{ kubesphere }}"
+  #     kubeconfig: "{{ kubeconfig }}"
+  #     namespace: "{{ kubesphere_namespace }}"
+  #     state: present
+  #     src: "{{ ansible_env.HOME }}/carrier/{{ kubesphere }}_provisionercapabilities.yaml"
+  #     wait: true
+
+  - name: Get an existing Service object
+    kubernetes.core.k8s_info:
+      kubeconfig: "{{ inventory_dir }}/acloud-client-kubeconfig"
+      kind: Service
+      # name: web
+      # namespace: testing
+    # delegate_to: "{{ groups['masters'][0] }}"
+    register: web_service
+  
+  - debug:
+      msg: "{{ web_service }}"

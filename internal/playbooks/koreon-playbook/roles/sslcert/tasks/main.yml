@@ -120,7 +120,9 @@
     path: "{{ cert_dir }}/metrics-server/metrics-server.crt"
     csr_path: "{{ cert_dir }}/metrics-server/metrics-server.csr"
     provider: ownca
-    ownca_path: "{{ cert_dir }}/metrics-server/apiextca.crt"
-    ownca_privatekey_path: "{{ cert_dir }}/metrics-server/apiextca.key"
+    ownca_path: "{{ master_cert_dir }}/ca.crt"
+    ownca_privatekey_path: "{{ master_cert_dir }}/ca.key"
+    # ownca_path: "{{ cert_dir }}/metrics-server/apiextca.crt"
+    # ownca_privatekey_path: "{{ cert_dir }}/metrics-server/apiextca.key"
     ownca_not_after: "+{{ cert_validity_days }}d" # valid for one year
   register: certificate

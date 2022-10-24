@@ -3,13 +3,13 @@ clusters:
 - cluster:
     certificate-authority-data: {{ ca_data.stdout | b64encode }}
     server: https://{{ hostvars[inventory_hostname]['ip'] }}:{{ api_secure_port }}
-  name: kubernetes
+  name: {{ cluster_name | default('kubernetes') }}
 contexts:
 - context:
-    cluster: kubernetes
+    cluster: {{ cluster_name | default('kubernetes') }}
     user: system:kube-scheduler
-  name: system:kube-scheduler@kubernetes
-current-context: system:kube-scheduler@kubernetes
+  name: system:kube-scheduler@{{ cluster_name | default('kubernetes') }}
+current-context: system:kube-scheduler@{{ cluster_name | default('kubernetes') }}
 kind: Config
 preferences: {}
 users:

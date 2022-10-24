@@ -1,0 +1,6 @@
+---
+- name: Generate basic vars
+  template:
+    src: basic.yaml.j2
+    dest: "{{ playbook_dir }}/inventory/group_vars/basic.yaml"
+    mode: 0644

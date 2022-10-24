@@ -8,8 +8,8 @@ account_private_key: /etc/kubernetes/pki/sa.key
 account_key: /etc/kubernetes/pki/sa.pub
 ca_key: /etc/kubernetes/pki/ca.key
 ca_cert: /etc/kubernetes/pki/ca.crt
-api_key: /etc/kubernetes/pki/kube-apiserver.key
-api_cert: /etc/kubernetes/pki/kube-apiserver.crt
+api_key: /etc/kubernetes/pki/apiserver.key
+api_cert: /etc/kubernetes/pki/apiserver.crt
 api_kubelet_client_key: /etc/kubernetes/pki/apiserver-kubelet-client.key
 api_kubelet_client_cert: /etc/kubernetes/pki/apiserver-kubelet-client.crt
 proxy_ca_cert: /etc/kubernetes/pki/front-proxy-ca.crt

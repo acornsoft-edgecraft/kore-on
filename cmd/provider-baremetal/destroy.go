@@ -21,6 +21,7 @@ type strDestroyCmd struct {
 	playbookFiles []string
 	privateKey    string
 	user          string
+	extravars     map[string]interface{}
 }
 
 func DestroyCmd() *cobra.Command {
@@ -47,9 +48,9 @@ func DestroyCmd() *cobra.Command {
 	f.BoolVarP(&destroy.step, "step", "", false, "step")
 	f.BoolVarP(&destroy.dryRun, "dry-run", "d", false, "dryRun")
 	f.StringVarP(&destroy.inventory, "inventory", "i", destroy.inventory, "Specify ansible playbook inventory")
+	f.StringVar(&destroy.tags, "tags", destroy.tags, "Ansible options tags")
 	f.StringVarP(&destroy.privateKey, "private-key", "p", "", "Specify ansible playbook privateKey")
 	f.StringVarP(&destroy.user, "user", "u", "", "SSH login user")
-	f.StringVar(&destroy.tags, "tags", destroy.tags, "Ansible options tags")
 
 	return cmd
 }
@@ -76,24 +77,15 @@ func (c *strDestroyCmd) run() error {
 		c.tags = ""
 	}
 
-	// vars, err := varListToMap(extravars)
-	// if err != nil {
-	// 	return errors.New("(commandHandler)", "Error parsing extra variables", err)
-	// }
-
 	ansiblePlaybookConnectionOptions := &options.AnsibleConnectionOptions{
-		// Connection: "ssh",
 		PrivateKey: c.privateKey,
 		User:       c.user,
 	}
-	// if connectionLocal {
-	// 	ansiblePlaybookConnectionOptions.Connection = "local"
-	// }
-
 	ansiblePlaybookOptions := &playbook.AnsiblePlaybookOptions{
 		Inventory: c.inventory,
 		Verbose:   c.verbose,
 		Tags:      c.tags,
+		ExtraVars: c.extravars,
 	}
 
 	playbook := &playbook.AnsiblePlaybookCmd{
@@ -102,7 +94,7 @@ func (c *strDestroyCmd) run() error {
 		Options:           ansiblePlaybookOptions,
 		Exec: execute.NewDefaultExecute(
 			execute.WithTransformers(
-				results.Prepend("cobra-cmd-ansibleplaybook example"),
+				results.Prepend("cobra-cmd-ansibleplaybook"),
 			),
 		),
 	}

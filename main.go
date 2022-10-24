@@ -4,8 +4,8 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 package main
 
 import (
-	"cube/cmd"
 	"fmt"
+	"kore-on/cmd"
 	"time"
 )
 

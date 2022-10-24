@@ -6,15 +6,18 @@ package cmd
 import (
 	"os"
 
-	baremetal "cube/cmd/provider-baremetal"
-	common "cube/cmd/provider-common"
+	baremetal "kore-on/cmd/provider-baremetal"
+	common "kore-on/cmd/provider-common"
+
+	"kore-on/pkg/config"
+	"kore-on/pkg/logger"
 
 	"github.com/spf13/cobra"
 )
 
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
-	Use:   "cube",
+	Use:   "kore-on",
 	Short: "Install kubernetes cluster to on-premise system with registry and storage system",
 	Long:  `cube, It install kubernetes cluster.`,
 }
@@ -28,6 +31,8 @@ func Execute() {
 }
 
 func init() {
+	cobra.OnInitialize(initConfig)
+
 	RootCmd.AddCommand(
 		common.InitCmd(),
 		baremetal.CreateCmd(),
@@ -35,4 +40,19 @@ func init() {
 		baremetal.DestroyCmd(),
 		baremetal.TestCmd(),
 	)
+}
+
+func initConfig() {
+	// create default logger
+	err := logger.New()
+	if err != nil {
+		logger.Fatalf("Could not instantiate log %ss", err.Error())
+	}
+
+	// load config file
+	err = config.Load()
+	if err != nil {
+		logger.Fatalf("Could not load configuration: %s", err.Error())
+		os.Exit(1)
+	}
 }

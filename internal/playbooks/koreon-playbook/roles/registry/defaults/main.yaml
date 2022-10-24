@@ -1,5 +1,5 @@
 ---
-harbor_version: v2.3.0
+# harbor_version: v2.3.0
 docker_compose_version: v1.29.2
 
 harbor_cert_work_dir: "{{ install_dir }}/cert"

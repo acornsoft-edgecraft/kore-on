@@ -1,0 +1,11 @@
+---
+# Air-gap Local Repository
+- hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Init | Configuration
+      ansible.builtin.include_role:
+        name: init
+        apply:
+          tags:
+            - init

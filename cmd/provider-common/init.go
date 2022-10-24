@@ -2,38 +2,103 @@ package common
 
 import (
 	"fmt"
+	"io/ioutil"
+	"kore-on/pkg/config"
+	"kore-on/pkg/utils"
 	"os"
 	"time"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 type strInitCmd struct {
+	verbose       bool
+	check         bool
+	playbookFiles []string
 }
 
 func InitCmd() *cobra.Command {
-	create := &strInitCmd{}
+	init := &strInitCmd{}
 	cmd := &cobra.Command{
 		Use:          "init [flags]",
 		Short:        "get config file",
 		Long:         "",
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return create.run()
+			return init.run()
 		},
 	}
+
+	init.playbookFiles = []string{
+		"./internal/playbooks/koreon-playbook/init.yaml",
+	}
+
+	f := cmd.Flags()
+	f.BoolVarP(&init.verbose, "verbose", "v", false, "verbose")
+	f.BoolVar(&init.check, "check", false, "check validation in config file")
+
 	return cmd
 }
 
 func (c *strInitCmd) run() error {
-	currDir, err := os.Getwd()
+	// currDir, _ := os.Getwd()
 	currTime := time.Now()
+	SUCCESS_FORMAT := "\033[1;32m%s\033[0m\n"
 
-	if err != nil {
-		return err
+	koreOnConfigFileName := viper.GetString("KoreOn.KoreOnConfigFile")
+	koreOnConfigFilePath := utils.IskoreOnConfigFilePath(koreOnConfigFileName)
+
+	// if use check flag then validation for configfile
+	// var data map[string]interface{}
+	if c.check {
+		utils.ValidateKoreonTomlConfig(koreOnConfigFilePath)
+		// b, err := json.Marshal(koreonToml)
+		// if err != nil {
+		// 	log.Fatal(err)
+		// }
+		// _ = json.Unmarshal(b, &data)
+		// fmt.Printf("%s\n", data)
+		// fmt.Println("===================")
+		// fmt.Println("asddfdasfs: === ", viper.GetString("KoreOn.KoreOnConfigFile"))
+		os.Exit(0)
 	}
 
-	fmt.Println("Getting Strart time: ", currTime)
-	fmt.Println("currDir: ", currDir)
+	// create init configration file
+	if utils.FileExists(koreOnConfigFilePath) {
+		fmt.Println("Previous " + koreOnConfigFileName + " file exist and it will be backup")
+		os.Rename(koreOnConfigFilePath, koreOnConfigFilePath+"_"+currTime.Format("20060102150405"))
+	}
+	ioutil.WriteFile(koreOnConfigFilePath, []byte(config.Template), 0600)
+	fmt.Printf(SUCCESS_FORMAT, fmt.Sprintf("Initialize completed, Edit %s file according to your environment and run `koreonctl create`", koreOnConfigFileName))
+
+	// ansiblePlaybookConnectionOptions := &options.AnsibleConnectionOptions{
+	// 	Connection: "local",
+	// }
+
+	// ansiblePlaybookOptions := &playbook.AnsiblePlaybookOptions{
+	// 	Verbose: c.verbose,
+	// 	// ExtraVars: data,
+	// 	// ExtraVarsFile: []string{"@" + koreOnConfigFilePath},
+	// }
+
+	// playbook := &playbook.AnsiblePlaybookCmd{
+	// 	Playbooks:         c.playbookFiles,
+	// 	ConnectionOptions: ansiblePlaybookConnectionOptions,
+	// 	Options:           ansiblePlaybookOptions,
+	// 	Exec: execute.NewDefaultExecute(
+	// 		execute.WithTransformers(
+	// 			results.Prepend("cobra-cmd-ansibleplaybook"),
+	// 		),
+	// 	),
+	// }
+
+	// options.AnsibleForceColor()
+
+	// err := playbook.Run(context.TODO())
+	// if err != nil {
+	// 	return err
+	// }
+
 	return nil
 }
