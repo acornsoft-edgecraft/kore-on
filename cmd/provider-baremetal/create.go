@@ -17,9 +17,11 @@ type strCreateCmd struct {
 	verbose       bool
 	step          bool
 	inventory     string
+	tags          string
 	playbookFiles []string
 	privateKey    string
 	user          string
+	extravars     map[string]interface{}
 }
 
 func CreateCmd() *cobra.Command {
@@ -35,6 +37,8 @@ func CreateCmd() *cobra.Command {
 		},
 	}
 
+	// Default value for command struct
+	create.tags = ""
 	create.inventory = "./internal/playbooks/koreon-playbook/inventories/inventory-redhat/static-inventory.ini"
 	create.playbookFiles = []string{
 		"./internal/playbooks/koreon-playbook/cluster.yaml",
@@ -45,6 +49,7 @@ func CreateCmd() *cobra.Command {
 	f.BoolVarP(&create.step, "step", "", false, "step")
 	f.BoolVarP(&create.dryRun, "dry-run", "d", false, "dryRun")
 	f.StringVarP(&create.inventory, "inventory", "i", create.inventory, "Specify ansible playbook inventory")
+	f.StringVar(&create.tags, "tags", create.tags, "Ansible options tags")
 	f.StringVarP(&create.privateKey, "private-key", "p", "", "Specify ansible playbook privateKey")
 	f.StringVarP(&create.user, "user", "u", "", "SSH login user")
 
@@ -69,23 +74,16 @@ func (c *strCreateCmd) run() error {
 		return fmt.Errorf("[ERROR]: %s", "To run ansible-playbook an ssh login user must be specified")
 	}
 
-	// vars, err := varListToMap(extravars)
-	// if err != nil {
-	// 	return errors.New("(commandHandler)", "Error parsing extra variables", err)
-	// }
-
 	ansiblePlaybookConnectionOptions := &options.AnsibleConnectionOptions{
-		// Connection: "ssh",
 		PrivateKey: c.privateKey,
 		User:       c.user,
 	}
-	// if connectionLocal {
-	// 	ansiblePlaybookConnectionOptions.Connection = "local"
-	// }
 
 	ansiblePlaybookOptions := &playbook.AnsiblePlaybookOptions{
 		Inventory: c.inventory,
 		Verbose:   c.verbose,
+		Tags:      c.tags,
+		ExtraVars: c.extravars,
 	}
 
 	playbook := &playbook.AnsiblePlaybookCmd{
@@ -94,7 +92,7 @@ func (c *strCreateCmd) run() error {
 		Options:           ansiblePlaybookOptions,
 		Exec: execute.NewDefaultExecute(
 			execute.WithTransformers(
-				results.Prepend("cobra-cmd-ansibleplaybook example"),
+				results.Prepend("cobra-cmd-ansibleplaybook"),
 			),
 		),
 	}

@@ -3,13 +3,13 @@ clusters:
 - cluster:
     certificate-authority-data: {{ ca_data.stdout | b64encode }}
     server: https://{{ hostvars[inventory_hostname]['ip'] }}:{{ api_secure_port }}
-  name: kubernetes
+  name: {{ cluster_name | default('kubernetes') }}
 contexts:
 - context:
-    cluster: kubernetes
+    cluster: {{ cluster_name | default('kubernetes') }}
     user: kubernetes-admin
-  name: kubernetes-admin@kubernetes
-current-context: kubernetes-admin@kubernetes
+  name: kubernetes-admin@{{ cluster_name | default('kubernetes') }}
+current-context: kubernetes-admin@{{ cluster_name | default('kubernetes') }}
 kind: Config
 preferences: {}
 users:

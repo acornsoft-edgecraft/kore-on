@@ -11,5 +11,5 @@ etcd_access_addresses: |-
   {{ etcd_peer_url_scheme }}://{{ hostvars[inventory_hostname]['ip'] | default(hostvars[inventory_hostname]['ansible_default_ipv4']['address']) }}:2379
 
 scripts_dir: "{{ install_dir }}/scripts"
-backup_dir: "{{ install_dir }}/backup"
+backup_dir: "{{ data_root_dir }}/backup"
 maxbackup_day: 7

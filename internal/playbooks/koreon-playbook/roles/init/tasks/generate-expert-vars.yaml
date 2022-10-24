@@ -1,0 +1,6 @@
+---
+- name: Generate expert vars
+  template:
+    src: expert.yaml.j2
+    dest: "{{ playbook_dir }}/inventory/group_vars/expert.yaml"
+    mode: 0644

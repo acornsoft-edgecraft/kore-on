@@ -1,0 +1,6 @@
+---
+- import_tasks: generate-inventory.yaml
+
+# - import_tasks: generate-basic.yaml
+
+# - import_tasks: generate-expert.yaml

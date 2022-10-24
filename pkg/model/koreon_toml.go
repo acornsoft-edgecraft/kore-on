@@ -1,7 +1,7 @@
 package model
 
-type KoreonToml struct {
-	Koreon struct {
+type KoreOnToml struct {
+	KoreOn struct {
 		ClusterName      string `toml:"cluster-name,omitempty"`
 		ClusterID        string `toml:"cluster-id,omitempty"`
 		InstallDir       string `toml:"install-dir,omitempty"`
@@ -31,6 +31,7 @@ type KoreonToml struct {
 		} `toml:"calico,omitempty"`
 
 		Etcd struct {
+			ExternalEtcd  bool     `toml:"external-etcd,omitempty"`
 			IP            []string `toml:"ip,omitempty"`
 			PrivateIP     []string `toml:"private-ip,omitempty"`
 			EncryptSecret bool     `toml:"encrypt-secret,omitempty"`

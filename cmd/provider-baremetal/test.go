@@ -2,13 +2,18 @@ package cmd
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"kore-on/pkg/logger"
+	"kore-on/pkg/utils"
+	"os"
 
 	"github.com/apenella/go-ansible/pkg/execute"
 	"github.com/apenella/go-ansible/pkg/options"
 	"github.com/apenella/go-ansible/pkg/playbook"
 	"github.com/apenella/go-ansible/pkg/stdoutcallback/results"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 // Commands structure
@@ -21,6 +26,7 @@ type strTestCmd struct {
 	playbookFiles []string
 	privateKey    string
 	user          string
+	extravars     map[string]interface{}
 }
 
 func TestCmd() *cobra.Command {
@@ -36,9 +42,10 @@ func TestCmd() *cobra.Command {
 		},
 	}
 
-	test.inventory = "./internal/playbooks/koreon-playbook/inventories/inventory-redhat/static-inventory.ini"
+	test.tags = ""
+	test.inventory = "inventory.ini"
 	test.playbookFiles = []string{
-		"./internal/playbooks/koreon-playbook/z-test-deploy.yaml",
+		"./internal/playbooks/koreon-playbook/z-test-extra-vars.yaml",
 	}
 
 	f := cmd.Flags()
@@ -54,6 +61,21 @@ func TestCmd() *cobra.Command {
 }
 
 func (c *strTestCmd) run() error {
+	koreOnConfigFileName := viper.GetString("KoreOn.KoreOnConfigFile")
+	koreOnConfigFilePath := utils.IskoreOnConfigFilePath(koreOnConfigFileName)
+	koreonToml, value := utils.ValidateKoreonTomlConfig(koreOnConfigFilePath)
+
+	if value {
+		b, err := json.Marshal(koreonToml)
+		if err != nil {
+			logger.Fatal(err)
+			os.Exit(1)
+		}
+		if err := json.Unmarshal(b, &c.extravars); err != nil {
+			logger.Fatal(err.Error())
+			os.Exit(1)
+		}
+	}
 
 	if len(c.playbookFiles) < 1 {
 		return fmt.Errorf("[ERROR]: %s", "To run ansible-playbook playbook file path must be specified")
@@ -64,31 +86,31 @@ func (c *strTestCmd) run() error {
 	}
 
 	if len(c.privateKey) < 1 {
-		return fmt.Errorf("[ERROR]: %s", "To run ansible-playbook an privateKey must be specified")
+		if len(koreonToml.NodePool.Security.PrivateKeyPath) < 1 {
+			c.privateKey = koreonToml.NodePool.Security.PrivateKeyPath
+		} else {
+			return fmt.Errorf("[ERROR]: %s", "To run ansible-playbook an privateKey must be specified")
+		}
 	}
 
 	if len(c.user) < 1 {
-		return fmt.Errorf("[ERROR]: %s", "To run ansible-playbook an ssh login user must be specified")
+		if len(koreonToml.NodePool.Security.SSHUserID) < 1 {
+			c.user = koreonToml.NodePool.Security.SSHUserID
+		} else {
+			return fmt.Errorf("[ERROR]: %s", "To run ansible-playbook an ssh login user must be specified")
+		}
 	}
 
-	// vars, err := varListToMap(extravars)
-	// if err != nil {
-	// 	return errors.New("(commandHandler)", "Error parsing extra variables", err)
-	// }
-
 	ansiblePlaybookConnectionOptions := &options.AnsibleConnectionOptions{
-		// Connection: "local",
 		PrivateKey: c.privateKey,
 		User:       c.user,
 	}
-	// if connectionLocal {
-	// 	ansiblePlaybookConnectionOptions.Connection = "local"
-	// }
 
 	ansiblePlaybookOptions := &playbook.AnsiblePlaybookOptions{
 		Inventory: c.inventory,
 		Verbose:   c.verbose,
 		Tags:      c.tags,
+		ExtraVars: c.extravars,
 	}
 
 	playbook := &playbook.AnsiblePlaybookCmd{

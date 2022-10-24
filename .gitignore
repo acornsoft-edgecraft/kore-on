@@ -353,3 +353,5 @@ MigrationBackup/
 .vscode/
 files/
 gows/
+tmp/
+temp/

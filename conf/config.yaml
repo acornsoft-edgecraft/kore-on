@@ -1,0 +1,7 @@
+KoreOn:
+  KoreOnImageName: "koreon"
+  KoreOnImage: "regi.k3.acornsoft.io/k3lab/koreon:1.1.3"
+  KoreOnKubeConfig: "acloud-client-kubeconfig"
+  KoreOnConfigFile: "koreon.toml"
+  KoreOnConfigFileSubDir: "test"
+  SupportK8SVersion: ["1.19", "1.20", "1.21", "1.22", "1.23"]

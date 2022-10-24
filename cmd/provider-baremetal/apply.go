@@ -80,7 +80,7 @@ func (c *strApplyCmd) run() error {
 		Options:           ansiblePlaybookOptions,
 		Exec: execute.NewDefaultExecute(
 			execute.WithTransformers(
-				results.Prepend("cobra-cmd-ansibleplaybook example"),
+				results.Prepend("cobra-cmd-ansibleplaybook"),
 			),
 		),
 	}

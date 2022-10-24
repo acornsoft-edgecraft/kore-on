@@ -1,0 +1,109 @@
+# "###"는 제거 대상
+###provider: false
+###cloud_provider: onpremise
+
+#- [koreon]
+## Optional
+## - cluster-name: use cluster name in config context (default: "kubernetes")
+## - install-dir: installation scripts(harbor, shell scripts) save directory (default: "/var/lib/kore-on")
+## - cert-validity-days: SSL validity days(default: 36500)
+## - debug-mode: verbose 옵션 사용 여부 선택 (default: false)
+## - closed-network: Air Gap 선언 (default: false)
+## - local-repository: local repository 서비스 url (Required when selecting the closed network.)
+## - local-repository-archive-file: local repository packages archive file path (Required when selecting the closed network.)
+cluster_name: {{ KoreOn.ClusterName | default("kubernetes") }}
+install_dir: {{ KoreOn.InstallDir | default("/var/lib/kore-on") }}
+cert_validity_days: {{ 36500 if (KoreOn.CertValidityDays | default(0)) == 0 }}
+debug_mode: {{ KoreOn.DebugMode | default(false) }}
+closed_network: {{ KoreOn.ClosedNetwork | default(false) }}
+local_repository: {{ KoreOn.LocalRepository | default("") }}
+local_repository_archieve_file: {{ KoreOn.LocalRepositoryArchiveFile | default("") }}
+#-end [koreon]
+
+#- [kubernetes]
+## Required
+## - k8s_version: kubernetes version (default: "latest")
+## optional
+## - cluster_id: use cluster id in node/kubelet labelling  (default: "kubernetes")
+## - container_runtime: use k8s cri (only: "containerd")
+## - kube_proxy_mode: use k8s proxy mode [iptables | ipvs] (default: "ipvs")
+## - service_ip_range: k8s service network cidr (default: "10.96.0.0/20")
+## - pod_ip_range: k8s pod network cidr (default: "10.4.0.0/24")
+## - node_port_range: k8s node port network range (default: "30000-32767")
+## - api-sans: k8s apiserver SAN 추가 [--apiserver-cert-extra-sans 설정과 동일] (default: [])
+k8s_version: {{ Kubernetes.Version | default("latest") }}
+cluster_id: {{ KoreOn.ClusterName | default("kubernetes") }}
+container_runtime: {{ Kubernetes.ContainerRuntime | default("containerd") }}
+kube_proxy_mode: {{ Kubernetes.KubeProxyMode | default("ipvs") }}
+service_ip_range: {{ Kubernetes.ServiceCidr | default("10.96.0.0/20") }}
+pod_ip_range: {{ Kubernetes.PodCidr | default("10.4.0.0/20") }}
+node_port_range: {{ Kubernetes.NodePortRange | default("30000-32767") }}
+api_sans: {{ Kubernetes.ApiSans | default([]) }}
+#-end [kubernetes]
+
+#- [kubernetes.etcd]
+## Optional
+## external-etcd: used external etcd than input the ip and private-ip address (default: false)
+##                not used than skip ip address. it is used control plane nodes as automatic.
+external_etcd: {{ Kubernetes.Etcd.ExternalEtcd | default(false) }}
+external_etcd_ip: {{ Kubernetes.Etcd.IP | default([]) }}
+external_etcd_private-ip: {{ Kubernetes.Etcd.PrivateIP | default([]) }}
+#-end [kubernetes.etcd]
+
+#- [kubernetes.calico]
+## Required
+## - 
+## Optional
+## - calico_version: input calico version (default: "latest")
+## - vxlan_mode: Calico network mode (default: false)
+calico_version: {{ Kubernetes.Calico.Version | default("latest") }}
+vxlan_mode: {{ Kubernetes.Calico.VxlanMode | default(false) }}
+#-end [kubernetes.calico]
+
+#- [node-pool]
+## Required
+## - 
+## Optional
+## - data_root_dir: data(backup, docker, log, kubelet, etcd, k8s-audit, containerd) root dir (default: "/data") 
+data_root_dir: {{ NodePool.DataDir | default("/data") }}
+#-end [node-pool]
+
+#- [node-pool.master]
+## Required
+## - 
+## Optional
+## - master_isolated: k8s controll plane nodes isolation (default: true)
+## - haproxy: used internal load-balancer (default: true)
+## - api_lb_ip: 
+master_isolated: {{ NodePool.Isolated | default(true) }}
+haproxy: {{ NodePool.HaproxyInstall | default(true) }}
+api_lb_ip: https://192.168.77.234:6443
+lb_ip: 192.168.77.234
+lb_port: 6443
+#-end [node-pool.master]
+
+#- [private-registry]
+## Required
+## - 
+## Optional
+## - registry_install: 
+registry_install: true
+registry_data_dir: /data/harbor
+registry: 192.168.77.239
+registry_domain: 192.168.77.239
+registry_public_cert: false
+registry_archieve_file:
+#-end [shared-storage]
+
+#- [shared-storage]
+## Required
+## - 
+## Optional
+storage_install: true
+nfs_ip: 192.168.77.239
+nfs_volume_dir: /storage
+#-end [shared-storage]
+
+
+# option for preparing local-repo and registry (do not modify when fully understand this flag)
+archive_repo: false

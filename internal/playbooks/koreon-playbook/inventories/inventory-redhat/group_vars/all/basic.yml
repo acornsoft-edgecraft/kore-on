@@ -40,6 +40,7 @@ registry: 192.168.77.239
 registry_domain: 192.168.77.239
 registry_public_cert: false
 registry_archieve_file:
+harbor_version: v2.6.0
 
 # option for NFS storage
 storage_install: true

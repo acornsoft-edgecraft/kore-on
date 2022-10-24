@@ -4,10 +4,10 @@
 - hosts: registry
   become: true
   roles:
-    # - { role: yum-repo, tags: registry }
-    - { role: cri, tags: registry }
+    - { role: yum-repo, tags: registry, vars: { param: "registry" } }
+    - { role: cri, tags: registry, vars: { param: "registry" } }
     - { role: registry, tags: registry }
-    # - { role: post-install, tags: registry }
+    - { role: post-install, tags: registry }
 
 # - hosts: registry
 #   become: true
