@@ -1,5 +1,5 @@
 ---
-# Init generate inventory and vars
+# Init | Generate inventory and vars
 - hosts: localhost
   gather_facts: false
   tasks:
@@ -10,7 +10,7 @@
           tags:
             - init
 
-# Init | Network Check.
+# Init | Network Check
 - hosts: all
   become: false
   gather_facts: false
@@ -21,28 +21,3 @@
         apply:
           tags:
             - init-network
-
-# clean master and worker node
-- hosts: cluster
-  become: true
-  roles:
-    - reset
-  tags:
-    - reset-cluster
-
-# clean private registry
-- hosts: registry
-  become: true
-  roles:
-  - reset/registry
-  tags:
-  - reset-registry
-
-# clean storage
-- hosts: storage
-  become: true
-  roles:
-  - reset/storage
-  tags:
-  - reset-storage
-

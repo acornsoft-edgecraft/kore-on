@@ -55,14 +55,16 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string) (model.KoreOnToml, bo
 	// k8sVersion := koreonToml.Kubernetes.Version
 	//apiSans := koreonToml.Kubernetes.ApiSans
 	etcdCnt := len(koreonToml.Kubernetes.Etcd.IP)
+	etcdPrivateIpCnt := len(koreonToml.Kubernetes.Etcd.PrivateIP)
 
 	nodePoolDataDir := koreonToml.NodePool.DataDir
-	nodePoolSecuritySSHUserID := koreonToml.NodePool.Security.SSHUserID
-	nodePoolSecurityPrivateKeyPath := koreonToml.NodePool.Security.PrivateKeyPath
-	nodePoolMasterLbIP := koreonToml.NodePool.Master.LbIP
+	// nodePoolSecuritySSHUserID := koreonToml.NodePool.Security.SSHUserID
+	// nodePoolSecurityPrivateKeyPath := koreonToml.NodePool.Security.PrivateKeyPath
+	// nodePoolMasterLbIP := koreonToml.NodePool.Master.LbIP
 
 	privateRegistryInstall := koreonToml.PrivateRegistry.Install
 	privateRegistryRegistryIP := koreonToml.PrivateRegistry.RegistryIP
+	privateRegistryRegistryVersion := koreonToml.PrivateRegistry.RegistryVersion
 	privateRegistryRegistryDomain := koreonToml.PrivateRegistry.RegistryDomain
 
 	privateRegistryDataDir := koreonToml.PrivateRegistry.DataDir
@@ -89,20 +91,20 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string) (model.KoreOnToml, bo
 	// 	errorCnt++
 	// }
 
-	if nodePoolSecuritySSHUserID == "" {
-		logger.Fatal("node-pool.security > ssh-user-id is required.")
-		errorCnt++
-	}
+	// if nodePoolSecuritySSHUserID == "" {
+	// 	logger.Fatal("node-pool.security > ssh-user-id is required.")
+	// 	errorCnt++
+	// }
 
-	if nodePoolSecurityPrivateKeyPath == "" {
-		logger.Fatal("node-pool.security > private-key-path is required.")
-		errorCnt++
-	}
+	// if nodePoolSecurityPrivateKeyPath == "" {
+	// 	logger.Fatal("node-pool.security > private-key-path is required.")
+	// 	errorCnt++
+	// }
 
-	if nodePoolMasterLbIP == "" {
-		logger.Fatal("node-pool.master > lb-ip is required.")
-		errorCnt++
-	}
+	// if nodePoolMasterLbIP == "" {
+	// 	logger.Fatal("node-pool.master > lb-ip is required.")
+	// 	errorCnt++
+	// }
 
 	if len(kubernetesPodCidr) > 0 {
 		//todo check cider
@@ -112,12 +114,15 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string) (model.KoreOnToml, bo
 	}
 
 	if koreonToml.Kubernetes.Etcd.ExternalEtcd {
+		if etcdCnt != etcdPrivateIpCnt && etcdCnt > 0 && etcdPrivateIpCnt > 0 {
+			logger.Fatal("etcd nodes IP address and private ip address needs")
+			errorCnt++
+		}
 		switch etcdCnt {
 		case 1, 3, 5:
 		default:
 			logger.Fatal("Only odd number of etcd nodes are supported.(1, 3, 5)")
 			errorCnt++
-
 		}
 	}
 
@@ -133,6 +138,10 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string) (model.KoreOnToml, bo
 
 		if privateRegistryRegistryIP == "" {
 			logger.Fatal("private-registry > registry-ip is required.")
+			errorCnt++
+		}
+		if privateRegistryRegistryVersion == "" {
+			logger.Fatal("private-registry > registry-version is required.")
 			errorCnt++
 		}
 
@@ -191,10 +200,10 @@ func checkSharedStorage(koreonToml model.KoreOnToml) int {
 			errorCnt++
 		}
 
-		if koreonToml.SharedStorage.VolumeSize < 10 {
-			logger.Fatal("shared-storage > volume-size is 10 or more.")
-			errorCnt++
-		}
+		// if koreonToml.SharedStorage.VolumeSize < 10 {
+		// 	logger.Fatal("shared-storage > volume-size is 10 or more.")
+		// 	errorCnt++
+		// }
 
 		if koreonToml.SharedStorage.StorageIP == "" {
 			logger.Fatal("shared-storage > storage-ip is required.")

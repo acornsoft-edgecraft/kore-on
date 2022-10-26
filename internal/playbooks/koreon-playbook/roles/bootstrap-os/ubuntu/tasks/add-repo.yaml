@@ -1,18 +1,4 @@
 ---
-- debug:
-    msg: "INFO: Configure yum repositories ...4\n"
-  run_once: true
-
-- name: Print some debug information 
-  vars:
-    msg: |
-        Ansible ansible_os_family: {{ ansible_os_family }}
-        Ansible Distribution: {{ ansible_distribution }}
-        Ansible Dist version: {{ ansible_distribution_version }}
-  debug:
-    msg: "{{ msg.split('\n') }}"
-  tags: debug_info
-
 # For ubuntu     -------------------------------------------------------------
 - name: Add Kubernetes APT GPG key
   apt_key:

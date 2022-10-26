@@ -1,0 +1,3 @@
+---
+- name: Network Ping/Pong
+  ansible.builtin.import_tasks: network-ping.yaml

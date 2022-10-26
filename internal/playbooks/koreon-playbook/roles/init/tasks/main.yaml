@@ -1,6 +1,8 @@
 ---
 - import_tasks: generate-inventory.yaml
 
-# - import_tasks: generate-basic.yaml
+- import_tasks: generate-basic-vars.yaml
 
-# - import_tasks: generate-expert.yaml
+- import_tasks: generate-expert-vars.yaml
+
+- meta: refresh_inventory

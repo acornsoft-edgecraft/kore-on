@@ -32,8 +32,8 @@ type KoreOnToml struct {
 
 		Etcd struct {
 			ExternalEtcd  bool     `toml:"external-etcd,omitempty"`
-			IP            []string `toml:"ip,omitempty"`
-			PrivateIP     []string `toml:"private-ip,omitempty"`
+			IP            []string `toml:"ip"`
+			PrivateIP     []string `toml:"private-ip"`
 			EncryptSecret bool     `toml:"encrypt-secret,omitempty"`
 		} `toml:"etcd,omitempty"`
 	} `toml:"kubernetes,omitempty"`
@@ -52,6 +52,7 @@ type KoreOnToml struct {
 			IP             []string `toml:"ip,omitempty"`
 			PrivateIP      []string `toml:"private-ip,omitempty"`
 			LbIP           string   `toml:"lb-ip,omitempty"`
+			LbPort         int      `toml:"lb-port,omitempty"`
 			Isolated       bool     `toml:"isolated"`
 			HaproxyInstall bool     `toml:"haproxy-install"`
 		} `toml:"master,omitempty"`
@@ -71,12 +72,13 @@ type KoreOnToml struct {
 
 	PrivateRegistry struct {
 		Install             bool   `toml:"install"`
+		RegistryVersion     string `toml:"registry-version,omitempty"`
 		RegistryIP          string `toml:"registry-ip,omitempty"`
 		RegistryDomain      string `toml:"registry-domain,omitempty"`
 		PrivateIP           string `toml:"private-ip,omitempty"`
 		DataDir             string `toml:"data-dir,omitempty"`
-		PublicCert          bool   `toml:"public-cert"`
 		RegistryArchiveFile string `toml:"registry-archive-file"`
+		PublicCert          bool   `toml:"public-cert"`
 		CertFile            struct {
 			SslCertificate    string `toml:"ssl-certificate,omitempty"`
 			SslCertificateKey string `toml:"ssl-certificate-key,omitempty"`

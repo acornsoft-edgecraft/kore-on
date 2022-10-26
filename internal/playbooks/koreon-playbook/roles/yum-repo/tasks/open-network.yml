@@ -77,6 +77,28 @@
     - not inventory_hostname in groups['node']
 
 - block:
+  # container-selinux is in extras repo
+  - name: Enable RHEL 7 repos
+    rhsm_repository:
+      name:
+        - "rhel-7-server-rpms"
+        - "rhel-7-server-extras-rpms"
+      state: enabled
+    when:
+      - rhel_enable_repos | default(True) | bool
+      - ansible_distribution_major_version == "7"
+
+  # container-selinux is in appstream repo
+  - name: Enable RHEL 8 repos
+    rhsm_repository:
+      name:
+        - "rhel-8-for-*-baseos-rpms"
+        - "rhel-8-for-*-appstream-rpms"
+      state: enabled
+    when:
+      - rhel_enable_repos | default(True) | bool
+      - ansible_distribution_major_version == "8"
+      
   - name: Import EPEL GPG key.
     rpm_key:
       key: "https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-{{ ansible_distribution_major_version }}"

@@ -95,6 +95,8 @@ func IskoreOnConfigFilePath(s string) string {
 	sub := viper.GetString("KoreOn.KoreOnConfigFileSubDir")
 	if sub != "" {
 		sub = "/" + sub + "/"
+	} else {
+		sub = "/"
 	}
 	return currDir + sub + s
 }
