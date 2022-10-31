@@ -1,11 +1,12 @@
 package config
 
 const Template = `
-
 [koreon]
 ## Required
-## - local-repository: local repository 서비스 url (Required when selecting the closed network.)
+## - local-repository-install: local repository installation activate. (Required when selecting the closed network.)
 ## - local-repository-archive-file: local repository packages archive file path (Required when selecting the closed network.)
+## - local-repository: local repository 서비스 url (Required when selecting the closed network.)
+##                     If you are installing a local repository, you can skip it.
 ## Optional
 ## - cluster-name: use cluster name in config context (default: "kubernetes")
 ## - install-dir: installation scripts(harbor, shell scripts) save directory (default: "/var/lib/kore-on")
@@ -17,14 +18,16 @@ const Template = `
 #cert-validity-days = 36500
 #debug-mode = true
 #closed-network = false
-#local-repository = "http://192.168.77.239:8080"
-#local-repository-archive-file = "/tmp/koreon/local-repo.20220224_071700.tgz"
+#local-repository-install = true
+local-repository-archive-file = "./local-repo.20221030_232949.tgz"
+#local-repository-url = "http://192.168.77.239:8080"
 
 [kubernetes]
 ## Required
 ## - 
 ## Optional
-## - version: kubernetes version (default: "latest")
+## - version: Kubernetes version (default: "latest")
+##            If you input only the major version, the minor version automatically selects the last version.
 ## - container-runtime: use k8s cri (only containerd)
 ## - kube-proxy-mode: use k8s proxy mode [iptables | ipvs] (default: "ipvs")
 ## - service-cidr: k8s service network cidr (default: "10.96.0.0/20")
@@ -32,12 +35,13 @@ const Template = `
 ## - node-port-range: k8s node port network range (default: "30000-32767")
 ## - audit-log-enable: k8s audit log enabled (default: true)
 ## - api-sans: k8s apiserver SAN 추가 [--apiserver-cert-extra-sans 설정과 동일] (default: master[0] ip address)
-version = "v1.23.12"
+#version = "v1.23.12"
 #container-runtime = "containerd"
 #kube-proxy-mode = "ipvs"
-#service-cidr ="172.20.0.0/24"
-#pod-cidr="10.10.0.0/24"
-#node-port-range="30000-32767"
+#service-cidr = "172.20.0.0/24"
+#pod-cidr = "10.10.0.0/24"
+#node-port-range = "30000-32767"
+#audit-log-enable = true
 #api-sans = ["192.168.77.234"]
 
 [kubernetes.etcd]
@@ -57,11 +61,11 @@ version = "v1.23.12"
 ## Required
 ## - 
 ## Optional
-## - version: calico version (default: "latest")
+## - version: Calico version (default: "latest")
+##            If you input only the major version, the minor version automatically selects the last version.
 ## - vxlan-mode: calico VXLAN mode activate (default: false)
-version = "v3.24"
+#version = "v3.23.4"
 #vxlan-mode = true
-
 
 [node-pool]
 ## Required
@@ -84,7 +88,7 @@ data-dir = "/data"
 ##               If you use the same IP address, you can skip it.
 ## Optional
 ## - lb-ip: loadbalancer ip address (default: master[0] node ip address)
-## - isolated: K8s control plane nodes isolated (default: true)
+## - isolated: K8s control plane nodes isolated (default: false)
 ## - haproxy-install: used internal load-balancer (default: true)
 ## - lb-ip: Enter the IP address when using a load balancer (default: master[0] ip address)
 ## - lb-port: Enter the port when using a load balancer (default: "6443")

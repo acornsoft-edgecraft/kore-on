@@ -18,7 +18,7 @@
   when:
     - ansible_os_family in ["Ubuntu", "Debian"]
   apt_repository:
-    repo: deb [trusted=yes] {{ local_repository }} ./
+    repo: deb [trusted=yes] {{ local_repository_url }} ./
     state: present
     update_cache: true
     filename: 'local'

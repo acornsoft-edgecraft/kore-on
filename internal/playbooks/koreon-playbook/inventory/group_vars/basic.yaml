@@ -4,8 +4,12 @@
 
 #- [koreon]
 ## Required
-## - local-repository: local repository 서비스 url (Required when selecting the closed network.)
+## - local-repository-install: local repository installation activate. (Required when selecting the closed network.)
+## - local-repository-port: Port number used as local repository. (Required when selecting the closed network.)
+##                          If you use the default value, you can skip it. (default: 8080)
 ## - local-repository-archive-file: local repository packages archive file path (Required when selecting the closed network.)
+## - local-repository-url: local repository 서비스 url (Required when selecting the closed network.)
+##                         If you are installing a local repository, you can skip it.
 ## Optional
 ## - cluster-name: use cluster name in config context (default: "kubernetes")
 ## - install-dir: installation scripts(harbor, shell scripts) save directory (default: "/var/lib/kore-on")
@@ -16,9 +20,11 @@ cluster_name: kubernetes
 install_dir: /var/lib/kore-on
 cert_validity_days: 36500
 debug_mode: False
-closed_network: False
-local_repository: 
-local_repository_archive_file: 
+closed_network: True
+local_repository_install: True
+local_repository_port: 8080
+local_repository_archive_file: ./local-repo.20221030_232949.tgz
+local_repository_url: ''
 #-end [koreon]
 
 #- [kubernetes]
@@ -32,13 +38,14 @@ local_repository_archive_file:
 ## - pod_ip_range: k8s pod network cidr (default: "10.4.0.0/24")
 ## - node_port_range: k8s node port network range (default: "30000-32767")
 ## - api-sans: k8s apiserver SAN 추가 [--apiserver-cert-extra-sans 설정과 동일] (default: master[0] ip address)
-k8s_version: v1.23.12
+k8s_version: v1.23.13
 cluster_id: kubernetes
 container_runtime: containerd
 kube_proxy_mode: ipvs
 service_ip_range: 10.96.0.0/20
 pod_ip_range: 10.4.0.0/20
 node_port_range: 30000-32767
+audit_log_enable: True
 api_sans: ['192.168.77.234']
 #-end [kubernetes]
 
@@ -58,7 +65,7 @@ external_etcd_private_ip: ['']
 ## Optional
 ## - calico_version: input calico version (default: "latest")
 ## - vxlan_mode: Calico network mode (default: false)
-calico_version: v3.24
+calico_version: v3.23.4
 vxlan_mode: False
 #-end [kubernetes.calico]
 
@@ -74,13 +81,13 @@ data_root_dir: /data
 ## Required
 ## - 
 ## Optional
-## - master_isolated: k8s controll plane nodes isolation (default: true)
+## - master_isolated: k8s controll plane nodes isolation (default: fasle)
 ## - haproxy: used internal load-balancer (default: true)
 ## - lb-ip: Enter the IP address when using a load balancer (default: master[0] ip address)
 ## - lb-port: Enter the port when using a load balancer (default: "6443")
 ## - api_lb_ip: authmatic input (only: lb_ip:lb_port)
 master_isolated: False
-haproxy: False
+haproxy: True
 lb_ip: 192.168.77.234
 lb_port: 6443
 api_lb_ip: 192.168.77.234:6443
@@ -101,9 +108,9 @@ api_lb_ip: 192.168.77.234:6443
 registry_install: True
 registry_version: v2.6.0
 registry_data_dir: /data/harbor
-registry: 192.168.77.239
+registry_ip: 192.168.77.239
 registry_domain: 192.168.77.239
-registry_archieve_file: 
+registry_archieve_file: /tmp/koreon/harbor.20220224_072307.tgz
 registry_public_cert: False
 #-end [shared-storage]
 

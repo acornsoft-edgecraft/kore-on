@@ -48,48 +48,54 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string) (model.KoreOnToml, bo
 	errorCnt := 0
 	koreonToml, _ := GetKoreonTomlConfig(koreOnConfigFilePath)
 
-	// koreonClusterName := koreonToml.KoreOn.ClusterName
-
 	kubernetesPodCidr := koreonToml.Kubernetes.PodCidr
 	kubernetesServiceCidr := koreonToml.Kubernetes.ServiceCidr
-	// k8sVersion := koreonToml.Kubernetes.Version
-	//apiSans := koreonToml.Kubernetes.ApiSans
+	k8sVersion := koreonToml.Kubernetes.Version
 	etcdCnt := len(koreonToml.Kubernetes.Etcd.IP)
 	etcdPrivateIpCnt := len(koreonToml.Kubernetes.Etcd.PrivateIP)
-
 	nodePoolDataDir := koreonToml.NodePool.DataDir
-	// nodePoolSecuritySSHUserID := koreonToml.NodePool.Security.SSHUserID
-	// nodePoolSecurityPrivateKeyPath := koreonToml.NodePool.Security.PrivateKeyPath
-	// nodePoolMasterLbIP := koreonToml.NodePool.Master.LbIP
 
 	privateRegistryInstall := koreonToml.PrivateRegistry.Install
 	privateRegistryRegistryIP := koreonToml.PrivateRegistry.RegistryIP
 	privateRegistryRegistryVersion := koreonToml.PrivateRegistry.RegistryVersion
 	privateRegistryRegistryDomain := koreonToml.PrivateRegistry.RegistryDomain
-
 	privateRegistryDataDir := koreonToml.PrivateRegistry.DataDir
 	isPrivateRegistryPublicCert := koreonToml.PrivateRegistry.PublicCert
 	privateRegistryCrt := koreonToml.PrivateRegistry.CertFile.SslCertificate
 	privateRegistryKey := koreonToml.PrivateRegistry.CertFile.SslCertificateKey
 
-	// if koreonClusterName == "" {
-	// 	logger.Fatal("koreon > cluster-name is required.")
-	// 	errorCnt++
-	// 	//todo 길이 체크
-	// }
+	calicoVersion := koreonToml.Kubernetes.Calico.Version
 
 	if koreonToml.KoreOn.InstallDir != "" && !strings.HasPrefix(koreonToml.KoreOn.InstallDir, "/") {
 		logger.Fatal("koreon > install-dir is Only absolute paths are supported.")
 		errorCnt++
 	}
 
-	// if k8sVersion == "" {
-	// 	logger.Fatal("kubernetes > version is required.")
-	// 	errorCnt++
-	// } else if !IsSupportK8sVersion(k8sVersion) {
-	// 	logger.Fatal(fmt.Sprintf("kubernetes > supported version: %v", conf.SupportK8SVersion))
-	// 	errorCnt++
-	// }
+	confK8sVersion := "KoreOn.SupportK8sVersion"
+	supportK8sVersion := IsSupportVersion(k8sVersion, confK8sVersion)
+
+	if k8sVersion == "" {
+		koreonToml.Kubernetes.Version = supportK8sVersion
+		logger.Warn("kubernetes > Kubernetes version is required. Last version", koreonToml.Kubernetes.Version, "applied automatically.")
+	} else if supportK8sVersion == "" {
+		logger.Fatal(fmt.Sprintf("kubernetes > K8s supported version lists:\n %v", ListSupportVersion(confK8sVersion)))
+		errorCnt++
+	} else {
+		koreonToml.Kubernetes.Version = supportK8sVersion
+	}
+
+	confCalicoVersion := "KoreOn.SupportCalicoVersion"
+	supportCalicoVersion := IsSupportVersion(calicoVersion, confCalicoVersion)
+
+	if calicoVersion == "" {
+		koreonToml.Kubernetes.Calico.Version = supportCalicoVersion
+		logger.Warn("kubernetes > Calico version is required. Last version", koreonToml.Kubernetes.Calico.Version, "applied automatically.")
+	} else if supportCalicoVersion == "" {
+		logger.Fatal(fmt.Sprintf("kubernetes > Calico supported version lists:\n %v", ListSupportVersion(confCalicoVersion)))
+		errorCnt++
+	} else {
+		koreonToml.Kubernetes.Calico.Version = supportCalicoVersion
+	}
 
 	// if nodePoolSecuritySSHUserID == "" {
 	// 	logger.Fatal("node-pool.security > ssh-user-id is required.")
@@ -169,9 +175,20 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string) (model.KoreOnToml, bo
 	}
 
 	if koreonToml.KoreOn.ClosedNetwork {
-		if koreonToml.KoreOn.LocalRepository == "" && koreonToml.KoreOn.LocalRepositoryArchiveFile == "" {
-			logger.Fatal("koreon> local-repository or local-repository-archive-file is required.")
-			errorCnt++
+		if koreonToml.KoreOn.LocalRepositoryInstall {
+			if koreonToml.KoreOn.LocalRepositoryArchiveFile == "" {
+				logger.Fatal("koreon> When installing a local repository, the local-repository-archive-file entry is required.")
+				errorCnt++
+			}
+		} else {
+			if koreonToml.KoreOn.LocalRepositoryUrl == "" {
+				logger.Fatal("koreon> If you are not installing a local repository, the local-repository-url entry is required.")
+				errorCnt++
+			}
+			if koreonToml.KoreOn.LocalRepositoryArchiveFile != "" {
+				logger.Fatal("koreon> If you are not installing a local repository, the local-repository-archive-file entry should be empty.")
+				errorCnt++
+			}
 		}
 
 		if privateRegistryInstall {

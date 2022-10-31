@@ -21,7 +21,7 @@
   when:
     - not local_repo_archived_file.stat.exists
   copy:
-    src: "{{ inventory_dir }}/files/{{ local_repository_archive_file }}"
+    src: "{{ inventory_dir }}/files/{{ local_repository_archive_file | basename }}"
     dest: "/tmp/{{ local_repository_archive_file | basename}}"
 
 - name: Extract local repository archive file into /data/localrepo
@@ -68,16 +68,16 @@
     - ansible_os_family in ["CentOS", "RedHat"]
   command: "{{ item }}"
   with_items:
-    -  "sed -i 's# 80;# 8080;#g' /etc/nginx/conf.d/default.conf"
-    -  "sed -i 's#/usr/share/nginx/html#/data/localrepo#g' /etc/nginx/conf.d/default.conf"
+    -  "sed -i 's# 80;# 8080;#g' /etc/nginx/nginx.conf"
+    -  "sed -i 's#/usr/share/nginx/html#/data/localrepo#g' /etc/nginx/nginx.conf"
 
 - name: Update nginx.conf
   when:
     - ansible_os_family in ["Ubuntu", "Debian"]
   command: "{{ item }}"
   with_items:
-    -  "sed -i 's# 80;# 8080;#g' /etc/nginx/conf.d/default.conf"
-    -  "sed -i 's#/usr/share/nginx/html#/data/localrepo#g' /etc/nginx/conf.d/default.conf"
+    -  "sed -i 's# 80;# 8080;#g' /etc/nginx/nginx.conf"
+    -  "sed -i 's#/usr/share/nginx/html#/data/localrepo#g' /etc/nginx/nginx.conf"
 
 
 - name: Start and enable nginx

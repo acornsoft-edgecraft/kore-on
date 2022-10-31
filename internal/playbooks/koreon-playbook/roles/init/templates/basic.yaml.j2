@@ -4,21 +4,27 @@
 
 #- [koreon]
 ## Required
-## - local-repository: local repository 서비스 url (Required when selecting the closed network.)
+## - local-repository-install: local repository installation activate. (Required when selecting the closed network.)
+## - local-repository-port: Port number used as local repository. (Required when selecting the closed network.)
+##                          If you use the default value, you can skip it. (default: 8080)
 ## - local-repository-archive-file: local repository packages archive file path (Required when selecting the closed network.)
+## - local-repository-url: local repository 서비스 url (Required when selecting the closed network.)
+##                         If you are installing a local repository, you can skip it.
 ## Optional
 ## - cluster-name: use cluster name in config context (default: "kubernetes")
 ## - install-dir: installation scripts(harbor, shell scripts) save directory (default: "/var/lib/kore-on")
 ## - cert-validity-days: SSL validity days(default: 36500)
 ## - debug-mode: verbose 옵션 사용 여부 선택 (default: false)
 ## - closed-network: Air Gap 선언 (default: false)
-cluster_name: {{ "kubernetes" if (KoreOn.ClusterName | default("kubernetes")) == "" else KoreOn.ClusterName }}
-install_dir: {{ "/var/lib/kore-on" if (KoreOn.InstallDir | default("/var/lib/kore-on")) == "" else KoreOn.InstallDir }}
-cert_validity_days: {{ 36500 if (KoreOn.CertValidityDays | default(0)) == 0 }}
-debug_mode: {{ KoreOn.DebugMode | default(false) }}
-closed_network: {{ KoreOn.ClosedNetwork | default(false) }}
-local_repository: {{ KoreOn.LocalRepository | default("") }}
-local_repository_archive_file: {{ KoreOn.LocalRepositoryArchiveFile | default("") }}
+cluster_name: {{ (KoreOn.ClusterName == "") | ternary("kubernetes", KoreOn.ClusterName) }}
+install_dir: {{ (KoreOn.InstallDir == "") | ternary("/var/lib/kore-on", KoreOn.InstallDir) }}
+cert_validity_days: {{ (KoreOn.CertValidityDays == 0) | ternary(36500, KoreOn.CertValidityDays) }}
+debug_mode: {{ KoreOn.DebugMode }}
+closed_network: {{ KoreOn.ClosedNetwork }}
+local_repository_install: {{ KoreOn.LocalRepositoryInstall }}
+local_repository_port: {{ (KoreOn.LocalRepositoryPort == 0) | ternary(8080, KoreOn.LocalRepositoryPort) }}
+local_repository_archive_file: {{ KoreOn.LocalRepositoryArchiveFile }}
+local_repository_url: {{ (KoreOn.LocalRepositoryUrl == "") | ternary("''", KoreOn.LocalRepositoryUrl) }}
 #-end [koreon]
 
 #- [kubernetes]
@@ -32,14 +38,14 @@ local_repository_archive_file: {{ KoreOn.LocalRepositoryArchiveFile | default(""
 ## - pod_ip_range: k8s pod network cidr (default: "10.4.0.0/24")
 ## - node_port_range: k8s node port network range (default: "30000-32767")
 ## - api-sans: k8s apiserver SAN 추가 [--apiserver-cert-extra-sans 설정과 동일] (default: master[0] ip address)
-k8s_version: {{ "v1.19.0" if (Kubernetes.Version | default("latest")) == "" else Kubernetes.Version}}
-cluster_id: {{ "kubernetes" if (KoreOn.ClusterName | default("kubernetes")) == "" else KoreOn.ClusterName }}
-container_runtime: {{ "containerd" if (Kubernetes.ContainerRuntime | default("containerd")) == "" else Kubernetes.ContainerRuntime }}
-kube_proxy_mode: {{ "ipvs" if (Kubernetes.KubeProxyMode | default("ipvs")) == "" else  Kubernetes.KubeProxyMode}}
-service_ip_range: {{ "10.96.0.0/20" if (Kubernetes.ServiceCidr | default("10.96.0.0/20")) == "" else Kubernetes.ServiceCidr }}
-pod_ip_range: {{ "10.4.0.0/20" if (Kubernetes.PodCidr | default("10.4.0.0/20")) == "" else Kubernetes.PodCidr }}
-node_port_range: {{ "30000-32767" if (Kubernetes.NodePortRange | default("30000-32767")) == "" else Kubernetes.NodePortRange }}
-{# api_sans: {{ [NodePool.Master.IP[0]] if (Kubernetes.ApiSans == None) else Kubernetes.ApiSans }} #}
+k8s_version: {{ (Kubernetes.Version == "") | ternary("v1.23.12", Kubernetes.Version) }}
+cluster_id: {{ (KoreOn.ClusterName == "") | ternary("kubernetes", KoreOn.ClusterName) }}
+container_runtime: {{ (Kubernetes.ContainerRuntime == "") | ternary("containerd", Kubernetes.ContainerRuntime) }}
+kube_proxy_mode: {{ (Kubernetes.KubeProxyMode == "") | ternary("ipvs", Kubernetes.KubeProxyMode) }}
+service_ip_range: {{ (Kubernetes.ServiceCidr == "") | ternary("10.96.0.0/20", Kubernetes.ServiceCidr) }}
+pod_ip_range: {{ (Kubernetes.PodCidr == "") | ternary("10.4.0.0/20", Kubernetes.PodCidr) }}
+node_port_range: {{ (Kubernetes.NodePortRange == "") | ternary("30000-32767", Kubernetes.NodePortRange) }}
+audit_log_enable: {{ (Kubernetes.AuditLogEnable == None) | ternary(true, Kubernetes.AuditLogEnable) }}
 api_sans: {{ (Kubernetes.ApiSans == None) | ternary([NodePool.Master.IP[0]], Kubernetes.ApiSans) }}
 #-end [kubernetes]
 
@@ -48,7 +54,7 @@ api_sans: {{ (Kubernetes.ApiSans == None) | ternary([NodePool.Master.IP[0]], Kub
 ## - 
 ## external-etcd: used external etcd than input the ip and private-ip address (default: false)
 ##                not used than skip ip address. it is used control plane nodes as automatic.
-external_etcd: {{ Kubernetes.Etcd.ExternalEtcd | default(false) }}
+external_etcd: {{ Kubernetes.Etcd.ExternalEtcd }}
 external_etcd_ip: {{ ((Kubernetes.Etcd.IP != None) and (Kubernetes.Etcd.IP | length > 0))  | ternary(Kubernetes.Etcd.IP, [""]) }}
 external_etcd_private_ip: {{ ((Kubernetes.Etcd.PrivateIP != None) and (Kubernetes.Etcd.PrivateIP | length > 0))  | ternary(Kubernetes.Etcd.PrivateIP, [""]) }}
 #-end [kubernetes.etcd]
@@ -59,8 +65,8 @@ external_etcd_private_ip: {{ ((Kubernetes.Etcd.PrivateIP != None) and (Kubernete
 ## Optional
 ## - calico_version: input calico version (default: "latest")
 ## - vxlan_mode: Calico network mode (default: false)
-calico_version: {{ Kubernetes.Calico.Version | default("latest") }}
-vxlan_mode: {{ Kubernetes.Calico.VxlanMode | default(false) }}
+calico_version: {{ Kubernetes.Calico.Version }}
+vxlan_mode: {{ Kubernetes.Calico.VxlanMode }}
 #-end [kubernetes.calico]
 
 #- [node-pool]
@@ -68,20 +74,20 @@ vxlan_mode: {{ Kubernetes.Calico.VxlanMode | default(false) }}
 ## - 
 ## Optional
 ## - data_root_dir: data(backup, docker, log, kubelet, etcd, k8s-audit, containerd) root dir (default: "/data") 
-data_root_dir: {{ NodePool.DataDir | default("/data") }}
+data_root_dir: {{ (NodePool.DataDir == "") | ternary("/data", NodePool.DataDir) }}
 #-end [node-pool]
 
 #- [node-pool.master]
 ## Required
 ## - 
 ## Optional
-## - master_isolated: k8s controll plane nodes isolation (default: true)
+## - master_isolated: k8s controll plane nodes isolation (default: fasle)
 ## - haproxy: used internal load-balancer (default: true)
 ## - lb-ip: Enter the IP address when using a load balancer (default: master[0] ip address)
 ## - lb-port: Enter the port when using a load balancer (default: "6443")
 ## - api_lb_ip: authmatic input (only: lb_ip:lb_port)
-master_isolated: {{ NodePool.Master.Isolated | default(true) }}
-haproxy: {{ NodePool.Master.HaproxyInstall | default(true) }}
+master_isolated: {{ NodePool.Master.Isolated }}
+haproxy: {{ (NodePool.Master.HaproxyInstall == None) | ternary(true, NodePool.Master.HaproxyInstall) }}
 lb_ip: {{ ((NodePool.Master.LbIP != None) and (NodePool.Master.LbIP | length > 0)) | ternary(NodePool.Master.LbIP, NodePool.Master.IP[0]) }}
 lb_port: {{ ((NodePool.Master.LbPort != None) and (NodePool.Master.LbPort > 0)) | ternary(NodePool.Master.LbPort, 6443) }}
 api_lb_ip: {{ ((NodePool.Master.LbIP != None) and (NodePool.Master.LbIP | length > 0)) | ternary(NodePool.Master.LbIP, NodePool.Master.IP[0]) }}:{{ ((NodePool.Master.LbPort != None) and (NodePool.Master.LbPort > 0)) | ternary(NodePool.Master.LbPort, 6443) }}
@@ -99,13 +105,13 @@ api_lb_ip: {{ ((NodePool.Master.LbIP != None) and (NodePool.Master.LbIP | length
 ## - registry_data_dir: private registry data directory (default: "/data/harbor")
 ## - registry_archieve_file: registry archive file path (default: "")
 ## - registry_public_cert: public cert activate (default: false)
-registry_install: {{ PrivateRegistry.Install | default(false) }}
-registry_version: {{ PrivateRegistry.RegistryVersion | default("latest") }}
-registry_data_dir: {{ PrivateRegistry.DataDir | default("/data/harbor") }}
-registry: {{ PrivateRegistry.RegistryIP | default("") }}
-registry_domain: {{ PrivateRegistry.RegistryDomain | default("") }}
-registry_archieve_file: {{ PrivateRegistry.RegistryArchiveFile | default("") }}
-registry_public_cert: {{ PrivateRegistry.PublicCert | default(false) }}
+registry_install: {{ PrivateRegistry.Install }}
+registry_version: {{ (PrivateRegistry.RegistryVersion == "") | ternary("v2.6.0", PrivateRegistry.RegistryVersion) }}
+registry_data_dir: {{ (PrivateRegistry.DataDir == "" ) | ternary("/data/harbor", PrivateRegistry.DataDir) }}
+registry_ip: {{ PrivateRegistry.RegistryIP }}
+registry_domain: {{ PrivateRegistry.RegistryDomain }}
+registry_archieve_file: {{ PrivateRegistry.RegistryArchiveFile }}
+registry_public_cert: {{ PrivateRegistry.PublicCert }}
 #-end [shared-storage]
 
 
@@ -115,8 +121,8 @@ registry_public_cert: {{ PrivateRegistry.PublicCert | default(false) }}
 ## Optional
 ## - registry_ssl_ca: The certificate path used when using public-cert. (default: "")
 ## - registry_ssl_ca_key: The certificate-key used when using public-cert. (default: "")
-registry_ssl_ca: {{ PrivateRegistry.CertFile.SslCertificate | default("") }}
-registry_ssl_ca_key: {{ PrivateRegistry.CertFile.SslCertificateKey | default("") }}
+registry_ssl_ca: {{ PrivateRegistry.CertFile.SslCertificate }}
+registry_ssl_ca_key: {{ PrivateRegistry.CertFile.SslCertificateKey }}
 #-end [private-registry.cert-file]
 
 
@@ -124,7 +130,7 @@ registry_ssl_ca_key: {{ PrivateRegistry.CertFile.SslCertificateKey | default("")
 ## Required
 ## - 
 ## Optional
-storage_install: {{ SharedStorage.Install | default(false) }}
-nfs_ip: {{ SharedStorage.StorageIP | default("") }}
-nfs_volume_dir: {{ SharedStorage.VolumeDir | default("/storage") }}
+storage_install: {{ SharedStorage.Install }}
+nfs_ip: {{ SharedStorage.StorageIP }}
+nfs_volume_dir: {{ (SharedStorage.VolumeDir == "") | ternary("/storage", SharedStorage.VolumeDir) }}
 #-end [shared-storage]

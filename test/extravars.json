@@ -3,7 +3,7 @@
         "CertValidityDays": 0,
         "ClosedNetwork": false,
         "ClusterID": "",
-        "ClusterName": "test-cluster",
+        "ClusterName": "",
         "DebugMode": false,
         "InstallDir": "",
         "LocalRepository": "",
@@ -13,34 +13,35 @@
         "ApiSans": null,
         "AuditLogEnable": false,
         "Calico": {
-            "Version": "latest",
+            "Version": "v3.24",
             "VxlanMode": false
         },
         "CalicoVersion": "",
         "ContainerRuntime": "",
         "Etcd": {
-            "EncryptSecret": true,
+            "EncryptSecret": false,
             "ExternalEtcd": false,
-            "IP": [],
-            "PrivateIP": []
+            "IP": null,
+            "PrivateIP": null
         },
         "KubeProxyMode": "",
         "NodePortRange": "",
         "PodCidr": "",
         "ServiceCidr": "",
-        "Version": "1.19.10"
+        "Version": "v1.23.12"
     },
     "NodePool": {
-        "DataDir": "",
+        "DataDir": "/data",
         "Master": {
-            "HaproxyInstall": true,
+            "HaproxyInstall": false,
             "IP": [
                 "192.168.77.234",
                 "192.168.77.235",
                 "192.168.77.236"
             ],
             "Isolated": false,
-            "LbIP": "192.168.77.234",
+            "LbIP": "",
+            "LbPort": 0,
             "Name": "",
             "PrivateIP": [
                 "3.0.0.1",
@@ -59,9 +60,9 @@
             ]
         },
         "Security": {
-            "PrivateKeyPath": "/tmp/cert/id_rsa",
+            "PrivateKeyPath": "",
             "SSHPort": 0,
-            "SSHUserID": "centos"
+            "SSHUserID": ""
         }
     },
     "PrivateRegistry": {
@@ -71,17 +72,18 @@
         },
         "DataDir": "/data/harbor",
         "Install": true,
-        "PrivateIP": "",
+        "PrivateIP": "3.0.0.50",
         "PublicCert": false,
         "RegistryArchiveFile": "",
-        "RegistryDomain": "",
-        "RegistryIP": "192.168.77.239"
+        "RegistryDomain": "192.168.77.239",
+        "RegistryIP": "192.168.77.239",
+        "RegistryVersion": "v2.6.0"
     },
     "SharedStorage": {
         "Install": true,
         "PrivateIP": "3.0.0.50",
         "StorageIP": "192.168.77.239",
         "VolumeDir": "/data/storage",
-        "VolumeSize": 1000
+        "VolumeSize": 0
     }
 }

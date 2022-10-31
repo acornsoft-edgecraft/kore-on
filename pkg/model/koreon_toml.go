@@ -9,7 +9,9 @@ type KoreOnToml struct {
 
 		//#Airgap
 		ClosedNetwork              bool   `toml:"closed-network,omitempty"`
-		LocalRepository            string `toml:"local-repository,omitempty"`
+		LocalRepositoryInstall     bool   `toml:"local-repository-install,omitempty"`
+		LocalRepositoryPort        int    `toml:"local-repository-port,omitempty"`
+		LocalRepositoryUrl         string `toml:"local-repository-url,omitempty"`
 		LocalRepositoryArchiveFile string `toml:"local-repository-archive-file"`
 		DebugMode                  bool   `toml:"debug-mode,omitempty"`
 	} `toml:"koreon,omitempty"`
@@ -22,7 +24,7 @@ type KoreOnToml struct {
 		ServiceCidr      string   `toml:"service-cidr,omitempty"`
 		PodCidr          string   `toml:"pod-cidr,omitempty"`
 		NodePortRange    string   `toml:"node-port-range,omitempty"`
-		AuditLogEnable   bool     `toml:"audit-log-enable"`
+		AuditLogEnable   *bool    `toml:"audit-log-enable"`
 		ApiSans          []string `toml:"api-sans,omitempty"`
 
 		Calico struct {
@@ -53,8 +55,8 @@ type KoreOnToml struct {
 			PrivateIP      []string `toml:"private-ip,omitempty"`
 			LbIP           string   `toml:"lb-ip,omitempty"`
 			LbPort         int      `toml:"lb-port,omitempty"`
-			Isolated       bool     `toml:"isolated"`
-			HaproxyInstall bool     `toml:"haproxy-install"`
+			Isolated       bool     `toml:"isolated,omitempty"`
+			HaproxyInstall *bool    `toml:"haproxy-install,omitempty"`
 		} `toml:"master,omitempty"`
 
 		Node StrNode `toml:"node,omitempty"`
@@ -71,14 +73,14 @@ type KoreOnToml struct {
 	} `toml:"shared-storage,omitempty"`
 
 	PrivateRegistry struct {
-		Install             bool   `toml:"install"`
+		Install             bool   `toml:"install,omitempty"`
 		RegistryVersion     string `toml:"registry-version,omitempty"`
 		RegistryIP          string `toml:"registry-ip,omitempty"`
 		RegistryDomain      string `toml:"registry-domain,omitempty"`
 		PrivateIP           string `toml:"private-ip,omitempty"`
 		DataDir             string `toml:"data-dir,omitempty"`
 		RegistryArchiveFile string `toml:"registry-archive-file"`
-		PublicCert          bool   `toml:"public-cert"`
+		PublicCert          bool   `toml:"public-cert,omitempty"`
 		CertFile            struct {
 			SslCertificate    string `toml:"ssl-certificate,omitempty"`
 			SslCertificateKey string `toml:"ssl-certificate-key,omitempty"`

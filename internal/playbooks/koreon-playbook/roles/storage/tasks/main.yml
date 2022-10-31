@@ -1,3 +1,2 @@
 ---
 - import_tasks: storage.yml
-  when: storage_install

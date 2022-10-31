@@ -6,12 +6,12 @@ if __name__ == '__main__':
 
     k8s_versions = [ "{{ kube_support_versions | list }}" ]
     registry_version = "{{ harbor_version }}"
-    registry_ip = "{{ registry }}"
+    registry_ip = "{{ registry_ip }}"
     registry_id = "{{ registry_id }}"
     registry_passwd = "{{ registry_passwd }}"
 
     # Harbor root ca
-    ca_crt = "/etc/docker/certs.d/{{ registry }}/ca.crt"
+    ca_crt = "/etc/docker/certs.d/{{ registry_ip }}/ca.crt"
 
     project_names = []
 

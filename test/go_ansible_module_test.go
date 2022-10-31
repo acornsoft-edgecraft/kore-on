@@ -17,8 +17,8 @@ func TestAsibleModulePing(t *testing.T) {
 
 	ansibleAdhocOptions := &adhoc.AnsibleAdhocOptions{
 		Inventory:  " 127.0.0.1,",
-		ModuleName: "ping",
-		// Args:       "ping 127.0.0.1 -c 2",
+		ModuleName: "ansible.builtin.gather_facts",
+		Args:       "true",
 	}
 
 	adhoc := &adhoc.AnsibleAdhocCmd{

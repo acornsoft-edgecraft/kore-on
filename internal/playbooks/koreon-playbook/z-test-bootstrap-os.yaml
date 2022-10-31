@@ -9,6 +9,7 @@
         apply:
           tags:
             - init
+  any_errors_fatal: true
 
 # Clear gathered facts from all currently targeted hosts 
 - hosts: all
@@ -17,8 +18,9 @@
   tasks:
     - name: Clear gathered facts
       meta: clear_facts
+  any_errors_fatal: true
 
-# Init | Network Check.
+# Pre-installation check network.
 - hosts: all
   become: false
   gather_facts: true
@@ -34,39 +36,20 @@
             - init-network
   any_errors_fatal: true
 
-# clean master and worker node
-- hosts: cluster
+# Configure system package repository
+- hosts: all
   become: true
   gather_facts: false
   vars_files:
     - "{{ playbook_dir }}/inventory/group_vars/basic.yaml"
     - "{{ playbook_dir }}/inventory/group_vars/expert.yaml"
-  roles:
-    - reset
-  tags:
-    - reset-cluster
-
-# clean private registry
-- hosts: registry
-  become: true
-  gather_facts: false
-  vars_files:
-    - "{{ playbook_dir }}/inventory/group_vars/basic.yaml"
-    - "{{ playbook_dir }}/inventory/group_vars/expert.yaml"
-  roles:
-  - reset/registry
-  tags:
-  - reset-registry
-
-# clean storage
-- hosts: storage
-  become: true
-  gather_facts: false
-  vars_files:
-    - "{{ playbook_dir }}/inventory/group_vars/basic.yaml"
-    - "{{ playbook_dir }}/inventory/group_vars/expert.yaml"
-  roles:
-  - reset/storage
-  tags:
-  - reset-storage
-
+  tasks:
+    - name: Bootstrap OS
+      ansible.builtin.include_role:
+        name: bootstrap-os/{{ ansible_os_family | lower }}
+        apply:
+          tags:
+            - bootstrap-os
+      when:
+        - ansible_os_family is defined
+  any_errors_fatal: true

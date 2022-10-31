@@ -1,0 +1,11 @@
+[LocalRepo_BaseOS]
+name=LocalRepo_BaseOS
+enabled=1
+gpgcheck=0
+baseurl={{ (local_repository_url is defined) | ternary('http://' + registry_ip + ':8080', local_repository_url, omit) }}
+
+[LocalRepo_AppStream]
+name=LocalRepo_AppStream
+enabled=1
+gpgcheck=0
+baseurl={{ (local_repository_url is defined) | ternary('http://' + registry_ip + ':8080', local_repository_url, omit) }}
