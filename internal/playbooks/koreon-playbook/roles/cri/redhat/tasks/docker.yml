@@ -1,0 +1,82 @@
+---
+- name: Create docker config directory
+  file:
+    path: /etc/docker
+    state: directory
+
+- name: Check data directory existence
+  stat:
+    path: "{{ data_root_dir }}"
+  register: data_dir_exist
+
+- name: Create data directory existence
+  when: not data_dir_exist.stat.exists
+  file:
+    path: "{{ data_root_dir }}"
+    state: directory
+
+# Install docker package  --------------------------------------------------
+# For RedHat
+# yum repository에 enabled=no로 되어 있으므로 enablerepo=Docker-CE-Stable 로 활성화 한다.
+# disable_gpg_check=yes 로 설정하여 GPG key 정확성을 check하는 인터렉션을 방지한다.
+- name: yum clean packages
+  command: yum clean packages
+  ignore_errors: true
+
+- name: Install Docker
+  yum:
+    name: ["docker-ce", "docker-ce-cli"]
+    state: present
+    update_cache: yes
+    disable_gpg_check: yes
+  when:
+    - closed_network
+
+- name: Install Docker
+  yum:
+    name: ["docker-ce", "docker-ce-cli"]
+    state: present
+    enablerepo: Docker-CE-Stable
+    disable_gpg_check: yes
+  when:
+    - not closed_network
+
+# Set docker root dir and configuration   ------------------------------------------------
+- name: Copy daemon.json file to /etc/docker
+  template:
+    src: "{{ item.src }}"
+    dest: /etc/docker/{{ item.dest }}
+  with_items:
+    - { src: "daemon.json.j2", dest: "daemon.json" }
+  register: docker_daemon_json
+# ---------------------------------------------------------------------------------------
+
+- name: Enable Docker
+  ansible.builtin.systemd:
+    name: docker
+    daemon_reload: yes
+    enabled: yes
+
+- name: Populate service facts
+  ansible.builtin.service_facts:
+
+- name: check if Dcoker is installed
+  fail:
+    msg: Docker is not installed, why? It should have been there!
+  when: ansible_facts.services["docker.service"] is not defined
+  any_errors_fatal: true
+
+- name: Restart Docker
+  ansible.builtin.systemd:
+    name: docker
+    state: restarted
+  when:
+    - ansible_facts.services["docker.service"].state in "running"
+    - docker_daemon_json.changed
+    
+- name: Start Docker
+  ansible.builtin.systemd:
+    name: docker
+    state: started
+  when:
+    - not ansible_facts.services["docker.service"].state in "running"

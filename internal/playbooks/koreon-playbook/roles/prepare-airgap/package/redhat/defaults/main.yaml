@@ -1,0 +1,6 @@
+---
+package_data_dir: "{{ prepare_airgap_registry_data_dir }}/packages"
+
+containerd_base_url: "https://download.docker.com/linux/centos/{{ ansible_distribution_major_version }}/aarch64/stable/Packages"
+containerd_version: "{{ SupportVersion.PackageVersion.Containerd | regex_replace('^v', '') }}"
+containerd_url: "{{ containerd_base_url }}/containerd.io-{{ containerd_version }}-3.1.el{{ ansible_distribution_major_version }}.aarch64.rpm"

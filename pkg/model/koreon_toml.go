@@ -51,9 +51,9 @@ type KoreOnToml struct {
 
 		Master struct {
 			Name           string   `toml:"name,omitempty"`
-			IP             []string `toml:"ip,omitempty"`
-			PrivateIP      []string `toml:"private-ip,omitempty"`
-			LbIP           string   `toml:"lb-ip,omitempty"`
+			IP             []string `toml:"ip"`
+			PrivateIP      []string `toml:"private-ip"`
+			LbIP           string   `toml:"lb-ip"`
 			LbPort         int      `toml:"lb-port,omitempty"`
 			Isolated       bool     `toml:"isolated,omitempty"`
 			HaproxyInstall *bool    `toml:"haproxy-install,omitempty"`
@@ -75,9 +75,9 @@ type KoreOnToml struct {
 	PrivateRegistry struct {
 		Install             bool   `toml:"install,omitempty"`
 		RegistryVersion     string `toml:"registry-version,omitempty"`
-		RegistryIP          string `toml:"registry-ip,omitempty"`
+		RegistryIP          string `toml:"registry-ip"`
 		RegistryDomain      string `toml:"registry-domain,omitempty"`
-		PrivateIP           string `toml:"private-ip,omitempty"`
+		PrivateIP           string `toml:"private-ip"`
 		DataDir             string `toml:"data-dir,omitempty"`
 		RegistryArchiveFile string `toml:"registry-archive-file"`
 		PublicCert          bool   `toml:"public-cert,omitempty"`
@@ -86,9 +86,20 @@ type KoreOnToml struct {
 			SslCertificateKey string `toml:"ssl-certificate-key,omitempty"`
 		} `toml:"cert-file,omitempty"`
 	} `toml:"private-registry,omitempty"`
+
+	PrepareAirgap struct {
+		K8sVersion      string `toml:"k8s-version,omitempty"`
+		RegistryVersion string `toml:"registry-version,omitempty"`
+		RegistryIP      string `toml:"registry-ip"`
+	} `toml:"prepare-airgap,omitempty"`
+
+	SupportVersion struct {
+		PackageVersion PackageVersion
+		ImageVersion   ImageVersion
+	}
 }
 
 type StrNode struct {
-	IP        []string `toml:"ip,omitempty"`
-	PrivateIP []string `toml:"private-ip,omitempty"`
+	IP        []string `toml:"ip"`
+	PrivateIP []string `toml:"private-ip"`
 }

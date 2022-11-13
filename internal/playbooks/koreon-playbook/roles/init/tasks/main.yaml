@@ -5,4 +5,12 @@
 
 - import_tasks: generate-expert-vars.yaml
 
+- name: Include vars of basic.yaml
+  ansible.builtin.include_vars:
+    file: "{{ playbook_dir }}/inventory/group_vars/basic.yaml"
+
+- import_tasks: generate-images-vars.yaml
+
+- import_tasks: generate-packages-vars.yaml
+
 - meta: refresh_inventory

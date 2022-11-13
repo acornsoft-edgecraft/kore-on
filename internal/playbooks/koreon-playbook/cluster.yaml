@@ -51,6 +51,7 @@
             - create-local-repo
       when:
         - closed_network
+        - local_repository_install
   any_errors_fatal: true
 
 # Configure system package repository
@@ -133,7 +134,7 @@
   tasks:
     - name: Install Container Runtime Interface for registry
       ansible.builtin.include_role:
-        name: cri
+        name: cri/{{ ansible_os_family | lower }}
         apply:
           tags:
             - cri
@@ -152,11 +153,6 @@
           tags:
             - registry
   any_errors_fatal: true
-  # roles:
-  #   - { role: yum-repo, tags: registry, vars: { param: "registry" } }
-  #   - { role: cri, tags: registry, vars: { param: "registry" } }
-  #   - { role: registry, tags: registry }
-  #   - { role: post-install, tags: registry }
 
 # install ssl cert
 - hosts: sslhost

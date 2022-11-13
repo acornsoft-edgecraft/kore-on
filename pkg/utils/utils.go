@@ -108,14 +108,20 @@ func IskoreOnConfigFilePath(s string) string {
 
 func IsSupportVersion(version string, conf string) string {
 	supportversion := viper.GetStringMapStringSlice(conf)
-
+	if len(supportversion) == 0 {
+		logger.Fatal("koreon > There is no supported version.")
+	}
 	if len(strings.Split(version, ".")) == 2 {
 		k := version
 		v, err := supportversion[version]
 		if !err {
-			return ""
+			logger.Fatal("koreon > There is no supported version.")
 		}
-		version = fmt.Sprintf("%v.%v", k, v[len(v)-1])
+		if len(v) == 1 && v[0] == "" {
+			version = fmt.Sprintf("%v", k)
+		} else {
+			version = fmt.Sprintf("%v.%v", k, v[len(v)-1])
+		}
 	}
 
 	keys := make([]string, 0, len(supportversion))
@@ -126,24 +132,46 @@ func IsSupportVersion(version string, conf string) string {
 
 	values, err := supportversion[keys[0]]
 	if !err {
-		return ""
+		logger.Fatal("koreon > There is no supported version.")
 	}
 
 	latest := fmt.Sprintf("%v.%v", keys[0], values[len(values)-1])
 
-	if version == "" {
+	if version == "" || version == "latest" {
 		return latest
 	} else {
 		major := version[0:strings.LastIndex(version, ".")]
 		minor := version[len(major)+1 : len(version)+0]
+
 		for _, v := range supportversion[major] {
 			if v == minor {
 				return version
 			}
 		}
-		// Returns no matching version
-		return ""
+		// Returns just use major version
+		return version
 	}
+}
+
+func GetSupportVersion(version string, key string) map[string]interface{} {
+	getVersion := viper.GetStringMap("SupportVersion")
+	chekVersion := false
+
+	for k, v := range getVersion[key].(map[string]interface{}) {
+		if k == version {
+			chekVersion = true
+			return v.(map[string]interface{})
+		}
+	}
+	if !chekVersion {
+		for k, v := range getVersion[key].(map[string]interface{}) {
+			if k == version[0:strings.LastIndex(version, ".")] {
+				return v.(map[string]interface{})
+			}
+		}
+	}
+
+	return nil
 }
 
 func ListSupportVersion(conf string) string {

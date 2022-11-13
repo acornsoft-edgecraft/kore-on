@@ -1,0 +1,4 @@
+---
+- include_tasks: "install-registry.yaml"
+
+- include_tasks: "pull-push-images.yaml"

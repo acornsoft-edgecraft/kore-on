@@ -45,7 +45,7 @@ func TestCmd() *cobra.Command {
 	test.tags = ""
 	test.inventory = "./internal/playbooks/koreon-playbook/inventory/inventory.ini"
 	test.playbookFiles = []string{
-		"./internal/playbooks/koreon-playbook/z-test-bootstrap-os.yaml",
+		"./internal/playbooks/koreon-playbook/z-test-package-download.yaml",
 	}
 
 	f := cmd.Flags()
@@ -63,7 +63,7 @@ func TestCmd() *cobra.Command {
 func (c *strTestCmd) run() error {
 	koreOnConfigFileName := viper.GetString("KoreOn.KoreOnConfigFile")
 	koreOnConfigFilePath := utils.IskoreOnConfigFilePath(koreOnConfigFileName)
-	koreonToml, value := utils.ValidateKoreonTomlConfig(koreOnConfigFilePath)
+	koreonToml, value := utils.ValidateKoreonTomlConfig(koreOnConfigFilePath, "prepare-airgap")
 
 	if value {
 		b, err := json.Marshal(koreonToml)

@@ -1,7 +1,3 @@
-# "###"는 제거 대상
-###provider: false
-###cloud_provider: onpremise
-
 #- [koreon]
 ## Required
 ## - local-repository-install: local repository installation activate. (Required when selecting the closed network.)
@@ -20,10 +16,10 @@ cluster_name: kubernetes
 install_dir: /var/lib/kore-on
 cert_validity_days: 36500
 debug_mode: False
-closed_network: True
-local_repository_install: True
+closed_network: False
+local_repository_install: False
 local_repository_port: 8080
-local_repository_archive_file: ./local-repo.20221030_232949.tgz
+local_repository_archive_file: 
 local_repository_url: ''
 #-end [koreon]
 
@@ -38,7 +34,7 @@ local_repository_url: ''
 ## - pod_ip_range: k8s pod network cidr (default: "10.4.0.0/24")
 ## - node_port_range: k8s node port network range (default: "30000-32767")
 ## - api-sans: k8s apiserver SAN 추가 [--apiserver-cert-extra-sans 설정과 동일] (default: master[0] ip address)
-k8s_version: v1.23.13
+k8s_version: v1.23.12
 cluster_id: kubernetes
 container_runtime: containerd
 kube_proxy_mode: ipvs
@@ -46,7 +42,7 @@ service_ip_range: 10.96.0.0/20
 pod_ip_range: 10.4.0.0/20
 node_port_range: 30000-32767
 audit_log_enable: True
-api_sans: ['192.168.77.234']
+api_sans: [AnsibleUndefined]
 #-end [kubernetes]
 
 #- [kubernetes.etcd]
@@ -65,7 +61,7 @@ external_etcd_private_ip: ['']
 ## Optional
 ## - calico_version: input calico version (default: "latest")
 ## - vxlan_mode: Calico network mode (default: false)
-calico_version: v3.23.4
+calico_version: 
 vxlan_mode: False
 #-end [kubernetes.calico]
 
@@ -88,9 +84,9 @@ data_root_dir: /data
 ## - api_lb_ip: authmatic input (only: lb_ip:lb_port)
 master_isolated: False
 haproxy: True
-lb_ip: 192.168.77.234
+lb_ip: 
 lb_port: 6443
-api_lb_ip: 192.168.77.234:6443
+api_lb_ip: :6443
 #-end [node-pool.master]
 
 #- [private-registry]
@@ -105,14 +101,14 @@ api_lb_ip: 192.168.77.234:6443
 ## - registry_data_dir: private registry data directory (default: "/data/harbor")
 ## - registry_archieve_file: registry archive file path (default: "")
 ## - registry_public_cert: public cert activate (default: false)
-registry_install: True
+registry_install: False
 registry_version: v2.6.0
 registry_data_dir: /data/harbor
-registry_ip: 192.168.77.239
-registry_domain: 192.168.77.239
-registry_archieve_file: /tmp/koreon/harbor.20220224_072307.tgz
+registry_ip: 
+registry_domain: True
+registry_archive_file: True
 registry_public_cert: False
-#-end [shared-storage]
+#-end [private-registry]
 
 
 #- [private-registry.cert-file]
@@ -130,7 +126,34 @@ registry_ssl_ca_key:
 ## Required
 ## - 
 ## Optional
-storage_install: True
-nfs_ip: 192.168.77.239
-nfs_volume_dir: /data/storage
+storage_install: False
+nfs_ip: 
+nfs_volume_dir: /storage
 #-end [shared-storage]
+
+
+
+#- [prepare-airgap]
+## Required
+## - k8s-version: private registry nodes ip address.
+##                This is a required field used when the pre-preparation stage of the air gap network.
+## - registry-version: Storage node ip address.
+##                This is a required field used when the pre-preparation stage of the air gap network.
+## - registry-ip: Private registry node ip address.
+##                This is a required field used when the pre-preparation stage of the air gap network.
+## Optional
+## - 
+prepare_airgap_k8s_version: v1.21.14
+prepare_airgap_registry_version: v2.6.1
+prepare_airgap_registry_ip: 192.168.77.239
+prepare_airgap_registry_data_dir: "/data"
+prepare_airgap_registry_install_dir: "/var/lib/kore-on"
+## packages
+package_containerd_version: v1.5.11
+package_docker_compose_version: v2.10.2
+## images
+image_calico_version: v3.21.6
+image_coredns_version: v1.8.0
+image_metrics_server_version: v0.6.1
+image_pause_version: v3.5
+#-end [prepare-airgap]

@@ -1,7 +1,3 @@
-# "###"는 제거 대상
-###provider: false
-###cloud_provider: onpremise
-
 #- [koreon]
 ## Required
 ## - local-repository-install: local repository installation activate. (Required when selecting the closed network.)
@@ -88,9 +84,9 @@ data_root_dir: {{ (NodePool.DataDir == "") | ternary("/data", NodePool.DataDir) 
 ## - api_lb_ip: authmatic input (only: lb_ip:lb_port)
 master_isolated: {{ NodePool.Master.Isolated }}
 haproxy: {{ (NodePool.Master.HaproxyInstall == None) | ternary(true, NodePool.Master.HaproxyInstall) }}
-lb_ip: {{ ((NodePool.Master.LbIP != None) and (NodePool.Master.LbIP | length > 0)) | ternary(NodePool.Master.LbIP, NodePool.Master.IP[0]) }}
-lb_port: {{ ((NodePool.Master.LbPort != None) and (NodePool.Master.LbPort > 0)) | ternary(NodePool.Master.LbPort, 6443) }}
-api_lb_ip: {{ ((NodePool.Master.LbIP != None) and (NodePool.Master.LbIP | length > 0)) | ternary(NodePool.Master.LbIP, NodePool.Master.IP[0]) }}:{{ ((NodePool.Master.LbPort != None) and (NodePool.Master.LbPort > 0)) | ternary(NodePool.Master.LbPort, 6443) }}
+lb_ip: {{ (NodePool.Master.LbIP != None or NodePool.Master.LbIP != "") | ternary(NodePool.Master.LbIP, NodePool.Master.IP[0]) }}
+lb_port: {{ (NodePool.Master.LbPort == 0) | ternary(6443, NodePool.Master.LbPort) }}
+api_lb_ip: {{ (NodePool.Master.LbIP != None or NodePool.Master.LbIP != "") | ternary(NodePool.Master.LbIP, NodePool.Master.IP[0]) }}:{{ (NodePool.Master.LbPort == 0) | ternary(6443, NodePool.Master.LbPort) }}
 #-end [node-pool.master]
 
 #- [private-registry]
@@ -108,11 +104,11 @@ api_lb_ip: {{ ((NodePool.Master.LbIP != None) and (NodePool.Master.LbIP | length
 registry_install: {{ PrivateRegistry.Install }}
 registry_version: {{ (PrivateRegistry.RegistryVersion == "") | ternary("v2.6.0", PrivateRegistry.RegistryVersion) }}
 registry_data_dir: {{ (PrivateRegistry.DataDir == "" ) | ternary("/data/harbor", PrivateRegistry.DataDir) }}
-registry_ip: {{ PrivateRegistry.RegistryIP }}
-registry_domain: {{ PrivateRegistry.RegistryDomain }}
-registry_archieve_file: {{ PrivateRegistry.RegistryArchiveFile }}
+registry_ip: {{ (PrivateRegistry.RegistryIP == None) | ternary("''", PrivateRegistry.RegistryIP) }}
+registry_domain: {{ PrivateRegistry.RegistryDomain == None | ternary("''", PrivateRegistry.RegistryDomain) }}
+registry_archive_file: {{ PrivateRegistry.RegistryArchiveFile == None | ternary("''", PrivateRegistry.RegistryArchiveFile) }}
 registry_public_cert: {{ PrivateRegistry.PublicCert }}
-#-end [shared-storage]
+#-end [private-registry]
 
 
 #- [private-registry.cert-file]
@@ -131,6 +127,33 @@ registry_ssl_ca_key: {{ PrivateRegistry.CertFile.SslCertificateKey }}
 ## - 
 ## Optional
 storage_install: {{ SharedStorage.Install }}
-nfs_ip: {{ SharedStorage.StorageIP }}
+nfs_ip: {{ (SharedStorage.StorageIP == None) | ternary("''", SharedStorage.StorageIP) }}
 nfs_volume_dir: {{ (SharedStorage.VolumeDir == "") | ternary("/storage", SharedStorage.VolumeDir) }}
 #-end [shared-storage]
+
+
+
+#- [prepare-airgap]
+## Required
+## - k8s-version: private registry nodes ip address.
+##                This is a required field used when the pre-preparation stage of the air gap network.
+## - registry-version: Storage node ip address.
+##                This is a required field used when the pre-preparation stage of the air gap network.
+## - registry-ip: Private registry node ip address.
+##                This is a required field used when the pre-preparation stage of the air gap network.
+## Optional
+## - 
+prepare_airgap_k8s_version: {{ (PrepareAirgap.K8sVersion == "" or PrepareAirgap.K8sVersion == None) | ternary("''", PrepareAirgap.K8sVersion) }}
+prepare_airgap_registry_version: {{ (PrepareAirgap.RegistryVersion == "" or PrepareAirgap.RegistryVersion == None) | ternary("''", PrepareAirgap.RegistryVersion) }}
+prepare_airgap_registry_ip: {{ (PrepareAirgap.RegistryIP == None or PrepareAirgap.RegistryIP == "") | ternary("''", PrepareAirgap.RegistryIP) }}
+prepare_airgap_registry_data_dir: "/data"
+prepare_airgap_registry_install_dir: "/var/lib/kore-on"
+## packages
+{% for image in (SupportVersion.PackageVersion | dict2items) %}
+package_{{ image.key | regex_replace('((?!^)|\\b[a-zA-Z][a-z]*)([A-Z][a-z]*|\\d+)', '\\1_\\2') | lower }}_version: {{ image.value}}
+{% endfor %}
+## images
+{% for image in (SupportVersion.ImageVersion | dict2items) %}
+image_{{ image.key | regex_replace('((?!^)|\\b[a-zA-Z][a-z]*)([A-Z][a-z]*|\\d+)', '\\1_\\2') | lower }}_version: {{ image.value}}
+{% endfor %}
+#-end [prepare-airgap]

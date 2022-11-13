@@ -1,0 +1,6 @@
+#- Package List
+## Required package items.
+prepare_airgap_packages:
+    - nginx: ""
+    - createrepo: ""
+#-end Package List

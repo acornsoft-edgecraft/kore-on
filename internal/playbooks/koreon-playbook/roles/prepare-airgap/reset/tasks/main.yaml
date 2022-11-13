@@ -1,0 +1,99 @@
+---
+- name: Remove harbor components
+  shell: "docker-compose down -v"
+  args:
+    chdir: "{{ install_dir }}/harbor"
+  failed_when: false
+
+- name: Remove all containers
+  shell: "/usr/bin/docker ps -aq | xargs -r docker rm -fv"
+  tags: ['docker']
+
+- name: Stop docker service
+  systemd:
+    name: "{{ item }}"
+    state: stopped
+  with_items:
+    - docker
+  failed_when: false
+  tags: ['services']
+
+- name: Remove docker service file
+  file:
+    path: "{{ item }}"
+    state: absent
+#    purge: yes
+#    force: yes
+  with_items:
+    - /lib/systemd/system/docker.service
+    - /etc/systemd/system/docker
+  register: docker_services_removed
+  tags: ['services']
+
+- name: Flush iptables
+  iptables:
+    flush: yes
+  tags: ['iptables']
+
+- name: Delete some files and directories
+  shell: "rm -rf {{ item }}"
+  with_items:
+    - /usr/local/bin/docker-compose
+    - /usr/bin/docker-compose
+    - /etc/cron.d/check-registry-liveness
+    - /etc/cron.d/registry-backup
+    - /etc/cron.d/registry-logrotation
+    - /etc/cron.d/docker-logrotate
+    - /etc/apt/sources.list.d/kubernetes.list
+    - /etc/apt/sources.list.d/docker.list
+    - /etc/docker/certs.d
+    - /etc/docker/daemon.json
+    - /etc/docker/key.json
+    - /var/log/harbor
+    - /tmp/harbor-backup.tgz
+    - /tmp/harbor
+    - /tmp/registry-restore.sh
+    - "{{ data_root_dir }}/*"
+    - "{{ install_dir }}"
+  tags: ['files']
+
+- name: Remove docker package
+  when: ansible_os_family in ["Ubuntu", "Debian"]
+  apt:
+    name: ['docker-ce', 'docker-ce-cli', 'containerd.io']
+    state: absent
+    force: true
+  register: packages_removed
+  tags: ['services']
+
+- name: Remove kubernetes, etcd, docker package
+  when: ansible_os_family in ["CentOS", "RedHat"]
+  yum:
+    name: ['docker-ce', 'docker-ce-cli', 'containerd.io']
+    state: absent
+  failed_when: false
+  register: packages_removed
+  tags: ['services']
+
+- name: systemctl daemon-reload
+  systemd:
+    daemon_reload: yes
+  when: docker_services_removed.changed or packages_removed.changed
+
+- name: Restart network
+  systemd:
+    name: >-
+      {% if ansible_os_family == "RedHat" -%}
+      {%- if ansible_distribution_major_version|int == 8 -%}
+      NetworkManager
+      {%- else -%}
+      network
+      {%- endif -%}
+      {%- elif ansible_distribution == "Ubuntu" and ansible_distribution_release == "bionic" -%}
+      systemd-networkd
+      {%- endif %}
+    state: restarted
+  failed_when: false
+  tags:
+    - service
+    - network

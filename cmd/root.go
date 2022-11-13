@@ -38,6 +38,7 @@ func init() {
 		baremetal.CreateCmd(),
 		baremetal.ApplyCmd(),
 		baremetal.DestroyCmd(),
+		baremetal.AirGapCmd(),
 		baremetal.TestCmd(),
 	)
 }

@@ -1,4 +1,23 @@
 ---
+- name: Backup /etc/yum.repos.d directory
+  ansible.builtin.copy:
+    remote_src: true
+    src: "/etc/yum.repos.d"
+    dest: "/etc/yum.repos.d.back-{{ ansible_date_time.iso8601_basic_short }}"
+
+- name: Remove /etc/yum.repos.d directory
+  ansible.builtin.file:
+    path: "/etc/yum.repos.d"
+    state: absent
+
+- name: Create /etc/yum.repos.d directory
+  ansible.builtin.file:
+    path: "/etc/yum.repos.d"
+    state: directory
+    owner: root
+    group: root
+    mode: "0644"
+    
 # container-selinux is in extras repo
 # - name: Enable RHEL 7 repos
 #   rhsm_repository:
@@ -46,6 +65,34 @@
     disablerepo: "*"
     enablerepo: "epel"
     state: latest
+
+- name: Adding Nginx|nginx-stable repository
+  yum_repository:
+    name: nginx-stable
+    description: nginx-stable repo
+    file: nginx
+    baseurl: "http://nginx.org/packages/centos/$releasever/$basearch"
+    enabled: yes
+    gpgcheck: yes
+    repo_gpgcheck: yes
+    module_hotfixes: True
+    gpgkey:
+      - "https://nginx.org/keys/nginx_signing.key"
+  notify: yum-clean-metadata
+
+- name: Adding Nginx|nginx-mainline repository
+  yum_repository:
+    name: nginx-mainline
+    description: nginx-mainline repo
+    file: nginx
+    baseurl: "http://nginx.org/packages/mainline/centos/$releasever/$basearch"
+    enabled: False
+    gpgcheck: yes
+    repo_gpgcheck: yes
+    module_hotfixes: True
+    gpgkey:
+      - "https://nginx.org/keys/nginx_signing.key"
+  notify: yum-clean-metadata
 
 - name: Adding Kubernetes repository
   yum_repository:

@@ -20,7 +20,6 @@ import (
 type strDestroyCmd struct {
 	dryRun        bool
 	verbose       bool
-	step          bool
 	inventory     string
 	tags          string
 	playbookFiles []string
@@ -50,7 +49,6 @@ func DestroyCmd() *cobra.Command {
 
 	f := cmd.Flags()
 	f.BoolVarP(&destroy.verbose, "verbose", "v", false, "verbose")
-	f.BoolVarP(&destroy.step, "step", "", false, "step")
 	f.BoolVarP(&destroy.dryRun, "dry-run", "d", false, "dryRun")
 	f.StringVarP(&destroy.inventory, "inventory", "i", destroy.inventory, "Specify ansible playbook inventory")
 	f.StringVar(&destroy.tags, "tags", destroy.tags, "Ansible options tags")
@@ -63,7 +61,7 @@ func DestroyCmd() *cobra.Command {
 func (c *strDestroyCmd) run() error {
 	koreOnConfigFileName := viper.GetString("KoreOn.KoreOnConfigFile")
 	koreOnConfigFilePath := utils.IskoreOnConfigFilePath(koreOnConfigFileName)
-	koreonToml, value := utils.ValidateKoreonTomlConfig(koreOnConfigFilePath)
+	koreonToml, value := utils.ValidateKoreonTomlConfig(koreOnConfigFilePath, "destroy")
 
 	if value {
 		b, err := json.Marshal(koreonToml)

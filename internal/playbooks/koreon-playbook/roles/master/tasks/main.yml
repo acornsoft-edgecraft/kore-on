@@ -271,7 +271,7 @@
 - name: Get kubeconfig file
   fetch:
     src: /etc/kubernetes/acloud/acloud-client-kubeconfig
-    dest: "{{ inventory_dir }}/acloud-client-kubeconfig"
+    dest: "{{ playbook_dir }}/inventory/acloud-client-kubeconfig"
     flat: yes
   delegate_to: "{{ groups['masters'][0] }}"
   run_once: true

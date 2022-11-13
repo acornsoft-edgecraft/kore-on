@@ -43,7 +43,7 @@
     - ansible_distribution in ["CentOS", "RedHat"]
     - closed_network
   yum:
-    name: ['docker-ce-19.03.15', 'docker-ce-cli-19.03.15']
+    name: ['docker-ce', 'docker-ce-cli']
     state: present
     update_cache: yes
     disable_gpg_check: yes

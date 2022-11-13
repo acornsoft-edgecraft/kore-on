@@ -6,9 +6,12 @@
     - name: Init | Configuration
       ansible.builtin.include_role:
         name: init
-        apply:
-          tags:
-            - init
+      tags:
+        - init
+        - reset-cluster
+        - reset-registry
+        - reset-storage
+        - reset-prepare-airgap
 
 # Clear gathered facts from all currently targeted hosts 
 - hosts: all
@@ -29,9 +32,12 @@
     - name: Init | Network check
       ansible.builtin.include_role:
         name: init/network
-        apply:
-          tags:
-            - init-network
+      tags:
+        - init-network
+        - reset-cluster
+        - reset-registry
+        - reset-storage
+        - reset-prepare-airgap
   any_errors_fatal: true
 
 # clean master and worker node
@@ -41,10 +47,12 @@
   vars_files:
     - "{{ playbook_dir }}/inventory/group_vars/basic.yaml"
     - "{{ playbook_dir }}/inventory/group_vars/expert.yaml"
-  roles:
-    - reset
-  tags:
-    - reset-cluster
+  tasks:
+    - name: Reset | Cluster
+      ansible.builtin.include_role:
+        name: reset
+      tags:
+        - reset-cluster
 
 # clean private registry
 - hosts: registry
@@ -53,10 +61,12 @@
   vars_files:
     - "{{ playbook_dir }}/inventory/group_vars/basic.yaml"
     - "{{ playbook_dir }}/inventory/group_vars/expert.yaml"
-  roles:
-  - reset/registry
-  tags:
-  - reset-registry
+  tasks:
+    - name: Reset | Registry
+      ansible.builtin.include_role:
+        name: reset/registry
+      tags:
+      - reset-registry
 
 # clean storage
 - hosts: storage
@@ -65,8 +75,24 @@
   vars_files:
     - "{{ playbook_dir }}/inventory/group_vars/basic.yaml"
     - "{{ playbook_dir }}/inventory/group_vars/expert.yaml"
-  roles:
-  - reset/storage
-  tags:
-  - reset-storage
+  tasks:
+    - name: Reset | Storage
+      ansible.builtin.include_role:
+        name: reset/storage
+      tags:
+      - reset-storage
 
+# clean prepare-airgap
+- hosts: prepare_airgap
+  become: true
+  gather_facts: false
+  vars_files:
+    - "{{ playbook_dir }}/inventory/group_vars/basic.yaml"
+    - "{{ playbook_dir }}/inventory/group_vars/expert.yaml"
+  tasks:
+    - name: Reset | prepare_airgap
+      ansible.builtin.include_role:
+        name: reset/registry
+        apply:
+          tags:
+            - reset-prepare-airgap

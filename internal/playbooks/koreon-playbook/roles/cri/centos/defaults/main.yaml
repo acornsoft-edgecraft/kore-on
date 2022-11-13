@@ -3,7 +3,7 @@
 is_gpu_node: "{{ 'gpu-node' in groups and inventory_hostname in groups['gpu-node'] }}"
 
 # Get kubernetes major version (i.e. 1.20.2 => 1.20)
-k8s_major_version: "{{ k8s_version | regex_replace('^v([0-9])+\\.([0-9]+)\\.[0-9]+', 'v\\1.\\2') }}"
+# k8s_major_version: "{{ k8s_version | regex_replace('^v([0-9])+\\.([0-9]+)\\.[0-9]+', 'v\\1.\\2') }}"
 
 crictl_supported_versions:
   v1.25: "v1.25.0"
@@ -17,7 +17,7 @@ crictl_version: "{{ crictl_supported_versions[k8s_major_version] }}"
 
 containerd_pkg: |-
   {% if ansible_distribution in ["CentOS", "RedHat"] -%}
-    containerd.io-1.4.3-3.2.el{{ ansible_distribution_major_version }}
+    containerd.io
   {%- elif ansible_distribution in ["Ubuntu", "Debian"] -%}
-    containerd.io=1.4.3-2
+    containerd.io
   {%- endif %}

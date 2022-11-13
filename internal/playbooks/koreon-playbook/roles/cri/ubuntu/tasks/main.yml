@@ -1,0 +1,15 @@
+---
+- include_tasks: containerd.yml
+  when:
+  - container_runtime == 'containerd'
+  - param in "cluster" | default("")
+
+- include_tasks: docker.yml
+  when:
+  - container_runtime == 'docker'
+  - param in "cluster" | default("")
+
+# only docker is available for harbor registry
+- include_tasks: docker.yml
+  when:
+  - param in "registry" | default("")

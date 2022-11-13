@@ -71,7 +71,7 @@
 - name: Copy registry public certificate file
   when: registry_public_cert
   copy:
-    src: "{{ inventory_dir }}/{{ item.src }}"
+    src: "{{ playbook_dir }}/{{ item.src }}"
     dest: "{{ harbor_cert_dir }}/{{ item.dest }}"
   with_items:
     - { src: "files/harbor.crt", dest: "harbor.crt" }
@@ -142,14 +142,14 @@
     chdir: "{{ harbor_install_dir }}"
 
 - import_tasks: backup.yml
-  when: archive_repo
+#  when: archive_repo
 
 # Scripts for restoring registry data when closed-network
-- name: Check harbor restore log existence
-  when: closed_network
-  stat:
-    path: "{{ install_dir }}/harbor-restore.log"
-  register: restore_log_stat
+#- name: Check harbor restore log existence
+#  when: closed_network
+#  stat:
+#    path: "{{ install_dir }}/harbor-restore.log"
+#  register: restore_log_stat
 
-- import_tasks: restore.yml
-  when: closed_network and not restore_log_stat.stat.exists
+#- import_tasks: restore.yml
+#  when: closed_network and not restore_log_stat.stat.exists

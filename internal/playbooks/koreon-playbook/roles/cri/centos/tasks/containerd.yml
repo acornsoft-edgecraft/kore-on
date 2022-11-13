@@ -31,6 +31,7 @@
   yum:
     name: "{{ containerd_pkg }}"
     state: present
+    disable_gpg_check: yes
 
 # https://github.com/kubernetes-sigs/cri-tools/releases/download/v1.21.0/crictl-v1.21.0-linux-amd64.tar.gz
 - name: Get crictl tgz file and uncompress it

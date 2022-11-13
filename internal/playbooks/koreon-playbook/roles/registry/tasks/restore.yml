@@ -14,7 +14,7 @@
   when:
     - not harbor_archived_file.stat.exists
   copy:
-    src: "{{ inventory_dir }}/files/{{ registry_archive_file }}"
+    src: "{{ playbook_dir }}/files/{{ registry_archive_file }}"
     dest: "/tmp/{{ registry_archive_file | basename}}"
 
 - name: Stop harbor for restoring backup data

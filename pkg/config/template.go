@@ -4,9 +4,12 @@ const Template = `
 [koreon]
 ## Required
 ## - local-repository-install: local repository installation activate. (Required when selecting the closed network.)
+##                             It is installed on the registry host.
+## - local-repository-port: Port number used as local repository. (Required when selecting the closed network.)
+##                          If you use the default value, you can skip it. (default: 8080)
 ## - local-repository-archive-file: local repository packages archive file path (Required when selecting the closed network.)
-## - local-repository: local repository 서비스 url (Required when selecting the closed network.)
-##                     If you are installing a local repository, you can skip it.
+## - local-repository-url: local repository 서비스 url (Required when selecting the closed network.)
+##                         If you are installing a local repository, you can skip it.
 ## Optional
 ## - cluster-name: use cluster name in config context (default: "kubernetes")
 ## - install-dir: installation scripts(harbor, shell scripts) save directory (default: "/var/lib/kore-on")
@@ -17,10 +20,11 @@ const Template = `
 #install-dir = "/var/lib/kore-on"
 #cert-validity-days = 36500
 #debug-mode = true
-#closed-network = false
+#closed-network = true
 #local-repository-install = true
-local-repository-archive-file = "./local-repo.20221030_232949.tgz"
-#local-repository-url = "http://192.168.77.239:8080"
+#local-repository-port = 8080
+#local-repository-archive-file = "./local-repo.20221030_232949.tgz"
+#local-repository-url = "http://x.x.x.x:8080"
 
 [kubernetes]
 ## Required
@@ -42,7 +46,7 @@ local-repository-archive-file = "./local-repo.20221030_232949.tgz"
 #pod-cidr = "10.10.0.0/24"
 #node-port-range = "30000-32767"
 #audit-log-enable = true
-#api-sans = ["192.168.77.234"]
+#api-sans = ["x.x.x.x"]
 
 [kubernetes.etcd]
 ## Required
@@ -61,10 +65,7 @@ local-repository-archive-file = "./local-repo.20221030_232949.tgz"
 ## Required
 ## - 
 ## Optional
-## - version: Calico version (default: "latest")
-##            If you input only the major version, the minor version automatically selects the last version.
 ## - vxlan-mode: calico VXLAN mode activate (default: false)
-#version = "v3.23.4"
 #vxlan-mode = true
 
 [node-pool]
@@ -92,11 +93,11 @@ data-dir = "/data"
 ## - haproxy-install: used internal load-balancer (default: true)
 ## - lb-ip: Enter the IP address when using a load balancer (default: master[0] ip address)
 ## - lb-port: Enter the port when using a load balancer (default: "6443")
-ip = ["192.168.77.234","192.168.77.235","192.168.77.236"]
-private-ip = ["3.0.0.1","3.0.0.2","3.0.0.3"]
+#ip = ["x.x.x.x","x.x.x.x","x.x.x.x"]
+#private-ip = ["x.x.x.x","x.x.x.x","x.x.x.x"]
 #isolated = true
 #haproxy-install = true
-#lb-ip = "192.168.77.234"
+#lb-ip = "x.x.x.x"
 #lb-port = "6443"
 
 [node-pool.node]
@@ -105,32 +106,33 @@ private-ip = ["3.0.0.1","3.0.0.2","3.0.0.3"]
 ## - private-ip: K8s work nodes private ip address. (this is using it to generate an inventory)
 ##               If you use the same IP address, you can skip it.
 ## Optional
-ip = ["192.168.77.237", "192.168.77.238"]
-private-ip = ["3.0.0.11", "3.0.0.12"]
+#ip = ["x.x.x.x", "x.x.x.x"]
+#private-ip = ["x.x.x.x", "x.x.x.x"]
 
 [private-registry]
 ## Required
-## - registry-version: private registry nodes ip address. This is a required entry used when installing a private registry.
-##                (this is using it to generate an extra vars)
-## - registry-ip: private registry nodes ip address. This is a required entry used when installing a private registry.
-##                (this is using it to generate an inventory)
-## - private-ip: K8s work node private ip address. This is a required entry used when installing a private registry.
+## - registry-ip: Public IP address of the private registry node.
+##                This is a required entry used when installing a private registry.
+## - private-ip: Private IP address of the private registry node. 
+##               This is a required entry used when installing a private registry.
 ##               If you use the same IP address, you can skip it.
-##               (this is using it to generate an inventory)
 ## - registry-domain: K8s registry configuration (this is using it to generate an extra vars)
 ## Optional
 ## - install: private registry install (default: false)
+## - registry-version: Private registry version. (default: latest)
+##                     This is a required entry used when installing a private registry.
+##                     If you input only the major version, the minor version automatically selects the last version.
 ## - data-dir: private registry data directory (default: "/data/harbor")
 ## - registry-archive-file: registry archive file path (default: "")
 ## - public-cert: public cert activate (default: false)
-install = true
-registry-version = "v2.6.0"
-registry-ip = "192.168.77.239"
-private-ip = "3.0.0.50"
-registry-domain = "192.168.77.239"
-data-dir = "/data/harbor"
-#registry-archive-file = "/tmp/koreon/harbor.20220224_072307.tgz"
-public-cert = false
+#install = true
+#registry-version = "v2.6.0"
+#registry-ip = "x.x.x.x"
+#private-ip = "x.x.x.x"
+#registry-domain = "x.x.x.x"
+#data-dir = "/data/harbor"
+#registry-archive-file = "./harbor-offline-installer-v2.6.0.tgz"
+#public-cert = false
 
 [private-registry.cert-file]
 ## Required
@@ -156,8 +158,22 @@ public-cert = false
 ##               (this is using it to generate an extra vars)
 ## Optional
 ## - install: NFS Server Installation (default: false)
-install = true
-storage-ip = "192.168.77.239"
-private-ip = "3.0.0.50"
-volume-dir = "/data/storage"
+#install = true
+#storage-ip = "x.x.x.x"
+#private-ip = "x.x.x.x"
+#volume-dir = "/data/storage"
+
+[prepare-airgap]
+## Required
+## - k8s-version: private registry nodes ip address.
+##                This is a required field used when the pre-preparation stage of the air gap network.
+## - registry-version: Storage node ip address.
+##                This is a required field used when the pre-preparation stage of the air gap network.
+## - registry-ip: Private registry node ip address.
+##                This is a required field used when the pre-preparation stage of the air gap network.
+## Optional
+## - 
+k8s-version = "v1.21"
+registry-version = "v2.6"
+registry-ip = "192.168.77.239"
 `
