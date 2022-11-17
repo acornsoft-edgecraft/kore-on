@@ -11,26 +11,15 @@
     path: "{{ data_root_dir }}/localrepo"
     state: directory
 
-- name: Check local-repo tgz existence
-  stat:
-    path: "/tmp/{{ local_repository_archive_file | basename }}"
-  register: local_repo_archived_file
-
-- name: Upload local-repo archived file
-  copy:
-    src: "{{ playbook_dir }}/files/{{ local_repository_archive_file | basename }}"
-    dest: "/tmp/{{ local_repository_archive_file | basename }}"
-  when:
-    - not local_repo_archived_file.stat.exists
-
 - name: Extract local repository archive file into /data/localrepo
   unarchive:
-    src: "/tmp/{{ local_repository_archive_file | basename }}"
+    src: "{{ playbook_dir }}/download/{{ local_repository_archive_file | basename }}"
     dest: "{{ data_root_dir }}/localrepo"
-    remote_src: yes
     owner: "root"
     group: "root"
     creates: "{{ data_root_dir }}/localrepo/repodata"
+  any_errors_fatal: true
+  
 # # ---------------------------------------------------------------------------------
 
 # # Add local repo ------------------------------------------------------------------
@@ -53,6 +42,16 @@
     group: root
     mode: "0644"
 
+- name: Populate service facts
+  ansible.builtin.service_facts:
+
+- name: check if Nginx is installed
+  fail:
+    msg: Nginx is installed, why? To proceed, please delete nginx and run it again
+  when: ansible_facts.services["nginx.service"] is defined
+  any_errors_fatal: true
+
+
 - name: Add local repo for create nginx
   yum_repository:
     name: local-to-file
@@ -63,22 +62,16 @@
 - name: Install nginx server for local repository
   ansible.builtin.yum:
     name: nginx
-    disablerepo: "*"
     enablerepo: local-to-file
     state: latest
+    disable_gpg_check: yes
 
 - name: Update nginx.conf
-  ansible.builtin.replace:
-    path: /etc/nginx/nginx.conf
-    regexp: "{{ item.From }}"
-    replace: "{{ item.To }}"
-    owner: root
-    group: root
-    mode: '0644'
-  with_items:
-    - { From: ' 80;', To: ' {{ local_repository_port }};' }
-    - { From: ':80;', To: ':{{ local_repository_port }};' }
-    - { From: '/usr/share/nginx/html', To: '{{ data_root_dir }}/localrepo' }
+  template:
+    src: nginx-local-repo.conf.j2
+    dest: "/etc/nginx/conf.d/local-repo.conf"
+    owner: "root"
+    mode: 0644
 
 - name: Start and enable nginx
   ansible.builtin.service:

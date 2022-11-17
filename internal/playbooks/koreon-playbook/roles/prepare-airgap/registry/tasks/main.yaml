@@ -1,4 +1,17 @@
 ---
 - include_tasks: "install-registry.yaml"
+  when:
+    - param is not defined
 
 - include_tasks: "pull-push-images.yaml"
+  when:
+    - param is not defined
+
+- include_tasks: "archive-registry.yaml"
+  when:
+    - param is not defined
+
+- include_tasks: "archive-copy-to-local.yaml"
+  when:
+    - param is defined 
+    - param in "download" | default("")

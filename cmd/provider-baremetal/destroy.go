@@ -33,7 +33,7 @@ func DestroyCmd() *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:          "destroy [flags]",
-		Short:        "Install kubernetes cluster, registry",
+		Short:        "Delete kubernetes cluster, registry",
 		Long:         "",
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -112,7 +112,7 @@ func (c *strDestroyCmd) run() error {
 		Options:           ansiblePlaybookOptions,
 		Exec: execute.NewDefaultExecute(
 			execute.WithTransformers(
-				results.Prepend("cobra-cmd-ansibleplaybook"),
+				results.Prepend("Destroy Cluster"),
 			),
 		),
 	}

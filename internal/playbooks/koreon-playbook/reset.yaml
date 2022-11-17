@@ -6,6 +6,13 @@
     - name: Init | Configuration
       ansible.builtin.include_role:
         name: init
+        apply:
+          tags:
+            - init
+            - reset-cluster
+            - reset-registry
+            - reset-storage
+            - reset-prepare-airgap
       tags:
         - init
         - reset-cluster
@@ -20,6 +27,12 @@
   tasks:
     - name: Clear gathered facts
       meta: clear_facts
+      tags:
+        - init-network
+        - reset-cluster
+        - reset-registry
+        - reset-storage
+        - reset-prepare-airgap
 
 # Init | Network Check.
 - hosts: all
@@ -32,6 +45,13 @@
     - name: Init | Network check
       ansible.builtin.include_role:
         name: init/network
+        apply:
+          tags:
+            - init
+            - reset-cluster
+            - reset-registry
+            - reset-storage
+            - reset-prepare-airgap
       tags:
         - init-network
         - reset-cluster
@@ -51,6 +71,9 @@
     - name: Reset | Cluster
       ansible.builtin.include_role:
         name: reset
+        apply:
+          tags:
+            - reset-cluster
       tags:
         - reset-cluster
 
@@ -65,8 +88,11 @@
     - name: Reset | Registry
       ansible.builtin.include_role:
         name: reset/registry
+        apply:
+          tags:
+            - reset-registry
       tags:
-      - reset-registry
+        - reset-registry
 
 # clean storage
 - hosts: storage
@@ -79,8 +105,11 @@
     - name: Reset | Storage
       ansible.builtin.include_role:
         name: reset/storage
+        apply:
+          tags:
+            - reset-storage
       tags:
-      - reset-storage
+        - reset-storage
 
 # clean prepare-airgap
 - hosts: prepare_airgap
@@ -96,3 +125,5 @@
         apply:
           tags:
             - reset-prepare-airgap
+      tags:
+        - reset-prepare-airgap

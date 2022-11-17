@@ -3,8 +3,9 @@
 CURRENT_DATE=`date '+%Y%m%d'`
 CURRENT_TIME=`date '+%Y%m%d_%H%M%S'`
 
-K8S_VERIONS="$1"
-REPO_DIR="$2"
+K8S_VERIONS="-{{ prepare_airgap_k8s_version | regex_replace('^v', '') }}"
+REPO_DIR="{{ package_data_dir }}"
+ARCHIVE_DIR="{{ package_archive_dir }}"
 
 error_exit() {
     echo "error: ${1:-"unknown error"}" 1>&2
@@ -12,11 +13,12 @@ error_exit() {
 }
 
 make_yum_repo(){
-    mkdir -p "$REPO_DIR"/archive
     cd "$REPO_DIR"
 
     dnf clean all
-    dnf -y download createrepo
+    dnf repolist
+    dnf -y install createrepo
+    dnf -y install yum-utils
 
     dnf -y download --resolve --arch x86_64  --downloaddir=./ createrepo
     dnf -y download --resolve --downloaddir=./ yum-utils
@@ -29,6 +31,7 @@ make_yum_repo(){
     dnf -y download --resolve --alldeps --arch x86_64 --downloaddir=./ python3
 
     dnf -y download --resolve --arch x86_64 --downloaddir=./ nfs-utils
+    dnf -y download --resolve --arch x86_64 --downloaddir=./ NetworkManager
     dnf -y download --resolve --arch x86_64 --downloaddir=./ ipvsadm
     dnf -y download --resolve --arch x86_64 --downloaddir=./ ipset
     dnf -y download --resolve --arch x86_64 --downloaddir=./ lksctp-tools
@@ -36,13 +39,9 @@ make_yum_repo(){
     dnf -y download --resolve --arch x86_64 --downloaddir=./ socat
     dnf -y download --resolve --arch x86_64 --downloaddir=./ conntrack-tools
 
-    dnf -y download --resolve --alldeps --enablerepo=Docker-CE-Stable --arch x86_64 --downloaddir=./ containerd.io
-    dnf -y download --resolve --enablerepo=Docker-CE-Stable --arch x86_64 --downloaddir=./ docker-ce docker-ce-cli
-    dnf -y download --resolve --arch x86_64 --downloaddir=./ --disableexcludes=Kubernetes kubectl${K8S_VERIONS} kubelet${K8S_VERIONS} kubeadm${K8S_VERIONS}
-
-    # for item in {"{{ kube_support_versions | map('regex_replace', '^v', '') | list }}"}; do
-    #     dnf -y download --resolve --arch x86_64 --downloaddir=./ --disableexcludes=Kubernetes kubectl-${item} kubelet-${item} kubeadm-${item}
-    # done
+    dnf -y download --resolve --alldeps --arch x86_64 --downloaddir=./ --disableexcludes=Docker-CE-Stable "{{ containerd_io }}"
+    dnf -y download --resolve --alldeps --enablerepo=Docker-CE-Stable --arch x86_64 --downloaddir=./ docker-ce docker-ce-cli
+    dnf -y download --resolve --alldeps --arch x86_64 --downloaddir=./ --disableexcludes=Kubernetes kubectl${K8S_VERIONS} kubelet${K8S_VERIONS} kubeadm${K8S_VERIONS}
 
     createrepo .
 
@@ -58,7 +57,6 @@ make_apt_repo(){
     if [ "$K8S_VERIONS" != "" ]; then
         K8S_VERIONS=-$(echo $K8S_VERIONS | sed 's/^v//')
     fi
-    mkdir -p "$REPO_DIR"/archive
     cd "$REPO_DIR"
 
     apt-get -y update
@@ -69,9 +67,9 @@ make_apt_repo(){
     apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" ipvsadm
     apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" ipset
 
-    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" containerd.io=1.4.3-2
-    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" docker-ce=5:19.03.15~3-0~ubuntu-$(lsb_release -cs)
-    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" docker-ce-cli=5:19.03.15~3-0~ubuntu-$(lsb_release -cs)
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" containerd.io="{{ package_containerd_version }}"
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" docker-ce
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" docker-ce-cli
 
     apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" jq
     apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" libonig2
@@ -96,7 +94,7 @@ make_apt_repo(){
 
 create_tarball() {
  	cd $REPO_DIR
-    tar --exclude archive -zcvf $REPO_DIR/archive/local-repo.$CURRENT_TIME.tgz ./
+    tar --exclude archive -zcvf $ARCHIVE_DIR/local-repo.$CURRENT_TIME.tgz ./
 }
 
 

@@ -5,6 +5,8 @@ package model
 type PackageVersion struct {
 	Containerd    string `validate:"containerd,SupportContainerdVersion"`
 	DockerCompose string `validate:"docker-compose,SupportDockerComposeVersion"`
+	Crictl        string `validate:"crictl,SupportCrictlVersion"`
+	Etcd          string `validate:"etcd,SupportEtcdVersion"`
 }
 
 type ImageVersion struct {

@@ -48,6 +48,7 @@ func GetKoreonTomlConfig(koreOnConfigFilePath string) (model.KoreOnToml, error) 
 }
 
 func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.KoreOnToml, bool) {
+	var koreon_toml model.KoreOnToml
 	errorCnt = 0
 	koreonToml, _ := GetKoreonTomlConfig(koreOnConfigFilePath)
 
@@ -68,20 +69,22 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 		if registryIP == "" {
 			logger.Fatal(fmt.Sprintf("Prepare Air Gap > Kubernetes version is required.\nK8s supported version lists:\n %v", ListSupportVersion(confK8sVersion)))
 			errorCnt++
+		} else {
+			koreon_toml.PrepareAirgap.RegistryIP = registryIP
 		}
 
 		if k8sVersion == "" {
-			koreonToml.PrepareAirgap.K8sVersion = supportK8sVersion
+			koreon_toml.PrepareAirgap.K8sVersion = supportK8sVersion
 			logger.Warn("Prepare Air Gap > Kubernetes version is required. Last version", koreonToml.PrepareAirgap.K8sVersion, "applied automatically.")
 		} else {
-			koreonToml.PrepareAirgap.K8sVersion = supportK8sVersion
+			koreon_toml.PrepareAirgap.K8sVersion = supportK8sVersion
 		}
 
 		if registryVersion == "" {
-			koreonToml.PrepareAirgap.RegistryVersion = supportHarborVersion
+			koreon_toml.PrepareAirgap.RegistryVersion = supportHarborVersion
 			logger.Warn("Prepare Air Gap > Harbor version is required. Last version", koreonToml.PrepareAirgap.RegistryVersion, "applied automatically.")
 		} else {
-			koreonToml.PrepareAirgap.RegistryVersion = supportHarborVersion
+			koreon_toml.PrepareAirgap.RegistryVersion = supportHarborVersion
 		}
 
 		// Get image support version
@@ -90,24 +93,28 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 			logger.Fatal("Prepare Air Gap > Support package and container image not found.:\n")
 			errorCnt++
 		}
+		// Get package support version
 		supportPackageList := GetSupportVersion(supportK8sVersion, "k8s_support_package")
 		if supportPackageList == nil {
 			logger.Fatal("Prepare Air Gap > Support package and container image not found.:\n")
 			errorCnt++
 		}
 
-		k8sSupportImagesVersion := setField(&koreonToml.SupportVersion.ImageVersion, supportK8sList)
+		// Set image support version
+		k8sSupportImagesVersion := setField(&koreon_toml.SupportVersion.ImageVersion, supportK8sList)
 		if k8sSupportImagesVersion != nil {
 			logger.Fatal(k8sSupportImagesVersion)
 			errorCnt++
 		}
 
-		packageSupportVersion := setField(&koreonToml.SupportVersion.PackageVersion, supportPackageList)
+		// Set package support version
+		packageSupportVersion := setField(&koreon_toml.SupportVersion.PackageVersion, supportPackageList)
 		if packageSupportVersion != nil {
 			logger.Fatal(packageSupportVersion)
 			errorCnt++
 		}
 
+		koreonToml = koreon_toml
 		// koreonToml.SupportVersion.ImageVersion.Calico = IsSupportVersion(fmt.Sprintf("%v", supportK8sList["calico"]), confCalicoVersion)
 		// koreonToml.SupportVersion.ImageVersion.Coredns = IsSupportVersion(fmt.Sprintf("%v", supportK8sList["coredns"]), confCorednsVersion)
 
@@ -265,6 +272,35 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 				}
 			}
 		}
+
+		// Get image support version
+		supportK8sList := GetSupportVersion(supportK8sVersion, "k8s_support_image")
+		if supportK8sList == nil {
+			logger.Fatal("Prepare Air Gap > Support package and container image not found.:\n")
+			errorCnt++
+		}
+		// Get package support version
+		supportPackageList := GetSupportVersion(supportK8sVersion, "k8s_support_package")
+		if supportPackageList == nil {
+			logger.Fatal("Prepare Air Gap > Support package and container image not found.:\n")
+			errorCnt++
+		}
+
+		// Set image support version
+		k8sSupportImagesVersion := setField(&koreonToml.SupportVersion.ImageVersion, supportK8sList)
+		if k8sSupportImagesVersion != nil {
+			logger.Fatal(k8sSupportImagesVersion)
+			errorCnt++
+		}
+
+		// Set package support version
+		packageSupportVersion := setField(&koreonToml.SupportVersion.PackageVersion, supportPackageList)
+		if packageSupportVersion != nil {
+			logger.Fatal(packageSupportVersion)
+			errorCnt++
+		}
+
+		koreonToml.PrepareAirgap = koreon_toml.PrepareAirgap
 	}
 
 	if errorCnt > 0 {

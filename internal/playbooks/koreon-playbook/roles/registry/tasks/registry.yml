@@ -10,31 +10,34 @@
     - "{{ registry_data_dir }}/cert"
     - "/etc/docker/certs.d/{{ registry_domain }}"
 
+# download harbor offline installer
+- name: Download offline installer
+  ansible.builtin.get_url:
+    url: "https://github.com/goharbor/harbor/releases/download/{{ harbor_version }}/harbor-offline-installer-{{ harbor_version }}.tgz"
+    dest: "{{ harbor_data_dir }}/{{ harbor_offline_file }}"
+  any_errors_fatal: true
+
 # Upload harbor offline installer and extract it when not exist
 - name: Check harbor tgz existence
   stat:
-    path: "{{ harbor_install_dir }}/{{ harbor_offline_file }}"
+    path: "{{ harbor_data_dir }}/{{ harbor_offline_file }}"
   register: harbor_tgz_stat
 
-- name: Copy harbor offline installer and extract it
-  when: not harbor_tgz_stat.stat.exists
-  unarchive:
-    src: "{{ harbor_offline_installer_file }}"
+- name: Unarchive harbor offline installer and extract it
+  ansible.builtin.unarchive:
+    src: "{{ harbor_data_dir }}/{{ harbor_offline_file }}"
     dest: "{{ install_dir }}"
+    remote_src: True
+  any_errors_fatal: true
 
-# Upload docker-compose binary
-- name: Check docker-compose existence
-  stat:
-    path: /usr/local/bin/docker-compose
-  register: docker_compose_stat
-
-- name: Get docker-compose binary
-  when: not docker_compose_stat.stat.exists
-  copy:
-    src: "docker-compose-{{ docker_compose_version }}-Linux-x86_64"
+# Download docker-compose binary
+- name: Download docker-compose binary
+  ansible.builtin.get_url:
+    url: https://github.com/docker/compose/releases/download/{{ package_docker_compose_version }}/docker-compose-linux-x86_64
     dest: /usr/local/bin/docker-compose
-    mode: 0755
-  register: get_docker_compose
+    mode: "0755"
+    owner: "root"
+    group: "root"
 
 - name: Create docker-compose symbolic link
   when: not docker_compose_stat.stat.exists and get_docker_compose.changed

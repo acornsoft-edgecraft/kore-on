@@ -5,42 +5,45 @@
     path: "{{ item }}"
     state: directory
   with_items:
-    - "{{ harbor_install_dir }}"
-    - "{{ harbor_cert_work_dir }}"
-    - "{{ harbor_cert_dir }}"
-    - "/etc/docker/certs.d/{{ harbor_domain }}"
-    - "{{ harbor_archive_dir }}"
+    - "{{ install_dir }}/harbor"
+    - "{{ install_dir }}/cert"
+    - "{{ registry_data_dir }}/cert"
+    - "/etc/docker/certs.d/{{ registry_domain }}"
 
-# download harbor offline installer
-- name: Download offline installer
-  ansible.builtin.get_url:
-    url: "https://github.com/goharbor/harbor/releases/download/{{ harbor_version }}/harbor-offline-installer-{{ harbor_version }}.tgz"
-    dest: "{{ harbor_data_dir }}/{{ harbor_offline_file }}"
+- name: Unarchive harbor 
+  ansible.builtin.unarchive:
+    src: "{{playbook_dir}}/download/{{ registry_archive_file | basename}}"
+    dest: "{{ harbor_data_dir }}"
+  when:
+    - not registry_archive_file in ""
   any_errors_fatal: true
-
-# Upload harbor offline installer and extract it when not exist
-- name: Check harbor tgz existence
-  stat:
-    path: "{{ harbor_data_dir }}/{{ harbor_offline_file }}"
-  register: harbor_tgz_stat
 
 - name: Unarchive harbor offline installer and extract it
   ansible.builtin.unarchive:
     src: "{{ harbor_data_dir }}/{{ harbor_offline_file }}"
-    dest: "{{ prepare_airgap_registry_install_dir }}"
+    dest: "{{ install_dir }}"
     remote_src: True
   any_errors_fatal: true
 
-# Download docker-compose binary
-- name: Download docker-compose binary
-  ansible.builtin.get_url:
-    url: https://github.com/docker/compose/releases/download/{{ package_docker_compose_version }}/docker-compose-linux-x86_64
+# Upload docker-compose binary
+- name: Check docker-compose existence
+  stat:
+    path: /usr/local/bin/docker-compose
+  register: docker_compose_stat
+
+- name: Get docker-compose binary
+  when: not docker_compose_stat.stat.exists
+  ansible.builtin.copy:
+    src: "{{ harbor_data_dir }}/docker-compose"
     dest: /usr/local/bin/docker-compose
-    mode: "0755"
+    remote_src: True
+    mode: 0755
     owner: "root"
     group: "root"
+  register: get_docker_compose
 
 - name: Create docker-compose symbolic link
+  when: not docker_compose_stat.stat.exists and get_docker_compose.changed
   file:
     src: /usr/local/bin/docker-compose
     dest: /usr/bin/docker-compose
@@ -103,11 +106,11 @@
   args:
     chdir: "{{ harbor_install_dir }}"
 
-- name: "Copy ca.crt file to /etc/docker/certs.d/{{ prepare_airgap_registry_ip }}"
+- name: "Copy ca.crt file to /etc/docker/certs.d/{{ registry_domain }}"
   when: not registry_public_cert
   copy:
     src: "{{ harbor_cert_dir }}/ca.crt"
-    dest: "/etc/docker/certs.d/{{ prepare_airgap_registry_ip }}"
+    dest: "/etc/docker/certs.d/{{ registry_domain }}"
     remote_src: yes
 
 - stat:
@@ -143,3 +146,16 @@
   shell: "docker-compose exec -T proxy nginx -s reload"
   args:
     chdir: "{{ harbor_install_dir }}"
+
+#- import_tasks: backup.yml
+#  when: archive_repo
+
+# Scripts for restoring registry data when closed-network
+#- name: Check harbor restore log existence
+#  when: closed_network
+#  stat:
+#    path: "{{ install_dir }}/harbor-restore.log"
+#  register: restore_log_stat
+
+#- import_tasks: restore.yml
+#  when: closed_network and not restore_log_stat.stat.exists

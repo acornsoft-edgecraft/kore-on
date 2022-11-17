@@ -36,7 +36,7 @@
 # https://github.com/kubernetes-sigs/cri-tools/releases/download/v1.21.0/crictl-v1.21.0-linux-amd64.tar.gz
 - name: Get crictl tgz file and uncompress it
   unarchive:
-    src: "crictl-{{ crictl_version }}-{{ ansible_system | lower }}-amd64.tar.gz"
+    src: "{{ playbook_dir }}/download/crictl-{{ crictl_version }}-{{ ansible_system | lower }}-amd64.tar.gz"
     dest: /usr/bin
     owner: "root"
     group: "root"

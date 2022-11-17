@@ -70,6 +70,7 @@
   ansible.builtin.systemd:
     name: docker
     state: restarted
+    daemon_reload: True
   when:
     - ansible_facts.services["docker.service"].state in "running"
     - docker_daemon_json.changed
@@ -78,5 +79,10 @@
   ansible.builtin.systemd:
     name: docker
     state: started
+  register: result
+  until: "result is not failed"
+  retries: 3
+  delay: 5
+  ignore_errors: True
   when:
     - not ansible_facts.services["docker.service"].state in "running"

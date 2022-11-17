@@ -53,7 +53,6 @@ func CreateCmd() *cobra.Command {
 	f.BoolVarP(&create.verbose, "verbose", "v", false, "verbose")
 	f.BoolVarP(&create.step, "step", "", false, "step")
 	f.BoolVarP(&create.dryRun, "dry-run", "d", false, "dryRun")
-	f.StringVarP(&create.inventory, "inventory", "i", create.inventory, "Specify ansible playbook inventory")
 	f.StringVar(&create.tags, "tags", create.tags, "Ansible options tags")
 	f.StringVarP(&create.privateKey, "private-key", "p", "", "Specify ansible playbook privateKey")
 	f.StringVarP(&create.user, "user", "u", "", "SSH login user")
@@ -112,7 +111,7 @@ func (c *strCreateCmd) run() error {
 		Options:           ansiblePlaybookOptions,
 		Exec: execute.NewDefaultExecute(
 			execute.WithTransformers(
-				results.Prepend("cobra-cmd-ansibleplaybook"),
+				results.Prepend("Create Cluster"),
 			),
 		),
 	}
