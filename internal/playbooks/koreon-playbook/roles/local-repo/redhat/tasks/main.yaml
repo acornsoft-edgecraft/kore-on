@@ -67,6 +67,17 @@
     disable_gpg_check: yes
 
 - name: Update nginx.conf
+  ansible.builtin.replace:
+    path: /etc/nginx/nginx.conf
+    regexp: "{{ item.From }}"
+    replace: "{{ item.To }}"
+    owner: root
+    group: root
+    mode: '0644'
+  with_items:
+    - { From: '\*.conf', To: 'local-repo.conf' }
+
+- name: Update nginx.conf
   template:
     src: nginx-local-repo.conf.j2
     dest: "/etc/nginx/conf.d/local-repo.conf"

@@ -18,9 +18,9 @@ proxy_client_cert: /etc/kubernetes/pki/front-proxy-client.crt
 dashboard_cert: /etc/kubernetes/pki/dashboard.crt
 dashboard_key: /etc/kubernetes/pki/dashboard.key
 kubeadminconfig: /etc/kubernetes/admin.conf
-api_image: gcr.io/google_containers/kube-apiserver-amd64:{{ k8s_version }}
-controller_image: gcr.io/google_containers/kube-controller-manager-amd64:{{ k8s_version }}
-scheduler_image: gcr.io/google_containers/kube-scheduler-amd64:{{ k8s_version }}
+# api_image: gcr.io/google_containers/kube-apiserver-amd64:{{ k8s_version }}
+# controller_image: gcr.io/google_containers/kube-controller-manager-amd64:{{ k8s_version }}
+# scheduler_image: gcr.io/google_containers/kube-scheduler-amd64:{{ k8s_version }}
 auth_mode: Node,Rbac
 audit_log_enable: true
 encrypt_secret: true
