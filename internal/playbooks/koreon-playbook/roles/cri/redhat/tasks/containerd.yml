@@ -56,6 +56,7 @@
         dest: /usr/bin
         owner: "root"
         group: "root"
+        remote_src: True
   when:
     - not closed_network
 
