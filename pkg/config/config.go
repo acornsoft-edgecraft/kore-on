@@ -14,20 +14,6 @@ import (
 
 // ===== [ Types ] =====
 
-// Config - Represents the configuration
-type Config struct {
-	KoreOn KoreOn `yaml:"kore-on"`
-}
-
-type KoreOn struct {
-	KoreOnImageName      string   `yaml:"KoreOnImageName"`
-	KoreOnImage          string   `yaml:"KoreOnImage"`
-	KoreOnKubeConfig     string   `yaml:"KoreOnKubeConfig"`
-	KoreOnConfigFile     string   `yaml:"KoreOnConfigFile"`
-	SupportK8sVersion    []string `yaml:"SupportK8sVersion"`
-	SupportCalicoVersion []string `yaml:"SupportCalicoVersion"`
-}
-
 // ===== [ Implementations ] =====
 
 // ===== [ Private Functions ] =====
@@ -47,11 +33,6 @@ func Load() error {
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	viper.AutomaticEnv()
 
-	// how to bind the env or the flag
-	// viper.BindPFlag("port", serverCmd.Flags().Lookup("port")) // flag-viper binding
-	// viper.BindEnv("home") // binding with env HOME
-
-	// var conf = Config{}
 	var err error
 
 	// If a config file is found, read it in.
@@ -66,18 +47,6 @@ func Load() error {
 	}
 
 	logger.Info("Using config file:", viper.ConfigFileUsed())
-
-	// Unmarshal to instance
-	// err = viper.Unmarshal(&conf.KoreOn)
-	// err = viper.Unmarshal(&conf, func(decoderConfig *mapstructure.DecoderConfig) {
-	// 	decoderConfig.TagName = "yaml"
-	// })
-	// if err != nil {
-	// 	logger.Errorf("Could not load configuration file: %s", err.Error())
-	// 	os.Exit(1)
-	// }
-
-	// fmt.Printf("config info : %v \n", conf)
 
 	return err
 }

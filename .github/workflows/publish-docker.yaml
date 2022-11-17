@@ -53,3 +53,43 @@ jobs:
           tags: |
             ${{steps.variables.outputs.prefix}}/${{steps.variables.outputs.project}}:${{steps.variables.outputs.version}}
             ${{steps.variables.outputs.prefix}}/${{steps.variables.outputs.project}}:latest
+      # build_release
+      - name: Setup Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ^1.19.0
+      - name: Build artifacts
+        run: |
+          GOOS=linux GOARCH=amd64 go build -o bin/linux/amd64/koreonctl -ldflags="-X 'main.Version=${{ steps.variables.outputs.version }}' -X 'main.CommitId=$(git rev-parse HEAD)' -X 'main.BuildDate=$(date -u +%FT%T%Z)'" /cmd/koreonctl/main.go
+          GOOS=darwin GOARCH=amd64 go build -o bin/darwin/amd64/koreonctl -ldflags="-X 'main.Version=${{ steps.variables.outputs.version }}' -X 'main.CommitId=$(git rev-parse HEAD)' -X 'main.BuildDate=$(date -u +%FT%T%Z)'" /cmd/koreonctl/main.go
+          chmod +x bin/linux/amd64/koreonctl
+          chmod +x bin/darwin/amd64/koreonctl          
+      - name: Release
+        uses: actions/create-release@v1
+        id: create_release
+        with:
+          draft: false
+          prerelease: false
+          release_name: Release ${{ steps.variables.outputs.version }}
+          tag_name: ${{ steps.variables.outputs.version }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - name: Upload linux artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: bin/linux/amd64/koreonctl
+          asset_name: koreonctl-linux-amd64
+          asset_content_type: application/octet-stream
+      - name: Upload darwin artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: bin/darwin/amd64/koreonctl
+          asset_name: koreonctl-darwin-amd64
+          asset_content_type: application/octet-stream
+
