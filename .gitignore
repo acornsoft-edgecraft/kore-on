@@ -356,4 +356,5 @@ gows/
 tmp/
 temp/
 test__/
-download/
+*.gz
+*.tgz
