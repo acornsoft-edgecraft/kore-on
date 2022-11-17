@@ -1,7 +1,7 @@
 ---
 # etcd_source_type: package | github-release
 etcd_source_type: package
-etcd_version: 3.4.16
+etcd_version: "{{ package_etcd_version }}"
 etcd_client_port: 2379
 etcd_peer_port: 2380
 etcd_peers_group: etcd
@@ -11,6 +11,7 @@ etcd_bin_dir: "/usr/bin"
 etcd_script_dir: /usr/libexec/etcd
 etcd_initial_cluster_state: new
 etcd_initial_cluster_token: etcd-k8-cluster
+etcd_src: "{{ playbook_dir }}/download/etcd-{{ etcd_version }}-linux-amd64.tar.gz"
 
 #etcd_interface: "{{ansible_default_ipv4.interface}}"
 #etcd_machine_address: "{{ hostvars[inventory_hostname]['ansible_' + etcd_interface].ipv4.address }}"

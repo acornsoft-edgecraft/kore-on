@@ -1,0 +1,4 @@
+---
+- name: Network Check | Ping/Pong
+  ansible.builtin.ping:
+  any_errors_fatal: true

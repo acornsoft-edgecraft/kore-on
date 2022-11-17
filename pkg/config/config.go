@@ -20,11 +20,12 @@ type Config struct {
 }
 
 type KoreOn struct {
-	KoreOnImageName   string   `yaml:"KoreOnImageName"`
-	KoreOnImage       string   `yaml:"KoreOnImage"`
-	KoreOnKubeConfig  string   `yaml:"KoreOnKubeConfig"`
-	KoreOnConfigFile  string   `yaml:"KoreOnConfigFile"`
-	SupportK8SVersion []string `yaml:"SupportK8SVersion"`
+	KoreOnImageName      string   `yaml:"KoreOnImageName"`
+	KoreOnImage          string   `yaml:"KoreOnImage"`
+	KoreOnKubeConfig     string   `yaml:"KoreOnKubeConfig"`
+	KoreOnConfigFile     string   `yaml:"KoreOnConfigFile"`
+	SupportK8sVersion    []string `yaml:"SupportK8sVersion"`
+	SupportCalicoVersion []string `yaml:"SupportCalicoVersion"`
 }
 
 // ===== [ Implementations ] =====

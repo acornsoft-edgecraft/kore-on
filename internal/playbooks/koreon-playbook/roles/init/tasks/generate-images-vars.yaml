@@ -1,0 +1,6 @@
+---  
+- name: Generate images vars
+  template:
+    src: images.yaml.j2
+    dest: "{{ playbook_dir }}/inventory/group_vars/images.yaml"
+    mode: 0644

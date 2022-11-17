@@ -1,0 +1,94 @@
+---
+# Extract rpm/deb archived files and start nginx service for serving to all nodes ---
+- name: disable selinux
+  selinux:
+    policy: targeted
+    state: disabled
+  #no_log: true
+
+- name: Create local repository directory
+  file:
+    path: "{{ data_root_dir }}/localrepo"
+    state: directory
+
+- name: Extract local repository archive file into /data/localrepo
+  unarchive:
+    src: "{{ playbook_dir }}/download/{{ local_repository_archive_file | basename }}"
+    dest: "{{ data_root_dir }}/localrepo"
+    owner: "root"
+    group: "root"
+    creates: "{{ data_root_dir }}/localrepo/repodata"
+  any_errors_fatal: true
+  
+# # ---------------------------------------------------------------------------------
+
+# # Add local repo ------------------------------------------------------------------
+- name: Backup /etc/yum.repos.d directory
+  ansible.builtin.copy:
+    remote_src: true
+    src: "/etc/yum.repos.d"
+    dest: "/etc/yum.repos.d.back-{{ ansible_date_time.iso8601_basic_short }}"
+
+- name: Remove /etc/yum.repos.d directory
+  ansible.builtin.file:
+    path: "/etc/yum.repos.d"
+    state: absent
+
+- name: Create /etc/yum.repos.d directory
+  ansible.builtin.file:
+    path: "/etc/yum.repos.d"
+    state: directory
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Populate service facts
+  ansible.builtin.service_facts:
+
+- name: check if Nginx is installed
+  fail:
+    msg: Nginx is installed, why? To proceed, please delete nginx and run it again
+  when: ansible_facts.services["nginx.service"] is defined
+  any_errors_fatal: true
+
+
+- name: Add local repo for create nginx
+  yum_repository:
+    name: local-to-file
+    description: "Local Repo configure for nginx server"
+    baseurl: "file:///data/localrepo"
+  notify: yum-clean-metadata
+
+- name: Install nginx server for local repository
+  ansible.builtin.yum:
+    name: nginx
+    enablerepo: local-to-file
+    state: latest
+    disable_gpg_check: yes
+
+- name: Update nginx.conf
+  template:
+    src: nginx-local-repo.conf.j2
+    dest: "/etc/nginx/conf.d/local-repo.conf"
+    owner: "root"
+    mode: 0644
+
+- name: Start and enable nginx
+  ansible.builtin.service:
+    name: nginx
+    enabled: yes
+    state: restarted
+
+- name: Add local repository
+  yum_repository:
+    name: local-repo
+    description: "Local Repo configure"
+    gpgcheck: false
+    baseurl: "{{ (local_repository_url == '') | ternary('http://' + registry_ip + ':' + (local_repository_port | string), local_repository_url, omit) }}"
+  notify: yum-clean-metadata
+
+- name: Remove repository (and clean up left-over metadata)
+  yum_repository:
+    name: local-to-file
+    state: absent
+  notify: yum-clean-metadata

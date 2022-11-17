@@ -9,7 +9,9 @@ type KoreOnToml struct {
 
 		//#Airgap
 		ClosedNetwork              bool   `toml:"closed-network,omitempty"`
-		LocalRepository            string `toml:"local-repository,omitempty"`
+		LocalRepositoryInstall     bool   `toml:"local-repository-install,omitempty"`
+		LocalRepositoryPort        int    `toml:"local-repository-port,omitempty"`
+		LocalRepositoryUrl         string `toml:"local-repository-url,omitempty"`
 		LocalRepositoryArchiveFile string `toml:"local-repository-archive-file"`
 		DebugMode                  bool   `toml:"debug-mode,omitempty"`
 	} `toml:"koreon,omitempty"`
@@ -22,7 +24,7 @@ type KoreOnToml struct {
 		ServiceCidr      string   `toml:"service-cidr,omitempty"`
 		PodCidr          string   `toml:"pod-cidr,omitempty"`
 		NodePortRange    string   `toml:"node-port-range,omitempty"`
-		AuditLogEnable   bool     `toml:"audit-log-enable"`
+		AuditLogEnable   *bool    `toml:"audit-log-enable"`
 		ApiSans          []string `toml:"api-sans,omitempty"`
 
 		Calico struct {
@@ -32,8 +34,8 @@ type KoreOnToml struct {
 
 		Etcd struct {
 			ExternalEtcd  bool     `toml:"external-etcd,omitempty"`
-			IP            []string `toml:"ip,omitempty"`
-			PrivateIP     []string `toml:"private-ip,omitempty"`
+			IP            []string `toml:"ip"`
+			PrivateIP     []string `toml:"private-ip"`
 			EncryptSecret bool     `toml:"encrypt-secret,omitempty"`
 		} `toml:"etcd,omitempty"`
 	} `toml:"kubernetes,omitempty"`
@@ -49,11 +51,12 @@ type KoreOnToml struct {
 
 		Master struct {
 			Name           string   `toml:"name,omitempty"`
-			IP             []string `toml:"ip,omitempty"`
-			PrivateIP      []string `toml:"private-ip,omitempty"`
-			LbIP           string   `toml:"lb-ip,omitempty"`
-			Isolated       bool     `toml:"isolated"`
-			HaproxyInstall bool     `toml:"haproxy-install"`
+			IP             []string `toml:"ip"`
+			PrivateIP      []string `toml:"private-ip"`
+			LbIP           string   `toml:"lb-ip"`
+			LbPort         int      `toml:"lb-port,omitempty"`
+			Isolated       bool     `toml:"isolated,omitempty"`
+			HaproxyInstall *bool    `toml:"haproxy-install,omitempty"`
 		} `toml:"master,omitempty"`
 
 		Node StrNode `toml:"node,omitempty"`
@@ -70,21 +73,33 @@ type KoreOnToml struct {
 	} `toml:"shared-storage,omitempty"`
 
 	PrivateRegistry struct {
-		Install             bool   `toml:"install"`
-		RegistryIP          string `toml:"registry-ip,omitempty"`
+		Install             bool   `toml:"install,omitempty"`
+		RegistryVersion     string `toml:"registry-version,omitempty"`
+		RegistryIP          string `toml:"registry-ip"`
 		RegistryDomain      string `toml:"registry-domain,omitempty"`
-		PrivateIP           string `toml:"private-ip,omitempty"`
+		PrivateIP           string `toml:"private-ip"`
 		DataDir             string `toml:"data-dir,omitempty"`
-		PublicCert          bool   `toml:"public-cert"`
 		RegistryArchiveFile string `toml:"registry-archive-file"`
+		PublicCert          bool   `toml:"public-cert,omitempty"`
 		CertFile            struct {
 			SslCertificate    string `toml:"ssl-certificate,omitempty"`
 			SslCertificateKey string `toml:"ssl-certificate-key,omitempty"`
 		} `toml:"cert-file,omitempty"`
 	} `toml:"private-registry,omitempty"`
+
+	PrepareAirgap struct {
+		K8sVersion      string `toml:"k8s-version,omitempty"`
+		RegistryVersion string `toml:"registry-version,omitempty"`
+		RegistryIP      string `toml:"registry-ip"`
+	} `toml:"prepare-airgap,omitempty"`
+
+	SupportVersion struct {
+		PackageVersion PackageVersion
+		ImageVersion   ImageVersion
+	}
 }
 
 type StrNode struct {
-	IP        []string `toml:"ip,omitempty"`
-	PrivateIP []string `toml:"private-ip,omitempty"`
+	IP        []string `toml:"ip"`
+	PrivateIP []string `toml:"private-ip"`
 }

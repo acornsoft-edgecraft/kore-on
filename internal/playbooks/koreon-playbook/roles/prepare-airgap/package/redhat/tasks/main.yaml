@@ -1,0 +1,30 @@
+---
+# Create Package directory
+- name: Package | Create package directory
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+    - "{{ package_data_dir }}"
+
+- name: Download crictl binary
+  ansible.builtin.get_url:
+    url: "{{ crictl_get_url }}"
+    dest: "{{ package_archive_dir }}"
+  any_errors_fatal: true
+
+- name: Download ETCD binary
+  ansible.builtin.get_url:
+    url: "{{ etcd_get_url }}"
+    dest: "{{ package_archive_dir }}"
+  any_errors_fatal: true
+
+- name: Copy local-repository scripts files
+  template:
+    src: "package-download.sh.j2"
+    dest: "/tmp/package-download.sh"
+    mode: 0755
+
+# Download the package and create a local repository
+- name: Make local repository
+  shell: "/tmp/package-download.sh"

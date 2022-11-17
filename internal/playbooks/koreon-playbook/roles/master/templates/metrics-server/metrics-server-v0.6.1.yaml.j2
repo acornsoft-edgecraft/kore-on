@@ -157,9 +157,7 @@ spec:
         - --kubelet-use-node-status-port
         - --metric-resolution=15s
         - --profiling=false
-        - --kubelet-certificate-authority={{ ca_cert }}
-        - --tls-cert-file={{ metrics_server_cert_file }}
-        - --tls-private-key-file={{ metrics_server_key_file }}
+        - --kubelet-insecure-tls
         image: k8s.gcr.io/metrics-server/metrics-server:v0.6.1
         imagePullPolicy: IfNotPresent
         livenessProbe:

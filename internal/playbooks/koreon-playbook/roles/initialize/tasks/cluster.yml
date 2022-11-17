@@ -27,12 +27,17 @@
     state: stopped
   failed_when: false
 
+- name: Populate service facts
+  ansible.builtin.service_facts:
+
 - name: Install NetworkManager
-  when: ansible_os_family in ["CentOS", "RedHat"]
   yum:
     name: NetworkManager
     state: present
     # update_cache: yes
+  when: 
+    - ansible_os_family in ["CentOS", "RedHat"]
+    - ansible_facts.services["NetworkManager.service"] is not defined
 
 # Calico module wt_u32을 load하기 위해 필요하나 4.18.0-193에서는 설치해도 not found 에러가 발생함.
 #- name: Install kernel-modules-extra

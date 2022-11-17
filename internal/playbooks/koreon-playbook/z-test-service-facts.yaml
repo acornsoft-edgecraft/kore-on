@@ -1,0 +1,36 @@
+---
+- hosts: prepare_airgap
+  become: true
+  vars_files:
+    - "{{ playbook_dir }}/inventory/group_vars/basic.yaml"
+    - "{{ playbook_dir }}/inventory/group_vars/expert.yaml"
+  tasks:
+    - name: Populate service facts
+      ansible.builtin.service_facts:
+
+    - name: check if Dcoker is installed
+      fail:
+        msg: Docker is not installed, why? It should have been there!
+      when: ansible_facts.services["docker.service"] is not defined
+      any_errors_fatal: true
+
+    - name: Get Service Status
+      ansible.builtin.systemd:
+        name: "docker"
+      register: pg_service_status
+
+    - debug:
+        var: pg_service_status.status.ActiveState
+
+    - debug:
+        var: ansible_facts.services["docker.service"].state
+
+    - debug:
+        msg: aaaaaaaaaaaa
+      when:
+        -   pg_service_status.status.ActiveState in "active"
+
+    - debug:
+        msg: bbbbbbbbbbbb
+      when:
+        - not ansible_facts.services["docker.service"].state in "running"

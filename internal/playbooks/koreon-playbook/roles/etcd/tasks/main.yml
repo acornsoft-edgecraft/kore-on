@@ -34,24 +34,17 @@
     owner: etcd
     group: etcd
 
-- name: Copy etcd compressed file
-  copy:
-    src: "etcd-v{{ etcd_version }}-linux-amd64.tar.gz"
-    dest: "{{ etcd_download_dir }}/etcd-v{{ etcd_version }}-linux-amd64.tar.gz"
-    mode: 0755
-
 - name: Unzip etcd compressed file
   unarchive:
-    src: "{{ etcd_download_dir }}/etcd-v{{ etcd_version }}-linux-amd64.tar.gz"
+    src: "{{ etcd_src }}"
     dest: "{{ etcd_download_dir }}/"
-    remote_src: yes
     owner: "root"
     group: "root"
-    creates: "{{ etcd_download_dir }}/etcd-v{{ etcd_version }}-linux-amd64/etcd"
+    creates: "{{ etcd_download_dir }}/etcd-{{ etcd_version }}-linux-amd64/etcd"
 
 - name: Copy etcd binaries to destination directory
   copy:
-    src: "{{ etcd_download_dir }}/etcd-v{{ etcd_version }}-linux-amd64/{{ item }}"
+    src: "{{ etcd_download_dir }}/etcd-{{ etcd_version }}-linux-amd64/{{ item }}"
     dest: "{{ etcd_bin_dir }}/{{ item }}"
     mode: 0755
     owner: root

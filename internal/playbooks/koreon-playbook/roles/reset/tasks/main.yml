@@ -75,7 +75,7 @@
   register: mounted_dirs
 
 - name: Unmount kubelet dirs
-  command: umount {{item}}
+  command: umount -f -l {{item}}
   with_items: '{{ mounted_dirs.stdout_lines }}'
 
 - name: Gather mounted /run/containerd dirs
@@ -84,7 +84,7 @@
   register: containerd_mounted_dirs
 
 - name: Unmount /run/containerd dirs
-  command: umount -l {{item}}
+  command: umount -f -l {{item}}
   with_items: '{{ containerd_mounted_dirs.stdout_lines }}'
 
 - name: Stop etcd services

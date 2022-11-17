@@ -22,6 +22,13 @@ var RootCmd = &cobra.Command{
 	Long:  `cube, It install kubernetes cluster.`,
 }
 
+// RootCmd represents the base command when called without any subcommands
+var KoreOnCtlCmd = &cobra.Command{
+	Use:   "koreonctl",
+	Short: "Install kubernetes cluster to on-premise system with registry and storage system",
+	Long:  `cube, It install kubernetes cluster.`,
+}
+
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
@@ -38,8 +45,11 @@ func init() {
 		baremetal.CreateCmd(),
 		baremetal.ApplyCmd(),
 		baremetal.DestroyCmd(),
+		baremetal.AirGapCmd(),
 		baremetal.TestCmd(),
 	)
+	KoreOnCtlCmd.AddCommand()
+
 }
 
 func initConfig() {

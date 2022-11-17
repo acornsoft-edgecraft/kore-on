@@ -2,20 +2,24 @@ package cmd
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"kore-on/pkg/logger"
+	"kore-on/pkg/utils"
+	"os"
 
 	"github.com/apenella/go-ansible/pkg/execute"
 	"github.com/apenella/go-ansible/pkg/options"
 	"github.com/apenella/go-ansible/pkg/playbook"
 	"github.com/apenella/go-ansible/pkg/stdoutcallback/results"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 // Commands structure
 type strDestroyCmd struct {
 	dryRun        bool
 	verbose       bool
-	step          bool
 	inventory     string
 	tags          string
 	playbookFiles []string
@@ -29,7 +33,7 @@ func DestroyCmd() *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:          "destroy [flags]",
-		Short:        "Install kubernetes cluster, registry",
+		Short:        "Delete kubernetes cluster, registry",
 		Long:         "",
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -38,14 +42,13 @@ func DestroyCmd() *cobra.Command {
 	}
 	// Default value for command struct
 	destroy.tags = ""
-	destroy.inventory = "./internal/playbooks/koreon-playbook/inventories/inventory-redhat/static-inventory.ini"
+	destroy.inventory = "./internal/playbooks/koreon-playbook/inventory/inventory.ini"
 	destroy.playbookFiles = []string{
 		"./internal/playbooks/koreon-playbook/reset.yaml",
 	}
 
 	f := cmd.Flags()
 	f.BoolVarP(&destroy.verbose, "verbose", "v", false, "verbose")
-	f.BoolVarP(&destroy.step, "step", "", false, "step")
 	f.BoolVarP(&destroy.dryRun, "dry-run", "d", false, "dryRun")
 	f.StringVarP(&destroy.inventory, "inventory", "i", destroy.inventory, "Specify ansible playbook inventory")
 	f.StringVar(&destroy.tags, "tags", destroy.tags, "Ansible options tags")
@@ -56,6 +59,21 @@ func DestroyCmd() *cobra.Command {
 }
 
 func (c *strDestroyCmd) run() error {
+	koreOnConfigFileName := viper.GetString("KoreOn.KoreOnConfigFile")
+	koreOnConfigFilePath := utils.IskoreOnConfigFilePath(koreOnConfigFileName)
+	koreonToml, value := utils.ValidateKoreonTomlConfig(koreOnConfigFilePath, "destroy")
+
+	if value {
+		b, err := json.Marshal(koreonToml)
+		if err != nil {
+			logger.Fatal(err)
+			os.Exit(1)
+		}
+		if err := json.Unmarshal(b, &c.extravars); err != nil {
+			logger.Fatal(err.Error())
+			os.Exit(1)
+		}
+	}
 
 	if len(c.playbookFiles) < 1 {
 		return fmt.Errorf("[ERROR]: %s", "To run ansible-playbook playbook file path must be specified")
@@ -94,7 +112,7 @@ func (c *strDestroyCmd) run() error {
 		Options:           ansiblePlaybookOptions,
 		Exec: execute.NewDefaultExecute(
 			execute.WithTransformers(
-				results.Prepend("cobra-cmd-ansibleplaybook"),
+				results.Prepend("Destroy Cluster"),
 			),
 		),
 	}

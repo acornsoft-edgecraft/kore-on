@@ -1,0 +1,59 @@
+---
+# Ubuntu ----------------------------------------------------------------------
+- name: Check /etc/apt/sources.list existence
+  when:
+    - ansible_os_family in ["Ubuntu", "Debian"]
+  stat:
+    path: /etc/apt/sources.list
+  register: sources_list_stat
+
+- name: Backup /etc/apt/sources.list
+  when:
+    - ansible_os_family in ["Ubuntu", "Debian"]
+    - sources_list_stat.stat.exists
+  command: mv /etc/apt/sources.list /etc/apt/sources.list.bak
+  ignore_errors: True
+
+- name: Adding local repository
+  when:
+    - ansible_os_family in ["Ubuntu", "Debian"]
+  apt_repository:
+    repo: deb [trusted=yes] {{ local_repository_url }} ./
+    state: present
+    update_cache: true
+    filename: 'local'
+# ----------------------------------------------------------------------------
+
+# RHEL, Centos------------------------------------------------------------------
+- name: Check local.repo file existence
+  when:
+    - ansible_os_family in ["CentOS", "RedHat"]
+  stat:
+    path: /etc/yum.repos.d/local.repo
+  register: local_repo_file
+
+- name: Backup /etc/yum.repos.d directory
+  when:
+    - ansible_os_family in ["CentOS", "RedHat"]
+    - not local_repo_file.stat.exists
+  command: mv /etc/yum.repos.d /etc/yum.repos.d.bak
+  ignore_errors: True
+
+- name: Create /etc/yum.repos.d directory
+  when:
+    - ansible_os_family in ["CentOS", "RedHat"]
+    - not local_repo_file.stat.exists
+  file:
+    path: /etc/yum.repos.d
+    state: directory
+    owner: root
+    mode: 0755
+
+- name: Apply local repostory (offline install)
+  when:
+    - ansible_os_family in ["CentOS", "RedHat"]
+  template:
+    src: "local.repo.j2"
+    dest: "/etc/yum.repos.d/local.repo"
+    backup: true
+# ----------------------------------------------------------------------------

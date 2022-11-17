@@ -1,0 +1,104 @@
+---
+# container-selinux is in extras repo
+- name: Enable RHEL 7 repos
+  rhsm_repository:
+    name:
+      - "rhel-7-server-rpms"
+      - "rhel-7-server-extras-rpms"
+    state: enabled
+  when:
+    - rhel_enable_repos | default(True) | bool
+    - ansible_distribution_major_version == "7"
+
+# container-selinux is in appstream repo
+# - name: Enable RHEL 8 repos
+#   rhsm_repository:
+#     name:
+#       - "rhel-8-for-*-baseos-rpms"
+#       - "rhel-8-for-*-appstream-rpms"
+#     state: enabled
+#   when:
+#     - rhel_enable_repos | default(True) | bool
+#     - ansible_distribution_major_version == "8"
+    
+- name: Import EPEL GPG key.
+  rpm_key:
+    key: "https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-{{ ansible_distribution_major_version }}"
+    state: present
+  register: result
+  until: result is succeeded
+  retries: 5
+  delay: 10
+  ignore_errors: "{{ ansible_check_mode }}"
+
+- name: Install EPEL repo.
+  yum:
+    name: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_distribution_major_version }}.noarch.rpm"
+    state: present
+  register: result
+  until: result is succeeded
+  retries: 5
+  delay: 10
+
+- name: Install epel
+  yum:
+    name: epel-release
+    disablerepo: "*"
+    enablerepo: "epel"
+    state: latest
+
+- name: Adding Nginx|nginx-stable repository
+  yum_repository:
+    name: nginx-stable
+    description: nginx-stable repo
+    file: nginx
+    baseurl: "http://nginx.org/packages/centos/$releasever/$basearch"
+    enabled: yes
+    gpgcheck: yes
+    repo_gpgcheck: yes
+    module_hotfixes: True
+    gpgkey:
+      - "https://nginx.org/keys/nginx_signing.key"
+  notify: yum-clean-metadata
+
+- name: Adding Nginx|nginx-mainline repository
+  yum_repository:
+    name: nginx-mainline
+    description: nginx-mainline repo
+    file: nginx
+    baseurl: "http://nginx.org/packages/mainline/centos/$releasever/$basearch"
+    enabled: False
+    gpgcheck: yes
+    repo_gpgcheck: yes
+    module_hotfixes: True
+    gpgkey:
+      - "https://nginx.org/keys/nginx_signing.key"
+  notify: yum-clean-metadata
+
+
+- name: Adding Kubernetes repository
+  yum_repository:
+    name: Kubernetes
+    description: Kubernetes repo
+    file: kubernetes
+    baseurl: "http://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64"
+    enabled: yes
+    gpgcheck: yes
+    repo_gpgcheck: yes
+    exclude: kube*
+    gpgkey:
+      - "http://packages.cloud.google.com/yum/doc/yum-key.gpg"
+      - "http://packages.cloud.google.com/yum/doc/rpm-package-key.gpg"
+  notify: yum-clean-metadata
+
+- name: Adding Docker-ce repository
+  yum_repository:
+    name: Docker-CE-Stable
+    description: Docker-ce repo
+    file: docker
+    baseurl: https://download.docker.com/linux/centos/$releasever/$basearch/stable
+    enabled: yes
+    gpgcheck: yes
+    repo_gpgcheck: no
+    gpgkey: https://download.docker.com/linux/centos/gpg
+  notify: yum-clean-metadata

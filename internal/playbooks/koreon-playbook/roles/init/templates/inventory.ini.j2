@@ -1,56 +1,70 @@
 ## Inventory
 ## - All nodes IP Address and Internal IP Address 
 [all]
-{% for IP in NodePool.Master.IP %}
-master-{{ loop.index }}                 ansible_ssh_host={{ IP }}  ip={{ NodePool.Master.PrivateIP[loop.index-1]  }}
-{% endfor %}
-{% if Kubernetes.Etcd.ExternalEtcd%}
-{%   for IP in Kubernetes.Etcd.IP %}
-etcd-{{ loop.index }}                   ansible_ssh_host={{ IP }}  ip={{ Kubernetes.Etcd.PrivateIP[loop.index-1]  }}
+{% if (PrepareAirgap.RegistryIP == "") %}
+{% if NodePool.Master.IP %}
+{%   for IP in NodePool.Master.IP %}
+master-{{ loop.index }}                 ansible_ssh_host={{ IP }}  ip={{((NodePool.Master.PrivateIP != None) and (NodePool.Master.PrivateIP | length > 0)) | ternary(NodePool.Master.PrivateIP[loop.index-1], IP) }}
 {%   endfor %}
 {% endif%}
-{% for IP in NodePool.Node.IP %}
-node-{{ loop.index }}                   ansible_ssh_host={{ IP }}  ip={{ NodePool.Node.PrivateIP[loop.index-1]  }}
-{% endfor %}
+{% if Kubernetes.Etcd.ExternalEtcd %}
+{%   for IP in Kubernetes.Etcd.IP %}
+etcd-{{ loop.index }}                   ansible_ssh_host={{ IP }}  ip={{ ((Kubernetes.Etcd.PrivateIP != None) and (Kubernetes.Etcd.PrivateIP | length > 0)) | ternary(Kubernetes.Etcd.PrivateIP[loop.index-1], IP) }}
+{%   endfor %}
+{% endif%}
+{% if NodePool.Node.IP %}
+{%   for IP in NodePool.Node.IP %}
+node-{{ loop.index }}                   ansible_ssh_host={{ IP }}  ip={{ ((NodePool.Node.PrivateIP != None) and (NodePool.Node.PrivateIP | length > 0)) | ternary(NodePool.Node.PrivateIP[loop.index-1], IP) }}
+{%   endfor %}
+{% endif%}
 {%- if (PrivateRegistry.Install | default(false)) and (SharedStorage.Install | default(false)) %}
 {%   if PrivateRegistry.RegistryIP == SharedStorage.StorageIP %}
-node-regi-storage        ansible_ssh_host={{ PrivateRegistry.RegistryIP }}  ip={{ PrivateRegistry.PrivateIP  }}
+node-regi-storage        ansible_ssh_host={{ PrivateRegistry.RegistryIP }}  ip={{ ((PrivateRegistry.PrivateIP != None) and (PrivateRegistry.PrivateIP | length > 0)) | ternary(PrivateRegistry.PrivateIP, PrivateRegistry.RegistryIP) }}
 {%   else %}
-node-regi                ansible_ssh_host={{ PrivateRegistry.RegistryIP }}  ip={{ PrivateRegistry.PrivateIP  }}
-node-storage             ansible_ssh_host={{ SharedStorage.StorageIP }}  ip={{ SharedStorage.PrivateIP  }}
+node-regi                ansible_ssh_host={{ PrivateRegistry.RegistryIP }}  ip={{ ((PrivateRegistry.PrivateIP != None) and (PrivateRegistry.PrivateIP | length > 0)) | ternary(PrivateRegistry.PrivateIP, PrivateRegistry.RegistryIP) }}
+node-storage             ansible_ssh_host={{ SharedStorage.StorageIP }}  ip={{ ((SharedStorage.PrivateIP != None) and (SharedStorage.PrivateIP | length > 0)) | ternary(SharedStorage.PrivateIP, SharedStorage.StorageIP) }}
 {%   endif %}
 {% elif (PrivateRegistry.Install | default(false)) %}
-node-regi                ansible_ssh_host={{ PrivateRegistry.RegistryIP }}  ip={{ PrivateRegistry.PrivateIP  }}
+node-regi                ansible_ssh_host={{ PrivateRegistry.RegistryIP }}  ip={{ ((PrivateRegistry.PrivateIP != None) and (PrivateRegistry.PrivateIP | length > 0)) | ternary(PrivateRegistry.PrivateIP, PrivateRegistry.RegistryIP) }}
 {% elif (SharedStorage.Install | default(false)) %}
-node-storage             ansible_ssh_host={{ SharedStorage.StorageIP }}  ip={{ SharedStorage.PrivateIP  }}
+node-storage             ansible_ssh_host={{ SharedStorage.StorageIP }}  ip={{ ((SharedStorage.PrivateIP != None) and (SharedStorage.PrivateIP | length > 0)) | ternary(SharedStorage.PrivateIP, SharedStorage.StorageIP) }}
 {%- endif %}
-
-[masters]
-{% for IP in NodePool.Master.IP %}
-master-{{ loop.index }}
-{% endfor %}
-
-[etcd]
-{% if Kubernetes.Etcd.ExternalEtcd%}
-{%   for IP in Kubernetes.Etcd.IP %}
-etcd-{{ loop.index }}
-{%   endfor %}
 {% else %}
+prepare-airgap-node      ansible_ssh_host={{ PrepareAirgap.RegistryIP }}
+{% endif %}
+
+{% if (PrepareAirgap.RegistryIP == "") %}
+## Create ssl cert master noode name in [all] sector
+[sslhost]
+{% if NodePool.Master.IP %}
+master-1
+{% endif %}
+
+## Master Nodes name in [all] sector
+[masters]
+{% if NodePool.Master.IP %}
 {%   for IP in NodePool.Master.IP %}
 master-{{ loop.index }}
 {%   endfor %}
-{% endif%}
+{% endif %}
+
+## ETCD Nodes name in [all] sector 
+[etcd]
+{% if Kubernetes.Etcd.ExternalEtcd %}
+{%   for IP in Kubernetes.Etcd.IP %}
+etcd-{{ loop.index }}
+{%   endfor %}
+{% elif NodePool.Master.IP %}
+{%   for IP in NodePool.Master.IP %}
+master-{{ loop.index }}
+{%   endfor %}
+{% endif %}
 
 [node]
-{% for IP in NodePool.Node.IP %}
+{% if NodePool.Master.IP %}
+{%   for IP in NodePool.Node.IP %}
 node-{{ loop.index }}
-{% endfor %}
-
-[storage]
-{% if PrivateRegistry.Install and SharedStorage.Install and PrivateRegistry.RegistryIP == SharedStorage.StorageIP %}
-node-regi-storage
-{% else %}
-{{'node-storage' if SharedStorage.Install}}
+{%   endfor %}
 {% endif %}
 
 [registry]
@@ -60,10 +74,18 @@ node-regi-storage
 {{'node-regi' if PrivateRegistry.Install}}
 {% endif %}
 
+[storage]
+{% if PrivateRegistry.Install and SharedStorage.Install and PrivateRegistry.RegistryIP == SharedStorage.StorageIP %}
+node-regi-storage
+{% else %}
+{{'node-storage' if SharedStorage.Install}}
+{% endif %}
+
 [cluster:children]
 masters
 node
 
-[local_repo]
-
-[package_download]
+{% else %}
+[prepare_airgap]
+prepare-airgap-node
+{% endif %}

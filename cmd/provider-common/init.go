@@ -52,15 +52,7 @@ func (c *strInitCmd) run() error {
 	// if use check flag then validation for configfile
 	// var data map[string]interface{}
 	if c.check {
-		utils.ValidateKoreonTomlConfig(koreOnConfigFilePath)
-		// b, err := json.Marshal(koreonToml)
-		// if err != nil {
-		// 	log.Fatal(err)
-		// }
-		// _ = json.Unmarshal(b, &data)
-		// fmt.Printf("%s\n", data)
-		// fmt.Println("===================")
-		// fmt.Println("asddfdasfs: === ", viper.GetString("KoreOn.KoreOnConfigFile"))
+		utils.ValidateKoreonTomlConfig(koreOnConfigFilePath, "init")
 		os.Exit(0)
 	}
 
@@ -71,34 +63,6 @@ func (c *strInitCmd) run() error {
 	}
 	ioutil.WriteFile(koreOnConfigFilePath, []byte(config.Template), 0600)
 	fmt.Printf(SUCCESS_FORMAT, fmt.Sprintf("Initialize completed, Edit %s file according to your environment and run `koreonctl create`", koreOnConfigFileName))
-
-	// ansiblePlaybookConnectionOptions := &options.AnsibleConnectionOptions{
-	// 	Connection: "local",
-	// }
-
-	// ansiblePlaybookOptions := &playbook.AnsiblePlaybookOptions{
-	// 	Verbose: c.verbose,
-	// 	// ExtraVars: data,
-	// 	// ExtraVarsFile: []string{"@" + koreOnConfigFilePath},
-	// }
-
-	// playbook := &playbook.AnsiblePlaybookCmd{
-	// 	Playbooks:         c.playbookFiles,
-	// 	ConnectionOptions: ansiblePlaybookConnectionOptions,
-	// 	Options:           ansiblePlaybookOptions,
-	// 	Exec: execute.NewDefaultExecute(
-	// 		execute.WithTransformers(
-	// 			results.Prepend("cobra-cmd-ansibleplaybook"),
-	// 		),
-	// 	),
-	// }
-
-	// options.AnsibleForceColor()
-
-	// err := playbook.Run(context.TODO())
-	// if err != nil {
-	// 	return err
-	// }
 
 	return nil
 }

@@ -1,0 +1,14 @@
+---
+harbor_version: "{{ prepare_airgap_registry_version }}"
+harbor_domain: "{{ prepare_airgap_registry_ip }}"
+harbor_data_dir: "{{ prepare_airgap_registry_data_dir }}/harbor"
+harbor_archive_dir: "{{ prepare_airgap_registry_data_dir }}/archive"
+
+
+harbor_cert_work_dir: "{{ prepare_airgap_registry_install_dir }}/cert"
+harbor_cert_dir: "{{ harbor_data_dir }}/cert"
+harbor_install_dir: "{{ prepare_airgap_registry_install_dir }}/harbor"
+
+harbor_offline_installer_file: harbor-offline-installer-{{ harbor_version }}.tgz
+harbor_offline_file: harbor-offline-installer-{{ harbor_version }}.tar.gz
+harbor_download_url: https://github.com/goharbor/harbor/releases/download/{{ harbor_version }}/{{ harbor_offline_installer_file }}

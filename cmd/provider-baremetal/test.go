@@ -43,9 +43,9 @@ func TestCmd() *cobra.Command {
 	}
 
 	test.tags = ""
-	test.inventory = "inventory.ini"
+	test.inventory = "./internal/playbooks/koreon-playbook/inventory/inventory.ini"
 	test.playbookFiles = []string{
-		"./internal/playbooks/koreon-playbook/z-test-extra-vars.yaml",
+		"./internal/playbooks/koreon-playbook/z-test-package-download.yaml",
 	}
 
 	f := cmd.Flags()
@@ -63,7 +63,7 @@ func TestCmd() *cobra.Command {
 func (c *strTestCmd) run() error {
 	koreOnConfigFileName := viper.GetString("KoreOn.KoreOnConfigFile")
 	koreOnConfigFilePath := utils.IskoreOnConfigFilePath(koreOnConfigFileName)
-	koreonToml, value := utils.ValidateKoreonTomlConfig(koreOnConfigFilePath)
+	koreonToml, value := utils.ValidateKoreonTomlConfig(koreOnConfigFilePath, "prepare-airgap")
 
 	if value {
 		b, err := json.Marshal(koreonToml)
@@ -86,7 +86,7 @@ func (c *strTestCmd) run() error {
 	}
 
 	if len(c.privateKey) < 1 {
-		if len(koreonToml.NodePool.Security.PrivateKeyPath) < 1 {
+		if len(koreonToml.NodePool.Security.PrivateKeyPath) > 0 {
 			c.privateKey = koreonToml.NodePool.Security.PrivateKeyPath
 		} else {
 			return fmt.Errorf("[ERROR]: %s", "To run ansible-playbook an privateKey must be specified")
@@ -94,7 +94,7 @@ func (c *strTestCmd) run() error {
 	}
 
 	if len(c.user) < 1 {
-		if len(koreonToml.NodePool.Security.SSHUserID) < 1 {
+		if len(koreonToml.NodePool.Security.SSHUserID) > 0 {
 			c.user = koreonToml.NodePool.Security.SSHUserID
 		} else {
 			return fmt.Errorf("[ERROR]: %s", "To run ansible-playbook an ssh login user must be specified")

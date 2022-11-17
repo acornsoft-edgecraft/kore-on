@@ -1,0 +1,86 @@
+---
+- name: Backup /etc/yum.repos.d directory
+  copy:
+    src: "/etc/yum.repos.d"
+    dest: "/etc/yum.repos.d.bak"
+    remote_src: yes
+    owner: root
+    mode: 0755
+    
+- name: Find the files
+  find:
+    paths: "/etc/yum.repos.d"
+    file_type: file
+    recurse: yes
+    patterns:
+      - 'CentOS-*.repo'
+  register: repos_d
+
+- name: Change CentOS baseurl
+  shell: "{{ item }}"
+  loop:
+    - "sed -i 's/^mirrorlist/#mirrorlist/' /etc/yum.repos.d/CentOS-*"
+    - "sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.epel.cloud|g' /etc/yum.repos.d/CentOS-*"
+  when:
+    - repos_d.matched
+
+- name: Install epel
+  yum:
+    name: epel-release
+    state: latest
+
+- name: Adding Nginx|nginx-stable repository
+  yum_repository:
+    name: nginx-stable
+    description: nginx-stable repo
+    file: nginx
+    baseurl: "http://nginx.org/packages/centos/$releasever/$basearch"
+    enabled: yes
+    gpgcheck: yes
+    repo_gpgcheck: yes
+    module_hotfixes: True
+    gpgkey:
+      - "https://nginx.org/keys/nginx_signing.key"
+  notify: yum-clean-metadata
+
+- name: Adding Nginx|nginx-mainline repository
+  yum_repository:
+    name: nginx-mainline
+    description: nginx-mainline repo
+    file: nginx
+    baseurl: "http://nginx.org/packages/mainline/centos/$releasever/$basearch"
+    enabled: False
+    gpgcheck: yes
+    repo_gpgcheck: yes
+    module_hotfixes: True
+    gpgkey:
+      - "https://nginx.org/keys/nginx_signing.key"
+  notify: yum-clean-metadata
+
+
+- name: Adding Kubernetes repository
+  yum_repository:
+    name: Kubernetes
+    description: Kubernetes repo
+    file: kubernetes
+    baseurl: "http://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64"
+    enabled: yes
+    gpgcheck: yes
+    repo_gpgcheck: yes
+    exclude: kube*
+    gpgkey:
+      - "http://packages.cloud.google.com/yum/doc/yum-key.gpg"
+      - "http://packages.cloud.google.com/yum/doc/rpm-package-key.gpg"
+  notify: yum-clean-metadata
+
+- name: Adding Docker-ce repository
+  yum_repository:
+    name: Docker-CE-Stable
+    description: Docker-ce repo
+    file: docker
+    baseurl: https://download.docker.com/linux/centos/$releasever/$basearch/stable
+    enabled: yes
+    gpgcheck: yes
+    repo_gpgcheck: no
+    gpgkey: https://download.docker.com/linux/centos/gpg
+  notify: yum-clean-metadata

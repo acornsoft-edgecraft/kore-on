@@ -1,0 +1,7 @@
+# Registry
+registry_id: "admin"
+registry_passwd: "Pass0000@"
+
+basic_auth: "{{ registry_id }}:{{ registry_passwd }}"
+_version: "{{ prepare_airgap_registry_version | split('.') | first }}"
+_url: "{{ (_version == 'v1') | ternary(prepare_airgap_registry_ip + '/api', prepare_airgap_registry_ip + '/api/' + _version + '.0') }}"

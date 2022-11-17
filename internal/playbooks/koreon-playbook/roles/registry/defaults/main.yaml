@@ -1,13 +1,14 @@
 ---
-# harbor_version: v2.3.0
+harbor_version: "{{ registry_version }}"
 docker_compose_version: v1.29.2
 
+harbor_data_dir: "{{ registry_data_dir }}"
 harbor_cert_work_dir: "{{ install_dir }}/cert"
 harbor_cert_dir: "{{ registry_data_dir }}/cert"
 harbor_install_dir: "{{ install_dir }}/harbor"
 
 harbor_offline_installer_file: harbor-offline-installer-{{ harbor_version }}.tgz
-harbor_offline_file: harbor.{{ harbor_version }}.tar.gz
+harbor_offline_file: harbor-offline-installer-{{ harbor_version }}.tar.gz
 harbor_download_url: https://github.com/goharbor/harbor/releases/download/{{ harbor_version }}/{{ harbor_offline_installer_file }}
 
 # Get kubernetes version type int

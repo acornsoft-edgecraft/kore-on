@@ -1,0 +1,38 @@
+---
+# Create Archive directory
+- name: Prepare-airgap | Create archive directory
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+    - "{{ harbor_archive_dir }}"
+
+## If used chart museum
+- name: Prepare-airgap | chart museum is used
+  ansible.builtin.file:
+    path: "{{ harbor_data_dir }}/chart_storage/README.md"
+    state: touch
+    owner: "10000"
+    group: "10000"
+    mode: "0754"
+    modification_time: preserve
+    access_time: preserve
+
+- name: Copy /usr/local/bin/docker-compose for archive
+  ansible.builtin.copy:
+    remote_src: True
+    src: "/usr/local/bin/docker-compose"
+    dest: "{{ harbor_data_dir }}"
+
+## Harbor Archive
+- name: Prepare-airgap | Archive registry
+  community.general.archive:
+    path:
+      - "{{ harbor_data_dir }}/database"
+      - "{{ harbor_data_dir }}/registry"
+      - "{{ harbor_data_dir }}/chart_storage"
+      - "{{ harbor_data_dir }}/secret"
+      - "{{ harbor_data_dir }}/{{ harbor_offline_file }}"
+      - "{{ harbor_data_dir }}/docker-compose"
+    dest: "{{ harbor_archive_dir }}/harbor-{{ ansible_date_time.iso8601_basic_short }}.tgz"
+    format: gz

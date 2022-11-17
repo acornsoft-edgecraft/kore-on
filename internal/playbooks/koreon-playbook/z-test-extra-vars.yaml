@@ -1,5 +1,5 @@
 ---
-# Air-gap Local Repository
+# Init generate inventory and vars
 - hosts: localhost
   gather_facts: false
   tasks:

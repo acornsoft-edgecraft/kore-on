@@ -1,7 +1,163 @@
+## Kore-on basic configure
 KoreOn:
   KoreOnImageName: "koreon"
   KoreOnImage: "regi.k3.acornsoft.io/k3lab/koreon:1.1.3"
   KoreOnKubeConfig: "acloud-client-kubeconfig"
   KoreOnConfigFile: "koreon.toml"
-  KoreOnConfigFileSubDir: "test"
-  SupportK8SVersion: ["1.19", "1.20", "1.21", "1.22", "1.23"]
+  KoreOnConfigFileSubDir: "test__"
+
+#- Support versions
+## K8s
+SupportK8sVersion: {
+  "v1.19": ["10", "11", "12", "13", "14", "15", "16"],
+  "v1.20": ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15"],
+  "v1.21": ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14"],
+  "v1.22": ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15"],
+  "v1.23": ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13"]
+}
+SupportCalicoVersion: {
+  "v3.19": ["0", "1", "2", "3", "4"],
+  "v3.20": ["0", "1", "2", "3", "4", "5", "6"],
+  "v3.21": ["0", "1", "2", "3", "4", "5", "6"],
+  "v3.22": ["0", "1", "2", "3", "4", "5"],
+  "v3.23": ["0", "1", "2", "3", "4"]
+}
+SupportCalicoCtlVersion: {
+  "v3.19": ["0", "1", "2", "3", "4"],
+  "v3.20": ["0", "1", "2", "3", "4", "5", "6"],
+  "v3.21": ["0", "1", "2", "3", "4", "5", "6"],
+  "v3.22": ["0", "1", "2", "3", "4", "5"],
+  "v3.23": ["0", "1", "2", "3", "4"]
+}
+SupportCorednsVersion: {
+  "v1.7": ["0", "1"],
+  "v1.8": ["0", "1", "2", "3", "4", "5", "6", "7"],
+  "v1.9": ["0", "1", "2", "3", "4"],
+  "v1.10": ["0"]
+}
+SupportMetricsServerVersion: {
+  "v0.6": ["0", "1"]
+}
+SupportNginxVersion: {
+  "v1.21": ["3", "4", "5", "6"]
+}
+SupportPauseVersion: {
+  "v3.3": [""],
+  "v3.4": ["1"],
+  "v3.5": [""],
+  "v3.6": [""]
+}
+## K8s package list
+SupportContainerdVersion: {
+  "v1.4": ["8", "9", "10", "11", "12", "13"],
+  "v1.5": ["10", "11"],
+  "v1.6": ["4", "6", "7", "8", "9"]
+}
+SupportCrictlVersion: {
+  "v1.19": ["0"],
+  "v1.20": ["0"],
+  "v1.21": ["0"],
+  "v1.22": ["0", "1"],
+  "v1.23": ["0"],
+  "v1.24": ["0", "1", "2"],
+  "v1.25": ["0"]
+}
+SupportEtcdVersion: {
+  "v3.4": ["16", "17", "18", "19", "20", "21", "22"]
+}
+
+
+## Harbor
+SupportHarborVersion: {
+  "v2.3": ["0", "1", "2", "3", "4", "5"],
+  "v2.4": ["0", "1", "2", "3"],
+  "v2.5": ["0", "1", "2", "3", "4"],
+  "v2.6": ["0", "1"]
+}
+# SupportDockerVersion: {
+#   "v20.10": ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"],
+#   "v19.03": ["15"]
+# }
+SupportDockerComposeVersion: {
+  "v2.12": ["0", "1", "2"],
+  "v2.11": ["0", "1", "2"],
+  "v2.10": ["0", "1", "2"],
+  "v2.9": ["0"],
+  "v2.8": ["0"],
+  "v2.7": ["0"],
+  "v2.6": ["0", "1"],
+  "v2.5": ["0", "1"],
+  "v2.4": ["0", "1"],
+  "v2.3": ["4"],
+  "v1.29": ["2"]
+}
+#-end Support versions
+
+# This is the version supported by k8s images for k8s version.
+# This is the version supported by localrepo packages for k8s version.
+SupportVersion: {
+  "k8s_support_image": {
+    "v1.19": {
+      "calico": "v3.19",
+      "coredns": "v1.7.0",
+      "metrics-server": "v0.6",
+      "pause": "v3.3",
+    },
+    "v1.20": {
+      "calico": "v3.20",
+      "coredns": "v1.7.0",
+      "metrics-server": "v0.6",
+      "pause": "v3.4.1",
+    },
+    "v1.21": {
+      "calico": "v3.21",
+      "coredns": "v1.8.0",
+      "metrics-server": "v0.6",
+      "pause": "v3.5",
+    },
+    "v1.22": {
+      "calico": "v3.22",
+      "coredns": "v1.8.4",
+      "metrics-server": "v0.6",
+      "pause": "v3.6",
+    },
+    "v1.23": {
+      "calico": "v3.23",
+      "coredns": "v1.8.6",
+      "metrics-server": "v0.6",
+      "pause": "v3.6",
+    },
+  },
+  "k8s_support_package": {
+    "v1.19": {
+      "containerd": "v1.4",
+      "docker-compose": "v2.10",
+      "crictl": "v1.19",
+      "etcd": "v3.4",
+    },
+    "v1.20": {
+      "containerd": "v1.5",
+      "docker-compose": "v2.10",
+      "crictl": "v1.20",
+      "etcd": "v3.4",
+    },
+    "v1.21": {
+      "containerd": "v1.5",
+      "docker-compose": "v2.10",
+      "crictl": "v1.21",
+      "etcd": "v3.4",
+    },
+    "v1.22": {
+      "containerd": "v1.5",
+      "docker-compose": "v2.10",
+      "crictl": "v1.22",
+      "etcd": "v3.4",
+    },
+    "v1.23": {
+      "containerd": "v1.6",
+      "docker-compose": "v2.10",
+      "crictl": "v1.23",
+      "etcd": "v3.4",
+    },
+  }
+}

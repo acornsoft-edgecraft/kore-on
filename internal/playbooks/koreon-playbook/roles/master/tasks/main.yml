@@ -271,7 +271,7 @@
 - name: Get kubeconfig file
   fetch:
     src: /etc/kubernetes/acloud/acloud-client-kubeconfig
-    dest: "{{ inventory_dir }}/acloud-client-kubeconfig"
+    dest: "{{ playbook_dir }}/inventory/acloud-client-kubeconfig"
     flat: yes
   delegate_to: "{{ groups['masters'][0] }}"
   run_once: true
@@ -339,7 +339,7 @@
     src: "{{ item.src }}"
     dest: "{{ kube_addon_dir }}/{{ item.dest }}"
   with_items:
-  - { src: "calico/calico-{{calico_version}}.yaml.j2", dest: "calico/calico.yaml" }
+  - { src: "calico/calico-{{ calico_version | regex_replace('^v([0-9])+\\.([0-9]+)\\.[0-9]+', 'v\\1.\\2') }}.yaml.j2", dest: "calico/calico.yaml" }
   delegate_to: "{{ groups['masters'][0] }}"
   run_once: true
 

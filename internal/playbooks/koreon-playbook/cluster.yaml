@@ -1,85 +1,263 @@
 ---
 # This playbook deploys a kubernetes cluster with platform applications
+# Init generate inventory and vars
+- hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Init | Configuration
+      ansible.builtin.include_role:
+        name: init
+        apply:
+          tags:
+            - init
+
+# Clear gathered facts from all currently targeted hosts 
+- hosts: all
+  become: false
+  gather_facts: false
+  tasks:
+    - name: Clear gathered facts
+      meta: clear_facts
+
+# Pre-installation check network.
+- hosts: all
+  become: false
+  gather_facts: true
+  vars_files:
+    - "{{ playbook_dir }}/inventory/group_vars/basic.yaml"
+    - "{{ playbook_dir }}/inventory/group_vars/expert.yaml"
+  tasks:
+    - name: Init | Network check
+      ansible.builtin.include_role:
+        name: init/network
+        apply:
+          tags:
+            - init-network
+  any_errors_fatal: true
 
 # Configure local-repository for air-gap env
 - hosts: registry
   become: true
-  roles:
-    - { role: yum-repo/local-repo, tags: yum-repo }
+  gather_facts: false
+  vars_files:
+    - "{{ playbook_dir }}/inventory/group_vars/basic.yaml"
+    - "{{ playbook_dir }}/inventory/group_vars/expert.yaml"
+  tasks:
+    - name: Create Local Repository
+      ansible.builtin.include_role:
+        name: local-repo/{{ ansible_os_family | lower }}
+        apply:
+          tags:
+            - create-local-repo
+      when:
+        - closed_network
+        - local_repository_install
+  any_errors_fatal: true
 
-# Configure system package repository
-- hosts: all
-  become: true
-  roles:
-    - { role: yum-repo, tags: yum-repo }
-    
-- hosts: cluster
-  become: true
-  roles:
-    - { role: initialize, tags: initialize }
+# # Configure system package repository
+# - hosts: all
+#   become: true
+#   gather_facts: false
+#   vars_files:
+#     - "{{ playbook_dir }}/inventory/group_vars/basic.yaml"
+#     - "{{ playbook_dir }}/inventory/group_vars/expert.yaml"
+#   tasks:
+#     - name: Bootstrap OS
+#       ansible.builtin.include_role:
+#         name: bootstrap-os/{{ ansible_os_family | lower }}
+#         apply:
+#           tags:
+#             - bootstrap-os
+#       when:
+#         - ansible_os_family is defined
+#   any_errors_fatal: true
 
-# Install cri
-- hosts: cluster
-  become: true
-  roles:
-    - { role: cri, tags: cri, vars: { param: "cluster" } }
 
-# Configure storage
-- hosts: storage
-  become: true
-  roles:
-    - { role: storage, tags: storage }
+# ###
+# # Cluster Initialize
+# - hosts: cluster
+#   become: true
+#   gather_facts: false
+#   vars_files:
+#     - "{{ playbook_dir }}/inventory/group_vars/basic.yaml"
+#     - "{{ playbook_dir }}/inventory/group_vars/expert.yaml"
+#   tasks:
+#     - name: Cluster Initialize
+#       ansible.builtin.include_role:
+#         name: initialize
+#         apply:
+#           tags:
+#             - initialize
+#   any_errors_fatal: true
+
+# # Install container runtime interface
+# - hosts: cluster
+#   become: true
+#   gather_facts: false
+#   vars_files:
+#     - "{{ playbook_dir }}/inventory/group_vars/basic.yaml"
+#     - "{{ playbook_dir }}/inventory/group_vars/expert.yaml"
+#   tasks:
+#     - name: CRI | Install Container Runtime Interface
+#       ansible.builtin.include_role:
+#         name: cri/{{ ansible_os_family | lower }}
+#         apply:
+#           tags:
+#             - cri
+#       vars:
+#         param: "cluster"
+#   any_errors_fatal: true
+
+# # Configuration storage
+# - hosts: storage
+#   become: true
+#   gather_facts: false
+#   vars_files:
+#     - "{{ playbook_dir }}/inventory/group_vars/basic.yaml"
+#     - "{{ playbook_dir }}/inventory/group_vars/expert.yaml"
+#   tasks:
+#     - name: Installation Storage Server
+#       ansible.builtin.include_role:
+#         name: storage
+#         apply:
+#           tags:
+#             - storage
+#       when:
+#         - storage_install
+#   any_errors_fatal: true
 
 # Install registry
 - hosts: registry
   become: true
-  roles:
-    - { role: yum-repo, tags: registry, vars: { param: "registry" } }
-    - { role: cri, tags: registry, vars: { param: "registry" } }
-    - { role: registry, tags: registry }
-    - { role: post-install, tags: registry }
-
-# install ssl cert
-- hosts: sslhost
-  become: true
   gather_facts: false
-  roles:
-    - { role: sslcert, tags: sslcert }
+  vars_files:
+    - "{{ playbook_dir }}/inventory/group_vars/basic.yaml"
+    - "{{ playbook_dir }}/inventory/group_vars/expert.yaml"
+  tasks:
+    - name: Install Container Runtime Interface for registry
+      ansible.builtin.include_role:
+        name: cri/{{ ansible_os_family | lower }}
+        apply:
+          tags:
+            - cri
+      vars:
+        param: "registry"
+    - name: Registry Installation
+      ansible.builtin.include_role:
+        name: registry
+        apply:
+          tags:
+            - registry
+    - name: Post-installation after registry installation 
+      ansible.builtin.include_role:
+        name: post-install
+        apply:
+          tags:
+            - registry
+  any_errors_fatal: true
 
-# Install etcd
-- hosts: etcd
-  become: true
-  roles:
-    - { role: etcd, tags: etcd }
+# # install ssl cert
+# - hosts: sslhost
+#   become: true
+#   gather_facts: false
+#   vars_files:
+#     - "{{ playbook_dir }}/inventory/group_vars/basic.yaml"
+#     - "{{ playbook_dir }}/inventory/group_vars/expert.yaml"
+#   tasks:
+#     - name: Generate certificate
+#       ansible.builtin.include_role:
+#         name: sslcert
+#         apply:
+#           tags:
+#             - sslcert
 
-# install haproxy
-- hosts: node
-  become: true
-  roles:
-    - { role: haproxy, tags: haproxy }
+# # Install etcd
+# - hosts: etcd
+#   become: true
+#   gather_facts: false
+#   vars_files:
+#     - "{{ playbook_dir }}/inventory/group_vars/basic.yaml"
+#     - "{{ playbook_dir }}/inventory/group_vars/expert.yaml"
+#   tasks:
+#     - name: ETCD Installation
+#       ansible.builtin.include_role:
+#         name: etcd
+#         apply:
+#           tags:
+#             - etcd
 
-# install kubernetes master services
-- hosts: masters
-  become: true
-  roles:
-    - { role: master, tags: master }
+# # install haproxy
+# - hosts: node
+#   become: true
+#   gather_facts: false
+#   vars_files:
+#     - "{{ playbook_dir }}/inventory/group_vars/basic.yaml"
+#     - "{{ playbook_dir }}/inventory/group_vars/expert.yaml"
+#   tasks:
+#     - name: Haproxy Installation
+#       ansible.builtin.include_role:
+#         name: haproxy
+#         apply:
+#           tags:
+#             - haproxy
 
-# install kubernetes on the nodes
-- hosts: node
-  become: true
-  roles:
-    - { role: node, tags: node }
+# ----
+# # install kubernetes master services
+# - hosts: masters
+#   become: true
+#   gather_facts: false
+#   vars_files:
+#     - "{{ playbook_dir }}/inventory/group_vars/basic.yaml"
+#     - "{{ playbook_dir }}/inventory/group_vars/expert.yaml"
+#   tasks:
+#     - name: K8s Controll Plane Installation
+#       ansible.builtin.include_role:
+#         name: master
+#         apply:
+#           tags:
+#             - master
 
-# install kubernetes addon services
-- hosts: masters[0]
-  become: true
-  gather_facts: false
-  roles:
-    - { role: addon, tags: addon }
+# # install kubernetes on the nodes
+# - hosts: node
+#   become: true
+#   gather_facts: false
+#   vars_files:
+#     - "{{ playbook_dir }}/inventory/group_vars/basic.yaml"
+#     - "{{ playbook_dir }}/inventory/group_vars/expert.yaml"
+#   tasks:
+#     - name: K8s Worker Node Installation
+#       ansible.builtin.include_role:
+#         name: node
+#         apply:
+#           tags:
+#             - node
 
-# Post-install
-- hosts: masters:node
-  become: true
-  gather_facts: false
-  roles:
-    - { role: post-install, tags: post-install }
+# # install kubernetes addon services
+# - hosts: masters[0]
+#   become: true
+#   gather_facts: false
+#   vars_files:
+#     - "{{ playbook_dir }}/inventory/group_vars/basic.yaml"
+#     - "{{ playbook_dir }}/inventory/group_vars/expert.yaml"
+#   tasks:
+#     - name: K8s Addon Services Installation
+#       ansible.builtin.include_role:
+#         name: addon
+#         apply:
+#           tags:
+#             - addon
+
+# # Post-install
+# - hosts: masters:node
+#   become: true
+#   gather_facts: false
+#   vars_files:
+#     - "{{ playbook_dir }}/inventory/group_vars/basic.yaml"
+#     - "{{ playbook_dir }}/inventory/group_vars/expert.yaml"
+#   tasks:
+#     - name: Cluster Post-installation
+#       ansible.builtin.include_role:
+#         name: post-install
+#         apply:
+#           tags:
+#             - post-install

@@ -1,0 +1,27 @@
+---
+# # Add local repo ------------------------------------------------------------------
+- name: Backup /etc/yum.repos.d directory
+  ansible.builtin.copy:
+    remote_src: true
+    src: "/etc/yum.repos.d"
+    dest: "/etc/yum.repos.d.back-{{ ansible_date_time.iso8601_basic_short }}"
+
+- name: Remove /etc/yum.repos.d directory
+  ansible.builtin.file:
+    path: "/etc/yum.repos.d"
+    state: absent
+
+- name: Create /etc/yum.repos.d directory
+  ansible.builtin.file:
+    path: "/etc/yum.repos.d"
+    state: directory
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Add local repository
+  yum_repository:
+    name: local-repo
+    description: "Local Repo configure"
+    baseurl: "{{ (local_repository_url == '') | ternary('http://' + registry_ip + ':' + (local_repository_port | string), local_repository_url, omit) }}"
+  notify: yum-clean-metadata
