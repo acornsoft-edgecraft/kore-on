@@ -16,7 +16,7 @@ cluster_name: kubernetes
 install_dir: /var/lib/kore-on
 cert_validity_days: 36500
 debug_mode: False
-closed_network: False
+closed_network: True
 local_repository_install: True
 local_repository_port: 8080
 local_repository_archive_file: local-repo.20221116_031319.tgz

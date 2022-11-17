@@ -1,4 +1,0 @@
----
-- include_tasks: localrepo.yml
-  when:
-    - closed_network
