@@ -27,27 +27,6 @@
   register: packages_removed
   tags: ['services']
 
-#- name: Stop docker service
-#  systemd:
-#    name: "{{ item }}"
-#    state: stopped
-#  with_items:
-#    - docker
-#  failed_when: false
-#  tags: ['services']
-
-#- name: Remove docker service file
-#  file:
-#    path: "{{ item }}"
-#    state: absent
-##    purge: yes
-##    force: yes
-#  with_items:
-#    - /lib/systemd/system/docker.service
-#    - /etc/systemd/system/docker
-#  register: docker_services_removed
-#  tags: ['services']
-
 - name: Flush iptables
   iptables:
     flush: yes
@@ -80,7 +59,6 @@
 - name: systemctl daemon-reload
   systemd:
     daemon_reload: yes
-#  when: docker_services_removed.changed or packages_removed.changed
 
 - name: Restart network
   systemd:
