@@ -61,7 +61,7 @@ external_etcd_private_ip: {{ ((Kubernetes.Etcd.PrivateIP != None) and (Kubernete
 ## Optional
 ## - calico_version: input calico version (default: "latest")
 ## - vxlan_mode: Calico network mode (default: false)
-calico_version: {{ Kubernetes.Calico.Version }}
+calico_version: {{ SupportVersion.ImageVersion.Calico | regex_replace('^v([0-9])+\\.([0-9]+)\\.[0-9]+', 'v\\1.\\2') }}
 vxlan_mode: {{ Kubernetes.Calico.VxlanMode }}
 #-end [kubernetes.calico]
 

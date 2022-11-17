@@ -81,8 +81,7 @@
     state: started
   register: result
   until: "result is not failed"
-  retries: 3
+  retries: 5
   delay: 5
-  ignore_errors: True
   when:
     - not ansible_facts.services["docker.service"].state in "running"
