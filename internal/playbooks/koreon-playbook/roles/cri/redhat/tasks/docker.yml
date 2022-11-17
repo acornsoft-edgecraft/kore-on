@@ -51,12 +51,6 @@
   register: docker_daemon_json
 # ---------------------------------------------------------------------------------------
 
-- name: Enable Docker
-  ansible.builtin.systemd:
-    name: docker
-    daemon_reload: yes
-    enabled: yes
-
 - name: Populate service facts
   ansible.builtin.service_facts:
 
@@ -85,3 +79,9 @@
   delay: 5
   when:
     - not ansible_facts.services["docker.service"].state in "running"
+
+- name: Enable Docker
+  ansible.builtin.systemd:
+    name: docker
+    daemon_reload: yes
+    enabled: yes
