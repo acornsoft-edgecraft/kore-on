@@ -7,6 +7,7 @@ import (
 	"io"
 	"kore-on/pkg/logger"
 	"os"
+	"os/exec"
 	"sort"
 	"strings"
 
@@ -197,6 +198,19 @@ func ListSupportVersion(conf string) string {
 
 	b, _ = prettyPrint(b)
 	return string(b)
+}
+
+func CheckDocker() error {
+	//fmt.Println("Checking pre-requisition [" + runtime.GOOS + "]")
+	_, err := exec.Command("docker", "-v").Output()
+
+	if err != nil {
+		//fmt.Println(err.Error())
+		logger.Fatal("docker is not found. Install docker before proceeding")
+		logger.Fatal("Visit https://www.docker.com/get-started")
+		return err
+	}
+	return nil
 }
 
 func prettyPrint(b []byte) ([]byte, error) {

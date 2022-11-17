@@ -33,7 +33,7 @@ func AirGapCmd() *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:          "prepare-airgap [flags]",
-		Short:        "Install kubernetes cluster, registry",
+		Short:        "Preparing a kubernetes cluster and registry for AirGap network",
 		Long:         "",
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {

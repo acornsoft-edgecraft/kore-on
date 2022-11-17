@@ -30,7 +30,12 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
-	KoreOnCtlCmd.AddCommand()
+	KoreOnCtlCmd.AddCommand(
+		initCmd(),
+		createCmd(),
+		destroyCmd(),
+		airGapCmd(),
+	)
 
 }
 
