@@ -64,8 +64,7 @@ jobs:
           GOOS=darwin GOARCH=amd64 go build -o bin/darwin/amd64/koreonctl -ldflags="-X 'main.Version=${{ steps.variables.outputs.version }}' -X 'main.CommitId=$(git rev-parse HEAD)' -X 'main.BuildDate=$(date -u +%FT%T%Z)'" cmd/koreonctl/main.go
           chmod +x bin/linux/amd64/koreonctl
           chmod +x bin/darwin/amd64/koreonctl          
-      - if: ${{steps.variables.outputs.version}} != ""
-        name: Release
+      - name: Release
         uses: actions/create-release@v1
         id: create_release
         with:
