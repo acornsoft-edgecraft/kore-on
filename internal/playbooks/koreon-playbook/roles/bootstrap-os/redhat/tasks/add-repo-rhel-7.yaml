@@ -1,4 +1,30 @@
 ---
+- name: Backup /etc/yum.repos.d directory
+  ansible.builtin.copy:
+    remote_src: true
+    src: "/etc/yum.repos.d"
+    dest: "/etc/yum.repos.d.back-{{ ansible_date_time.iso8601_basic_short }}"
+
+- name: Remove /etc/yum.repos.d directory
+  ansible.builtin.file:
+    path: "/etc/yum.repos.d"
+    state: absent
+
+- name: Create /etc/yum.repos.d directory
+  ansible.builtin.file:
+    path: "/etc/yum.repos.d"
+    state: directory
+    owner: root
+    group: root
+    mode: "0644"
+    
+- name: Remove EPEL repo
+  ansible.builtin.yum:
+    name: epel-release
+    state: absent
+  failed_when: false
+  ignore_errors: "{{ ansible_check_mode }}"
+  
 # container-selinux is in extras repo
 - name: Enable RHEL 7 repos
   rhsm_repository:
@@ -9,17 +35,6 @@
   when:
     - rhel_enable_repos | default(True) | bool
     - ansible_distribution_major_version == "7"
-
-# container-selinux is in appstream repo
-# - name: Enable RHEL 8 repos
-#   rhsm_repository:
-#     name:
-#       - "rhel-8-for-*-baseos-rpms"
-#       - "rhel-8-for-*-appstream-rpms"
-#     state: enabled
-#   when:
-#     - rhel_enable_repos | default(True) | bool
-#     - ansible_distribution_major_version == "8"
     
 - name: Import EPEL GPG key.
   rpm_key:

@@ -102,9 +102,9 @@ main() {
         error_exit "Illegal number of parameters. You must pass k8s version and backup directory path"
     fi
 
-    {% if ansible_os_family in ["CentOS", "RedHat"] -%}
+    {% if ansible_distribution in ["CentOS", "RedHat"] -%}
         make_yum_repo
-    {%- elif ansible_os_family in ["Ubuntu", "Debian"] -%}
+    {%- elif ansible_distribution in ["Ubuntu", "Debian"] -%}
         make_apt_repo
     {%- endif %}
 

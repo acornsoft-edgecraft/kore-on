@@ -95,6 +95,10 @@ func (c *strDestroyCmd) run() error {
 		c.tags = ""
 	}
 
+	if len(c.tags) > 1 && c.tags == "prepare-airgap" {
+		utils.ValidateKoreonTomlConfig(koreOnConfigFilePath, "destroy-prepare-airgap")
+	}
+
 	ansiblePlaybookConnectionOptions := &options.AnsibleConnectionOptions{
 		PrivateKey: c.privateKey,
 		User:       c.user,

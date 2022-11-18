@@ -14,7 +14,7 @@
 
 # Clear gathered facts from all currently targeted hosts 
 - hosts: all
-  become: false
+  become: true
   gather_facts: false
   tasks:
     - name: Clear gathered facts
@@ -46,12 +46,12 @@
   tasks:
     - name: Bootstrap OS
       ansible.builtin.include_role:
-        name: bootstrap-os/{{ ansible_os_family | lower }}
+        name: bootstrap-os/{{ ansible_distribution | lower }}
         apply:
           tags:
             - bootstrap-os
       when:
-        - ansible_os_family is defined
+        - ansible_distribution is defined
   any_errors_fatal: true
 
 # The pre-preparation stage of the air gap network.
@@ -66,7 +66,7 @@
   tasks:
     - name: Install docker for registry
       ansible.builtin.include_role:
-        name: cri/{{ ansible_os_family | lower }}
+        name: cri/{{ ansible_distribution | lower }}
         apply:
           tags:
             - cri
@@ -80,7 +80,7 @@
             - prepare-airgap  
     - name: Package download
       ansible.builtin.include_role:
-        name: prepare-airgap/package/{{ ansible_os_family | lower }}
+        name: prepare-airgap/package/{{ ansible_distribution | lower }}
         apply:
           tags:
             - package-download

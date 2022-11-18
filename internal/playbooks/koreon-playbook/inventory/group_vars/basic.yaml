@@ -16,11 +16,11 @@ cluster_name: kubernetes
 install_dir: /var/lib/kore-on
 cert_validity_days: 36500
 debug_mode: False
-closed_network: True
-local_repository_install: True
+closed_network: False
+local_repository_install: False
 local_repository_port: 8080
-local_repository_archive_file: local-repo.20221116_031319.tgz
-local_repository_url: http://3.0.0.50:8080
+local_repository_archive_file: 
+local_repository_url: ''
 #-end [koreon]
 
 #- [kubernetes]
@@ -34,7 +34,7 @@ local_repository_url: http://3.0.0.50:8080
 ## - pod_ip_range: k8s pod network cidr (default: "10.4.0.0/24")
 ## - node_port_range: k8s node port network range (default: "30000-32767")
 ## - api-sans: k8s apiserver SAN 추가 [--apiserver-cert-extra-sans 설정과 동일] (default: master[0] ip address)
-k8s_version: v1.21.14
+k8s_version: v1.23.13
 cluster_id: kubernetes
 container_runtime: containerd
 kube_proxy_mode: ipvs
@@ -61,7 +61,7 @@ external_etcd_private_ip: ['']
 ## Optional
 ## - calico_version: input calico version (default: "latest")
 ## - vxlan_mode: Calico network mode (default: false)
-calico_version: v3.21
+calico_version: v3.23
 vxlan_mode: False
 #-end [kubernetes.calico]
 
@@ -149,13 +149,13 @@ prepare_airgap_registry_ip: ''
 prepare_airgap_registry_data_dir: "/data"
 prepare_airgap_registry_install_dir: "/var/lib/kore-on"
 ## packages
-package_containerd_version: v1.5.11
-package_crictl_version: v1.21.0
+package_containerd_version: v1.6.9
+package_crictl_version: v1.23.0
 package_docker_compose_version: v2.10.2
 package_etcd_version: v3.4.22
 ## images
-image_calico_version: v3.21.6
-image_coredns_version: v1.8.0
+image_calico_version: v3.23.4
+image_coredns_version: v1.8.6
 image_metrics_server_version: v0.6.1
-image_pause_version: v3.5
+image_pause_version: v3.6
 #-end [prepare-airgap]

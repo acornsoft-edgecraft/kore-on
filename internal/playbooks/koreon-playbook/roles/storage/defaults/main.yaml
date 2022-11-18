@@ -1,7 +1,7 @@
 ---
 nfs_server_daemon: |-
-  {% if ansible_os_family in ['Ubuntu', 'Debian'] -%}
+  {% if ansible_distribution in ['Ubuntu', 'Debian'] -%}
     nfs-kernel-server
-  {%- elif ansible_os_family in ["CentOS", "RedHat"] -%}
+  {%- elif ansible_distribution in ["CentOS", "RedHat"] -%}
     nfs-server
   {%- endif %}

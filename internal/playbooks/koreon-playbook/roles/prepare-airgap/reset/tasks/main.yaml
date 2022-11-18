@@ -9,25 +9,22 @@
   shell: "/usr/bin/docker ps -aq | xargs -r docker rm -fv"
   tags: ['docker']
 
-- name: Stop docker service
-  systemd:
-    name: "{{ item }}"
-    state: stopped
-  with_items:
-    - docker
-  failed_when: false
+- name: Remove docker package in ["Ubuntu", "Debian"]
+  when: ansible_distribution in ["Ubuntu", "Debian"]
+  apt:
+    name: ['docker-ce', 'docker-ce-cli', 'containerd.io', 'nginx']
+    state: absent
+    force: true
+  register: packages_removed
   tags: ['services']
 
-- name: Remove docker service file
-  file:
-    path: "{{ item }}"
+- name: Remove docker package in ["CentOS", "RedHat"]
+  when: ansible_distribution in ["CentOS", "RedHat"]
+  yum:
+    name: ['docker-ce', 'docker-ce-cli', 'containerd.io', 'nginx']
     state: absent
-#    purge: yes
-#    force: yes
-  with_items:
-    - /lib/systemd/system/docker.service
-    - /etc/systemd/system/docker
-  register: docker_services_removed
+  failed_when: false
+  register: packages_removed
   tags: ['services']
 
 - name: Flush iptables
@@ -50,6 +47,8 @@
     - /etc/docker/daemon.json
     - /etc/docker/key.json
     - /var/log/harbor
+    - /var/lib/docker
+    - /var/lib/containerd
     - /tmp/harbor-backup.tgz
     - /tmp/harbor
     - /tmp/registry-restore.sh
@@ -57,33 +56,14 @@
     - "{{ install_dir }}"
   tags: ['files']
 
-- name: Remove docker package
-  when: ansible_os_family in ["Ubuntu", "Debian"]
-  apt:
-    name: ['docker-ce', 'docker-ce-cli', 'containerd.io']
-    state: absent
-    force: true
-  register: packages_removed
-  tags: ['services']
-
-- name: Remove kubernetes, etcd, docker package
-  when: ansible_os_family in ["CentOS", "RedHat"]
-  yum:
-    name: ['docker-ce', 'docker-ce-cli', 'containerd.io']
-    state: absent
-  failed_when: false
-  register: packages_removed
-  tags: ['services']
-
 - name: systemctl daemon-reload
   systemd:
     daemon_reload: yes
-  when: docker_services_removed.changed or packages_removed.changed
 
 - name: Restart network
   systemd:
     name: >-
-      {% if ansible_os_family == "RedHat" -%}
+      {% if ansible_distribution == "RedHat" -%}
       {%- if ansible_distribution_major_version|int == 8 -%}
       NetworkManager
       {%- else -%}

@@ -115,13 +115,13 @@ data-dir = "/data"
 ##                This is a required entry used when installing a private registry.
 ## - private-ip: Private IP address of the private registry node. 
 ##               This is a required entry used when installing a private registry.
-##               If you use the same IP address, you can skip it.
-## - registry-domain: K8s registry configuration (this is using it to generate an extra vars)
+##               If you use the same IP address, you can skip it.			  
 ## Optional
 ## - install: private registry install (default: false)
 ## - registry-version: Private registry version. (default: latest)
 ##                     This is a required entry used when installing a private registry.
 ##                     If you input only the major version, the minor version automatically selects the last version.
+## - registry-domain: If using a domain, please enter the domain. (default: registry-ip)
 ## - data-dir: private registry data directory (default: "/data/harbor")
 ## - registry-archive-file: registry archive file path (default: "")
 ## - public-cert: public cert activate (default: false)
@@ -153,7 +153,7 @@ data-dir = "/data"
 ##               This is a required field used when installing the nfs server.
 ##               If you use the same IP address, you can skip it.
 ##               (this is using it to generate an inventory)
-## - volume-dir: Storage node data directory. (defalue: /storage)
+## - volume-dir: Storage node data directory. (default: /data/storage)
 ##               This is a required field used when installing the nfs server.
 ##               (this is using it to generate an extra vars)
 ## Optional

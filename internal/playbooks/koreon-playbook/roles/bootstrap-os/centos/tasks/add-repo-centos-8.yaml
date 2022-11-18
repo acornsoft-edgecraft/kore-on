@@ -17,29 +17,14 @@
     owner: root
     group: root
     mode: "0644"
-    
-# container-selinux is in extras repo
-# - name: Enable RHEL 7 repos
-#   rhsm_repository:
-#     name:
-#       - "rhel-7-server-rpms"
-#       - "rhel-7-server-extras-rpms"
-#     state: enabled
-#   when:
-#     - rhel_enable_repos | default(True) | bool
-#     - ansible_distribution_major_version == "7"
 
-# container-selinux is in appstream repo
-- name: Enable RHEL 8 repos
-  rhsm_repository:
-    name:
-      - "rhel-8-for-*-baseos-rpms"
-      - "rhel-8-for-*-appstream-rpms"
-    state: enabled
-  when:
-    - rhel_enable_repos | default(True) | bool
-    - ansible_distribution_major_version == "8"
-    
+- name: Remove EPEL repo
+  ansible.builtin.yum:
+    name: epel-release
+    state: absent
+  failed_when: false
+  ignore_errors: "{{ ansible_check_mode }}"
+
 - name: Import EPEL GPG key.
   rpm_key:
     key: "https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-{{ ansible_distribution_major_version }}"
@@ -65,6 +50,39 @@
     disablerepo: "*"
     enablerepo: "epel"
     state: latest
+
+- name: Adding Extras repository
+  yum_repository:
+    name: extras
+    description: "CentOS Stream {{ ansible_distribution_major_version }} - Extras"
+    file: CentOS-Stream-Extras
+    mirrorlist: "http://mirrorlist.centos.org/?release=$stream&arch=$basearch&repo=extras&infra=$infra"
+    enabled: yes
+    gpgcheck: yes
+    gpgkey: "file:///etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial"
+  notify: yum-clean-metadata
+
+- name: Adding AppStream repository
+  yum_repository:
+    name: appstream
+    description: "CentOS Stream {{ ansible_distribution_major_version }} - AppStream"
+    file: CentOS-Stream-AppStream
+    mirrorlist: "http://mirrorlist.centos.org/?release=$stream&arch=$basearch&repo=AppStream&infra=$infra"
+    enabled: yes
+    gpgcheck: yes
+    gpgkey: "file:///etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial"
+  notify: yum-clean-metadata
+
+- name: Adding BaseOS repository
+  yum_repository:
+    name: baseos
+    description: "CentOS Stream {{ ansible_distribution_major_version }} - BaseOS"
+    file: CentOS-Stream-BaseOS
+    mirrorlist: "http://mirrorlist.centos.org/?release=$stream&arch=$basearch&repo=BaseOS&infra=$infra"
+    enabled: yes
+    gpgcheck: yes
+    gpgkey: "file:///etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial"
+  notify: yum-clean-metadata
 
 - name: Adding Nginx|nginx-stable repository
   yum_repository:

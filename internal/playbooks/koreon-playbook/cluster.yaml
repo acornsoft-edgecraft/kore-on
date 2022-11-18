@@ -13,7 +13,7 @@
 
 # Clear gathered facts from all currently targeted hosts 
 - hosts: all
-  become: false
+  become: true
   gather_facts: false
   tasks:
     - name: Clear gathered facts
@@ -45,7 +45,7 @@
   tasks:
     - name: Create Local Repository
       ansible.builtin.include_role:
-        name: local-repo/{{ ansible_os_family | lower }}
+        name: local-repo/{{ ansible_distribution | lower }}
         apply:
           tags:
             - create-local-repo
@@ -64,12 +64,12 @@
   tasks:
     - name: Bootstrap OS
       ansible.builtin.include_role:
-        name: bootstrap-os/{{ ansible_os_family | lower }}
+        name: bootstrap-os/{{ ansible_distribution | lower }}
         apply:
           tags:
             - bootstrap-os
       when:
-        - ansible_os_family is defined
+        - ansible_distribution is defined
   any_errors_fatal: true
 
 
@@ -100,7 +100,7 @@
   tasks:
     - name: CRI | Install Container Runtime Interface
       ansible.builtin.include_role:
-        name: cri/{{ ansible_os_family | lower }}
+        name: cri/{{ ansible_distribution | lower }}
         apply:
           tags:
             - cri
@@ -136,7 +136,7 @@
   tasks:
     - name: Install Container Runtime Interface for registry
       ansible.builtin.include_role:
-        name: cri/{{ ansible_os_family | lower }}
+        name: cri/{{ ansible_distribution | lower }}
         apply:
           tags:
             - cri

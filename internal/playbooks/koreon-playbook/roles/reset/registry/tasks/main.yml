@@ -10,7 +10,7 @@
   tags: ['docker']
 
 - name: Remove docker package in ["Ubuntu", "Debian"]
-  when: ansible_os_family in ["Ubuntu", "Debian"]
+  when: ansible_distribution in ["Ubuntu", "Debian"]
   apt:
     name: ['docker-ce', 'docker-ce-cli', 'containerd.io', 'nginx']
     state: absent
@@ -19,7 +19,7 @@
   tags: ['services']
 
 - name: Remove docker package in ["CentOS", "RedHat"]
-  when: ansible_os_family in ["CentOS", "RedHat"]
+  when: ansible_distribution in ["CentOS", "RedHat"]
   yum:
     name: ['docker-ce', 'docker-ce-cli', 'containerd.io', 'nginx']
     state: absent
@@ -63,7 +63,7 @@
 - name: Restart network
   systemd:
     name: >-
-      {% if ansible_os_family == "RedHat" -%}
+      {% if ansible_distribution == "RedHat" -%}
       {%- if ansible_distribution_major_version|int == 8 -%}
       NetworkManager
       {%- else -%}

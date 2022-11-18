@@ -8,7 +8,7 @@
     state: present
 
 - name: Hold containerd version
-  when: ansible_os_family in ["Ubuntu", "Debian"]
+  when: ansible_distribution in ["Ubuntu", "Debian"]
   dpkg_selections:
     name: containerd.io
     selection: hold
