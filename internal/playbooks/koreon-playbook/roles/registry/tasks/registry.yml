@@ -90,6 +90,20 @@
     dest: "{{ harbor_install_dir }}/harbor.yml"
 
 # Install harbor
+- name: Populate service facts
+  ansible.builtin.service_facts:
+
+- name: Run harbor befor docker running check
+  ansible.builtin.systemd:
+    name: docker
+    state: started
+  register: result
+  until: "result is not failed"
+  retries: 5
+  delay: 10
+  when:
+    - not ansible_facts.services["docker.service"].state in "running"
+
 - name: Run harbor install script
   ansible.builtin.shell: >-
     ./install.sh
