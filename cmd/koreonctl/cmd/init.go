@@ -70,7 +70,7 @@ func (c *strInitCmd) init(workDir string) error {
 
 	commandArgsKoreonctl := []string{
 		koreOnImage,
-		"destroy",
+		"init",
 	}
 
 	commandArgs = append(commandArgs, commandArgsVol...)
