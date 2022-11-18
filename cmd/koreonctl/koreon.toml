@@ -1,6 +1,4 @@
-package config
 
-const Template = `
 [koreon]
 ## Required
 ## - local-repository-install: local repository installation activate. (Required when selecting the closed network.)
@@ -175,5 +173,4 @@ data-dir = "/data"
 ## - 
 k8s-version = "v1.21"
 registry-version = "v2.6"
-registry-ip = "x.x.x.x"
-`
+registry-ip = "192.168.77.152"

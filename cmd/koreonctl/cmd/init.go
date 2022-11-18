@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"kore-on/pkg/logger"
 	"kore-on/pkg/utils"
+	"log"
 	"os"
+	"syscall"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -50,8 +52,7 @@ func (c *strInitCmd) init(workDir string) error {
 
 	koreonImageName := viper.GetString("KoreOn.KoreonImageName")
 	koreOnImage := viper.GetString("KoreOn.KoreOnImage")
-	koreOnConfigFileName := viper.GetString("KoreOn.KoreOnConfigFile")
-	koreOnConfigFilePath := utils.IskoreOnConfigFilePath(koreOnConfigFileName)
+	koreOnConfigFilePath := viper.GetString("KoreOn.KoreOnConfigFileSubDir")
 
 	commandArgs := []string{
 		"docker",
@@ -65,11 +66,12 @@ func (c *strInitCmd) init(workDir string) error {
 
 	commandArgsVol := []string{
 		"-v",
-		fmt.Sprintf("%s:%s", workDir, koreOnConfigFilePath),
+		fmt.Sprintf("%s:%s", workDir, "/"+koreOnConfigFilePath),
 	}
 
 	commandArgsKoreonctl := []string{
 		koreOnImage,
+		"./" + koreonImageName,
 		"init",
 	}
 
@@ -82,10 +84,10 @@ func (c *strInitCmd) init(workDir string) error {
 
 	fmt.Println(commandArgs)
 
-	// err := syscall.Exec("/usr/local/bin/docker", commandArgs, os.Environ())
-	// if err != nil {
-	// 	log.Printf("Command finished with error: %v", err)
-	// }
+	err := syscall.Exec("/usr/local/bin/docker", commandArgs, os.Environ())
+	if err != nil {
+		log.Printf("Command finished with error: %v", err)
+	}
 
 	return nil
 }

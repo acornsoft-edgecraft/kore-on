@@ -6,6 +6,7 @@ import (
 	"kore-on/pkg/utils"
 	"log"
 	"os"
+	"strings"
 	"syscall"
 
 	"github.com/spf13/cobra"
@@ -91,8 +92,7 @@ func (c *strAirGapCmd) airgap(workDir string) error {
 
 	koreonImageName := viper.GetString("KoreOn.KoreonImageName")
 	koreOnImage := viper.GetString("KoreOn.KoreOnImage")
-	koreOnConfigFileName := viper.GetString("KoreOn.KoreOnConfigFile")
-	koreOnConfigFilePath := utils.IskoreOnConfigFilePath(koreOnConfigFileName)
+	koreOnConfigFilePath := viper.GetString("KoreOn.KoreOnConfigFileSubDir")
 
 	commandArgs := []string{
 		"docker",
@@ -106,16 +106,23 @@ func (c *strAirGapCmd) airgap(workDir string) error {
 
 	commandArgsVol := []string{
 		"-v",
-		fmt.Sprintf("%s:%s", workDir, koreOnConfigFilePath),
+		fmt.Sprintf("%s:%s", workDir, "/"+koreOnConfigFilePath),
 	}
 
 	commandArgsKoreonctl := []string{
 		koreOnImage,
+		"./" + koreonImageName,
 		"prepare-airgap",
 	}
 
 	if c.command == "download-archive" {
 		commandArgsKoreonctl = append(commandArgsKoreonctl, "download-archive")
+	}
+
+	if c.privateKey != "" {
+		key := strings.Split(c.privateKey, "/")
+		commandArgsVol = append(commandArgsVol, "--mount")
+		commandArgsVol = append(commandArgsVol, fmt.Sprintf("type=bind,source=%s,target=/home/%s,readonly", c.privateKey, key[len(key)-1]))
 	}
 
 	commandArgs = append(commandArgs, commandArgsVol...)
@@ -131,15 +138,20 @@ func (c *strAirGapCmd) airgap(workDir string) error {
 
 	if c.privateKey != "" {
 		commandArgs = append(commandArgs, "--private-key")
+		key := strings.Split(c.privateKey, "/")
+		commandArgs = append(commandArgs, "/home/"+key[len(key)-1])
 	} else {
 		logger.Fatal(fmt.Errorf("[ERROR]: %s", "To run ansible-playbook an privateKey must be specified"))
 	}
 
 	if c.user != "" {
 		commandArgs = append(commandArgs, "--user")
+		commandArgs = append(commandArgs, c.user)
 	} else {
 		logger.Fatal(fmt.Errorf("[ERROR]: %s", "To run ansible-playbook an ssh login user must be specified"))
 	}
+
+	fmt.Println(commandArgs)
 
 	err := syscall.Exec("/usr/local/bin/docker", commandArgs, os.Environ())
 	if err != nil {
