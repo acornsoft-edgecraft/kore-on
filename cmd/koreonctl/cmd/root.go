@@ -6,6 +6,7 @@ package cmd
 import (
 	"os"
 
+	"kore-on/pkg/config"
 	"kore-on/pkg/logger"
 
 	"github.com/spf13/cobra"
@@ -46,9 +47,9 @@ func initConfig() {
 	}
 
 	// load config file
-	// err = config.Load()
-	// if err != nil {
-	// 	logger.Fatalf("Could not load configuration: %s", err.Error())
-	// 	os.Exit(1)
-	// }
+	err = config.Load()
+	if err != nil {
+		logger.Fatalf("Could not load configuration: %s", err.Error())
+		os.Exit(1)
+	}
 }

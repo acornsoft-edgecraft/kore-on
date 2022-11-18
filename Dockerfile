@@ -31,5 +31,7 @@ RUN python3 -m pip install ansible-core==2.12.3
 COPY --from=builder ["/build/kore-on", "/"]
 COPY --from=builder ["/build/conf", "/conf"]
 COPY internal /internal
+COPY tools /tools
+COPY ansible.cfg /ansible.cfg
 
 # Command to run when starting the container.

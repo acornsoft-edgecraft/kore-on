@@ -6,6 +6,7 @@ import (
 	"kore-on/pkg/utils"
 	"log"
 	"os"
+	"strings"
 	"syscall"
 
 	"github.com/spf13/cobra"
@@ -64,8 +65,7 @@ func (c *strCreateCmd) create(workDir string) error {
 
 	koreonImageName := viper.GetString("KoreOn.KoreonImageName")
 	koreOnImage := viper.GetString("KoreOn.KoreOnImage")
-	koreOnConfigFileName := viper.GetString("KoreOn.KoreOnConfigFile")
-	koreOnConfigFilePath := utils.IskoreOnConfigFilePath(koreOnConfigFileName)
+	koreOnConfigFilePath := viper.GetString("KoreOn.KoreOnConfigFileSubDir")
 
 	commandArgs := []string{
 		"docker",
@@ -79,12 +79,19 @@ func (c *strCreateCmd) create(workDir string) error {
 
 	commandArgsVol := []string{
 		"-v",
-		fmt.Sprintf("%s:%s", workDir, koreOnConfigFilePath),
+		fmt.Sprintf("%s:%s", workDir, "/"+koreOnConfigFilePath),
 	}
 
 	commandArgsKoreonctl := []string{
 		koreOnImage,
+		"./" + koreonImageName,
 		"create",
+	}
+
+	if c.privateKey != "" {
+		key := strings.Split(c.privateKey, "/")
+		commandArgsVol = append(commandArgsVol, "--mount")
+		commandArgsVol = append(commandArgsVol, fmt.Sprintf("type=bind,source=%s,target=/home/%s,readonly", c.privateKey, key[len(key)-1]))
 	}
 
 	commandArgs = append(commandArgs, commandArgsVol...)
@@ -100,6 +107,8 @@ func (c *strCreateCmd) create(workDir string) error {
 
 	if c.privateKey != "" {
 		commandArgs = append(commandArgs, "--private-key")
+		key := strings.Split(c.privateKey, "/")
+		commandArgs = append(commandArgs, "/home/"+key[len(key)-1])
 	} else {
 		logger.Fatal(fmt.Errorf("[ERROR]: %s", "To run ansible-playbook an privateKey must be specified"))
 	}
