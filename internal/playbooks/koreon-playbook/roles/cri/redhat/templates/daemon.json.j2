@@ -7,7 +7,7 @@
   },
   "storage-driver": "overlay2",
   "iptables": false
-{%-  if ansible_os_family in ["CentOS", "RedHat"] -%}
+{%-  if ansible_distribution in ["CentOS", "RedHat"] -%}
   ,
   "storage-opts": [
     "overlay2.override_kernel_check=true"

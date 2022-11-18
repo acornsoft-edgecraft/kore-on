@@ -1,7 +1,7 @@
 ---
 - name: yum clean
   when:
-    - ansible_os_family in ["CentOS", "RedHat"]
+    - ansible_distribution in ["CentOS", "RedHat"]
   shell: "{{ item }}"
   with_items:
     - "rm -f /tmp/yum_save_tx*"
@@ -12,7 +12,7 @@
 
 - name: apt cache clean
   when:
-    - ansible_os_family in ["Ubuntu", "Debian"]
+    - ansible_distribution in ["Ubuntu", "Debian"]
   shell: "{{ item }}"
   with_items:
     - "rm -f /var/lib/apt/lists/lock"
@@ -23,10 +23,11 @@
   #no_log: true  
 
 - name: disable selinux
-  when: ansible_os_family in ["CentOS", "RedHat"]
+  when: ansible_distribution in ["CentOS", "RedHat"]
   selinux:
     policy: targeted
     state: disabled
+  notify: yum-clean-all
   #no_log: true
 
 - name: Kernel configuration
@@ -35,15 +36,17 @@
   import_tasks: cluster.yml
 
 - name: Install nfs client
-  when: ansible_os_family in ["Ubuntu", "Debian"]
+  when: ansible_distribution in ["Ubuntu", "Debian"]
   apt:
     name: "nfs-common"
     state: present
     update_cache: yes
+  notify: yum-clean-all
 
 - name: Install nfs-utils
-  when: ansible_os_family in ["CentOS", "RedHat"]
+  when: ansible_distribution in ["CentOS", "RedHat"]
   yum:
     name: "nfs-utils"
     state: present
     update_cache: yes
+  notify: yum-clean-all

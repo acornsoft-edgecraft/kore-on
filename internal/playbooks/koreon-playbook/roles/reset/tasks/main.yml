@@ -188,7 +188,7 @@
   tags: ['files']
 
 - name: Remove kubernetes, etcd, docker package
-  when: ansible_os_family in ["Ubuntu", "Debian"]
+  when: ansible_distribution in ["Ubuntu", "Debian"]
   apt:
     name: ['kubelet', 'kubectl', 'kubeadm', 'kubernetes-cni', 'docker-ce', 'docker-ce-cli', 'docker-ce-selinux', 'lksctp-tools', 'containerd.io', 'container-selinux']
     state: absent
@@ -199,7 +199,7 @@
 
 
 - name: Remove kubernetes, etcd, docker package
-  when: ansible_os_family in ["CentOS", "RedHat"]
+  when: ansible_distribution in ["CentOS", "RedHat"]
   yum:
     name: ['kubelet', 'kubectl', 'kubeadm', 'kubernetes-cni', 'docker-ce', 'docker-ce-cli', 'docker-ce-selinux', 'lksctp-tools', 'containerd.io', 'container-selinux']
     state: absent
@@ -208,7 +208,7 @@
 
 - name: Check /etc/yum.repos.d.bak directory existence (offline install)
   when:
-    - ansible_os_family in ["CentOS", "RedHat"]
+    - ansible_distribution in ["CentOS", "RedHat"]
     - closed_network
   stat:
     path: /etc/yum.repos.d.bak
@@ -216,7 +216,7 @@
 
 - name: Restore /etc/yum.repos.d.bak directory (offline install)
   when:
-    - ansible_os_family in ["CentOS", "RedHat"]
+    - ansible_distribution in ["CentOS", "RedHat"]
     - closed_network
     - yum_backup_dir_exist.stat.exists
   command: "{{ item }}"
@@ -226,7 +226,7 @@
 
 - name: Check /etc/apt/sources.list.bak existence (offline install)
   when:
-    - ansible_os_family in ["Ubuntu", "Debian"]
+    - ansible_distribution in ["Ubuntu", "Debian"]
     - closed_network
   stat:
     path: /etc/apt/sources.list.bak
@@ -234,7 +234,7 @@
 
 - name: Restore /etc/apt/sources.list file (offline install)
   when:
-    - ansible_os_family in ["Ubuntu", "Debian"]
+    - ansible_distribution in ["Ubuntu", "Debian"]
     - closed_network
     - sources_list_bak_stat.stat.exists
   command: "{{ item }}"
@@ -249,7 +249,7 @@
 - name: Restart network
   systemd:
     name: >-
-      {% if ansible_os_family == "RedHat" -%}
+      {% if ansible_distribution == "RedHat" -%}
       {%- if ansible_distribution_major_version|int == 8 -%}
       NetworkManager
       {%- else -%}

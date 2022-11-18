@@ -1,32 +1,65 @@
 ---
 - name: Backup /etc/yum.repos.d directory
-  copy:
+  ansible.builtin.copy:
+    remote_src: true
     src: "/etc/yum.repos.d"
-    dest: "/etc/yum.repos.d.bak"
-    remote_src: yes
-    owner: root
-    mode: 0755
-    
-- name: Find the files
-  find:
-    paths: "/etc/yum.repos.d"
-    file_type: file
-    recurse: yes
-    patterns:
-      - 'CentOS-*.repo'
-  register: repos_d
+    dest: "/etc/yum.repos.d.back-{{ ansible_date_time.iso8601_basic_short }}"
 
-- name: Change CentOS baseurl
-  shell: "{{ item }}"
-  loop:
-    - "sed -i 's/^mirrorlist/#mirrorlist/' /etc/yum.repos.d/CentOS-*"
-    - "sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.epel.cloud|g' /etc/yum.repos.d/CentOS-*"
+- name: Remove /etc/yum.repos.d directory
+  ansible.builtin.file:
+    path: "/etc/yum.repos.d"
+    state: absent
+
+- name: Create /etc/yum.repos.d directory
+  ansible.builtin.file:
+    path: "/etc/yum.repos.d"
+    state: directory
+    owner: root
+    group: root
+    mode: "0644"
+    
+- name: Remove EPEL repo
+  ansible.builtin.yum:
+    name: epel-release
+    state: absent
+  failed_when: false
+  ignore_errors: "{{ ansible_check_mode }}"
+
+# container-selinux is in appstream repo
+- name: Enable RHEL 8 repos
+  rhsm_repository:
+    name:
+      - "rhel-8-for-*-baseos-rpms"
+      - "rhel-8-for-*-appstream-rpms"
+    state: enabled
   when:
-    - repos_d.matched
+    - rhel_enable_repos | default(True) | bool
+    - ansible_distribution_major_version == "8"
+    
+- name: Import EPEL GPG key.
+  rpm_key:
+    key: "https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-{{ ansible_distribution_major_version }}"
+    state: present
+  register: result
+  until: result is succeeded
+  retries: 5
+  delay: 10
+  ignore_errors: "{{ ansible_check_mode }}"
+
+- name: Install EPEL repo.
+  yum:
+    name: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_distribution_major_version }}.noarch.rpm"
+    state: present
+  register: result
+  until: result is succeeded
+  retries: 5
+  delay: 10
 
 - name: Install epel
   yum:
     name: epel-release
+    disablerepo: "*"
+    enablerepo: "epel"
     state: latest
 
 - name: Adding Nginx|nginx-stable repository
@@ -56,7 +89,6 @@
     gpgkey:
       - "https://nginx.org/keys/nginx_signing.key"
   notify: yum-clean-metadata
-
 
 - name: Adding Kubernetes repository
   yum_repository:

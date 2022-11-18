@@ -1,0 +1,140 @@
+---
+- name: Backup /etc/yum.repos.d directory
+  ansible.builtin.copy:
+    remote_src: true
+    src: "/etc/yum.repos.d"
+    dest: "/etc/yum.repos.d.back-{{ ansible_date_time.iso8601_basic_short }}"
+
+- name: Remove /etc/yum.repos.d directory
+  ansible.builtin.file:
+    path: "/etc/yum.repos.d"
+    state: absent
+
+- name: Create /etc/yum.repos.d directory
+  ansible.builtin.file:
+    path: "/etc/yum.repos.d"
+    state: directory
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Remove EPEL repo
+  ansible.builtin.yum:
+    name: epel-release
+    state: absent
+  failed_when: false
+  ignore_errors: "{{ ansible_check_mode }}"
+    
+- name: Import EPEL GPG key.
+  rpm_key:
+    key: "https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-{{ ansible_distribution_major_version }}"
+    state: present
+  register: result
+  until: result is succeeded
+  retries: 5
+  delay: 10
+  ignore_errors: "{{ ansible_check_mode }}"
+
+- name: Install EPEL repo.
+  yum:
+    name: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_distribution_major_version }}.noarch.rpm"
+    state: present
+  register: result
+  until: result is succeeded
+  retries: 5
+  delay: 10
+
+- name: Install epel
+  yum:
+    name: epel-release
+    disablerepo: "*"
+    enablerepo: "epel"
+    state: latest
+
+- name: Adding Extras repository
+  yum_repository:
+    name: extras
+    description: "CentOS Stream {{ ansible_distribution_major_version }} - Extras"
+    file: CentOS-Stream-Extras
+    mirrorlist: "http://mirrorlist.centos.org/?release=$stream&arch=$basearch&repo=extras&infra=$infra"
+    enabled: yes
+    gpgcheck: yes
+    gpgkey: "file:///etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial"
+  notify: yum-clean-metadata
+
+- name: Adding AppStream repository
+  yum_repository:
+    name: appstream
+    description: "CentOS Stream {{ ansible_distribution_major_version }} - AppStream"
+    file: CentOS-Stream-AppStream
+    mirrorlist: "http://mirrorlist.centos.org/?release=$stream&arch=$basearch&repo=AppStream&infra=$infra"
+    enabled: yes
+    gpgcheck: yes
+    gpgkey: "file:///etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial"
+  notify: yum-clean-metadata
+
+- name: Adding BaseOS repository
+  yum_repository:
+    name: baseos
+    description: "CentOS Stream {{ ansible_distribution_major_version }} - BaseOS"
+    file: CentOS-Stream-BaseOS
+    mirrorlist: "http://mirrorlist.centos.org/?release=$stream&arch=$basearch&repo=BaseOS&infra=$infra"
+    enabled: yes
+    gpgcheck: yes
+    gpgkey: "file:///etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial"
+  notify: yum-clean-metadata
+
+- name: Adding Nginx|nginx-stable repository
+  yum_repository:
+    name: nginx-stable
+    description: nginx-stable repo
+    file: nginx
+    baseurl: "http://nginx.org/packages/centos/$releasever/$basearch"
+    enabled: yes
+    gpgcheck: yes
+    repo_gpgcheck: yes
+    module_hotfixes: True
+    gpgkey:
+      - "https://nginx.org/keys/nginx_signing.key"
+  notify: yum-clean-metadata
+
+- name: Adding Nginx|nginx-mainline repository
+  yum_repository:
+    name: nginx-mainline
+    description: nginx-mainline repo
+    file: nginx
+    baseurl: "http://nginx.org/packages/mainline/centos/$releasever/$basearch"
+    enabled: False
+    gpgcheck: yes
+    repo_gpgcheck: yes
+    module_hotfixes: True
+    gpgkey:
+      - "https://nginx.org/keys/nginx_signing.key"
+  notify: yum-clean-metadata
+
+- name: Adding Kubernetes repository
+  yum_repository:
+    name: Kubernetes
+    description: Kubernetes repo
+    file: kubernetes
+    baseurl: "http://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64"
+    enabled: yes
+    gpgcheck: yes
+    repo_gpgcheck: yes
+    exclude: kube*
+    gpgkey:
+      - "http://packages.cloud.google.com/yum/doc/yum-key.gpg"
+      - "http://packages.cloud.google.com/yum/doc/rpm-package-key.gpg"
+  notify: yum-clean-metadata
+
+- name: Adding Docker-ce repository
+  yum_repository:
+    name: Docker-CE-Stable
+    description: Docker-ce repo
+    file: docker
+    baseurl: https://download.docker.com/linux/centos/$releasever/$basearch/stable
+    enabled: yes
+    gpgcheck: yes
+    repo_gpgcheck: no
+    gpgkey: https://download.docker.com/linux/centos/gpg
+  notify: yum-clean-metadata

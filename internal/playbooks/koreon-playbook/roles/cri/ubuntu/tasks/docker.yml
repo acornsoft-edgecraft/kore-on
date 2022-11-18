@@ -18,123 +18,14 @@
 # Install docker package  --------------------------------------------------
 # For ubuntu
 - name: Install Docker (Ubuntu, Debian)
-  when: ansible_os_family in ["Ubuntu", "Debian"]
   apt:
-    name: ['containerd.io=1.4.3-2', 'docker-ce=5:19.03.15~3-0~ubuntu-{{ ansible_distribution_release }}', 'docker-ce-cli=5:19.03.15~3-0~ubuntu-{{ ansible_distribution_release }}']
+    name: ['docker-ce', 'docker-ce-cli']
     state: present
 
 - name: Hold docker version  (Ubuntu, Debian)
-  when: ansible_os_family in ["Ubuntu", "Debian"]
   dpkg_selections:
     name: docker-ce
     selection: hold
-
-# For Centos
-# yum repository에 enabled=no로 되어 있으므로 enablerepo=Docker-CE-Stable 로 활성화 한다.
-# disable_gpg_check=yes 로 설정하여 GPG key 정확성을 check하는 인터렉션을 방지한다.
-- name: yum clean packages
-  command: yum clean packages
-  ignore_errors: true
-  when:
-    - ansible_distribution in ["CentOS", "RedHat"]
-
-- name: Install Docker (Centos, RedHat)
-  when:
-    - ansible_distribution in ["CentOS", "RedHat"]
-    - closed_network
-  yum:
-    name: ['docker-ce', 'docker-ce-cli']
-    state: present
-    update_cache: yes
-    disable_gpg_check: yes
-
-- name: Install Docker (Centos, RedHat)
-  yum:
-    name: ['docker-ce-19.03.15', 'docker-ce-cli-19.03.15']
-    state: present
-    enablerepo: Docker-CE-Stable
-    disable_gpg_check: yes
-  when:
-    - ansible_distribution in ["CentOS", "RedHat"]
-    - not closed_network
-
-# If GPU node  -------------------------------------------------------------
-#  Refer to https://nvidia.github.io/nvidia-docker/
-
-# Debian-based distributions
-#  curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add -
-#  distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
-#  curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | tee /etc/apt/sources.list.d/nvidia-docker.list
-#  apt-get update
-
-- name: Get distribution id, versionid
-  when:
-    - not closed_network
-    - is_gpu_node
-  shell: source /etc/os-release;echo $ID$VERSION_ID
-  register: os_distribution
-
-- name: Add Nvidia-docker APT GPG key (Ubuntu, Debian)
-  when:
-    - ansible_os_family in ["Ubuntu", "Debian"]
-    - not closed_network
-    - is_gpu_node
-  apt_key:
-    url: https://nvidia.github.io/nvidia-docker/gpgkey
-    state: present
-
-- name: Add Nvidia-docker repository (Ubuntu, Debian)
-  when:
-    - ansible_os_family in ["Ubuntu", "Debian"]
-    - not closed_network
-    - is_gpu_node
-  get_url:
-    url: "https://nvidia.github.io/nvidia-docker/{{ os_distribution.stdout }}/nvidia-docker.list"
-    dest: "/etc/apt/sources.list.d/nvidia-docker.list"
-    mode: 0644
-    owner: root
-    group: root
-
-- name: Install nvidia-docker2 (Ubuntu, Debian)
-  when:
-    - ansible_os_family in ["Ubuntu", "Debian"]
-    - is_gpu_node
-  apt:
-    name: nvidia-docker2
-    state: present
-    update_cache: true
-
-- name: Hold nvidia-docker2 version (Ubuntu, Debian)
-  when:
-    - ansible_os_family in ["Ubuntu", "Debian"]
-    - is_gpu_node
-  dpkg_selections:
-    name: nvidia-docker2
-    selection: hold
-
-# RHEL-based distributions
-#  distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
-#  curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.repo | sudo tee /etc/yum.repos.d/nvidia-docker.repo
-- name: Add Nvidia-docker repository (Centos, RedHat, Amazon)
-  when:
-    - ansible_distribution in ["CentOS", "RedHat", "Amazon"]
-    - not closed_network
-    - is_gpu_node
-  get_url:
-    url: "https://nvidia.github.io/nvidia-docker/{{ os_distribution.stdout }}/nvidia-docker.repo"
-    dest: "/etc/yum.repos.d/nvidia-docker.repo"
-    mode: 0644
-    owner: root
-    group: root
-
-- name: Install nvidia-docker2 (Centos, RedHat, Amazon)
-  when:
-    - ansible_distribution in ["CentOS", "RedHat", "Amazon"]
-    - is_gpu_node
-  yum:
-    name: nvidia-docker2
-    state: present
-    update_cache: yes
 #------------------------------------------------------------------------------
 
 # Set docker root dir and configuration   ------------------------------------------------
@@ -147,14 +38,37 @@
   register: docker_daemon_json
 # ---------------------------------------------------------------------------------------
 
+- name: Populate service facts
+  ansible.builtin.service_facts:
+
+- name: check if Dcoker is installed
+  fail:
+    msg: Docker is not installed, why? It should have been there!
+  when: ansible_facts.services["docker.service"] is not defined
+  any_errors_fatal: true
+
+- name: Restart Docker
+  ansible.builtin.systemd:
+    name: docker
+    state: restarted
+    daemon_reload: True
+  when:
+    - ansible_facts.services["docker.service"].state in "running"
+    - docker_daemon_json.changed
+    
+- name: Start Docker
+  ansible.builtin.systemd:
+    name: docker
+    state: started
+  register: result
+  until: "result is not failed"
+  retries: 5
+  delay: 5
+  when:
+    - not ansible_facts.services["docker.service"].state in "running"
+
 - name: Enable Docker
-  systemd:
+  ansible.builtin.systemd:
     name: docker
     daemon_reload: yes
     enabled: yes
-
-- name: Restart Docker
-  when: docker_daemon_json.changed
-  systemd:
-    name: docker
-    state: restarted

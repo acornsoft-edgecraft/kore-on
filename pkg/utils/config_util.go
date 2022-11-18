@@ -67,7 +67,7 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 		supportK8sVersion := IsSupportVersion(k8sVersion, confK8sVersion)
 		supportHarborVersion := IsSupportVersion(registryVersion, confHarborVersion)
 		if registryIP == "" {
-			logger.Fatal(fmt.Sprintf("Prepare Air Gap > Kubernetes version is required.\nK8s supported version lists:\n %v", ListSupportVersion(confK8sVersion)))
+			logger.Fatal(fmt.Sprintln("Prepare Air Gap > Registry IP Address is required."))
 			errorCnt++
 		} else {
 			koreon_toml.PrepareAirgap.RegistryIP = registryIP
@@ -133,7 +133,6 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 		privateRegistryRegistryIP := koreonToml.PrivateRegistry.RegistryIP
 		privateRegistryRegistryVersion := koreonToml.PrivateRegistry.RegistryVersion
 		privateRegistryRegistryDomain := koreonToml.PrivateRegistry.RegistryDomain
-		privateRegistryDataDir := koreonToml.PrivateRegistry.DataDir
 		isPrivateRegistryPublicCert := koreonToml.PrivateRegistry.PublicCert
 		privateRegistryCrt := koreonToml.PrivateRegistry.CertFile.SslCertificate
 		privateRegistryKey := koreonToml.PrivateRegistry.CertFile.SslCertificateKey
@@ -217,34 +216,28 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 				errorCnt++
 			}
 
-			supportHarborVersion := IsSupportVersion(privateRegistryRegistryVersion, confHarborVersion)
-			if privateRegistryRegistryVersion == "" {
-				koreonToml.PrivateRegistry.RegistryVersion = supportHarborVersion
-				logger.Warn("Private Registry > Harbor version is required. Last version", koreonToml.PrivateRegistry.RegistryVersion, "applied automatically.")
-			} else {
-				koreonToml.PrivateRegistry.RegistryVersion = supportHarborVersion
+			if privateRegistryRegistryDomain == "" {
+				koreonToml.PrivateRegistry.RegistryDomain = privateRegistryRegistryIP
 			}
+		}
 
-			if privateRegistryDataDir == "" {
-				logger.Fatal("private-registry > data-dir is required.")
+		supportHarborVersion := IsSupportVersion(privateRegistryRegistryVersion, confHarborVersion)
+		if privateRegistryRegistryVersion == "" {
+			koreonToml.PrivateRegistry.RegistryVersion = supportHarborVersion
+			logger.Warn("Private Registry > Harbor version is required. Last version", koreonToml.PrivateRegistry.RegistryVersion, "applied automatically.")
+		} else {
+			koreonToml.PrivateRegistry.RegistryVersion = supportHarborVersion
+		}
+
+		if isPrivateRegistryPublicCert {
+			if privateRegistryCrt == "" {
+				logger.Fatal("private-registry.cert-file > ssl-certificate is required.")
 				errorCnt++
 			}
 
-			if isPrivateRegistryPublicCert {
-				if privateRegistryCrt == "" {
-					logger.Fatal("private-registry.cert-file > ssl-certificate is required.")
-					errorCnt++
-				}
-
-				if privateRegistryKey == "" {
-					logger.Fatal("private-registry.cert-file > ssl-certificate-key is required.")
-					errorCnt++
-				}
-
-				if privateRegistryRegistryDomain == "" {
-					logger.Fatal("private-registry > registry-domain is required.")
-					errorCnt++
-				}
+			if privateRegistryKey == "" {
+				logger.Fatal("private-registry.cert-file > ssl-certificate-key is required.")
+				errorCnt++
 			}
 		}
 
@@ -301,6 +294,16 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 		}
 
 		koreonToml.PrepareAirgap = koreon_toml.PrepareAirgap
+	} else if cmd == "destroy-prepare-airgap" {
+		registryIP := koreonToml.PrepareAirgap.RegistryIP
+
+		if registryIP == "" {
+			logger.Fatal(fmt.Sprintln("Destroy: Prepare Air Gap > Registry IP Address is required."))
+		} else {
+			koreon_toml.PrepareAirgap = koreonToml.PrepareAirgap
+		}
+
+		koreonToml = koreon_toml
 	}
 
 	if errorCnt > 0 {
@@ -315,22 +318,10 @@ func checkSharedStorage(koreonToml model.KoreOnToml) int {
 	errorCnt = 0
 
 	if koreonToml.SharedStorage.Install == true {
-
-		if koreonToml.SharedStorage.VolumeDir == "" {
-			logger.Fatal("shared-storage > volume-dir is required.")
-			errorCnt++
-		}
-
-		// if koreonToml.SharedStorage.VolumeSize < 10 {
-		// 	logger.Fatal("shared-storage > volume-size is 10 or more.")
-		// 	errorCnt++
-		// }
-
 		if koreonToml.SharedStorage.StorageIP == "" {
 			logger.Fatal("shared-storage > storage-ip is required.")
 			errorCnt++
 		}
-
 	}
 
 	return errorCnt

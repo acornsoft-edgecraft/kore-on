@@ -1,7 +1,7 @@
 ---
 # For ubuntu     -------------------------------------------------------------
 - name: Unhold Kubernetes packages (ubuntu)
-  when: ansible_os_family in ["Ubuntu", "Debian"]
+  when: ansible_distribution in ["Ubuntu", "Debian"]
   dpkg_selections:
     name: "{{ item }}"
     selection: install
@@ -12,13 +12,13 @@
   failed_when: false
 
 - name: Install Kubernetes packages (kubectl, kubelet)
-  when: ansible_os_family in ["Ubuntu", "Debian"] and not is_kube_master
+  when: ansible_distribution in ["Ubuntu", "Debian"] and not is_kube_master
   apt:
     name: ['kubectl={{ k8s_version_int }}-00', 'kubelet={{ k8s_version_int }}-00', 'kubeadm={{ k8s_version_int }}-00']
     state: present
 
 - name: Prevent auto-upgrade Kubernetes packages
-  when: ansible_os_family in ["Ubuntu", "Debian"] and not is_kube_master
+  when: ansible_distribution in ["Ubuntu", "Debian"] and not is_kube_master
   dpkg_selections:
     name: "{{ item }}"
     selection: hold
@@ -91,9 +91,9 @@
   template:
     src: "kubeadm.kubelet.j2"
     dest: >-
-      {% if ansible_os_family in ["Ubuntu", "Debian"] -%}
+      {% if ansible_distribution in ["Ubuntu", "Debian"] -%}
       /etc/default/kubelet
-      {%- elif ansible_os_family in ["CentOS", "RedHat"] -%}
+      {%- elif ansible_distribution in ["CentOS", "RedHat"] -%}
       /etc/sysconfig/kubelet
       {%- endif %}
     owner: root

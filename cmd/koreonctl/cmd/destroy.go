@@ -17,6 +17,7 @@ type strDestroyCmd struct {
 	dryRun     bool
 	privateKey string
 	user       string
+	command    string
 }
 
 func destroyCmd() *cobra.Command {
@@ -31,11 +32,37 @@ func destroyCmd() *cobra.Command {
 		},
 	}
 
+	cmd.AddCommand(destroyPrepareAirGapCmd())
+
 	f := cmd.Flags()
 	f.BoolVar(&destroy.verbose, "vvv", false, "verbose")
 	f.BoolVarP(&destroy.dryRun, "dry-run", "d", false, "dryRun")
 	f.StringVarP(&destroy.privateKey, "private-key", "p", "", "Specify ansible playbook privateKey")
 	f.StringVarP(&destroy.user, "user", "u", "", "SSH login user")
+
+	return cmd
+}
+
+func destroyPrepareAirGapCmd() *cobra.Command {
+	destroyPrepareAirGapCmd := &strDestroyCmd{}
+
+	cmd := &cobra.Command{
+		Use:          "prepare-airgap [flags]",
+		Short:        "Destroy prepare-airgap",
+		Long:         "",
+		SilenceUsage: true,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return destroyPrepareAirGapCmd.run()
+		},
+	}
+
+	destroyPrepareAirGapCmd.command = "reset-prepare-airgap"
+
+	f := cmd.Flags()
+	f.BoolVarP(&destroyPrepareAirGapCmd.verbose, "verbose", "v", false, "verbose")
+	f.BoolVarP(&destroyPrepareAirGapCmd.dryRun, "dry-run", "d", false, "dryRun")
+	f.StringVarP(&destroyPrepareAirGapCmd.privateKey, "private-key", "p", "", "Specify ansible playbook privateKey")
+	f.StringVarP(&destroyPrepareAirGapCmd.user, "user", "u", "", "SSH login user")
 
 	return cmd
 }
@@ -83,6 +110,10 @@ func (c *strDestroyCmd) destroy(workDir string) error {
 
 	commandArgs = append(commandArgs, commandArgsVol...)
 	commandArgs = append(commandArgs, commandArgsKoreonctl...)
+
+	if c.command == "reset-prepare-airgap" {
+		commandArgs = append(commandArgs, fmt.Sprintf("--tags %s", c.command))
+	}
 
 	if c.verbose {
 		commandArgs = append(commandArgs, "--vvv")

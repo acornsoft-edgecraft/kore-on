@@ -5,12 +5,12 @@
     state: directory
 
 - name: Cluster | Disable firewalld
-  when: ansible_os_family in ["Ubuntu", "Debian"]
+  when: ansible_distribution in ["Ubuntu", "Debian"]
   ufw:
     state: disabled
 
 - name: Cluster | Disable firewalld
-  when: ansible_os_family in ["CentOS", "RedHat"]
+  when: ansible_distribution in ["CentOS", "RedHat"]
   systemd:
     name: firewalld
     enabled: false
@@ -27,7 +27,7 @@
   notify: reload nfs
 
 - name: Install nfs server
-  when: ansible_os_family in ["Ubuntu", "Debian"]
+  when: ansible_distribution in ["Ubuntu", "Debian"]
   apt:
     name:
       - nfs-common
@@ -36,14 +36,14 @@
     update_cache: yes
 
 - name: Install nfs server
-  when: ansible_os_family in ["CentOS", "RedHat"]
+  when: ansible_distribution in ["CentOS", "RedHat"]
   yum:
     name: nfs-utils
     state: present
     update_cache: yes
 
 - name: Enable & start rpcbind
-  when: ansible_os_family in ["CentOS", "RedHat"]
+  when: ansible_distribution in ["CentOS", "RedHat"]
   systemd:
     name: rpcbind
     enabled: yes

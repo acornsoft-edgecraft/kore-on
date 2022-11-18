@@ -21,7 +21,7 @@
           set_fact:
             distro: '{{ ansible_distribution | default("unknown") | lower }}'
             distro_version: '{{ ansible_distribution_version | default("unknown") }}'
-            os_family: '{{ ansible_os_family | default("unknown") }}'
+            os_family: '{{ ansible_distribution | default("unknown") }}'
 
         - name: test that python discovery is working and that fact persistence makes it only run once
           block:

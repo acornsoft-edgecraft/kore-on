@@ -3,3 +3,9 @@
     name: NetworkManager
     state: reloaded
   when: '"running" in nm_check.stdout'
+
+# Handler showing how to clean yum clean all
+- name: yum-clean-all
+  ansible.builtin.command: dnf clean all
+  args:
+    warn: no

@@ -39,4 +39,4 @@
         # - debug:
         #     msg: "{{ found_repo_files }}"
       when:
-        - ansible_os_family in ["CentOS", "RedHat"]
+        - ansible_distribution in ["CentOS", "RedHat"]

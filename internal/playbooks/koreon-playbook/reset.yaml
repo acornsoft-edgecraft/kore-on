@@ -121,7 +121,7 @@
   tasks:
     - name: Reset | prepare_airgap
       ansible.builtin.include_role:
-        name: reset/registry
+        name: prepare-airgap/reset
         apply:
           tags:
             - reset-prepare-airgap

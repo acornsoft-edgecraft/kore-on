@@ -1,6 +1,6 @@
 ---
 - name: Stop nfs server service
-  when: ansible_os_family in ["Ubuntu", "Debian"]
+  when: ansible_distribution in ["Ubuntu", "Debian"]
   systemd:
     name: "{{ item }}"
     state: stopped
@@ -10,7 +10,7 @@
   tags: ['services']
 
 - name: Stop nfs server service
-  when: ansible_os_family in ["CentOS", "RedHat"]
+  when: ansible_distribution in ["CentOS", "RedHat"]
   systemd:
     name: "{{ item }}"
     state: stopped
@@ -36,7 +36,7 @@
   tags: ['files']
 
 - name: Remove nfs-common, nfs-kernel-server package
-  when: ansible_os_family in ["Ubuntu", "Debian"]
+  when: ansible_distribution in ["Ubuntu", "Debian"]
   apt:
     name: ['nfs-common', 'nfs-kernel-server']
     state: absent
@@ -46,7 +46,7 @@
   tags: ['services']
 
 - name: Remove nfs-utils package
-  when: ansible_os_family in ["CentOS", "RedHat"]
+  when: ansible_distribution in ["CentOS", "RedHat"]
   yum:
     name: ['nfs-utils']
     state: absent
@@ -55,7 +55,7 @@
 
 - name: Check /etc/yum.repos.d.bak directory existence (offline install)
   when:
-    - ansible_os_family in ["CentOS", "RedHat"]
+    - ansible_distribution in ["CentOS", "RedHat"]
     - closed_network
   stat:
     path: /etc/yum.repos.d.bak
@@ -63,7 +63,7 @@
 
 - name: Restore /etc/yum.repos.d.bak directory (offline install)
   when:
-    - ansible_os_family in ["CentOS", "RedHat"]
+    - ansible_distribution in ["CentOS", "RedHat"]
     - closed_network
     - yum_backup_dir_exist.stat.exists
   command: "{{ item }}"
@@ -73,7 +73,7 @@
 
 - name: Check /etc/apt/sources.list.bak existence (offline install)
   when:
-    - ansible_os_family in ["Ubuntu", "Debian"]
+    - ansible_distribution in ["Ubuntu", "Debian"]
     - closed_network
   stat:
     path: /etc/apt/sources.list.bak
@@ -81,7 +81,7 @@
 
 - name: Restore /etc/apt/sources.list file (offline install)
   when:
-    - ansible_os_family in ["Ubuntu", "Debian"]
+    - ansible_distribution in ["Ubuntu", "Debian"]
     - closed_network
     - sources_list_bak_stat.stat.exists
   command: "{{ item }}"

@@ -84,9 +84,9 @@ data_root_dir: {{ (NodePool.DataDir == "") | ternary("/data", NodePool.DataDir) 
 ## - api_lb_ip: authmatic input (only: lb_ip:lb_port)
 master_isolated: {{ NodePool.Master.Isolated }}
 haproxy: {{ (NodePool.Master.HaproxyInstall == None) | ternary(true, NodePool.Master.HaproxyInstall) }}
-lb_ip: {{ (NodePool.Master.LbIP != None or NodePool.Master.LbIP != "") | ternary(NodePool.Master.LbIP, NodePool.Master.IP[0]) }}
+lb_ip: {{ (NodePool.Master.LbIP == "") | ternary(NodePool.Master.IP[0], NodePool.Master.LbIP) }}
 lb_port: {{ (NodePool.Master.LbPort == 0) | ternary(6443, NodePool.Master.LbPort) }}
-api_lb_ip: {{ (NodePool.Master.LbIP != None or NodePool.Master.LbIP != "") | ternary(NodePool.Master.LbIP, NodePool.Master.IP[0]) }}:{{ (NodePool.Master.LbPort == 0) | ternary(6443, NodePool.Master.LbPort) }}
+api_lb_ip: {{ (NodePool.Master.LbIP == "") | ternary(NodePool.Master.IP[0], NodePool.Master.LbIP) }}:{{ (NodePool.Master.LbPort == 0) | ternary(6443, NodePool.Master.LbPort) }}
 #-end [node-pool.master]
 
 #- [private-registry]
@@ -128,7 +128,7 @@ registry_ssl_ca_key: {{ PrivateRegistry.CertFile.SslCertificateKey }}
 ## Optional
 storage_install: {{ SharedStorage.Install }}
 nfs_ip: {{ (SharedStorage.StorageIP == None) | ternary("''", SharedStorage.StorageIP) }}
-nfs_volume_dir: {{ (SharedStorage.VolumeDir == "") | ternary("/storage", SharedStorage.VolumeDir) }}
+nfs_volume_dir: {{ (SharedStorage.VolumeDir == "") | ternary("/data/storage", SharedStorage.VolumeDir) }}
 #-end [shared-storage]
 
 
