@@ -1,5 +1,5 @@
 ---
-- name: yum clean
+{# - name: yum clean
   when:
     - ansible_distribution in ["CentOS", "RedHat"]
   shell: "{{ item }}"
@@ -7,7 +7,7 @@
     - "rm -f /tmp/yum_save_tx*"
     - "rm -f /var/lib/rpm/__*"
     - "rpm --rebuilddb"
-    - "yum clean all"
+    - "yum clean all" #}
   #no_log: true
 
 - name: apt cache clean
