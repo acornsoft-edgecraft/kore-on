@@ -4,8 +4,12 @@ import (
 	"fmt"
 	"kore-on/pkg/logger"
 	"kore-on/pkg/utils"
+	"log"
 	"os"
+	"os/exec"
+	"path/filepath"
 	"strings"
+	"syscall"
 
 	"kore-on/cmd/koreonctl/conf"
 
@@ -87,10 +91,9 @@ func (c *strCreateCmd) create(workDir string) error {
 
 	if c.privateKey != "" {
 		key := strings.Split(c.privateKey, "/")
+		keyPath, _ := filepath.Abs(c.privateKey)
 		commandArgsVol = append(commandArgsVol, "--mount")
-		commandArgsVol = append(commandArgsVol, fmt.Sprintf("type=bind,source=%s,target=/home/%s,readonly", c.privateKey, key[len(key)-1]))
-
-		fmt.Println("key == ", key)
+		commandArgsVol = append(commandArgsVol, fmt.Sprintf("type=bind,source=%s,target=/home/%s,readonly", keyPath, key[len(key)-1]))
 	}
 
 	commandArgs = append(commandArgs, commandArgsVol...)
@@ -119,15 +122,15 @@ func (c *strCreateCmd) create(workDir string) error {
 		logger.Fatal(fmt.Errorf("[ERROR]: %s", "To run ansible-playbook an ssh login user must be specified"))
 	}
 
-	// binary, lookErr := exec.LookPath("docker")
-	// if lookErr != nil {
-	// 	logger.Fatal(lookErr)
-	// }
+	binary, lookErr := exec.LookPath("docker")
+	if lookErr != nil {
+		logger.Fatal(lookErr)
+	}
 
-	// err := syscall.Exec(binary, commandArgs, os.Environ())
-	// if err != nil {
-	// 	log.Printf("Command finished with error: %v", err)
-	// }
+	err := syscall.Exec(binary, commandArgs, os.Environ())
+	if err != nil {
+		log.Printf("Command finished with error: %v", err)
+	}
 
 	return nil
 }
