@@ -126,6 +126,8 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 		kubernetesServiceCidr := koreonToml.Kubernetes.ServiceCidr
 		k8sVersion := koreonToml.Kubernetes.Version
 		etcdCnt := len(koreonToml.Kubernetes.Etcd.IP)
+		masterIP := koreonToml.NodePool.Master.IP
+		workerIP := koreonToml.NodePool.Node.IP
 		etcdPrivateIpCnt := len(koreonToml.Kubernetes.Etcd.PrivateIP)
 		nodePoolDataDir := koreonToml.NodePool.DataDir
 
@@ -151,39 +153,19 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 			koreonToml.Kubernetes.Version = supportK8sVersion
 		}
 
-		// Get image support version
-		// confCalicoVersion := "KoreOn.SupportCalicoVersion"
-		// calicoVersion := GetSupportVersion(supportK8sVersion, "k8s")
-		// supportCalicoVersion := IsSupportVersion(calicoVersion, confCalicoVersion)
-
-		// if calicoVersion == "" {
-		// 	koreonToml.Kubernetes.Calico.Version = supportCalicoVersion
-		// 	logger.Warn("kubernetes > Calico version is required. Last version", koreonToml.Kubernetes.Calico.Version, "applied automatically.")
-		// } else if supportCalicoVersion == "" {
-		// 	logger.Fatal(fmt.Sprintf("kubernetes > Calico supported version lists:\n %v", ListSupportVersion(confCalicoVersion)))
-		// 	errorCnt++
-		// } else {
-		// 	koreonToml.Kubernetes.Calico.Version = supportCalicoVersion
-		// }
-
-		// if nodePoolSecuritySSHUserID == "" {
-		// 	logger.Fatal("node-pool.security > ssh-user-id is required.")
-		// 	errorCnt++
-		// }
-
-		// if nodePoolSecurityPrivateKeyPath == "" {
-		// 	logger.Fatal("node-pool.security > private-key-path is required.")
-		// 	errorCnt++
-		// }
-
-		// if nodePoolMasterLbIP == "" {
-		// 	logger.Fatal("node-pool.master > lb-ip is required.")
-		// 	errorCnt++
-		// }
+		if len(masterIP) < 0 {
+			logger.Fatal("NodePool > K8s Control Plane node is required.")
+		} else {
+			//todo check masterIP
+			if len(workerIP) < 0 {
+				logger.Fatal("NodePool > K8s Worker node is required.")
+			}
+		}
 
 		if len(kubernetesPodCidr) > 0 {
 			//todo check cider
 		}
+
 		if len(kubernetesServiceCidr) > 0 {
 			//todo check cider
 		}
@@ -199,6 +181,10 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 				logger.Fatal("Only odd number of etcd nodes are supported.(1, 3, 5)")
 				errorCnt++
 			}
+		}
+
+		if len(nodePoolDataDir) > 0 {
+			// todo node pool data dir check
 		}
 
 		if len(nodePoolDataDir) > 0 {
