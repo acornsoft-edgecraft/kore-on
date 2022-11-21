@@ -4,7 +4,10 @@ import (
 	"fmt"
 	"kore-on/pkg/logger"
 	"kore-on/pkg/utils"
+	"log"
 	"os"
+	"os/exec"
+	"syscall"
 
 	"kore-on/cmd/koreonctl/conf"
 
@@ -56,8 +59,6 @@ func (c *strInitCmd) init(workDir string) error {
 	commandArgs := []string{
 		"docker",
 		"run",
-		"--name",
-		koreonImageName,
 		"--rm",
 		"--privileged",
 		"-it",
@@ -81,12 +82,15 @@ func (c *strInitCmd) init(workDir string) error {
 		commandArgs = append(commandArgs, "--vvv")
 	}
 
-	// fmt.Println(commandArgs)
+	binary, lookErr := exec.LookPath("docker")
+	if lookErr != nil {
+		logger.Fatal(lookErr)
+	}
 
-	// err := syscall.Exec("/usr/local/bin/docker", commandArgs, os.Environ())
-	// if err != nil {
-	// 	log.Printf("Command finished with error: %v", err)
-	// }
+	err := syscall.Exec(binary, commandArgs, os.Environ())
+	if err != nil {
+		log.Printf("Command finished with error: %v", err)
+	}
 
 	return nil
 }
