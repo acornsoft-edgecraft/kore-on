@@ -222,8 +222,22 @@
       ip_vs_sh
       nf_conntrack
 
+- name: Install package for ipvs in ["RedHat"]
+  ansible.builtin.yum:
+    name: "{{ item }}"
+    disablerepo: "*"
+    enablerepo: "rhel*"
+    state: present
+    update_cache: yes
+  with_items:
+    -  ipvsadm
+    -  ipset
+  when:
+    - kube_proxy_mode == 'ipvs'
+    - ansible_distribution in ["RedHat"]
+# -------------
+
 - name: Install package for ipvs
-  when: kube_proxy_mode == 'ipvs'
   package:
     name: "{{ item }}"
     state: present
@@ -231,6 +245,9 @@
   with_items:
     -  ipvsadm
     -  ipset
+  when:
+    - kube_proxy_mode == 'ipvs'
+    - ansible_distribution in ["CentOS", "Ubuntu", "Debian"]
 # -----------------------------------------------------------------------------------------------------
 
 - name: Check if bridge-nf-call-iptables key exists
