@@ -73,7 +73,7 @@ const Template = `
 ## - 
 ## Optional
 ## - data-dir: data(backup, docker, log, kubelet, etcd, k8s-audit, containerd) root dir (default: "/data") 
-data-dir = "/data"
+#data-dir = "/data"
 
 [node-pool.master]
 ## Required

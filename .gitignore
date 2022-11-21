@@ -359,11 +359,10 @@ test__/
 *.gz
 *.tgz
 
-# basic.yaml
-# expert.yaml
-# images.yaml
-# packages.yaml
-# *-client-kubeconfig
-# inventory.ini
+basic.yaml
+expert.yaml
+images.yaml
+packages.yaml
+*-client-kubeconfig
+inventory.ini
 
-group_vars/*.yaml
