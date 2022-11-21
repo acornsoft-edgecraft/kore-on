@@ -4,8 +4,11 @@ import (
 	"fmt"
 	"kore-on/pkg/logger"
 	"kore-on/pkg/utils"
+	"log"
 	"os"
+	"os/exec"
 	"strings"
+	"syscall"
 
 	"kore-on/cmd/koreonctl/conf"
 
@@ -90,8 +93,6 @@ func (c *strDestroyCmd) destroy(workDir string) error {
 	commandArgs := []string{
 		"docker",
 		"run",
-		"--name",
-		koreonImageName,
 		"--rm",
 		"--privileged",
 		"-it",
@@ -144,10 +145,15 @@ func (c *strDestroyCmd) destroy(workDir string) error {
 		logger.Fatal(fmt.Errorf("[ERROR]: %s", "To run ansible-playbook an ssh login user must be specified"))
 	}
 
-	// err := syscall.Exec("/usr/local/bin/docker", commandArgs, os.Environ())
-	// if err != nil {
-	// 	log.Printf("Command finished with error: %v", err)
-	// }
+	binary, lookErr := exec.LookPath("docker")
+	if lookErr != nil {
+		logger.Fatal(lookErr)
+	}
+
+	err := syscall.Exec(binary, commandArgs, os.Environ())
+	if err != nil {
+		log.Printf("Command finished with error: %v", err)
+	}
 
 	return nil
 }
