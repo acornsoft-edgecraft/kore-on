@@ -22,17 +22,17 @@ import (
 
 // Load - Load the configuration from file
 func Load() error {
+	var err error
+	// workingdir, err := os.Getwd()
+	// if err != nil {
+	// 	logger.Error(err)
+	// }
 
-	workingdir, err := os.Getwd()
-	if err != nil {
-		logger.Error(err)
-	}
-
-	dir := strings.Split(workingdir, "/")
+	// dir := strings.Split(workingdir, "/")
 	path := "./conf"
-	if dir[len(dir)-1] == "koreonctl" {
-		path = "../../conf"
-	}
+	// if dir[len(dir)-1] == "koreonctl" {
+	// 	path = "../../conf"
+	// }
 	// Search config files in config directory with name "config.yaml" (without extension).
 	viper.AddConfigPath(path)
 	viper.SetConfigName("config")
@@ -44,7 +44,7 @@ func Load() error {
 	viper.AutomaticEnv()
 
 	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err != nil {
+	if err = viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
 			// Config file not found; ignore error if desired
 			logger.Errorf("Could not load configuration file: %s", err.Error())
