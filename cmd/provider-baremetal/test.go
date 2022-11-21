@@ -85,21 +85,21 @@ func (c *strTestCmd) run() error {
 		return fmt.Errorf("[ERROR]: %s", "To run ansible-playbook an inventory must be specified")
 	}
 
-	if len(c.privateKey) < 1 {
-		if len(koreonToml.NodePool.Security.PrivateKeyPath) > 0 {
-			c.privateKey = koreonToml.NodePool.Security.PrivateKeyPath
-		} else {
-			return fmt.Errorf("[ERROR]: %s", "To run ansible-playbook an privateKey must be specified")
-		}
-	}
+	// if len(c.privateKey) < 1 {
+	// 	if len(koreonToml.NodePool.Security.PrivateKeyPath) > 0 {
+	// 		c.privateKey = koreonToml.NodePool.Security.PrivateKeyPath
+	// 	} else {
+	// 		return fmt.Errorf("[ERROR]: %s", "To run ansible-playbook an privateKey must be specified")
+	// 	}
+	// }
 
-	if len(c.user) < 1 {
-		if len(koreonToml.NodePool.Security.SSHUserID) > 0 {
-			c.user = koreonToml.NodePool.Security.SSHUserID
-		} else {
-			return fmt.Errorf("[ERROR]: %s", "To run ansible-playbook an ssh login user must be specified")
-		}
-	}
+	// if len(c.user) < 1 {
+	// 	if len(koreonToml.NodePool.Security.SSHUserID) > 0 {
+	// 		c.user = koreonToml.NodePool.Security.SSHUserID
+	// 	} else {
+	// 		return fmt.Errorf("[ERROR]: %s", "To run ansible-playbook an ssh login user must be specified")
+	// 	}
+	// }
 
 	ansiblePlaybookConnectionOptions := &options.AnsibleConnectionOptions{
 		PrivateKey: c.privateKey,

@@ -43,20 +43,20 @@ type KoreOnToml struct {
 	NodePool struct {
 		DataDir string `toml:"data-dir,omitempty"`
 
-		Security struct {
-			SSHUserID      string `toml:"ssh-user-id,omitempty"`
-			SSHPort        int    `toml:"ssh-port,omitempty"`
-			PrivateKeyPath string `toml:"private-key-path,omitempty"`
-		} `toml:"security,omitempty"`
+		// Security struct {
+		// 	SSHUserID      string `toml:"ssh-user-id,omitempty"`
+		// 	SSHPort        int    `toml:"ssh-port,omitempty"`
+		// 	PrivateKeyPath string `toml:"private-key-path,omitempty"`
+		// } `toml:"security,omitempty"`
 
 		Master struct {
 			Name           string   `toml:"name,omitempty"`
 			IP             []string `toml:"ip"`
 			PrivateIP      []string `toml:"private-ip"`
-			LbIP           string   `toml:"lb-ip"`
+			LbIP           string   `toml:"lb-ip,omitempty"`
 			LbPort         int      `toml:"lb-port,omitempty"`
 			Isolated       bool     `toml:"isolated,omitempty"`
-			HaproxyInstall *bool    `toml:"haproxy-install,omitempty"`
+			HaproxyInstall bool     `toml:"haproxy-install,omitempty"`
 		} `toml:"master,omitempty"`
 
 		Node StrNode `toml:"node,omitempty"`
@@ -75,11 +75,11 @@ type KoreOnToml struct {
 	PrivateRegistry struct {
 		Install             bool   `toml:"install,omitempty"`
 		RegistryVersion     string `toml:"registry-version,omitempty"`
-		RegistryIP          string `toml:"registry-ip"`
+		RegistryIP          string `toml:"registry-ip,omitempty"`
 		RegistryDomain      string `toml:"registry-domain,omitempty"`
-		PrivateIP           string `toml:"private-ip"`
+		PrivateIP           string `toml:"private-ip,omitempty"`
 		DataDir             string `toml:"data-dir,omitempty"`
-		RegistryArchiveFile string `toml:"registry-archive-file"`
+		RegistryArchiveFile string `toml:"registry-archive-file,omitempty"`
 		PublicCert          bool   `toml:"public-cert,omitempty"`
 		CertFile            struct {
 			SslCertificate    string `toml:"ssl-certificate,omitempty"`
@@ -90,7 +90,7 @@ type KoreOnToml struct {
 	PrepareAirgap struct {
 		K8sVersion      string `toml:"k8s-version,omitempty"`
 		RegistryVersion string `toml:"registry-version,omitempty"`
-		RegistryIP      string `toml:"registry-ip"`
+		RegistryIP      string `toml:"registry-ip,omitempty"`
 	} `toml:"prepare-airgap,omitempty"`
 
 	SupportVersion struct {
