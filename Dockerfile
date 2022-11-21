@@ -31,6 +31,7 @@ RUN ansible-galaxy collection install community.docker
 RUN ansible-galaxy collection install kubernetes.core
 RUN ansible-galaxy collection install community.general
 RUN ansible-galaxy collection install ansible.posix
+RUN ansible-galaxy collection install ansible.utils
 
 # Copy binary and config files from /build to root folder of scratch container.
 COPY --from=builder ["/build/kore-on", "/"]
