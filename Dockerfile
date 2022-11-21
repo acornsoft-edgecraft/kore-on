@@ -29,7 +29,7 @@ RUN python3 -m pip install ansible-core==2.12.3
 RUN ansible-galaxy collection install community.docker
 RUN ansible-galaxy collection install kubernetes.core
 RUN ansible-galaxy collection install community.general
-# RUN ansible-galaxy collection install ansible.posix
+RUN ansible-galaxy collection install ansible.posix
 
 # Copy binary and config files from /build to root folder of scratch container.
 COPY --from=builder ["/build/kore-on", "/"]
