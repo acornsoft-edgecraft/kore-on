@@ -15,7 +15,7 @@ const Template = `
 ## - install-dir: installation scripts(harbor, shell scripts) save directory (default: "/var/lib/kore-on")
 ## - cert-validity-days: SSL validity days(default: 36500)
 ## - debug-mode: Choose whether to use the verbose option. (default: false)
-## - closed-network: Air Gap 선언 (default: false)
+## - closed-network: Enable Air Gap (default: false)
 #cluster-name = "test-cluster"
 #install-dir = "/var/lib/kore-on"
 #cert-validity-days = 36500
@@ -38,7 +38,7 @@ const Template = `
 ## - pod-cidr: k8s pod network cidr (default: "10.4.0.0/24")
 ## - node-port-range: k8s node port network range (default: "30000-32767")
 ## - audit-log-enable: k8s audit log enabled (default: true)
-## - api-sans: k8s apiserver SAN 추가 [--apiserver-cert-extra-sans 설정과 동일] (default: master[0] ip address)
+## - api-sans: Add k8s apiserver SAN [--apiserver-cert-extra-sans 설정과 동일] (default: master[0] ip address)
 #version = "v1.23.12"
 #container-runtime = "containerd"
 #kube-proxy-mode = "ipvs"
