@@ -74,7 +74,6 @@
     module_hotfixes: True
     gpgkey:
       - "https://nginx.org/keys/nginx_signing.key"
-  notify: yum-clean-metadata
 
 - name: Adding Nginx|nginx-mainline repository
   yum_repository:
@@ -88,8 +87,7 @@
     module_hotfixes: True
     gpgkey:
       - "https://nginx.org/keys/nginx_signing.key"
-  notify: yum-clean-metadata
-
+      
 - name: Adding Kubernetes repository
   yum_repository:
     name: Kubernetes
