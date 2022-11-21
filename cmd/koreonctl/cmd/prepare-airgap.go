@@ -4,10 +4,8 @@ import (
 	"fmt"
 	"kore-on/pkg/logger"
 	"kore-on/pkg/utils"
-	"log"
 	"os"
 	"strings"
-	"syscall"
 
 	"kore-on/cmd/koreonctl/conf"
 
@@ -152,12 +150,12 @@ func (c *strAirGapCmd) airgap(workDir string) error {
 		logger.Fatal(fmt.Errorf("[ERROR]: %s", "To run ansible-playbook an ssh login user must be specified"))
 	}
 
-	fmt.Println(commandArgs)
+	// fmt.Println(commandArgs)
 
-	err := syscall.Exec("/usr/local/bin/docker", commandArgs, os.Environ())
-	if err != nil {
-		log.Printf("Command finished with error: %v", err)
-	}
+	// err := syscall.Exec("/usr/local/bin/docker", commandArgs, os.Environ())
+	// if err != nil {
+	// 	log.Printf("Command finished with error: %v", err)
+	// }
 
 	return nil
 }

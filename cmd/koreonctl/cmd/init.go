@@ -4,9 +4,7 @@ import (
 	"fmt"
 	"kore-on/pkg/logger"
 	"kore-on/pkg/utils"
-	"log"
 	"os"
-	"syscall"
 
 	"kore-on/cmd/koreonctl/conf"
 
@@ -83,12 +81,12 @@ func (c *strInitCmd) init(workDir string) error {
 		commandArgs = append(commandArgs, "--vvv")
 	}
 
-	fmt.Println(commandArgs)
+	// fmt.Println(commandArgs)
 
-	err := syscall.Exec("/usr/local/bin/docker", commandArgs, os.Environ())
-	if err != nil {
-		log.Printf("Command finished with error: %v", err)
-	}
+	// err := syscall.Exec("/usr/local/bin/docker", commandArgs, os.Environ())
+	// if err != nil {
+	// 	log.Printf("Command finished with error: %v", err)
+	// }
 
 	return nil
 }
