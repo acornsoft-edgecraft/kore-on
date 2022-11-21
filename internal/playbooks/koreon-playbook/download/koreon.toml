@@ -17,11 +17,11 @@
 #install-dir = "/var/lib/kore-on"
 #cert-validity-days = 36500
 #debug-mode = true
-#closed-network = true
-#local-repository-install = true
-#local-repository-port = 8080
-#local-repository-archive-file = "local-repo.20221116_031319.tgz"
-#local-repository-url = "http://3.0.0.50:8080"
+closed-network = true
+local-repository-install = true
+local-repository-port = 8080
+local-repository-archive-file = "local-repo.20221116_031319.tgz"
+local-repository-url = "http://3.0.0.50:8080"
 
 [kubernetes]
 ## Required
@@ -72,13 +72,6 @@ version = "v1.23"
 ## - data-dir: data(backup, docker, log, kubelet, etcd, k8s-audit, containerd) root dir (default: "/data") 
 data-dir = "/data"
 
-[node-pool.security]
-## Required
-## - ssh-user-id: node user id (You can skip this entry by using the --user command option)
-## - private-key-path: ssh private key path (You can skip this entry by using the --private-key-path command option)
-#ssh-user-id = "cloud-user"
-#private-key-path = "/Users/dongmook/DEV_WORKS/cert_ssh/rhel/cloud-user"
-
 [node-pool.master]
 ## Required
 ## - ip: k8s control plane nodes ip address. (this is using it to generate an inventory)
@@ -94,8 +87,8 @@ ip = ["192.168.77.234","192.168.77.235","192.168.77.236"]
 private-ip = ["3.0.0.1","3.0.0.2","3.0.0.3"]
 isolated = true
 haproxy-install = true
-#lb-ip = "192.168.77.234"
-#lb-port = 6443
+lb-ip = "192.168.77.234"
+lb-port = 6443
 
 [node-pool.node]
 ## Required
@@ -126,7 +119,7 @@ install = true
 registry-version = "v2.6"
 registry-ip = "192.168.77.239"
 private-ip = "3.0.0.50"
-#registry-domain = "192.168.77.239"
+registry-domain = "192.168.77.239"
 data-dir = "/data/harbor"
 registry-archive-file = "harbor-20221116T220154.tgz"
 #public-cert = false
@@ -170,6 +163,6 @@ volume-dir = "/data/storage"
 ##                This is a required field used when the pre-preparation stage of the air gap network.
 ## Optional
 ## - 
-#k8s-version = "v1.21"
-#registry-version = "v2.6"
-#registry-ip = "192.168.77.152"
+k8s-version = "v1.21"
+registry-version = "v2.6"
+registry-ip = "192.168.77.152"

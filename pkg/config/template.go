@@ -23,7 +23,7 @@ const Template = `
 #closed-network = true
 #local-repository-install = true
 #local-repository-port = 8080
-#local-repository-archive-file = "./local-repo.20221030_232949.tgz"
+#local-repository-archive-file = ""
 #local-repository-url = "http://x.x.x.x:8080"
 
 [kubernetes]
@@ -75,13 +75,6 @@ const Template = `
 ## - data-dir: data(backup, docker, log, kubelet, etcd, k8s-audit, containerd) root dir (default: "/data") 
 data-dir = "/data"
 
-[node-pool.security]
-## Required
-## - ssh-user-id: node user id (You can skip this entry by using the --user command option)
-## - private-key-path: ssh private key path (You can skip this entry by using the --private-key-path command option)
-#ssh-user-id = "cloud-user"
-#private-key-path = "/Users/dongmook/DEV_WORKS/cert_ssh/rhel/cloud-user"
-
 [node-pool.master]
 ## Required
 ## - ip: k8s control plane nodes ip address. (this is using it to generate an inventory)
@@ -131,7 +124,7 @@ data-dir = "/data"
 #private-ip = "x.x.x.x"
 #registry-domain = "x.x.x.x"
 #data-dir = "/data/harbor"
-#registry-archive-file = "./harbor-offline-installer-v2.6.0.tgz"
+#registry-archive-file = ""
 #public-cert = false
 
 [private-registry.cert-file]
@@ -173,7 +166,7 @@ data-dir = "/data"
 ##                This is a required field used when the pre-preparation stage of the air gap network.
 ## Optional
 ## - 
-k8s-version = "v1.21"
-registry-version = "v2.6"
-registry-ip = "x.x.x.x"
+#k8s-version = "v1.21"
+#registry-version = "v2.6"
+#registry-ip = "x.x.x.x"
 `

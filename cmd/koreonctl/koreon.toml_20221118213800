@@ -1,3 +1,4 @@
+
 [koreon]
 ## Required
 ## - local-repository-install: local repository installation activate. (Required when selecting the closed network.)
@@ -36,7 +37,7 @@
 ## - node-port-range: k8s node port network range (default: "30000-32767")
 ## - audit-log-enable: k8s audit log enabled (default: true)
 ## - api-sans: k8s apiserver SAN 추가 [--apiserver-cert-extra-sans 설정과 동일] (default: master[0] ip address)
-version = "v1.23.12"
+#version = "v1.23.12"
 #container-runtime = "containerd"
 #kube-proxy-mode = "ipvs"
 #service-cidr = "172.20.0.0/24"
@@ -90,8 +91,8 @@ data-dir = "/data"
 ## - haproxy-install: used internal load-balancer (default: true)
 ## - lb-ip: Enter the IP address when using a load balancer (default: master[0] ip address)
 ## - lb-port: Enter the port when using a load balancer (default: "6443")
-ip = ["192.168.77.231"]
-private-ip = ["10.10.10.74"]
+#ip = ["x.x.x.x","x.x.x.x","x.x.x.x"]
+#private-ip = ["x.x.x.x","x.x.x.x","x.x.x.x"]
 #isolated = true
 #haproxy-install = true
 #lb-ip = "x.x.x.x"
@@ -103,8 +104,8 @@ private-ip = ["10.10.10.74"]
 ## - private-ip: K8s work nodes private ip address. (this is using it to generate an inventory)
 ##               If you use the same IP address, you can skip it.
 ## Optional
-ip = ["192.168.77.232"]
-private-ip = ["10.10.10.187"]
+#ip = ["x.x.x.x", "x.x.x.x"]
+#private-ip = ["x.x.x.x", "x.x.x.x"]
 
 [private-registry]
 ## Required
@@ -112,20 +113,20 @@ private-ip = ["10.10.10.187"]
 ##                This is a required entry used when installing a private registry.
 ## - private-ip: Private IP address of the private registry node. 
 ##               This is a required entry used when installing a private registry.
-##               If you use the same IP address, you can skip it.
-## - registry-domain: K8s registry configuration (this is using it to generate an extra vars)
+##               If you use the same IP address, you can skip it.			  
 ## Optional
 ## - install: private registry install (default: false)
 ## - registry-version: Private registry version. (default: latest)
 ##                     This is a required entry used when installing a private registry.
 ##                     If you input only the major version, the minor version automatically selects the last version.
+## - registry-domain: If using a domain, please enter the domain. (default: registry-ip)
 ## - data-dir: private registry data directory (default: "/data/harbor")
 ## - registry-archive-file: registry archive file path (default: "")
 ## - public-cert: public cert activate (default: false)
-install = true
-registry-version = "v2.6.0"
-registry-ip = "192.168.77.233"
-private-ip = "10.10.10.8"
+#install = true
+#registry-version = "v2.6.0"
+#registry-ip = "x.x.x.x"
+#private-ip = "x.x.x.x"
 #registry-domain = "x.x.x.x"
 #data-dir = "/data/harbor"
 #registry-archive-file = "./harbor-offline-installer-v2.6.0.tgz"
@@ -150,14 +151,14 @@ private-ip = "10.10.10.8"
 ##               This is a required field used when installing the nfs server.
 ##               If you use the same IP address, you can skip it.
 ##               (this is using it to generate an inventory)
-## - volume-dir: Storage node data directory. (defalue: /storage)
+## - volume-dir: Storage node data directory. (default: /data/storage)
 ##               This is a required field used when installing the nfs server.
 ##               (this is using it to generate an extra vars)
 ## Optional
 ## - install: NFS Server Installation (default: false)
-install = true
-storage-ip = "192.168.77.233"
-private-ip = "10.10.10.8"
+#install = true
+#storage-ip = "x.x.x.x"
+#private-ip = "x.x.x.x"
 #volume-dir = "/data/storage"
 
 [prepare-airgap]
@@ -170,6 +171,6 @@ private-ip = "10.10.10.8"
 ##                This is a required field used when the pre-preparation stage of the air gap network.
 ## Optional
 ## - 
-#k8s-version = "v1.22"
-#registry-version = "v2.6"
-#registry-ip = "192.168.77.37"
+k8s-version = "v1.21"
+registry-version = "v2.6"
+registry-ip = "192.168.77.152"
