@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"syscall"
 
@@ -121,8 +122,9 @@ func (c *strAirGapCmd) airgap(workDir string) error {
 
 	if c.privateKey != "" {
 		key := strings.Split(c.privateKey, "/")
+		keyPath, _ := filepath.Abs(c.privateKey)
 		commandArgsVol = append(commandArgsVol, "--mount")
-		commandArgsVol = append(commandArgsVol, fmt.Sprintf("type=bind,source=%s,target=/home/%s,readonly", c.privateKey, key[len(key)-1]))
+		commandArgsVol = append(commandArgsVol, fmt.Sprintf("type=bind,source=%s,target=/home/%s,readonly", keyPath, key[len(key)-1]))
 	}
 
 	commandArgs = append(commandArgs, commandArgsVol...)
