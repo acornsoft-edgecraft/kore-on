@@ -8,8 +8,9 @@ import (
 	"os"
 	"syscall"
 
+	"kore-on/cmd/koreonctl/conf"
+
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 type strInitCmd struct {
@@ -50,9 +51,9 @@ func (c *strInitCmd) init(workDir string) error {
 	// Doker check
 	utils.CheckDocker()
 
-	koreonImageName := viper.GetString("KoreOn.KoreonImageName")
-	koreOnImage := viper.GetString("KoreOn.KoreOnImage")
-	koreOnConfigFilePath := viper.GetString("KoreOn.KoreOnConfigFileSubDir")
+	koreonImageName := conf.KoreOnImageName
+	koreOnImage := conf.KoreOnImage
+	koreOnConfigFilePath := conf.KoreOnConfigFileSubDir
 
 	commandArgs := []string{
 		"docker",
