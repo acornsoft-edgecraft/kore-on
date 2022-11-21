@@ -141,6 +141,7 @@ func (c *strDestroyCmd) destroy(workDir string) error {
 
 	if c.user != "" {
 		commandArgs = append(commandArgs, "--user")
+		commandArgs = append(commandArgs, c.user)
 	} else {
 		logger.Fatal(fmt.Errorf("[ERROR]: %s", "To run ansible-playbook an ssh login user must be specified"))
 	}
