@@ -26,7 +26,7 @@ RUN apt-get install -y curl vim python3 python3-pip openssh-server
 RUN pip3 install --upgrade pip
 RUN pip3 install --upgrade virtualenv
 RUN python3 -m pip install ansible-core==2.12.3
-RUN ansible-galaxy collection install ansible.posix
+# RUN ansible-galaxy collection install ansible.posix
 RUN ansible-galaxy collection install community.docker
 RUN ansible-galaxy collection install kubernetes.core
 
