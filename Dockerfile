@@ -30,6 +30,7 @@ RUN python3 -m pip install netaddr
 RUN ansible-galaxy collection install community.docker
 RUN ansible-galaxy collection install kubernetes.core
 RUN ansible-galaxy collection install community.general
+RUN ansible-galaxy collection install community.crypto
 RUN ansible-galaxy collection install ansible.posix
 RUN ansible-galaxy collection install ansible.utils
 
