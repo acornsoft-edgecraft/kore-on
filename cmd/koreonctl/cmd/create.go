@@ -5,6 +5,7 @@ import (
 	"kore-on/pkg/logger"
 	"kore-on/pkg/utils"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"kore-on/cmd/koreonctl/conf"
@@ -87,10 +88,9 @@ func (c *strCreateCmd) create(workDir string) error {
 
 	if c.privateKey != "" {
 		key := strings.Split(c.privateKey, "/")
+		key_path, _ := filepath.Abs(c.privateKey)
 		commandArgsVol = append(commandArgsVol, "--mount")
-		commandArgsVol = append(commandArgsVol, fmt.Sprintf("type=bind,source=%s,target=/home/%s,readonly", c.privateKey, key[len(key)-1]))
-
-		fmt.Println("key == ", key)
+		commandArgsVol = append(commandArgsVol, fmt.Sprintf("type=bind,source=%s,target=/home/%s,readonly", key_path, key[len(key)-1]))
 	}
 
 	commandArgs = append(commandArgs, commandArgsVol...)
