@@ -14,7 +14,7 @@ const Template = `
 ## - cluster-name: use cluster name in config context (default: "kubernetes")
 ## - install-dir: installation scripts(harbor, shell scripts) save directory (default: "/var/lib/kore-on")
 ## - cert-validity-days: SSL validity days(default: 36500)
-## - debug-mode: verbose 옵션 사용 여부 선택 (default: false)
+## - debug-mode: Choose whether to use the verbose option. (default: false)
 ## - closed-network: Air Gap 선언 (default: false)
 #cluster-name = "test-cluster"
 #install-dir = "/var/lib/kore-on"
@@ -73,7 +73,7 @@ const Template = `
 ## - 
 ## Optional
 ## - data-dir: data(backup, docker, log, kubelet, etcd, k8s-audit, containerd) root dir (default: "/data") 
-data-dir = "/data"
+#data-dir = "/data"
 
 [node-pool.master]
 ## Required
