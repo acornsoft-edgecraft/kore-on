@@ -4,9 +4,12 @@ import (
 	"fmt"
 	"kore-on/pkg/logger"
 	"kore-on/pkg/utils"
+	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
+	"syscall"
 
 	"kore-on/cmd/koreonctl/conf"
 
@@ -119,15 +122,15 @@ func (c *strCreateCmd) create(workDir string) error {
 		logger.Fatal(fmt.Errorf("[ERROR]: %s", "To run ansible-playbook an ssh login user must be specified"))
 	}
 
-	// binary, lookErr := exec.LookPath("docker")
-	// if lookErr != nil {
-	// 	logger.Fatal(lookErr)
-	// }
+	binary, lookErr := exec.LookPath("docker")
+	if lookErr != nil {
+		logger.Fatal(lookErr)
+	}
 
-	// err := syscall.Exec(binary, commandArgs, os.Environ())
-	// if err != nil {
-	// 	log.Printf("Command finished with error: %v", err)
-	// }
+	err := syscall.Exec(binary, commandArgs, os.Environ())
+	if err != nil {
+		log.Printf("Command finished with error: %v", err)
+	}
 
 	return nil
 }
