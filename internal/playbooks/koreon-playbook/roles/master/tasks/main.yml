@@ -376,14 +376,6 @@
   delegate_to: "{{ groups['masters'][0] }}"
   run_once: true
 
-- name: MetricsServer | Create MetricsServer Secret
-  shell: >
-    kubectl -n kube-system --kubeconfig={{ kubeadminconfig }} create secret tls metrics-server-certs
-    --cert="{{ cert_dir }}/metrics-server/metrics-server.crt"
-    --key="{{ cert_dir }}/metrics-server/metrics-server.key"
-  delegate_to: "{{ groups['masters'][0] }}"
-  run_once: true
-
 - name: MetricsServer | Create MetricsServer
   shell: "kubectl apply --kubeconfig={{ kubeadminconfig }} -f {{ kube_addon_dir }}/{{ item }}"
   with_items:
