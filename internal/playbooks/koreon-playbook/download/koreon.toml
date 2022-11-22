@@ -163,6 +163,6 @@ volume-dir = "/data/storage"
 ##                This is a required field used when the pre-preparation stage of the air gap network.
 ## Optional
 ## - 
-k8s-version = "v1.21"
-registry-version = "v2.6"
-registry-ip = "192.168.77.152"
+#k8s-version = "v1.21"
+#registry-version = "v2.6"
+3registry-ip = "192.168.77.152"
