@@ -71,6 +71,30 @@ func destroyPrepareAirGapCmd() *cobra.Command {
 	return cmd
 }
 
+func destroyClusterCmd() *cobra.Command {
+	destroyClusterCmd := &strDestroyCmd{}
+
+	cmd := &cobra.Command{
+		Use:          "cluster [flags]",
+		Short:        "Destroy cluster",
+		Long:         "",
+		SilenceUsage: true,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return destroyClusterCmd.run()
+		},
+	}
+
+	destroyClusterCmd.command = "reset-cluster"
+
+	f := cmd.Flags()
+	f.BoolVarP(&destroyClusterCmd.verbose, "verbose", "v", false, "verbose")
+	f.BoolVarP(&destroyClusterCmd.dryRun, "dry-run", "d", false, "dryRun")
+	f.StringVarP(&destroyClusterCmd.privateKey, "private-key", "p", "", "Specify ansible playbook privateKey")
+	f.StringVarP(&destroyClusterCmd.user, "user", "u", "", "SSH login user")
+
+	return cmd
+}
+
 func (c *strDestroyCmd) run() error {
 
 	workDir, _ := os.Getwd()
@@ -123,6 +147,10 @@ func (c *strDestroyCmd) destroy(workDir string) error {
 	commandArgs = append(commandArgs, commandArgsKoreonctl...)
 
 	if c.command == "reset-prepare-airgap" {
+		commandArgs = append(commandArgs, fmt.Sprintf("--tags %s", c.command))
+	}
+
+	if c.command == "reset-cluster" {
 		commandArgs = append(commandArgs, fmt.Sprintf("--tags %s", c.command))
 	}
 
