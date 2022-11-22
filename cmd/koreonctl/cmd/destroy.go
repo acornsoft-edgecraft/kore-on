@@ -155,7 +155,7 @@ func (c *strDestroyCmd) destroy(workDir string) error {
 	}
 
 	if c.verbose {
-		commandArgs = append(commandArgs, "--vvv")
+		commandArgs = append(commandArgs, "--verbose")
 	}
 
 	if c.dryRun {

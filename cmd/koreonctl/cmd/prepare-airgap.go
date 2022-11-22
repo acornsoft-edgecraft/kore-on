@@ -133,7 +133,7 @@ func (c *strAirGapCmd) airgap(workDir string) error {
 	commandArgs = append(commandArgs, commandArgsKoreonctl...)
 
 	if c.verbose {
-		commandArgs = append(commandArgs, "--vvv")
+		commandArgs = append(commandArgs, "--verbose")
 	}
 
 	if c.dryRun {

@@ -121,6 +121,9 @@
   command: kubeadm join --config {{ kube_config_dir }}/kubeadm-client.conf --ignore-preflight-errors=all
   register: kubeadm_join
 
+- debug:
+    msg: "{{ kubeadm_join }}"
+
 - name: Wait for kubelet bootstrap to create config
   when: not is_kube_master
   wait_for:
@@ -130,7 +133,7 @@
 
 - name: Update server field in kubelet kubeconfig
   when: not haproxy and not is_kube_master
-  command: "sed -i 's#server:.*#server: {{ api_lb_ip }}#g' {{ kube_config_dir }}/kubelet.conf"
+  command: "sed -i 's#server:.*#server: https://{{ api_lb_ip }}#g' {{ kube_config_dir }}/kubelet.conf"
   notify: restart kubelet
 
 - name: Update server field in kubelet kubeconfig (haproxy)

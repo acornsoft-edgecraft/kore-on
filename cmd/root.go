@@ -40,6 +40,8 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
+	RootCmd.CompletionOptions.HiddenDefaultCmd = true
+
 	RootCmd.AddCommand(
 		common.InitCmd(),
 		baremetal.CreateCmd(),
