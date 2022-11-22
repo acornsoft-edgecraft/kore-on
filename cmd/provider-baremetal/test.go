@@ -63,7 +63,7 @@ func TestCmd() *cobra.Command {
 func (c *strTestCmd) run() error {
 	koreOnConfigFileName := viper.GetString("KoreOn.KoreOnConfigFile")
 	koreOnConfigFilePath := utils.IskoreOnConfigFilePath(koreOnConfigFileName)
-	koreonToml, value := utils.ValidateKoreonTomlConfig(koreOnConfigFilePath, "prepare-airgap")
+	koreonToml, value := utils.ValidateKoreonTomlConfig(koreOnConfigFilePath, "create")
 
 	if value {
 		b, err := json.Marshal(koreonToml)

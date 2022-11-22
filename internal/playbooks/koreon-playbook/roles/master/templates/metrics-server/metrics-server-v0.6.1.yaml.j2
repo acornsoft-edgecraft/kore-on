@@ -195,9 +195,6 @@ spec:
         - mountPath: /etc/kubernetes/pki/ca.crt
           name: k8s-ca
           readOnly: true
-        - mountPath: /etc/kubernetes/pki/metrics-server
-          name: k8s-certs
-          readOnly: true
       priorityClassName: system-cluster-critical
       serviceAccountName: metrics-server
       volumes:
@@ -207,9 +204,6 @@ spec:
         hostPath:
           path: /etc/kubernetes/pki/ca.crt
           type: File
-      - name: k8s-certs
-        secret:
-          secretName: metrics-server-certs
 ---
 apiVersion: apiregistration.k8s.io/v1
 kind: APIService
