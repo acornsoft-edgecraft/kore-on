@@ -27,6 +27,7 @@ RUN pip3 install --upgrade pip
 RUN pip3 install --upgrade virtualenv
 RUN python3 -m pip install ansible-core==2.12.3
 RUN python3 -m pip install netaddr
+RUN python3 -m pip install cryptography
 RUN ansible-galaxy collection install community.docker
 RUN ansible-galaxy collection install kubernetes.core
 RUN ansible-galaxy collection install community.general
