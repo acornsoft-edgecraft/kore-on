@@ -6,7 +6,7 @@
     "max-size": "100m"
   },
   "storage-driver": "overlay2",
-  "iptables": false
+  "iptables": true
 {%-  if ansible_distribution in ["CentOS", "RedHat"] -%}
   ,
   "storage-opts": [
