@@ -19,14 +19,14 @@ proxy_client_cert: /etc/kubernetes/pki/front-proxy-client.crt
 dashboard_cert: /etc/kubernetes/pki/dashboard.crt
 dashboard_key: /etc/kubernetes/pki/dashboard.key
 kubeadminconfig: /etc/kubernetes/admin.conf
-# api_image: gcr.io/google_containers/kube-apiserver-amd64:{{ k8s_version }}
-# controller_image: gcr.io/google_containers/kube-controller-manager-amd64:{{ k8s_version }}
-# scheduler_image: gcr.io/google_containers/kube-scheduler-amd64:{{ k8s_version }}
+{# api_image: gcr.io/google_containers/kube-apiserver-amd64:{{ k8s_version }}
+controller_image: gcr.io/google_containers/kube-controller-manager-amd64:{{ k8s_version }}
+scheduler_image: gcr.io/google_containers/kube-scheduler-amd64:{{ k8s_version }} #}
 auth_mode: Node,Rbac
 audit_log_enable: true
 encrypt_secret: true
-kubernetes_service_ip: "{{ service_ip_range|ipaddr('net')|ipaddr(1)|ipaddr('address') }}"
-dns_ip: "{{ service_ip_range|ipaddr('net')|ipaddr(10)|ipaddr('address') }}"
+kubernetes_service_ip: "{{ service_ip_range|ansible.utils.ipaddr('net')|ansible.utils.ipaddr(1)|ansible.utils.ipaddr('address') }}"
+dns_ip: "{{ service_ip_range|ansible.utils.ipaddr('net')|ansible.utils.ipaddr(10)|ansible.utils.ipaddr('address') }}"
 api_secure_port: 6443
 api_insecure_port: 8080
 
@@ -76,7 +76,7 @@ route_table_name: ""
 efs_file_system_id: ""
 storage_account: ""
 yum_kubernetes_url: ""
-api_sans: []
+{# api_sans: [] #}
 single_volume_dir: ""
 single_volume_size: 0
 shared_volume_dir: ""
