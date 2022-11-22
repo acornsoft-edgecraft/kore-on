@@ -1,0 +1,29 @@
+---
+# This playbook deploys a kubernetes cluster with platform applications
+# Init generate inventory and vars
+- hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Init | Configuration
+      ansible.builtin.include_role:
+        name: init
+        apply:
+          tags:
+            - init
+      register: inventory_list
+    - name: Print a Inventory list
+      ansible.builtin.debug:
+        msg: "{{ groups['all'] }} - {{ groups['all'][ansible_ssh_host] }}"
+  any_errors_fatal: true
+
+- hosts: all
+  vars_prompt:
+    - name: will be accepted to confirm
+      prompt: "Do you really want to create? Only 'yes' will be accepted to confirm: "
+      private: true
+  any_errors_fatal: true
+
+- hosts: all
+  tasks:
+    - debug:
+        msg: "{{ value }}"

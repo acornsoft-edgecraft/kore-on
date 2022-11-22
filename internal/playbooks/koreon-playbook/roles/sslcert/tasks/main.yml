@@ -53,7 +53,7 @@
     - "openssl genrsa -out {{ master_cert_dir }}/apiserver-etcd-client.key 2048"
     - "openssl req -new -key {{ master_cert_dir }}/apiserver-etcd-client.key -subj '/O=system:masters/CN=kube-apiserver-etcd-client' |
       openssl x509 -req -CA {{ master_cert_dir }}/etcd/ca.crt -CAkey {{ master_cert_dir }}/etcd/ca.key -CAcreateserial -out {{ master_cert_dir }}/apiserver-etcd-client.crt -days {{ cert_validity_days }} -extensions v3_req_client -extfile {{ master_cert_dir }}/common-openssl.conf"
-
+{# 
 - name: Create private key with password protection
   community.crypto.openssl_privatekey:
     path: "{{ cert_dir }}/metrics-server/apiextca.key"
@@ -125,4 +125,4 @@
     # ownca_path: "{{ cert_dir }}/metrics-server/apiextca.crt"
     # ownca_privatekey_path: "{{ cert_dir }}/metrics-server/apiextca.key"
     ownca_not_after: "+{{ cert_validity_days }}d" # valid for one year
-  register: certificate
+  register: certificate #}

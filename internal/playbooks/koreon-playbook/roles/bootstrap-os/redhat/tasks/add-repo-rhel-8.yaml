@@ -90,18 +90,16 @@
       
 - name: Adding Kubernetes repository
   yum_repository:
-    name: Kubernetes
+    name: kubernetes
     description: Kubernetes repo
     file: kubernetes
-    baseurl: "http://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64"
+    baseurl: "https://packages.cloud.google.com/yum/repos/kubernetes-el7-$basearch"
     enabled: yes
     gpgcheck: yes
     repo_gpgcheck: yes
-    exclude: kube*
+    exclude: kubelet kubeadm kubectl
     gpgkey:
-      - "http://packages.cloud.google.com/yum/doc/yum-key.gpg"
-      - "http://packages.cloud.google.com/yum/doc/rpm-package-key.gpg"
-  notify: yum-clean-metadata
+      - "https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg"
 
 - name: Adding Docker-ce repository
   yum_repository:
