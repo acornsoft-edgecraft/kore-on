@@ -34,7 +34,7 @@
     name: "kubeadm-{{ k8s_version_int }}"
     state: present
     update_cache: yes
-    disable_excludes: Kubernetes
+    disable_excludes: kubernetes
 
 - name: Install Kubernetes packages (kubectl, kubelet)
   when:
@@ -113,7 +113,7 @@
     name: ['kubectl-{{ k8s_version_int }}', 'kubelet-{{ k8s_version_int }}']
     state: present
     update_cache: yes
-    disable_excludes: Kubernetes
+    disable_excludes: kubernetes
   register: masterpackage
   tags: masterpackage
 
