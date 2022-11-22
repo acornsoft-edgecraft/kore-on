@@ -351,7 +351,6 @@ MigrationBackup/
 
 .history/
 .vscode/
-files/
 gows/
 tmp/
 temp/
@@ -365,4 +364,4 @@ images.yaml
 packages.yaml
 *-client-kubeconfig
 inventory.ini
-
+koreon.toml

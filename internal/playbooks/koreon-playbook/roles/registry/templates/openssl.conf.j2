@@ -20,11 +20,11 @@ subjectAltName = @alt_names_registry
 [ alt_names_registry ]
 DNS.1 = localhost
 DNS.2 = {{ ansible_hostname }}
-{% if not registry_domain | ipaddr() -%}
+{% if not registry_domain | ansible.utils.ipaddr -%}
 DNS.3 = {{ registry_domain }}
 {% endif -%}
 IP.1 = 127.0.0.1
 IP.2 = {{ hostvars[inventory_hostname]['ansible_ssh_host'] }}
-{% if registry_domain|ipaddr() and registry_domain != registry_ip -%}
+{% if registry_domain|ansible.utils.ipaddr and registry_domain != registry_ip -%}
 IP.3 = {{ registry_domain }}
 {% endif -%}

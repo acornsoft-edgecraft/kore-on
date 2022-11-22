@@ -28,12 +28,12 @@ DNS.2 = kubernetes.default
 DNS.3 = kubernetes.default.svc
 DNS.4 = kubernetes.default.svc.cluster.local
 DNS.5 = localhost
-{% if not lb_ip | ipaddr() -%}
+{% if not lb_ip | ansible.utils.ipaddr -%}
 DNS.6 = {{ lb_ip }}
 {% endif -%}
 {% for san in api_sans -%}
 {%   set idx = loop.index  %}
-{% if not san | ipaddr() -%}
+{% if not san | ansible.utils.ipaddr -%}
 DNS.{{ idx+6 }} = {{ san }}
 {% endif -%}
 {%   if not loop.last -%}{%- endif -%}
@@ -41,12 +41,12 @@ DNS.{{ idx+6 }} = {{ san }}
 IP.1 = 127.0.0.1
 IP.2 = {{ hostvars[inventory_hostname]['ip'] | default(hostvars[inventory_hostname]['ansible_default_ipv4']['address']) }}
 IP.3 = {{ kubernetes_service_ip }}
-{% if lb_ip | ipaddr() -%}
+{% if lb_ip | ansible.utils.ipaddr -%}
 IP.4 = {{ lb_ip }}
 {% endif -%}
 {% for san in api_sans -%}
 {%   set idx = loop.index  %}
-{% if san | ipaddr() -%}
+{% if san | ansible.utils.ipaddr -%}
 IP.{{ idx+4 }} = {{ san }}
 {% endif -%}
 {%   if not loop.last -%}{%- endif -%}
