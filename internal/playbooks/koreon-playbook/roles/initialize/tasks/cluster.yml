@@ -225,7 +225,6 @@
 - name: Install package for ipvs in ["RedHat"]
   ansible.builtin.yum:
     name: "{{ item }}"
-    {# disablerepo: "kubernetes" #}
     state: present
     update_cache: yes
   with_items:

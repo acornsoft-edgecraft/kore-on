@@ -35,6 +35,7 @@
   when:
     - rhel_enable_repos | default(True) | bool
     - ansible_distribution_major_version == "7"
+  notify: yum-clean-metadata
     
 - name: Import EPEL GPG key.
   rpm_key:
@@ -54,6 +55,7 @@
   until: result is succeeded
   retries: 5
   delay: 10
+  notify: yum-clean-metadata
 
 - name: Install epel
   yum:
@@ -74,6 +76,7 @@
     module_hotfixes: True
     gpgkey:
       - "https://nginx.org/keys/nginx_signing.key"
+  notify: yum-clean-metadata
 
 - name: Adding Nginx|nginx-mainline repository
   yum_repository:
@@ -87,6 +90,7 @@
     module_hotfixes: True
     gpgkey:
       - "https://nginx.org/keys/nginx_signing.key"
+  notify: yum-clean-metadata
 
 - name: Adding Kubernetes repository
   yum_repository:
@@ -100,6 +104,7 @@
     exclude: kubelet kubeadm kubectl
     gpgkey:
       - "https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg"
+  notify: yum-clean-metadata
 
 - name: Adding Docker-ce repository
   yum_repository:
