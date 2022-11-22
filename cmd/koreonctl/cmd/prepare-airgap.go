@@ -100,6 +100,8 @@ func (c *strAirGapCmd) airgap(workDir string) error {
 	commandArgs := []string{
 		"docker",
 		"run",
+		"--pull",
+		"always",
 		"--rm",
 		"--privileged",
 		"-it",
