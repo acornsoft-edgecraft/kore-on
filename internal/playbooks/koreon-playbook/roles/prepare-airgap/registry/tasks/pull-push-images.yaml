@@ -10,6 +10,7 @@
     url: "https://{{ _url }}/projects"
     method: POST
     ca_path: "{{ harbor_data_dir }}/cert/ca.crt"
+    validate_certs: false
     headers:
       accept: application/json
       Content-Type: application/json

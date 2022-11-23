@@ -52,6 +52,9 @@
         url: "https://{{ _url }}/projects"
         method: POST
         ca_path: "{{ harbor_data_dir }}/cert/ca.crt"
+        client_cert: "{{ harbor_data_dir }}/cert/harbor.crt"
+        client_key: "{{ harbor_data_dir }}/cert/harbor.key"
+        validate_certs: false
         headers:
           accept: application/json
           Content-Type: application/json
@@ -64,9 +67,8 @@
           metadata:
             public: "true"
       register: result
-      failed_when: true
+      failed_when: false
       loop: "{{ prepare_airgap_images }}"
-      delegate_to: "{{ groups['prepare_airgap'][0] }}"
 
     - debug:
         msg: "{{ result }}"
