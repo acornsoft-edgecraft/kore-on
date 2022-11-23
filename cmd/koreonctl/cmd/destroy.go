@@ -143,39 +143,39 @@ func (c *strDestroyCmd) destroy(workDir string) error {
 		commandArgsVol = append(commandArgsVol, fmt.Sprintf("type=bind,source=%s,target=/home/%s,readonly", keyPath, key[len(key)-1]))
 	}
 
-	commandArgs = append(commandArgs, commandArgsVol...)
-	commandArgs = append(commandArgs, commandArgsKoreonctl...)
-
 	if c.command == "reset-prepare-airgap" {
-		commandArgs = append(commandArgs, fmt.Sprintf("--tags %s", c.command))
+		commandArgsKoreonctl = append(commandArgsKoreonctl, fmt.Sprintf("--tags %s", c.command))
 	}
 
 	if c.command == "reset-cluster" {
-		commandArgs = append(commandArgs, fmt.Sprintf("--tags %s", c.command))
+		commandArgsKoreonctl = append(commandArgsKoreonctl, fmt.Sprintf("--tags %s", c.command))
 	}
 
 	if c.verbose {
-		commandArgs = append(commandArgs, "--vvv")
+		commandArgsKoreonctl = append(commandArgsKoreonctl, "--verbose")
 	}
 
 	if c.dryRun {
-		commandArgs = append(commandArgs, "--dry-run")
+		commandArgsKoreonctl = append(commandArgsKoreonctl, "--dry-run")
 	}
 
 	if c.privateKey != "" {
-		commandArgs = append(commandArgs, "--private-key")
+		commandArgsKoreonctl = append(commandArgsKoreonctl, "--private-key")
 		key := strings.Split(c.privateKey, "/")
-		commandArgs = append(commandArgs, "/home/"+key[len(key)-1])
+		commandArgsKoreonctl = append(commandArgsKoreonctl, "/home/"+key[len(key)-1])
 	} else {
 		logger.Fatal(fmt.Errorf("[ERROR]: %s", "To run ansible-playbook an privateKey must be specified"))
 	}
 
 	if c.user != "" {
-		commandArgs = append(commandArgs, "--user")
-		commandArgs = append(commandArgs, c.user)
+		commandArgsKoreonctl = append(commandArgsKoreonctl, "--user")
+		commandArgsKoreonctl = append(commandArgsKoreonctl, c.user)
 	} else {
 		logger.Fatal(fmt.Errorf("[ERROR]: %s", "To run ansible-playbook an ssh login user must be specified"))
 	}
+
+	commandArgs = append(commandArgs, commandArgsVol...)
+	commandArgs = append(commandArgs, commandArgsKoreonctl...)
 
 	binary, lookErr := exec.LookPath("docker")
 	if lookErr != nil {

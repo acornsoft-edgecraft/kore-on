@@ -77,12 +77,12 @@ func (c *strInitCmd) init(workDir string) error {
 		"init",
 	}
 
+	if c.verbose {
+		commandArgsKoreonctl = append(commandArgsKoreonctl, "--vvv")
+	}
+
 	commandArgs = append(commandArgs, commandArgsVol...)
 	commandArgs = append(commandArgs, commandArgsKoreonctl...)
-
-	if c.verbose {
-		commandArgs = append(commandArgs, "--vvv")
-	}
 
 	binary, lookErr := exec.LookPath("docker")
 	if lookErr != nil {

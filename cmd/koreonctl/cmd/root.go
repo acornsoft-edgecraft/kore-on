@@ -34,6 +34,7 @@ func init() {
 		createCmd(),
 		destroyCmd(),
 		airGapCmd(),
+		destroyClusterCmd(),
 	)
 
 }

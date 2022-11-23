@@ -364,4 +364,4 @@ images.yaml
 packages.yaml
 *-client-kubeconfig
 inventory.ini
-koreon.toml
+*.toml

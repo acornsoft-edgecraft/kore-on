@@ -130,7 +130,7 @@
 
 - name: Update server field in kubelet kubeconfig
   when: not haproxy and not is_kube_master
-  command: "sed -i 's#server:.*#server: {{ api_lb_ip }}#g' {{ kube_config_dir }}/kubelet.conf"
+  command: "sed -i 's#server:.*#server: https://{{ api_lb_ip }}#g' {{ kube_config_dir }}/kubelet.conf"
   notify: restart kubelet
 
 - name: Update server field in kubelet kubeconfig (haproxy)
