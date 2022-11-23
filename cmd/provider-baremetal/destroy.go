@@ -95,7 +95,7 @@ func (c *strDestroyCmd) run() error {
 		c.tags = ""
 	}
 
-	if len(c.tags) > 1 && c.tags == "prepare-airgap" {
+	if len(c.tags) > 1 && c.tags == "reset-prepare-airgap" {
 		utils.ValidateKoreonTomlConfig(koreOnConfigFilePath, "destroy-prepare-airgap")
 	}
 
