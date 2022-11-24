@@ -29,7 +29,7 @@ func airGapCmd() *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:          "prepare-airgap [flags]",
-		Short:        "Preparing a kubernetes cluster and registry for AirGap network",
+		Short:        "Preparing a kubernetes cluster and registry for Air gap network",
 		Long:         "",
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -40,10 +40,9 @@ func airGapCmd() *cobra.Command {
 	cmd.AddCommand(downLoadArchiveCmd())
 
 	f := cmd.Flags()
-	f.BoolVar(&prepareAirgap.verbose, "vvv", false, "verbose")
 	f.BoolVarP(&prepareAirgap.dryRun, "dry-run", "d", false, "dryRun")
-	f.StringVarP(&prepareAirgap.privateKey, "private-key", "p", "", "Specify ansible playbook privateKey")
-	f.StringVarP(&prepareAirgap.user, "user", "u", "", "SSH login user")
+	f.StringVarP(&prepareAirgap.privateKey, "private-key", "p", "", "Specify ssh key path")
+	f.StringVarP(&prepareAirgap.user, "user", "u", "", "login user")
 
 	return cmd
 }
@@ -64,10 +63,9 @@ func downLoadArchiveCmd() *cobra.Command {
 	downLoadArchive.command = "download-archive"
 
 	f := cmd.Flags()
-	f.BoolVarP(&downLoadArchive.verbose, "verbose", "v", false, "verbose")
 	f.BoolVarP(&downLoadArchive.dryRun, "dry-run", "d", false, "dryRun")
-	f.StringVarP(&downLoadArchive.privateKey, "private-key", "p", "", "Specify ansible playbook privateKey")
-	f.StringVarP(&downLoadArchive.user, "user", "u", "", "SSH login user")
+	f.StringVarP(&downLoadArchive.privateKey, "private-key", "p", "", "Specify ssh key path")
+	f.StringVarP(&downLoadArchive.user, "user", "u", "", "login user")
 
 	return cmd
 }

@@ -53,8 +53,8 @@ func TestCmd() *cobra.Command {
 	f.BoolVarP(&test.step, "step", "", false, "step")
 	f.BoolVarP(&test.dryRun, "dry-run", "d", false, "dryRun")
 	f.StringVarP(&test.inventory, "inventory", "i", test.inventory, "Specify ansible playbook inventory")
-	f.StringVarP(&test.privateKey, "private-key", "p", "", "Specify ansible playbook privateKey")
-	f.StringVarP(&test.user, "user", "u", "", "SSH login user")
+	f.StringVarP(&test.privateKey, "private-key", "p", "", "Specify ssh key path")
+	f.StringVarP(&test.user, "user", "u", "", "login user")
 	f.StringVar(&test.tags, "tags", "", "Ansible options tags")
 
 	return cmd

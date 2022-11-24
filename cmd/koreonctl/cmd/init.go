@@ -22,8 +22,8 @@ func initCmd() *cobra.Command {
 	init := &strInitCmd{}
 	cmd := &cobra.Command{
 		Use:          "init [flags]",
-		Short:        "get config file",
-		Long:         "",
+		Short:        "Get configuration file",
+		Long:         "This command downloads a sample file that can set machine information and installation information.",
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return init.run()

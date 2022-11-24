@@ -127,3 +127,5 @@
             - reset-prepare-airgap
       tags:
         - reset-prepare-airgap
+      when:
+        - "{{ PrepareAirgap.RegistryIP != '' }}"

@@ -27,22 +27,28 @@ type strDestroyCmd struct {
 func destroyCmd() *cobra.Command {
 	destroy := &strDestroyCmd{}
 	cmd := &cobra.Command{
-		Use:          "destroy [flags]",
-		Short:        "Delete kubernetes cluster, registry",
-		Long:         "",
+		Use:   "destroy [flags]",
+		Short: "Delete kubernetes cluster, registry, prepare-airgap",
+		Long: "This command can delete [Kubernetes cluster / registry / storage].\n" +
+			"* If you do not use the sub command, it is all deleted.",
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return destroy.run()
 		},
 	}
 
-	cmd.AddCommand(destroyPrepareAirGapCmd())
+	cmd.AddCommand(
+		destroyPrepareAirGapCmd(),
+		destroyClusterCmd(),
+		destroyRegistryCmd(),
+		destroyStorageCmd(),
+	)
 
 	f := cmd.Flags()
-	f.BoolVar(&destroy.verbose, "vvv", false, "verbose")
+	f.BoolVar(&destroy.verbose, "verbose", false, "verbose")
 	f.BoolVarP(&destroy.dryRun, "dry-run", "d", false, "dryRun")
-	f.StringVarP(&destroy.privateKey, "private-key", "p", "", "Specify ansible playbook privateKey")
-	f.StringVarP(&destroy.user, "user", "u", "", "SSH login user")
+	f.StringVarP(&destroy.privateKey, "private-key", "p", "", "Specify ssh key path")
+	f.StringVarP(&destroy.user, "user", "u", "", "login user")
 
 	return cmd
 }
@@ -53,7 +59,7 @@ func destroyPrepareAirGapCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:          "prepare-airgap [flags]",
 		Short:        "Destroy prepare-airgap",
-		Long:         "",
+		Long:         "This command deletes the registry of the prepare-airgap host and deletes related directories.",
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return destroyPrepareAirGapCmd.run()
@@ -65,8 +71,8 @@ func destroyPrepareAirGapCmd() *cobra.Command {
 	f := cmd.Flags()
 	f.BoolVarP(&destroyPrepareAirGapCmd.verbose, "verbose", "v", false, "verbose")
 	f.BoolVarP(&destroyPrepareAirGapCmd.dryRun, "dry-run", "d", false, "dryRun")
-	f.StringVarP(&destroyPrepareAirGapCmd.privateKey, "private-key", "p", "", "Specify ansible playbook privateKey")
-	f.StringVarP(&destroyPrepareAirGapCmd.user, "user", "u", "", "SSH login user")
+	f.StringVarP(&destroyPrepareAirGapCmd.privateKey, "private-key", "p", "", "Specify ssh key path")
+	f.StringVarP(&destroyPrepareAirGapCmd.user, "user", "u", "", "login user")
 
 	return cmd
 }
@@ -77,7 +83,7 @@ func destroyClusterCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:          "cluster [flags]",
 		Short:        "Destroy cluster",
-		Long:         "",
+		Long:         "This command only deletes the Kubernetes cluster.",
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return destroyClusterCmd.run()
@@ -89,8 +95,56 @@ func destroyClusterCmd() *cobra.Command {
 	f := cmd.Flags()
 	f.BoolVarP(&destroyClusterCmd.verbose, "verbose", "v", false, "verbose")
 	f.BoolVarP(&destroyClusterCmd.dryRun, "dry-run", "d", false, "dryRun")
-	f.StringVarP(&destroyClusterCmd.privateKey, "private-key", "p", "", "Specify ansible playbook privateKey")
-	f.StringVarP(&destroyClusterCmd.user, "user", "u", "", "SSH login user")
+	f.StringVarP(&destroyClusterCmd.privateKey, "private-key", "p", "", "Specify ssh key path")
+	f.StringVarP(&destroyClusterCmd.user, "user", "u", "", "login user")
+
+	return cmd
+}
+
+func destroyRegistryCmd() *cobra.Command {
+	destroyRegistryCmd := &strDestroyCmd{}
+
+	cmd := &cobra.Command{
+		Use:          "registry [flags]",
+		Short:        "Destroy registry",
+		Long:         "This command deletes the installed registry(harbor) and deletes related services and directories.",
+		SilenceUsage: true,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return destroyRegistryCmd.run()
+		},
+	}
+
+	destroyRegistryCmd.command = "reset-registry"
+
+	f := cmd.Flags()
+	f.BoolVarP(&destroyRegistryCmd.verbose, "verbose", "v", false, "verbose")
+	f.BoolVarP(&destroyRegistryCmd.dryRun, "dry-run", "d", false, "dryRun")
+	f.StringVarP(&destroyRegistryCmd.privateKey, "private-key", "p", "", "Specify ssh key path")
+	f.StringVarP(&destroyRegistryCmd.user, "user", "u", "", "login user")
+
+	return cmd
+}
+
+func destroyStorageCmd() *cobra.Command {
+	destroyStorageCmd := &strDestroyCmd{}
+
+	cmd := &cobra.Command{
+		Use:          "storage [flags]",
+		Short:        "Destroy storage",
+		Long:         "This command deletes the installed storage(NFS) and deletes related services and directories.",
+		SilenceUsage: true,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return destroyStorageCmd.run()
+		},
+	}
+
+	destroyStorageCmd.command = "reset-storage"
+
+	f := cmd.Flags()
+	f.BoolVarP(&destroyStorageCmd.verbose, "verbose", "v", false, "verbose")
+	f.BoolVarP(&destroyStorageCmd.dryRun, "dry-run", "d", false, "dryRun")
+	f.StringVarP(&destroyStorageCmd.privateKey, "private-key", "p", "", "Specify ssh key path")
+	f.StringVarP(&destroyStorageCmd.user, "user", "u", "", "login user")
 
 	return cmd
 }
@@ -144,11 +198,23 @@ func (c *strDestroyCmd) destroy(workDir string) error {
 	}
 
 	if c.command == "reset-prepare-airgap" {
-		commandArgsKoreonctl = append(commandArgsKoreonctl, fmt.Sprintf("--tags %s", c.command))
+		commandArgsKoreonctl = append(commandArgsKoreonctl, "--tags")
+		commandArgsKoreonctl = append(commandArgsKoreonctl, c.command)
 	}
 
 	if c.command == "reset-cluster" {
-		commandArgsKoreonctl = append(commandArgsKoreonctl, fmt.Sprintf("--tags %s", c.command))
+		commandArgsKoreonctl = append(commandArgsKoreonctl, "--tags")
+		commandArgsKoreonctl = append(commandArgsKoreonctl, c.command)
+	}
+
+	if c.command == "reset-registry" {
+		commandArgsKoreonctl = append(commandArgsKoreonctl, "--tags")
+		commandArgsKoreonctl = append(commandArgsKoreonctl, c.command)
+	}
+
+	if c.command == "reset-storage" {
+		commandArgsKoreonctl = append(commandArgsKoreonctl, "--tags")
+		commandArgsKoreonctl = append(commandArgsKoreonctl, c.command)
 	}
 
 	if c.verbose {
