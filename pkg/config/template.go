@@ -51,8 +51,8 @@ const Template = `
 
 [kubernetes.etcd]
 ## Required
-## - ip: k8s control plane nodes ip address. (this is using it to generate an inventory)
-## - private-ip: K8s control plane nodes private ip address. (this is using it to generate an inventory)
+## - ip: k8s control plane nodes ip address. (Required when selecting the external-etcd="true")
+## - private-ip: K8s control plane nodes private ip address. (Required when selecting the external-etcd="true")
 ##               If you use the same IP address, you can skip it.
 ## Optional
 ## - external-etcd: used external etcd than input the ip and private-ip address (default: false)
@@ -78,8 +78,8 @@ const Template = `
 
 [node-pool.master]
 ## Required
-## - ip: k8s control plane nodes ip address. (this is using it to generate an inventory)
-## - private-ip: K8s control plane nodes private ip address. (this is using it to generate an inventory)
+## - ip: k8s control plane nodes ip address.
+## - private-ip: K8s control plane nodes private ip address.
 ##               If you use the same IP address, you can skip it.
 ## Optional
 ## - lb-ip: loadbalancer ip address (default: master[0] node ip address)
@@ -96,8 +96,8 @@ const Template = `
 
 [node-pool.node]
 ## Required
-## - ip: k8s work nodes ip address. (this is using it to generate an inventory)
-## - private-ip: K8s work nodes private ip address. (this is using it to generate an inventory)
+## - ip: k8s work nodes ip address.
+## - private-ip: K8s work nodes private ip address.
 ##               If you use the same IP address, you can skip it.
 ## Optional
 #ip = ["x.x.x.x", "x.x.x.x"]
