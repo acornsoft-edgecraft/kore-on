@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"kore-on/pkg/logger"
 	"kore-on/pkg/utils"
@@ -9,7 +8,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
 	"syscall"
 
 	"kore-on/cmd/koreonctl/conf"
@@ -18,11 +16,10 @@ import (
 )
 
 type strCreateCmd struct {
-	dryRun         bool
-	verbose        bool
-	privateKey     string
-	user           string
-	koreonTomlVars map[string]interface{}
+	dryRun     bool
+	verbose    bool
+	privateKey string
+	user       string
 }
 
 func createCmd() *cobra.Command {
@@ -70,16 +67,13 @@ func (c *strCreateCmd) create(workDir string) error {
 
 	koreonImageName := conf.KoreOnImageName
 	koreOnImage := conf.KoreOnImage
-	koreOnConfigFileName := conf.KoreOnImage
+	koreOnConfigFileName := conf.KoreOnConfigFile
 	koreOnConfigFilePath := conf.KoreOnConfigFileSubDir
 
-	koreonToml, value := utils.ValidateKoreonTomlConfig(workDir+"/"+koreOnConfigFileName, "create")
-	if value {
-		_, err := json.Marshal(koreonToml)
-		if err != nil {
-			logger.Fatal(err)
-			os.Exit(1)
-		}
+	koreonToml, err := utils.GetKoreonTomlConfig(workDir + "/" + koreOnConfigFileName)
+	if err != nil {
+		logger.Fatal(err)
+		os.Exit(1)
 	}
 
 	commandArgs := []string{
@@ -90,7 +84,7 @@ func (c *strCreateCmd) create(workDir string) error {
 		"-it",
 	}
 
-	if koreonToml.KoreOn.ClosedNetwork {
+	if !koreonToml.KoreOn.ClosedNetwork {
 		commandArgs = append(commandArgs, "--pull")
 		commandArgs = append(commandArgs, "always")
 	}
@@ -107,10 +101,10 @@ func (c *strCreateCmd) create(workDir string) error {
 	}
 
 	if c.privateKey != "" {
-		key := strings.Split(c.privateKey, "/")
+		key := filepath.Base(c.privateKey)
 		keyPath, _ := filepath.Abs(c.privateKey)
 		commandArgsVol = append(commandArgsVol, "--mount")
-		commandArgsVol = append(commandArgsVol, fmt.Sprintf("type=bind,source=%s,target=/home/%s,readonly", keyPath, key[len(key)-1]))
+		commandArgsVol = append(commandArgsVol, fmt.Sprintf("type=bind,source=%s,target=/home/%s,readonly", keyPath, key))
 	}
 
 	if c.verbose {
@@ -123,8 +117,8 @@ func (c *strCreateCmd) create(workDir string) error {
 
 	if c.privateKey != "" {
 		commandArgsKoreonctl = append(commandArgsKoreonctl, "--private-key")
-		key := strings.Split(c.privateKey, "/")
-		commandArgsKoreonctl = append(commandArgsKoreonctl, "/home/"+key[len(key)-1])
+		key := filepath.Base(c.privateKey)
+		commandArgsKoreonctl = append(commandArgsKoreonctl, "/home/"+key)
 	} else {
 		logger.Fatal(fmt.Errorf("[ERROR]: %s", "To run ansible-playbook an privateKey must be specified"))
 	}
@@ -139,12 +133,14 @@ func (c *strCreateCmd) create(workDir string) error {
 	commandArgs = append(commandArgs, commandArgsVol...)
 	commandArgs = append(commandArgs, commandArgsKoreonctl...)
 
+	fmt.Println(commandArgs)
+
 	binary, lookErr := exec.LookPath("docker")
 	if lookErr != nil {
 		logger.Fatal(lookErr)
 	}
 
-	err := syscall.Exec(binary, commandArgs, os.Environ())
+	err = syscall.Exec(binary, commandArgs, os.Environ())
 	if err != nil {
 		log.Printf("Command finished with error: %v", err)
 	}

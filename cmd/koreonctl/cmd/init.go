@@ -54,16 +54,26 @@ func (c *strInitCmd) init(workDir string) error {
 
 	koreonImageName := conf.KoreOnImageName
 	koreOnImage := conf.KoreOnImage
+	koreOnConfigFileName := conf.KoreOnConfigFile
 	koreOnConfigFilePath := conf.KoreOnConfigFileSubDir
+
+	koreonToml, err := utils.GetKoreonTomlConfig(workDir + "/" + koreOnConfigFileName)
+	if err != nil {
+		logger.Fatal(err)
+		os.Exit(1)
+	}
 
 	commandArgs := []string{
 		"docker",
 		"run",
-		"--pull",
-		"always",
 		"--rm",
 		"--privileged",
 		"-it",
+	}
+
+	if !koreonToml.KoreOn.ClosedNetwork {
+		commandArgs = append(commandArgs, "--pull")
+		commandArgs = append(commandArgs, "always")
 	}
 
 	commandArgsVol := []string{
@@ -89,7 +99,7 @@ func (c *strInitCmd) init(workDir string) error {
 		logger.Fatal(lookErr)
 	}
 
-	err := syscall.Exec(binary, commandArgs, os.Environ())
+	err = syscall.Exec(binary, commandArgs, os.Environ())
 	if err != nil {
 		log.Printf("Command finished with error: %v", err)
 	}
