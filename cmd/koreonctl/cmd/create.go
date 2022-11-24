@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"kore-on/pkg/logger"
 	"kore-on/pkg/utils"
@@ -17,10 +18,11 @@ import (
 )
 
 type strCreateCmd struct {
-	dryRun     bool
-	verbose    bool
-	privateKey string
-	user       string
+	dryRun         bool
+	verbose        bool
+	privateKey     string
+	user           string
+	koreonTomlVars map[string]interface{}
 }
 
 func createCmd() *cobra.Command {
@@ -68,16 +70,29 @@ func (c *strCreateCmd) create(workDir string) error {
 
 	koreonImageName := conf.KoreOnImageName
 	koreOnImage := conf.KoreOnImage
+	koreOnConfigFileName := conf.KoreOnImage
 	koreOnConfigFilePath := conf.KoreOnConfigFileSubDir
+
+	koreonToml, value := utils.ValidateKoreonTomlConfig(workDir+"/"+koreOnConfigFileName, "create")
+	if value {
+		_, err := json.Marshal(koreonToml)
+		if err != nil {
+			logger.Fatal(err)
+			os.Exit(1)
+		}
+	}
 
 	commandArgs := []string{
 		"docker",
 		"run",
-		"--pull",
-		"always",
 		"--rm",
 		"--privileged",
 		"-it",
+	}
+
+	if koreonToml.KoreOn.ClosedNetwork {
+		commandArgs = append(commandArgs, "--pull")
+		commandArgs = append(commandArgs, "always")
 	}
 
 	commandArgsVol := []string{
