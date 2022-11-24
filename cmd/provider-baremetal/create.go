@@ -54,8 +54,8 @@ func CreateCmd() *cobra.Command {
 	f.BoolVarP(&create.step, "step", "", false, "step")
 	f.BoolVarP(&create.dryRun, "dry-run", "d", false, "dryRun")
 	f.StringVar(&create.tags, "tags", create.tags, "Ansible options tags")
-	f.StringVarP(&create.privateKey, "private-key", "p", "", "Specify ansible playbook privateKey")
-	f.StringVarP(&create.user, "user", "u", "", "SSH login user")
+	f.StringVarP(&create.privateKey, "private-key", "p", "", "Specify ssh key path")
+	f.StringVarP(&create.user, "user", "u", "", "login user")
 
 	return cmd
 }

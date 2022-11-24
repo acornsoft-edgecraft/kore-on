@@ -8,13 +8,14 @@ const Template = `
 ## - local-repository-port: Port number used as local repository. (Required when selecting the closed network.)
 ##                          If you use the default value, you can skip it. (default: 8080)
 ## - local-repository-archive-file: local repository packages archive file path (Required when selecting the closed network.)
-## - local-repository-url: local repository 서비스 url (Required when selecting the closed network.)
-##                         If you are installing a local repository, you can skip it.
+## - local-repository-url: local repository service url (Required when selecting the closed network.)
+##                         If you are installing a private repository, you can skip it. (default: registry-ip)
 ## Optional
 ## - cluster-name: use cluster name in config context (default: "kubernetes")
 ## - install-dir: installation scripts(harbor, shell scripts) save directory (default: "/var/lib/kore-on")
 ## - cert-validity-days: SSL validity days(default: 36500)
-## - debug-mode: Choose whether to use the verbose option. (default: false)
+## - debug-mode: Check mode is just a simulation, and if you have steps that use conditionals that depend on the results of prior commands,
+##				 it may be less useful for you. (default: false)
 ## - closed-network: Enable Air Gap (default: false)
 #cluster-name = "test-cluster"
 #install-dir = "/var/lib/kore-on"
@@ -24,7 +25,7 @@ const Template = `
 #local-repository-install = true
 #local-repository-port = 8080
 #local-repository-archive-file = ""
-#local-repository-url = "http://x.x.x.x:8080"
+#local-repository-url = "http://x.x.x.x"
 
 [kubernetes]
 ## Required
@@ -38,7 +39,7 @@ const Template = `
 ## - pod-cidr: k8s pod network cidr (default: "10.4.0.0/24")
 ## - node-port-range: k8s node port network range (default: "30000-32767")
 ## - audit-log-enable: k8s audit log enabled (default: true)
-## - api-sans: Add k8s apiserver SAN [--apiserver-cert-extra-sans 설정과 동일] (default: master[0] ip address)
+## - api-sans: Add k8s apiserver SAN [--apiserver-cert-extra-sans same as setting] (default: master[0] ip address)
 #version = "v1.23.12"
 #container-runtime = "containerd"
 #kube-proxy-mode = "ipvs"

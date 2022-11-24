@@ -29,7 +29,7 @@ func createCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:          "create [flags]",
 		Short:        "Install kubernetes cluster, registry",
-		Long:         "",
+		Long:         "This command installs the Kubernetes cluster and registry.",
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return create.run()
@@ -39,8 +39,8 @@ func createCmd() *cobra.Command {
 	f := cmd.Flags()
 	f.BoolVar(&create.verbose, "vvv", false, "verbose")
 	f.BoolVarP(&create.dryRun, "dry-run", "d", false, "dryRun")
-	f.StringVarP(&create.privateKey, "private-key", "p", "", "Specify ansible playbook privateKey")
-	f.StringVarP(&create.user, "user", "u", "", "SSH login user")
+	f.StringVarP(&create.privateKey, "private-key", "p", "", "Specify ssh key path")
+	f.StringVarP(&create.user, "user", "u", "", "login user")
 
 	return cmd
 }

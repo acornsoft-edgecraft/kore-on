@@ -15,7 +15,7 @@ import (
 var KoreOnCtlCmd = &cobra.Command{
 	Use:   "koreonctl",
 	Short: "Install kubernetes cluster to on-premise system with registry and storage system",
-	Long:  `cube, It install kubernetes cluster.`,
+	Long:  `This command proceeds to automate the k8s installation task for on-premise.`,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -29,12 +29,13 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
+	KoreOnCtlCmd.CompletionOptions.HiddenDefaultCmd = true
+
 	KoreOnCtlCmd.AddCommand(
 		initCmd(),
 		createCmd(),
 		destroyCmd(),
 		airGapCmd(),
-		destroyClusterCmd(),
 	)
 
 }

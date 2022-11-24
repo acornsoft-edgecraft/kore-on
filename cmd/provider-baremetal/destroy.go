@@ -52,8 +52,8 @@ func DestroyCmd() *cobra.Command {
 	f.BoolVarP(&destroy.dryRun, "dry-run", "d", false, "dryRun")
 	f.StringVarP(&destroy.inventory, "inventory", "i", destroy.inventory, "Specify ansible playbook inventory")
 	f.StringVar(&destroy.tags, "tags", destroy.tags, "Ansible options tags")
-	f.StringVarP(&destroy.privateKey, "private-key", "p", "", "Specify ansible playbook privateKey")
-	f.StringVarP(&destroy.user, "user", "u", "", "SSH login user")
+	f.StringVarP(&destroy.privateKey, "private-key", "p", "", "Specify ssh key path")
+	f.StringVarP(&destroy.user, "user", "u", "", "login user")
 
 	return cmd
 }

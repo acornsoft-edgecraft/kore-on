@@ -54,8 +54,8 @@ func AirGapCmd() *cobra.Command {
 	f.BoolVarP(&prepareAirgap.verbose, "verbose", "v", false, "verbose")
 	f.BoolVarP(&prepareAirgap.dryRun, "dry-run", "d", false, "dryRun")
 	f.StringVar(&prepareAirgap.tags, "tags", prepareAirgap.tags, "Ansible options tags")
-	f.StringVarP(&prepareAirgap.privateKey, "private-key", "p", "", "Specify ansible playbook privateKey")
-	f.StringVarP(&prepareAirgap.user, "user", "u", "", "SSH login user")
+	f.StringVarP(&prepareAirgap.privateKey, "private-key", "p", "", "Specify ssh key path")
+	f.StringVarP(&prepareAirgap.user, "user", "u", "", "login user")
 
 	return cmd
 }
@@ -84,8 +84,8 @@ func DownLoadArchiveCmd() *cobra.Command {
 	f.BoolVarP(&downLoadArchive.verbose, "verbose", "v", false, "verbose")
 	f.BoolVarP(&downLoadArchive.dryRun, "dry-run", "d", false, "dryRun")
 	f.StringVar(&downLoadArchive.tags, "tags", downLoadArchive.tags, "Ansible options tags")
-	f.StringVarP(&downLoadArchive.privateKey, "private-key", "p", "", "Specify ansible playbook privateKey")
-	f.StringVarP(&downLoadArchive.user, "user", "u", "", "SSH login user")
+	f.StringVarP(&downLoadArchive.privateKey, "private-key", "p", "", "Specify ssh key path")
+	f.StringVarP(&downLoadArchive.user, "user", "u", "", "login user")
 
 	return cmd
 }
