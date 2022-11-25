@@ -36,3 +36,11 @@
       - "{{ harbor_data_dir }}/docker-compose"
     dest: "{{ harbor_archive_dir }}/harbor-{{ ansible_date_time.iso8601_basic_short }}.tgz"
     format: gz
+
+- name: Prepare-airgap | Archive koreon image
+  community.docker.docker_image:
+    name: "{{ item }}"
+    archive_path: "{{ harbor_archive_dir }}/koreon-latest.tgz"
+    source: local
+  with_items: 
+    - "{{ bastion_images }}"

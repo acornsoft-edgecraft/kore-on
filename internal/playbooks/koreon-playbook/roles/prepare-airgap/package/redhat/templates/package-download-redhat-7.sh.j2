@@ -1,0 +1,127 @@
+#!/bin/bash
+
+CURRENT_DATE=`date '+%Y%m%d'`
+CURRENT_TIME=`date '+%Y%m%d_%H%M%S'`
+
+K8S_VERIONS="-{{ prepare_airgap_k8s_version | regex_replace('^v', '') }}"
+REPO_DIR="{{ package_data_dir }}"
+ARCHIVE_DIR="{{ package_archive_dir }}"
+
+error_exit() {
+    echo "error: ${1:-"unknown error"}" 1>&2
+    exit 1
+}
+
+make_yum_repo(){
+    cd "$REPO_DIR"
+
+    yum clean all
+    yum repolist
+    yum -y install createrepo
+    yum -y install yum-utils
+
+    yumdownloader --resolve --arch x86_64  --downloaddir=./ createrepo
+    yumdownloader --resolve --downloaddir=./ yum-utils
+
+    yumdownloader --resolve --arch x86_64 --downloaddir=./ jq
+    yumdownloader --resolve --downloaddir=./ nginx
+    yumdownloader --resolve --arch x86_64 --downloaddir=./ telnet
+    yumdownloader --resolve --arch x86_64 --downloaddir=./ net-tools
+    yumdownloader --resolve --arch x86_64 --downloaddir=./ bind-utils
+    yumdownloader --resolve --arch x86_64 --downloaddir=./ python3
+
+    yumdownloader --resolve --arch x86_64 --downloaddir=./ nfs-utils
+    yumdownloader --resolve --arch x86_64 --downloaddir=./ NetworkManager
+    yumdownloader --resolve --arch x86_64 --downloaddir=./ ipvsadm
+    yumdownloader --resolve --arch x86_64 --downloaddir=./ ipset
+    yumdownloader --resolve --arch x86_64 --downloaddir=./ lksctp-tools
+    yumdownloader --resolve --arch x86_64 --downloaddir=./ python3-libselinux
+    yumdownloader --resolve --arch x86_64 --downloaddir=./ socat
+    yumdownloader --resolve --arch x86_64 --downloaddir=./ conntrack-tools
+
+    yumdownloader --resolve --arch x86_64 --downloaddir=./ --disableexcludes=Docker-CE-Stable "{{ containerd_io }}"
+    yumdownloader --resolve --enablerepo=Docker-CE-Stable --arch x86_64 --downloaddir=./ docker-ce docker-ce-cli
+    yumdownloader --resolve --arch x86_64 --downloaddir=./ --disableexcludes=kubernetes kubectl${K8S_VERIONS} kubelet${K8S_VERIONS} kubeadm${K8S_VERIONS}
+
+    createrepo .
+}
+
+make_apt_repo(){
+    if [ "$K8S_VERIONS" != "" ]; then
+        K8S_VERIONS=-$(echo $K8S_VERIONS | sed 's/^v//')
+    fi
+    cd "$REPO_DIR"
+
+    apt-get -y update
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" nfs-common libnfsidmap2 libtirpc3 rpcbind keyutils libtirpc-common
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" nfs-kernel-server
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" nginx
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" python3
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" ipvsadm
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" ipset
+
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" containerd.io="{{ package_containerd_version }}"
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" docker-ce
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" docker-ce-cli
+
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" jq
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" libonig2
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" telnet
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" vim
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" curl
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" net-tools
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" dnsutils
+
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" dpkg-dev
+    apt-get install -y dpkg-dev
+
+    for item in {"{{ kube_support_versions | map('regex_replace', '^v', '') | list }}"}; do
+        apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" kubelet=${item}-00 kubeadm=${item}-00 kubectl=${item}-00
+    done
+
+    rm -rf lock partial pkgcache.bin srcpkgcache.bin Packages.gz
+
+    dpkg-scanpackages -m . | gzip -c > Packages.gz
+}
+
+
+create_tarball() {
+ 	cd $REPO_DIR
+    tar --exclude archive -zcvf $ARCHIVE_DIR/local-repo.$CURRENT_TIME.tgz ./
+}
+
+
+main() {
+
+    for var in `grep -ri "ID" /etc/os-release`
+    do
+    KEY=$(echo $var | cut -f1 -d=)
+    VALUE=$(echo $var | cut -f2 -d= | sed 's/\"//g;s/platform\://')
+
+    case "$KEY" in
+        ID)                 ID=${VALUE} ;;
+        ID_LIKE)            ID_LIKE=${VALUE} ;;
+        VERSION_ID)         VERSION_ID=${VALUE} ;;
+        PLATFORM_ID)        PLATFORM_ID=${VALUE} ;;
+        *)
+    esac
+    done
+
+    if [ "$ID" == "centos" ]; then
+        make_yum_repo
+    fi
+
+    if [ "$ID" == "rhel" ]; then
+        make_yum_repo
+    fi
+
+    if [ "$ID" == "ubuntu" ]; then
+        make_apt_repo
+    fi
+
+    create_tarball
+
+    echo "Completed"
+}
+
+main "${@}"

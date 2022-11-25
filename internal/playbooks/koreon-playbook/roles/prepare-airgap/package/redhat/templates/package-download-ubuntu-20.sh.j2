@@ -41,7 +41,7 @@ make_yum_repo(){
 
     dnf -y download --resolve --alldeps --arch x86_64 --downloaddir=./ --disableexcludes=Docker-CE-Stable "{{ containerd_io }}"
     dnf -y download --resolve --alldeps --enablerepo=Docker-CE-Stable --arch x86_64 --downloaddir=./ docker-ce docker-ce-cli
-    dnf -y download --resolve --alldeps --arch x86_64 --downloaddir=./ --disableexcludes=Kubernetes kubectl${K8S_VERIONS} kubelet${K8S_VERIONS} kubeadm${K8S_VERIONS}
+    dnf -y download --resolve --alldeps --arch x86_64 --downloaddir=./ --disableexcludes=kubernetes kubectl${K8S_VERIONS} kubelet${K8S_VERIONS} kubeadm${K8S_VERIONS}
 
     createrepo .
 
