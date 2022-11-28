@@ -208,7 +208,8 @@ func CheckDocker() error {
 
 	if err != nil {
 		//fmt.Println(err.Error())
-		logger.Fatal("docker is not found. Install docker before proceeding.\nIf it is a closed network, you can install it using the 'koreanctl bastion' command with the prepared package.")
+		logger.Fatal("docker is not found. Install docker before proceeding.")
+		logger.Fatal("If it is a closed network, you can install it using the 'koreanctl bastion' command with the prepared package.")
 		logger.Fatal("Visit https://www.docker.com/get-started")
 		return err
 	}
