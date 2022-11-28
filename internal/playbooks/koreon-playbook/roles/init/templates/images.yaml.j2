@@ -17,4 +17,8 @@ prepare_airgap_images: [
       "k8s.gcr.io/kube-scheduler:{{ prepare_airgap_k8s_version }}",
       "k8s.gcr.io/kube-proxy:{{ prepare_airgap_k8s_version }}"
     ]
+
+bastion_images: [
+  "ghcr.io/acornsoft-edgecraft/kore-on:latest"
+]
 #-end Image List

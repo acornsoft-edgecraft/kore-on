@@ -1,16 +1,14 @@
 package cmd
 
 import (
-	"encoding/json"
+	"bytes"
 	"fmt"
+	"html/template"
 	"kore-on/pkg/logger"
+	"kore-on/pkg/model"
 	"kore-on/pkg/utils"
-	"log"
 	"os"
-	"os/exec"
 	"path/filepath"
-	"strings"
-	"syscall"
 
 	"kore-on/cmd/koreonctl/conf"
 
@@ -18,11 +16,10 @@ import (
 )
 
 type strCreateCmd struct {
-	dryRun         bool
-	verbose        bool
-	privateKey     string
-	user           string
-	koreonTomlVars map[string]interface{}
+	dryRun     bool
+	verbose    bool
+	privateKey string
+	user       string
 }
 
 func createCmd() *cobra.Command {
@@ -49,11 +46,6 @@ func createCmd() *cobra.Command {
 
 func (c *strCreateCmd) run() error {
 
-	//if !utils.CheckUserInput("Do you really want to create? Only 'yes' will be accepted to confirm: ", "yes") {
-	//	fmt.Println("nothing to changed. exit")
-	//	os.Exit(1)
-	//}
-
 	workDir, _ := os.Getwd()
 	var err error = nil
 	logger.Infof("Start provisioning for cloud infrastructure")
@@ -70,16 +62,38 @@ func (c *strCreateCmd) create(workDir string) error {
 
 	koreonImageName := conf.KoreOnImageName
 	koreOnImage := conf.KoreOnImage
-	koreOnConfigFileName := conf.KoreOnImage
+	koreOnConfigFileName := conf.KoreOnConfigFile
 	koreOnConfigFilePath := conf.KoreOnConfigFileSubDir
 
-	koreonToml, value := utils.ValidateKoreonTomlConfig(workDir+"/"+koreOnConfigFileName, "create")
-	if value {
-		_, err := json.Marshal(koreonToml)
-		if err != nil {
-			logger.Fatal(err)
-			os.Exit(1)
-		}
+	koreonToml, err := utils.GetKoreonTomlConfig(workDir + "/" + koreOnConfigFileName)
+	if err != nil {
+		logger.Fatal(err)
+		os.Exit(1)
+	}
+
+	// Make provision data
+	data := model.KoreonctlText{}
+	data.KoreOnTemp = koreonToml
+	data.Command = "create"
+
+	// Processing template
+	temp, err := template.ParseFiles("./conf/templates/koreonctl.text")
+	if err != nil {
+		logger.Errorf("Template has errors. cause(%s)", err.Error())
+		return err
+	}
+
+	// TODO: 진행상황을 어떻게 클라이언트에 보여줄 것인가?
+	var buff bytes.Buffer
+	err = temp.Execute(&buff, data)
+	if err != nil {
+		logger.Errorf("Template execution failed. cause(%s)", err.Error())
+		return err
+	}
+
+	if !utils.CheckUserInput(buff.String(), "y") {
+		fmt.Println("nothing to changed. exit")
+		os.Exit(1)
 	}
 
 	commandArgs := []string{
@@ -90,7 +104,7 @@ func (c *strCreateCmd) create(workDir string) error {
 		"-it",
 	}
 
-	if koreonToml.KoreOn.ClosedNetwork {
+	if !koreonToml.KoreOn.ClosedNetwork {
 		commandArgs = append(commandArgs, "--pull")
 		commandArgs = append(commandArgs, "always")
 	}
@@ -107,10 +121,10 @@ func (c *strCreateCmd) create(workDir string) error {
 	}
 
 	if c.privateKey != "" {
-		key := strings.Split(c.privateKey, "/")
+		key := filepath.Base(c.privateKey)
 		keyPath, _ := filepath.Abs(c.privateKey)
 		commandArgsVol = append(commandArgsVol, "--mount")
-		commandArgsVol = append(commandArgsVol, fmt.Sprintf("type=bind,source=%s,target=/home/%s,readonly", keyPath, key[len(key)-1]))
+		commandArgsVol = append(commandArgsVol, fmt.Sprintf("type=bind,source=%s,target=/home/%s,readonly", keyPath, key))
 	}
 
 	if c.verbose {
@@ -123,8 +137,8 @@ func (c *strCreateCmd) create(workDir string) error {
 
 	if c.privateKey != "" {
 		commandArgsKoreonctl = append(commandArgsKoreonctl, "--private-key")
-		key := strings.Split(c.privateKey, "/")
-		commandArgsKoreonctl = append(commandArgsKoreonctl, "/home/"+key[len(key)-1])
+		key := filepath.Base(c.privateKey)
+		commandArgsKoreonctl = append(commandArgsKoreonctl, "/home/"+key)
 	} else {
 		logger.Fatal(fmt.Errorf("[ERROR]: %s", "To run ansible-playbook an privateKey must be specified"))
 	}
@@ -139,15 +153,15 @@ func (c *strCreateCmd) create(workDir string) error {
 	commandArgs = append(commandArgs, commandArgsVol...)
 	commandArgs = append(commandArgs, commandArgsKoreonctl...)
 
-	binary, lookErr := exec.LookPath("docker")
-	if lookErr != nil {
-		logger.Fatal(lookErr)
-	}
+	// binary, lookErr := exec.LookPath("docker")
+	// if lookErr != nil {
+	// 	logger.Fatal(lookErr)
+	// }
 
-	err := syscall.Exec(binary, commandArgs, os.Environ())
-	if err != nil {
-		log.Printf("Command finished with error: %v", err)
-	}
+	// err = syscall.Exec(binary, commandArgs, os.Environ())
+	// if err != nil {
+	// 	log.Printf("Command finished with error: %v", err)
+	// }
 
 	return nil
 }

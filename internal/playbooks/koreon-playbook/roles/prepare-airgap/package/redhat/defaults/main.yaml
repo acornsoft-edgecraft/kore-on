@@ -1,6 +1,7 @@
 ---
 package_data_dir: "{{ prepare_airgap_registry_data_dir }}/packages"
 package_archive_dir: "{{ prepare_airgap_registry_data_dir }}/archive"
+package_bastion_dir: "{{ prepare_airgap_registry_data_dir }}/bastion"
 
 containerd_io: "containerd.io-{{ package_containerd_version | regex_replace('^v', '') }}-3.1.el{{ ansible_distribution_major_version }}"
 crictl_get_url: "https://github.com/kubernetes-sigs/cri-tools/releases/download/{{ package_crictl_version }}/crictl-{{ package_crictl_version }}-{{ ansible_system | lower }}-amd64.tar.gz"

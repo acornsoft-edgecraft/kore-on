@@ -159,10 +159,11 @@ const Template = `
 
 [prepare-airgap]
 ## Required
-## - k8s-version: private registry nodes ip address.
-##                This is a required field used when the pre-preparation stage of the air gap network.
-## - registry-version: Storage node ip address.
-##                This is a required field used when the pre-preparation stage of the air gap network.
+## - k8s-version: Kubernetes version (default: "latest")
+##                If you input only the major version, the minor version automatically selects the last version.
+## - registry-version: Private registry version. (default: latest)
+##                     This is a required entry used when installing a private registry.
+##                     If you input only the major version, the minor version automatically selects the last version.
 ## - registry-ip: Private registry node ip address.
 ##                This is a required field used when the pre-preparation stage of the air gap network.
 ## Optional

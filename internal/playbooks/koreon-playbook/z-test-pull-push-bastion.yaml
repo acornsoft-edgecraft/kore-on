@@ -1,0 +1,92 @@
+---
+- hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Init | Configuration
+      ansible.builtin.include_role:
+        name: init
+        apply:
+          tags:
+            - init
+  any_errors_fatal: true
+
+- hosts: prepare_airgap
+  become: true
+  vars_files:
+    - "{{ playbook_dir }}/inventory/group_vars/basic.yaml"
+    - "{{ playbook_dir }}/inventory/group_vars/expert.yaml"
+  vars:
+    registry_id: "admin"
+    registry_passwd: "Pass0000@"
+    basic_auth: "{{ registry_id }}:{{ registry_passwd }}"
+    harbor_archive_dir: "{{ prepare_airgap_registry_data_dir }}/archive"
+    harbor_data_dir: "{{ prepare_airgap_registry_data_dir }}/harbor"
+    _version: "{{ prepare_airgap_registry_version | split('.') | first }}"
+    _url: "{{ (_version == 'v1') | ternary(prepare_airgap_registry_ip + '/api', prepare_airgap_registry_ip + '/api/' + _version + '.0') }}"
+    bastion_images: [
+      "ghcr.io/acornsoft-edgecraft/kore-on:latest"
+    ]
+    prepare_airgap_images: [
+      "ghcr.io/acornsoft-edgecraft/kore-on:latest"
+    ]
+
+  tasks:
+    - name: pull an image and archive for bastion
+      community.docker.docker_image:
+        name: "{{ item }}"
+        source: pull
+      with_items: 
+        - "{{ bastion_images }}"
+        - "{{ prepare_airgap_images }}"
+
+    - name: pull an image and archive for bastion
+      community.docker.docker_image:
+        name: "{{ item }}"
+        archive_path: "{{ harbor_archive_dir }}/koreon-latest.tgz"
+        source: local
+      with_items: 
+        - "{{ bastion_images }}"
+
+    # - name: Create project
+    #   ansible.builtin.uri:
+    #     url: "https://{{ _url }}/projects"
+    #     method: POST
+    #     ca_path: "{{ harbor_data_dir }}/cert/ca.crt"
+    #     client_cert: "{{ harbor_data_dir }}/cert/harbor.crt"
+    #     client_key: "{{ harbor_data_dir }}/cert/harbor.key"
+    #     validate_certs: false
+    #     headers:
+    #       accept: application/json
+    #       Content-Type: application/json
+    #       Authorization: Basic {{ basic_auth | b64encode }}
+    #     body_format: json
+    #     body:
+    #       project_name: "{{ item | split('/') | first }}"
+    #       public: true
+    #       storage_limit: -1
+    #       metadata:
+    #         public: "true"
+    #   register: result
+    #   failed_when: false
+    #   loop: "{{ prepare_airgap_images }}"
+
+    # - debug:
+    #     msg: "{{ result }}"
+
+    # - name: Docker login
+    #   community.docker.docker_login:
+    #     registry_url: "{{ prepare_airgap_registry_ip }}"
+    #     username: "{{ registry_id }}"
+    #     password: "{{ registry_passwd }}"
+    #     reauthorize: True
+    #   delegate_to: "{{ groups['prepare_airgap'][0] }}"
+
+    # - name: Tag and push to local registry
+    #   community.docker.docker_image:
+    #     name: "{{ item }}"
+    #     repository: "{{ prepare_airgap_registry_ip + '/' + item }}"
+    #     ca_cert: "{{ harbor_data_dir }}/cert/ca.crt"
+    #     push: true
+    #     source: local
+    #   loop: "{{ prepare_airgap_images }}"
+    #   delegate_to: "{{ groups['prepare_airgap'][0] }}"

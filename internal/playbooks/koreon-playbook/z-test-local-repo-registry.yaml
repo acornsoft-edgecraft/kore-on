@@ -37,7 +37,7 @@
   any_errors_fatal: true
 
 # Test private repository and registry
-- hosts: registry
+- hosts: prepare_airgap
   become: true
   gather_facts: false
   vars_files:

@@ -36,6 +36,7 @@ func init() {
 		createCmd(),
 		destroyCmd(),
 		airGapCmd(),
+		bastionCmd(),
 	)
 
 }
@@ -46,4 +47,11 @@ func initConfig() {
 	if err != nil {
 		logger.Fatalf("Could not instantiate log %ss", err.Error())
 	}
+
+	// // load config file
+	// err = config.Load()
+	// if err != nil {
+	// 	logger.Fatalf("Could not load configuration: %s", err.Error())
+	// 	os.Exit(1)
+	// }
 }

@@ -45,7 +45,7 @@ func TestCmd() *cobra.Command {
 	test.tags = ""
 	test.inventory = "./internal/playbooks/koreon-playbook/inventory/inventory.ini"
 	test.playbookFiles = []string{
-		"./internal/playbooks/koreon-playbook/z-test-pull-push.yaml",
+		"./internal/playbooks/koreon-playbook/z-test-package-download.yaml",
 	}
 
 	f := cmd.Flags()

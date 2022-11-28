@@ -95,6 +95,7 @@
     name: local-repo
     description: "Local Repo configure"
     gpgcheck: false
+    enabled: true
     baseurl: "{{ (local_repository_url == '') | ternary('http://' + registry_ip + ':' + (local_repository_port | string), local_repository_url, omit) }}"
   notify: yum-clean-metadata
 

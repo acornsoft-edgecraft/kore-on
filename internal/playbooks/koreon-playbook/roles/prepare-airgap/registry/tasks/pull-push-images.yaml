@@ -1,9 +1,11 @@
 ---
-- name: pull an image
+- name: pull an image for prepare-airgap
   community.docker.docker_image:
     name: "{{ item }}"
     source: pull
-  loop: "{{ prepare_airgap_images }}"
+  with_items: 
+    - "{{ prepare_airgap_images }}"
+    - "{{ bastion_images }}"
 
 - name: Create project
   ansible.builtin.uri:

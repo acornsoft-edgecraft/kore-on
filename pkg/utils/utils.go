@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -8,6 +9,7 @@ import (
 	"kore-on/pkg/logger"
 	"os"
 	"os/exec"
+	"runtime"
 	"sort"
 	"strings"
 
@@ -206,11 +208,31 @@ func CheckDocker() error {
 
 	if err != nil {
 		//fmt.Println(err.Error())
-		logger.Fatal("docker is not found. Install docker before proceeding")
+		logger.Fatal("docker is not found. Install docker before proceeding.\nIf it is a closed network, you can install it using the 'koreanctl bastion' command with the prepared package.")
 		logger.Fatal("Visit https://www.docker.com/get-started")
 		return err
 	}
 	return nil
+}
+
+func CheckUserInput(prompt string, checkWord string) bool {
+	var res string
+	fmt.Print(prompt)
+
+	reader := bufio.NewReader(os.Stdin)
+	buf, _ := reader.ReadString('\n')
+
+	if runtime.GOOS == "windows" {
+		res = strings.Split(buf, "\r\n")[0]
+	} else {
+		res = strings.Split(buf, "\n")[0]
+	}
+
+	if res == checkWord {
+		return true
+	}
+
+	return false
 }
 
 func prettyPrint(b []byte) ([]byte, error) {

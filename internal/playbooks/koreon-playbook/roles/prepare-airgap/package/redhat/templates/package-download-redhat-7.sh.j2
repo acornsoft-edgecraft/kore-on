@@ -1,0 +1,157 @@
+#!/bin/bash
+
+CURRENT_DATE=`date '+%Y%m%d'`
+CURRENT_TIME=`date '+%Y%m%d_%H%M%S'`
+
+K8S_VERIONS="-{{ prepare_airgap_k8s_version | regex_replace('^v', '') }}"
+REPO_DIR="{{ package_data_dir }}"
+PACKAGE_BASTION_DIR="{{ package_bastion_dir }}"
+ARCHIVE_DIR="{{ package_archive_dir }}"
+
+error_exit() {
+    echo "error: ${1:-"unknown error"}" 1>&2
+    exit 1
+}
+
+make_yum_repo(){
+    cd "$REPO_DIR"
+
+    yum clean all
+    yum repolist
+    yum -y install createrepo
+    yum -y install yum-utils
+
+    repoquery --qf=%{name} -g --list --grouppkgs=all [groups] | xargs repotrack -a x86_64 -p ./ createrepo
+    repoquery --qf=%{name} -g --list --grouppkgs=all [groups] | xargs repotrack -p ./ yum-utils
+
+    repoquery --qf=%{name} -g --list --grouppkgs=all [groups] | xargs repotrack -a x86_64 -p ./ jq
+    repoquery --qf=%{name} -g --list --grouppkgs=all [groups] | xargs repotrack -p ././ nginx
+    repoquery --qf=%{name} -g --list --grouppkgs=all [groups] | xargs repotrack -a x86_64 -p ./ telnet
+    repoquery --qf=%{name} -g --list --grouppkgs=all [groups] | xargs repotrack -a x86_64 -p ./ net-tools
+    repoquery --qf=%{name} -g --list --grouppkgs=all [groups] | xargs repotrack -a x86_64 -p ./ bind-utils
+    repoquery --qf=%{name} -g --list --grouppkgs=all [groups] | xargs repotrack -a x86_64 -p ./ python3
+
+    repoquery --qf=%{name} -g --list --grouppkgs=all [groups] | xargs repotrack -a x86_64 -p ./ nfs-utils
+    repoquery --qf=%{name} -g --list --grouppkgs=all [groups] | xargs repotrack -a x86_64 -p ./ lvm2
+    repoquery --qf=%{name} -g --list --grouppkgs=all [groups] | xargs repotrack -a x86_64 -p ./ NetworkManager
+    repoquery --qf=%{name} -g --list --grouppkgs=all [groups] | xargs repotrack -a x86_64 -p ./ ipvsadm
+    repoquery --qf=%{name} -g --list --grouppkgs=all [groups] | xargs repotrack -a x86_64 -p ./ ipset
+    repoquery --qf=%{name} -g --list --grouppkgs=all [groups] | xargs repotrack -a x86_64 -p ./ lksctp-tools
+    repoquery --qf=%{name} -g --list --grouppkgs=all [groups] | xargs repotrack -a x86_64 -p ./ python3-libselinux
+    repoquery --qf=%{name} -g --list --grouppkgs=all [groups] | xargs repotrack -a x86_64 -p ./ socat
+    repoquery --qf=%{name} -g --list --grouppkgs=all [groups] | xargs repotrack -a x86_64 -p ./ conntrack-tools
+    repoquery --qf=%{name} -g --list --grouppkgs=all [groups] --enablerepo=Docker-CE-Stable | xargs repotrack -a x86_64 -p ./ docker-ce docker-ce-cli
+
+    repoquery --qf=%{name} -g --list --grouppkgs=all [groups] | xargs dnf install --downloadonly --enablerepo=Docker-CE-Stable --disableexcludes=Docker-CE-Stable --downloaddir=./ "{{ containerd_io }}"
+    repoquery --qf=%{name} -g --list --grouppkgs=all [groups] | xargs dnf install -y --downloadonly --enablerepo=kubernetes --disableexcludes=kubernetes --downloaddir=./ kubectl${K8S_VERIONS} kubelet${K8S_VERIONS} kubeadm${K8S_VERIONS}
+
+    createrepo .
+}
+
+make_apt_repo(){
+    if [ "$K8S_VERIONS" != "" ]; then
+        K8S_VERIONS=-$(echo $K8S_VERIONS | sed 's/^v//')
+    fi
+    cd "$REPO_DIR"
+
+    apt-get -y update
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" nfs-common libnfsidmap2 libtirpc3 rpcbind keyutils libtirpc-common
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" nfs-kernel-server
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" nginx
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" python3
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" ipvsadm
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" ipset
+
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" containerd.io="{{ package_containerd_version }}"
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" docker-ce
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" docker-ce-cli
+
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" jq
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" libonig2
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" telnet
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" vim
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" curl
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" net-tools
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" dnsutils
+
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" dpkg-dev
+    apt-get install -y dpkg-dev
+
+    for item in {"{{ kube_support_versions | map('regex_replace', '^v', '') | list }}"}; do
+        apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" kubelet=${item}-00 kubeadm=${item}-00 kubectl=${item}-00
+    done
+
+    rm -rf lock partial pkgcache.bin srcpkgcache.bin Packages.gz
+
+    dpkg-scanpackages -m . | gzip -c > Packages.gz
+}
+
+make_yum_bastion(){
+    cd "$PACKAGE_BASTION_DIR"
+
+    repoquery --qf=%{name} -g --list --grouppkgs=all [groups] --enablerepo=Docker-CE-Stable | xargs repotrack -a x86_64 -p ./ docker-ce docker-ce-cli
+}
+
+
+make_apt_bastion(){
+    cd "$PACKAGE_BASTION_DIR"
+
+    apt-get -y update
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" docker-ce
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" docker-ce-cli
+
+    rm -rf lock partial pkgcache.bin srcpkgcache.bin Packages.gz
+
+    dpkg-scanpackages -m . | gzip -c > Packages.gz
+}
+
+
+create_tarball() {
+ 	cd $REPO_DIR
+    tar --exclude archive -zcvf $ARCHIVE_DIR/local-repo-$CURRENT_TIME.tgz ./
+}
+
+create_bastion_tarball() {
+ 	cd "$PACKAGE_BASTION_DIR"
+    tar --exclude archive -zcvf $ARCHIVE_DIR/package-bastion-$CURRENT_TIME.tgz ./
+}
+
+
+main() {
+
+    for var in `grep -ri "ID" /etc/os-release`
+    do
+    KEY=$(echo $var | cut -f1 -d=)
+    VALUE=$(echo $var | cut -f2 -d= | sed 's/\"//g;s/platform\://')
+
+    case "$KEY" in
+        ID)                 ID=${VALUE} ;;
+        ID_LIKE)            ID_LIKE=${VALUE} ;;
+        VERSION_ID)         VERSION_ID=${VALUE} ;;
+        PLATFORM_ID)        PLATFORM_ID=${VALUE} ;;
+        *)
+    esac
+    done
+
+    if [ "$ID" == "centos" ]; then
+        make_yum_repo
+        make_yum_bastion
+    fi
+
+    if [ "$ID" == "rhel" ]; then
+        make_yum_repo
+        make_yum_bastion
+    fi
+
+    if [ "$ID" == "ubuntu" ]; then
+        make_apt_repo
+        make_apt_bastion
+    fi
+
+    create_tarball
+    create_bastion_tarball
+
+    echo "Completed"
+}
+
+main "${@}"
