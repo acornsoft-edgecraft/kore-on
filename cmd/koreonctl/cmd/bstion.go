@@ -14,50 +14,52 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type strInitCmd struct {
+type strBstionCmd struct {
 	verbose bool
 }
 
-func initCmd() *cobra.Command {
-	init := &strInitCmd{}
+func bastionCmd() *cobra.Command {
+	bastionCmd := &strBstionCmd{}
 	cmd := &cobra.Command{
-		Use:          "init [flags]",
-		Short:        "Get configuration file",
-		Long:         "This command downloads a sample file that can set machine information and installation information.",
+		Use:          "bastion [flags]",
+		Short:        "Install docker in bastion host",
+		Long:         "This command a installation docker on bastion host.",
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return init.run()
+			return bastionCmd.run()
 		},
 	}
 
 	f := cmd.Flags()
-	f.BoolVar(&init.verbose, "vvv", false, "verbose")
+	f.BoolVar(&bastionCmd.verbose, "vvv", false, "verbose")
 
 	return cmd
 }
 
-func (c *strInitCmd) run() error {
+func (c *strBstionCmd) run() error {
 
 	workDir, _ := os.Getwd()
 	var err error = nil
 	logger.Infof("Start provisioning for cloud infrastructure")
 
-	if err = c.init(workDir); err != nil {
+	if err = c.bastion(workDir); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (c *strInitCmd) init(workDir string) error {
+func (c *strBstionCmd) bastion(workDir string) error {
 	// Doker check
 	utils.CheckDocker()
 
 	koreonImageName := conf.KoreOnImageName
 	koreOnImage := conf.KoreOnImage
+	koreOnConfigFileName := conf.KoreOnConfigFile
 	koreOnConfigFilePath := conf.KoreOnConfigFileSubDir
 
-	if !utils.CheckUserInput("Do you really want to init? \nIs this ok [y/N]: ", "y") {
-		fmt.Println("nothing to changed. exit")
+	koreonToml, err := utils.GetKoreonTomlConfig(workDir + "/" + koreOnConfigFileName)
+	if err != nil {
+		logger.Fatal(err)
 		os.Exit(1)
 	}
 
@@ -69,8 +71,10 @@ func (c *strInitCmd) init(workDir string) error {
 		"-it",
 	}
 
-	commandArgs = append(commandArgs, "--pull")
-	commandArgs = append(commandArgs, "always")
+	if !koreonToml.KoreOn.ClosedNetwork {
+		commandArgs = append(commandArgs, "--pull")
+		commandArgs = append(commandArgs, "always")
+	}
 
 	commandArgsVol := []string{
 		"-v",
@@ -95,7 +99,7 @@ func (c *strInitCmd) init(workDir string) error {
 		logger.Fatal(lookErr)
 	}
 
-	err := syscall.Exec(binary, commandArgs, os.Environ())
+	err = syscall.Exec(binary, commandArgs, os.Environ())
 	if err != nil {
 		log.Printf("Command finished with error: %v", err)
 	}

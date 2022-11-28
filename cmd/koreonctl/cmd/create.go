@@ -1,14 +1,14 @@
 package cmd
 
 import (
+	"bytes"
 	"fmt"
+	"html/template"
 	"kore-on/pkg/logger"
+	"kore-on/pkg/model"
 	"kore-on/pkg/utils"
-	"log"
 	"os"
-	"os/exec"
 	"path/filepath"
-	"syscall"
 
 	"kore-on/cmd/koreonctl/conf"
 
@@ -46,11 +46,6 @@ func createCmd() *cobra.Command {
 
 func (c *strCreateCmd) run() error {
 
-	//if !utils.CheckUserInput("Do you really want to create? Only 'yes' will be accepted to confirm: ", "yes") {
-	//	fmt.Println("nothing to changed. exit")
-	//	os.Exit(1)
-	//}
-
 	workDir, _ := os.Getwd()
 	var err error = nil
 	logger.Infof("Start provisioning for cloud infrastructure")
@@ -73,6 +68,31 @@ func (c *strCreateCmd) create(workDir string) error {
 	koreonToml, err := utils.GetKoreonTomlConfig(workDir + "/" + koreOnConfigFileName)
 	if err != nil {
 		logger.Fatal(err)
+		os.Exit(1)
+	}
+
+	// Make provision data
+	data := model.KoreonctlText{}
+	data.KoreOnTemp = koreonToml
+	data.Command = "create"
+
+	// Processing template
+	temp, err := template.ParseFiles("./conf/templates/koreonctl.text")
+	if err != nil {
+		logger.Errorf("Template has errors. cause(%s)", err.Error())
+		return err
+	}
+
+	// TODO: 진행상황을 어떻게 클라이언트에 보여줄 것인가?
+	var buff bytes.Buffer
+	err = temp.Execute(&buff, data)
+	if err != nil {
+		logger.Errorf("Template execution failed. cause(%s)", err.Error())
+		return err
+	}
+
+	if !utils.CheckUserInput(buff.String(), "y") {
+		fmt.Println("nothing to changed. exit")
 		os.Exit(1)
 	}
 
@@ -133,17 +153,15 @@ func (c *strCreateCmd) create(workDir string) error {
 	commandArgs = append(commandArgs, commandArgsVol...)
 	commandArgs = append(commandArgs, commandArgsKoreonctl...)
 
-	fmt.Println(commandArgs)
+	// binary, lookErr := exec.LookPath("docker")
+	// if lookErr != nil {
+	// 	logger.Fatal(lookErr)
+	// }
 
-	binary, lookErr := exec.LookPath("docker")
-	if lookErr != nil {
-		logger.Fatal(lookErr)
-	}
-
-	err = syscall.Exec(binary, commandArgs, os.Environ())
-	if err != nil {
-		log.Printf("Command finished with error: %v", err)
-	}
+	// err = syscall.Exec(binary, commandArgs, os.Environ())
+	// if err != nil {
+	// 	log.Printf("Command finished with error: %v", err)
+	// }
 
 	return nil
 }

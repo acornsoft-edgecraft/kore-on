@@ -7,6 +7,7 @@
   with_items:
     - "{{ package_data_dir }}"
     - "{{ package_archive_dir }}"
+    - "{{ package_bastion_dir }}"
 
 - name: Download crictl binary
   ansible.builtin.get_url:
@@ -31,25 +32,10 @@
     dest: "/tmp/package-download.sh"
     mode: 0755
 
-
-- name: Copy bastion scripts files
-  template:
-    src: "package-docker-download.sh.j2"
-    dest: "/tmp/package-docker-download.sh"
-    mode: 0755
-
 # Download the package and create a local repository
 - name: Make local repository
   shell: "/tmp/package-download.sh"
   register: result_p
 
-# Download docker packages 
-- name: Make bastion packages
-  shell: "/tmp/package-docker-download.sh"
-  register: result_d
-
 - debug:
     msg: "{{ result_p }}"
-
-- debug:
-    msg: "{{ result_d }}"
