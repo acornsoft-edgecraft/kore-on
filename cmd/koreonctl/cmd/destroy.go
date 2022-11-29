@@ -14,6 +14,7 @@ import (
 	"syscall"
 
 	"kore-on/cmd/koreonctl/conf"
+	"kore-on/cmd/koreonctl/conf/templates"
 
 	"github.com/spf13/cobra"
 )
@@ -184,7 +185,8 @@ func (c *strDestroyCmd) destroy(workDir string) error {
 	data.Command = "create"
 
 	// Processing template
-	temp, err := template.ParseFiles("./conf/templates/koreonctl.text")
+	koreonctlText := template.New("koreonctlText")
+	temp, err := koreonctlText.Parse(templates.KoreonctlText)
 	if err != nil {
 		logger.Errorf("Template has errors. cause(%s)", err.Error())
 		return err

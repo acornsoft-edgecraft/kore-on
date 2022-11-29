@@ -130,6 +130,7 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 		workerIP := koreonToml.NodePool.Node.IP
 		etcdPrivateIpCnt := len(koreonToml.Kubernetes.Etcd.PrivateIP)
 		nodePoolDataDir := koreonToml.NodePool.DataDir
+		nodePoolSSHPort := koreonToml.NodePool.SSHPort
 
 		privateRegistryInstall := koreonToml.PrivateRegistry.Install
 		privateRegistryRegistryIP := koreonToml.PrivateRegistry.RegistryIP
@@ -187,8 +188,9 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 			// todo node pool data dir check
 		}
 
-		if len(nodePoolDataDir) > 0 {
-			// todo node pool data dir check
+		if nodePoolSSHPort == 0 {
+			// todo node pool ssh port check
+			koreonToml.NodePool.SSHPort = 22
 		}
 
 		//storage check
