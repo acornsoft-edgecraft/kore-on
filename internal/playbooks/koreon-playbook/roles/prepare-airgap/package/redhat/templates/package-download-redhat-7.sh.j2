@@ -92,6 +92,7 @@ make_yum_bastion(){
     cd "$PACKAGE_BASTION_DIR"
 
     repoquery --qf=%{name} -g --list --grouppkgs=all [groups] --enablerepo=Docker-CE-Stable | xargs repotrack -a x86_64 -p ./ docker-ce docker-ce-cli
+    repoquery --qf=%{name} -g --list --grouppkgs=all [groups] | xargs repotrack -a x86_64 -p ./ audit
 }
 
 

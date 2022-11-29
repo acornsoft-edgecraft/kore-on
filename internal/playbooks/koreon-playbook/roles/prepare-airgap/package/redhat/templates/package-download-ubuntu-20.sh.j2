@@ -92,6 +92,17 @@ make_apt_repo(){
     dpkg-scanpackages -m . | gzip -c > Packages.gz
 }
 
+make_apt_bastion(){
+    cd "$PACKAGE_BASTION_DIR"
+
+    apt-get -y update
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" docker-ce
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" docker-ce-cli
+
+    rm -rf lock partial pkgcache.bin srcpkgcache.bin Packages.gz
+
+    dpkg-scanpackages -m . | gzip -c > Packages.gz
+}
 
 create_tarball() {
  	cd $REPO_DIR
@@ -125,6 +136,7 @@ main() {
 
     if [ "$ID" == "ubuntu" ]; then
         make_apt_repo
+        make_apt_bastion
     fi
 
     create_tarball

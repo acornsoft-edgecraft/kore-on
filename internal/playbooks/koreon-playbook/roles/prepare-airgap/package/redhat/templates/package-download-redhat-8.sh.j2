@@ -98,6 +98,7 @@ make_yum_bastion(){
     cd "$PACKAGE_BASTION_DIR"
 
     dnf -y download --resolve --alldeps --enablerepo=Docker-CE-Stable --arch x86_64 --downloaddir=./ docker-ce docker-ce-cli
+    dnf -y download --resolve --arch x86_64 --downloaddir=./ audit
 }
 
 

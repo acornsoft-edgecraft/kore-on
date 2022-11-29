@@ -2,23 +2,30 @@ package cmd
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"html/template"
+	"io/ioutil"
 	"kore-on/pkg/logger"
 	"kore-on/pkg/utils"
+	"log"
 	"os"
+	"os/user"
 	"path/filepath"
+	"runtime"
 
 	"kore-on/cmd/koreonctl/conf"
 	"kore-on/cmd/koreonctl/conf/templates"
 
 	"github.com/spf13/cobra"
+	"github.com/zcalusic/sysinfo"
 )
 
 type strBstionCmd struct {
 	verbose         bool
 	archiveFilePath string
+	command         string
 }
 
 func bastionCmd() *cobra.Command {
@@ -75,13 +82,6 @@ func (c *strBstionCmd) bastion(workDir string) error {
 		}
 	}
 
-	// //untar gzip file
-	// archiveFilePath, _ := filepath.Abs(c.archiveFilePath)
-	// err = archiver.Unarchive(archiveFilePath, path)
-	// if err != nil {
-	// 	logger.Fatal(err)
-	// }
-
 	// Processing template
 	bastionText := template.New("bastionLocalRepoText")
 	temp, err := bastionText.Parse(templates.BastionLocalRepoText)
@@ -99,7 +99,33 @@ func (c *strBstionCmd) bastion(workDir string) error {
 		return err
 	}
 
-	fmt.Println(err)
+	current, err := user.Current()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if current.Uid != "0" {
+		log.Fatal("requires superuser privilege")
+	}
+
+	var si sysinfo.SysInfo
+
+	si.GetSysInfo()
+
+	data, err := json.MarshalIndent(&si, "", "  ")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println(string(data))
+
+	repoPath := "/etc/yum.repos.d"
+	err = ioutil.WriteFile(repoPath+"/bastion-local.repo", buff.Bytes(), 0644)
+	if err != nil {
+		logger.Fatal(err)
+	}
+
+	fmt.Println("aa == ", runtime.GOOS)
 
 	commandArgs := []string{
 		"yum",
