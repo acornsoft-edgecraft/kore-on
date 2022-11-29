@@ -1,8 +1,8 @@
 package templates
 
 const BastionLocalRepoText = `
-[bastionlocal]
-name=bastion local repo
+[bastion-local-to-file]
+name=bastion-local-repo
 baseurl=file://{{.}}
 gpgcheck=0
 enabled=0`

@@ -241,3 +241,8 @@ func prettyPrint(b []byte) ([]byte, error) {
 	err := json.Indent(&out, b, "", "  ")
 	return out.Bytes(), err
 }
+func Print(b []byte) (string, error) {
+	var out bytes.Buffer
+	err := json.Indent(&out, b, "", "  ")
+	return string(out.Bytes()), err
+}
