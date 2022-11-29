@@ -7,10 +7,14 @@ import (
 	"kore-on/pkg/logger"
 	"kore-on/pkg/model"
 	"kore-on/pkg/utils"
+	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"syscall"
 
 	"kore-on/cmd/koreonctl/conf"
+	"kore-on/cmd/koreonctl/conf/templates"
 
 	"github.com/spf13/cobra"
 )
@@ -77,7 +81,8 @@ func (c *strCreateCmd) create(workDir string) error {
 	data.Command = "create"
 
 	// Processing template
-	temp, err := template.ParseFiles("./conf/templates/koreonctl.text")
+	koreonctlText := template.New("koreonctlText")
+	temp, err := koreonctlText.Parse(templates.KoreonctlText)
 	if err != nil {
 		logger.Errorf("Template has errors. cause(%s)", err.Error())
 		return err
@@ -153,15 +158,15 @@ func (c *strCreateCmd) create(workDir string) error {
 	commandArgs = append(commandArgs, commandArgsVol...)
 	commandArgs = append(commandArgs, commandArgsKoreonctl...)
 
-	// binary, lookErr := exec.LookPath("docker")
-	// if lookErr != nil {
-	// 	logger.Fatal(lookErr)
-	// }
+	binary, lookErr := exec.LookPath("docker")
+	if lookErr != nil {
+		logger.Fatal(lookErr)
+	}
 
-	// err = syscall.Exec(binary, commandArgs, os.Environ())
-	// if err != nil {
-	// 	log.Printf("Command finished with error: %v", err)
-	// }
+	err = syscall.Exec(binary, commandArgs, os.Environ())
+	if err != nil {
+		log.Printf("Command finished with error: %v", err)
+	}
 
 	return nil
 }

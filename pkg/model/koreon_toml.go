@@ -42,6 +42,7 @@ type KoreOnToml struct {
 
 	NodePool struct {
 		DataDir string `toml:"data-dir,omitempty"`
+		SSHPort int    `toml:"ssh-port,omitempty"`
 
 		// Security struct {
 		// 	SSHUserID      string `toml:"ssh-user-id,omitempty"`

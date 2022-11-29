@@ -74,7 +74,9 @@ const Template = `
 ## - 
 ## Optional
 ## - data-dir: data(backup, docker, log, kubelet, etcd, k8s-audit, containerd) root dir (default: "/data") 
+## - ssh-port: Node ssh port (default: 22) 
 #data-dir = "/data"
+#ssh-port = 22
 
 [node-pool.master]
 ## Required

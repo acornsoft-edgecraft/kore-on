@@ -1,3 +1,6 @@
+package templates
+
+const KoreonctlText = `
 {{- $Master := .KoreOnTemp.NodePool.Master}}
 {{- $Node := .KoreOnTemp.NodePool.Node}}
 {{- $PrepareAirgap := .KoreOnTemp.PrepareAirgap}}
@@ -7,7 +10,7 @@
 ===========================================================================
 Node Name                      IP Address              Private IP Adderss
 ===========================================================================
-{{- if eq "" .KoreOnTemp.PrepareAirgap.RegistryIP -}}
+{{- if ne "prepare-airgap" .Command -}}
 {{  range $index, $data := $Master.IP}}
 master-{{$index}}                       {{$data}}                    {{if ne (len $Master.PrivateIP) 0}}{{index $Master.PrivateIP $index}}{{end -}}
 {{  end}}
@@ -29,7 +32,7 @@ node-regi                               {{$PrivateRegistry.RegistryIP}}         
 node-storage                   {{$SharedStorage.StorageIP}}                    {{if ne "" $SharedStorage.PrivateIP}}{{$SharedStorage.PrivateIP}}{{end -}}
 {{  end -}}
 {{else}}
-prepare-airgap-node                      {{.PrepareAirgap.RegistryIP}}                   
+prepare-airgap-node                      {{$PrepareAirgap.RegistryIP}}                   
 {{end -}}
 ===========================================================================
-Is this ok [y/N]: 
+Is this ok [y/N]: `

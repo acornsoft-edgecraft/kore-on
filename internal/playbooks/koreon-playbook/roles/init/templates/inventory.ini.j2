@@ -4,30 +4,30 @@
 {% if (PrepareAirgap.RegistryIP == "") %}
 {% if NodePool.Master.IP %}
 {%   for IP in NodePool.Master.IP %}
-master-{{ loop.index }}                 ansible_ssh_host={{ IP }}  ip={{((NodePool.Master.PrivateIP != None) and (NodePool.Master.PrivateIP | length > 0)) | ternary(NodePool.Master.PrivateIP[loop.index-1], IP) }}
+master-{{ loop.index }}                 ansible_ssh_host={{ IP }}    ansible_ssh_port={{ NodePool.SSHPort }}  ip={{((NodePool.Master.PrivateIP != None) and (NodePool.Master.PrivateIP | length > 0)) | ternary(NodePool.Master.PrivateIP[loop.index-1], IP) }}
 {%   endfor %}
 {% endif%}
 {% if Kubernetes.Etcd.ExternalEtcd %}
 {%   for IP in Kubernetes.Etcd.IP %}
-etcd-{{ loop.index }}                   ansible_ssh_host={{ IP }}  ip={{ ((Kubernetes.Etcd.PrivateIP != None) and (Kubernetes.Etcd.PrivateIP | length > 0)) | ternary(Kubernetes.Etcd.PrivateIP[loop.index-1], IP) }}
+etcd-{{ loop.index }}                   ansible_ssh_host={{ IP }}    ansible_ssh_port={{ NodePool.SSHPort }}  ip={{ ((Kubernetes.Etcd.PrivateIP != None) and (Kubernetes.Etcd.PrivateIP | length > 0)) | ternary(Kubernetes.Etcd.PrivateIP[loop.index-1], IP) }}
 {%   endfor %}
 {% endif%}
 {% if NodePool.Node.IP %}
 {%   for IP in NodePool.Node.IP %}
-node-{{ loop.index }}                   ansible_ssh_host={{ IP }}  ip={{ ((NodePool.Node.PrivateIP != None) and (NodePool.Node.PrivateIP | length > 0)) | ternary(NodePool.Node.PrivateIP[loop.index-1], IP) }}
+node-{{ loop.index }}                   ansible_ssh_host={{ IP }}    ansible_ssh_port={{ NodePool.SSHPort }}  ip={{ ((NodePool.Node.PrivateIP != None) and (NodePool.Node.PrivateIP | length > 0)) | ternary(NodePool.Node.PrivateIP[loop.index-1], IP) }}
 {%   endfor %}
 {% endif%}
 {%- if (PrivateRegistry.Install | default(false)) and (SharedStorage.Install | default(false)) %}
 {%   if PrivateRegistry.RegistryIP == SharedStorage.StorageIP %}
-node-regi-storage        ansible_ssh_host={{ PrivateRegistry.RegistryIP }}  ip={{ ((PrivateRegistry.PrivateIP != None) and (PrivateRegistry.PrivateIP | length > 0)) | ternary(PrivateRegistry.PrivateIP, PrivateRegistry.RegistryIP) }}
+node-regi-storage        ansible_ssh_host={{ PrivateRegistry.RegistryIP }}    ansible_ssh_port={{ NodePool.SSHPort }}  ip={{ ((PrivateRegistry.PrivateIP != None) and (PrivateRegistry.PrivateIP | length > 0)) | ternary(PrivateRegistry.PrivateIP, PrivateRegistry.RegistryIP) }}
 {%   else %}
-node-regi                ansible_ssh_host={{ PrivateRegistry.RegistryIP }}  ip={{ ((PrivateRegistry.PrivateIP != None) and (PrivateRegistry.PrivateIP | length > 0)) | ternary(PrivateRegistry.PrivateIP, PrivateRegistry.RegistryIP) }}
-node-storage             ansible_ssh_host={{ SharedStorage.StorageIP }}  ip={{ ((SharedStorage.PrivateIP != None) and (SharedStorage.PrivateIP | length > 0)) | ternary(SharedStorage.PrivateIP, SharedStorage.StorageIP) }}
+node-regi                ansible_ssh_host={{ PrivateRegistry.RegistryIP }}    ansible_ssh_port={{ NodePool.SSHPort }}  ip={{ ((PrivateRegistry.PrivateIP != None) and (PrivateRegistry.PrivateIP | length > 0)) | ternary(PrivateRegistry.PrivateIP, PrivateRegistry.RegistryIP) }}
+node-storage             ansible_ssh_host={{ SharedStorage.StorageIP }}    ansible_ssh_port={{ NodePool.SSHPort }}  ip={{ ((SharedStorage.PrivateIP != None) and (SharedStorage.PrivateIP | length > 0)) | ternary(SharedStorage.PrivateIP, SharedStorage.StorageIP) }}
 {%   endif %}
 {% elif (PrivateRegistry.Install | default(false)) %}
-node-regi                ansible_ssh_host={{ PrivateRegistry.RegistryIP }}  ip={{ ((PrivateRegistry.PrivateIP != None) and (PrivateRegistry.PrivateIP | length > 0)) | ternary(PrivateRegistry.PrivateIP, PrivateRegistry.RegistryIP) }}
+node-regi                ansible_ssh_host={{ PrivateRegistry.RegistryIP }}    ansible_ssh_port={{ NodePool.SSHPort }}  ip={{ ((PrivateRegistry.PrivateIP != None) and (PrivateRegistry.PrivateIP | length > 0)) | ternary(PrivateRegistry.PrivateIP, PrivateRegistry.RegistryIP) }}
 {% elif (SharedStorage.Install | default(false)) %}
-node-storage             ansible_ssh_host={{ SharedStorage.StorageIP }}  ip={{ ((SharedStorage.PrivateIP != None) and (SharedStorage.PrivateIP | length > 0)) | ternary(SharedStorage.PrivateIP, SharedStorage.StorageIP) }}
+node-storage             ansible_ssh_host={{ SharedStorage.StorageIP }}    ansible_ssh_port={{ NodePool.SSHPort }}  ip={{ ((SharedStorage.PrivateIP != None) and (SharedStorage.PrivateIP | length > 0)) | ternary(SharedStorage.PrivateIP, SharedStorage.StorageIP) }}
 {%- endif %}
 {% else %}
 prepare-airgap-node      ansible_ssh_host={{ PrepareAirgap.RegistryIP }}
