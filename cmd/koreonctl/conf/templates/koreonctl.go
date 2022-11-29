@@ -32,7 +32,7 @@ node-regi                               {{$PrivateRegistry.RegistryIP}}         
 node-storage                   {{$SharedStorage.StorageIP}}                    {{if ne "" $SharedStorage.PrivateIP}}{{$SharedStorage.PrivateIP}}{{end -}}
 {{  end -}}
 {{else}}
-prepare-airgap-node                      {{$PrepareAirgap.RegistryIP}}                   
+prepare-airgap-node                        {{$PrepareAirgap.RegistryIP}}                   
 {{end -}}
 ===========================================================================
 Is this ok [y/N]: `

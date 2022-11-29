@@ -64,6 +64,7 @@ make_apt_repo(){
     apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" nfs-kernel-server
     apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" nginx
     apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" python3
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" audit
     apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" ipvsadm
     apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" ipset
 
