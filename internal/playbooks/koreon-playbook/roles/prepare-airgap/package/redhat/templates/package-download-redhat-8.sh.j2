@@ -30,6 +30,7 @@ make_yum_repo(){
     dnf -y download --resolve --arch x86_64 --downloaddir=./ net-tools
     dnf -y download --resolve --arch x86_64 --downloaddir=./ bind-utils
     dnf -y download --resolve --alldeps --arch x86_64 --downloaddir=./ python3
+    dnf -y download --resolve --arch x86_64 --downloaddir=./ audit
 
     dnf -y download --resolve --arch x86_64 --downloaddir=./ nfs-utils
     dnf -y download --resolve --arch x86_64 --downloaddir=./ lvm2
@@ -119,7 +120,7 @@ create_tarball() {
 
 create_bastion_tarball() {
  	cd "$PACKAGE_BASTION_DIR"
-    tar --exclude archive -zcvf $ARCHIVE_DIR/package-bastion-$CURRENT_TIME.tgz ./
+    tar --exclude archive -zcvf $ARCHIVE_DIR/bastion-package-$CURRENT_TIME.tgz ./
 }
 
 main() {
