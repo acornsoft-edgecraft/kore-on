@@ -2,16 +2,13 @@ package cmd
 
 import (
 	"bytes"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"html/template"
 	"io/ioutil"
 	"kore-on/pkg/logger"
 	"kore-on/pkg/utils"
-	"log"
 	"os"
-	"os/user"
 	"path/filepath"
 	"runtime"
 
@@ -19,7 +16,6 @@ import (
 	"kore-on/cmd/koreonctl/conf/templates"
 
 	"github.com/spf13/cobra"
-	"github.com/zcalusic/sysinfo"
 )
 
 type strBstionCmd struct {
@@ -98,26 +94,6 @@ func (c *strBstionCmd) bastion(workDir string) error {
 		logger.Errorf("Template execution failed. cause(%s)", err.Error())
 		return err
 	}
-
-	current, err := user.Current()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	if current.Uid != "0" {
-		log.Fatal("requires superuser privilege")
-	}
-
-	var si sysinfo.SysInfo
-
-	si.GetSysInfo()
-
-	data, err := json.MarshalIndent(&si, "", "  ")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Println(string(data))
 
 	repoPath := "/etc/yum.repos.d"
 	err = ioutil.WriteFile(repoPath+"/bastion-local.repo", buff.Bytes(), 0644)
