@@ -43,6 +43,8 @@
   yum:
     name: "kubeadm-{{ k8s_version_int }}"
     state: present
+    disablerepo: "*"
+    enablerepo: "local-repo"
     update_cache: yes
 # ----------------------------------------------------------------------------
 

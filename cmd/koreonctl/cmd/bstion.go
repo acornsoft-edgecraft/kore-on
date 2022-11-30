@@ -7,12 +7,13 @@ import (
 	"html/template"
 	"io/ioutil"
 	"kore-on/pkg/logger"
-	"kore-on/pkg/utils"
+	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"runtime"
+	"syscall"
 
-	"kore-on/cmd/koreonctl/conf"
 	"kore-on/cmd/koreonctl/conf/templates"
 
 	"github.com/spf13/cobra"
@@ -55,18 +56,14 @@ func (c *strBstionCmd) run() error {
 }
 
 func (c *strBstionCmd) bastion(workDir string) error {
+	if runtime.GOOS == "linux" {
+		logger.Fatal("This command option is only supported on the Linux platform.")
+	}
+
 	// Doker check
-	utils.CheckDocker()
-
-	koreonImageName := conf.KoreOnImageName
-	koreOnImage := conf.KoreOnImage
-	koreOnConfigFileName := conf.KoreOnConfigFile
-	koreOnConfigFilePath := conf.KoreOnConfigFileSubDir
-
-	koreonToml, err := utils.GetKoreonTomlConfig(workDir + "/" + koreOnConfigFileName)
-	if err != nil {
-		logger.Fatal(err)
-		os.Exit(1)
+	_, dockerCheck := exec.LookPath("docker")
+	if dockerCheck == nil {
+		logger.Fatal("Docker already exists.")
 	}
 
 	// mkdir local directory
@@ -101,44 +98,26 @@ func (c *strBstionCmd) bastion(workDir string) error {
 		logger.Fatal(err)
 	}
 
-	fmt.Println("aa == ", runtime.GOOS)
-
 	commandArgs := []string{
 		"yum",
-		workDir + "/local",
+		"install",
+		"-y",
+		"--disablerepo=*",
+		"--enablerepo=bastion-local-to-file",
+		"docker-ce docker-cli",
 	}
 
-	if !koreonToml.KoreOn.ClosedNetwork {
-		commandArgs = append(commandArgs, workDir+"/local")
+	fmt.Println("aa == ", commandArgs)
+
+	binary, lookErr := exec.LookPath("yum")
+	if lookErr != nil {
+		logger.Fatal(lookErr)
 	}
 
-	commandArgsVol := []string{
-		"-v",
-		fmt.Sprintf("%s:%s", workDir, "/"+koreOnConfigFilePath),
+	err = syscall.Exec(binary, commandArgs, os.Environ())
+	if err != nil {
+		log.Printf("Command finished with error: %v", err)
 	}
-
-	commandArgsKoreonctl := []string{
-		koreOnImage,
-		"./" + koreonImageName,
-		"init",
-	}
-
-	if c.verbose {
-		commandArgsKoreonctl = append(commandArgsKoreonctl, "--vvv")
-	}
-
-	commandArgs = append(commandArgs, commandArgsVol...)
-	commandArgs = append(commandArgs, commandArgsKoreonctl...)
-
-	// binary, lookErr := exec.LookPath("yum")
-	// if lookErr != nil {
-	// 	logger.Fatal(lookErr)
-	// }
-
-	// err = syscall.Exec(binary, commandArgs, os.Environ())
-	// if err != nil {
-	// 	log.Printf("Command finished with error: %v", err)
-	// }
 
 	return nil
 }

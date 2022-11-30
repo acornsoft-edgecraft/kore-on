@@ -27,6 +27,8 @@
   yum:
     name: ["docker-ce", "docker-ce-cli"]
     state: present
+    disablerepo: "*"
+    enablerepo: "local-repo"
     update_cache: yes
     disable_gpg_check: yes
   when:
