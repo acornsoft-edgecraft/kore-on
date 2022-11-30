@@ -2,12 +2,13 @@ package cmd
 
 import (
 	"fmt"
+	"io/ioutil"
+	"kore-on/pkg/config"
 	"kore-on/pkg/logger"
 	"kore-on/pkg/utils"
-	"log"
 	"os"
-	"os/exec"
-	"syscall"
+	"path/filepath"
+	"time"
 
 	"kore-on/cmd/koreonctl/conf"
 
@@ -52,53 +53,26 @@ func (c *strInitCmd) init(workDir string) error {
 	// Doker check
 	utils.CheckDocker()
 
-	koreonImageName := conf.KoreOnImageName
-	koreOnImage := conf.KoreOnImage
-	koreOnConfigFilePath := conf.KoreOnConfigFileSubDir
+	currTime := time.Now()
+
+	SUCCESS_FORMAT := "\033[1;32m%s\033[0m\n"
+	koreOnConfigFile := conf.KoreOnConfigFile
 
 	if !utils.CheckUserInput("Do you really want to init? \nIs this ok [y/N]: ", "y") {
 		fmt.Println("nothing to changed. exit")
 		os.Exit(1)
 	}
 
-	commandArgs := []string{
-		"docker",
-		"run",
-		"--rm",
-		"--privileged",
-		"-it",
-	}
-
-	commandArgs = append(commandArgs, "--pull")
-	commandArgs = append(commandArgs, "always")
-
-	commandArgsVol := []string{
-		"-v",
-		fmt.Sprintf("%s:%s", workDir, "/"+koreOnConfigFilePath),
-	}
-
-	commandArgsKoreonctl := []string{
-		koreOnImage,
-		"./" + koreonImageName,
-		"init",
-	}
-
-	if c.verbose {
-		commandArgsKoreonctl = append(commandArgsKoreonctl, "--vvv")
-	}
-
-	commandArgs = append(commandArgs, commandArgsVol...)
-	commandArgs = append(commandArgs, commandArgsKoreonctl...)
-
-	binary, lookErr := exec.LookPath("docker")
-	if lookErr != nil {
-		logger.Fatal(lookErr)
-	}
-
-	err := syscall.Exec(binary, commandArgs, os.Environ())
+	koreOnConfigFilePath, err := filepath.Abs(koreOnConfigFile)
 	if err != nil {
-		log.Printf("Command finished with error: %v", err)
-	}
+		ioutil.WriteFile(workDir+"/"+koreOnConfigFile, []byte(config.Template), 0600)
+		fmt.Printf(SUCCESS_FORMAT, fmt.Sprintf("Initialize completed, Edit %s file according to your environment and run `koreonctl create`", koreOnConfigFile))
+	} else {
+		fmt.Println("Previous " + koreOnConfigFile + " file exist and it will be backup")
+		os.Rename(koreOnConfigFilePath, koreOnConfigFilePath+"_"+currTime.Format("20060102150405"))
+		ioutil.WriteFile(workDir+"/"+koreOnConfigFile, []byte(config.Template), 0600)
+		fmt.Printf(SUCCESS_FORMAT, fmt.Sprintf("Initialize completed, Edit %s file according to your environment and run `koreonctl create`", koreOnConfigFile))
 
+	}
 	return nil
 }

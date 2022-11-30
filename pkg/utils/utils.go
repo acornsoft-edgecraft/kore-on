@@ -12,6 +12,7 @@ import (
 	"runtime"
 	"sort"
 	"strings"
+	"syscall"
 
 	"github.com/spf13/viper"
 )
@@ -234,6 +235,16 @@ func CheckUserInput(prompt string, checkWord string) bool {
 	}
 
 	return false
+}
+
+func SyscallExec(cmd string, commandArgs []string) error {
+	binary, lookErr := exec.LookPath(cmd)
+	if lookErr != nil {
+		logger.Fatal(lookErr)
+	}
+
+	err := syscall.Exec(binary, commandArgs, os.Environ())
+	return err
 }
 
 func prettyPrint(b []byte) ([]byte, error) {

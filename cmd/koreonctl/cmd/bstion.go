@@ -3,17 +3,16 @@ package cmd
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"html/template"
 	"io/ioutil"
 	"kore-on/pkg/logger"
-	"log"
+	"kore-on/pkg/utils"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
-	"syscall"
 
+	"kore-on/cmd/koreonctl/conf"
 	"kore-on/cmd/koreonctl/conf/templates"
 
 	"github.com/spf13/cobra"
@@ -56,8 +55,23 @@ func (c *strBstionCmd) run() error {
 }
 
 func (c *strBstionCmd) bastion(workDir string) error {
-	if runtime.GOOS == "linux" {
+	if runtime.GOOS != "linux" {
 		logger.Fatal("This command option is only supported on the Linux platform.")
+	}
+
+	koreOnConfigFilePath, err := filepath.Abs(conf.KoreOnConfigFile)
+	if err != nil {
+		logger.Fatal(err)
+	}
+
+	koreonToml, err := utils.GetKoreonTomlConfig(koreOnConfigFilePath)
+	if err != nil {
+		logger.Fatal(err)
+	}
+
+	if !koreonToml.KoreOn.ClosedNetwork {
+		logger.Fatal("This command is only supported on the clese network")
+		os.Exit(1)
 	}
 
 	// Doker check
@@ -107,17 +121,26 @@ func (c *strBstionCmd) bastion(workDir string) error {
 		"docker-ce docker-cli",
 	}
 
-	fmt.Println("aa == ", commandArgs)
-
-	binary, lookErr := exec.LookPath("yum")
-	if lookErr != nil {
-		logger.Fatal(lookErr)
-	}
-
-	err = syscall.Exec(binary, commandArgs, os.Environ())
+	err = utils.SyscallExec(commandArgs[0], commandArgs)
 	if err != nil {
-		log.Printf("Command finished with error: %v", err)
+		logger.Fatal("Command finished with error: %v", err)
 	}
 
+	dockerLoad()
+
+	return nil
+}
+
+func dockerLoad() error {
+	commandArgs := []string{
+		"docker",
+		"load",
+		"--input",
+		conf.KoreOnImageArchive,
+	}
+	err := utils.SyscallExec(commandArgs[0], commandArgs)
+	if err != nil {
+		logger.Fatal("Command finished with error: %v", err)
+	}
 	return nil
 }

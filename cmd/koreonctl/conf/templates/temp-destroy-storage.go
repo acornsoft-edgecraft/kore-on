@@ -16,10 +16,10 @@ Node Name                      IP Address              Private IP Adderss
 node-regi-storage            {{$PrivateRegistry.RegistryIP}}
 {{      else}}
 node-storage                   {{$SharedStorage.StorageIP}}                    {{if ne "" $SharedStorage.PrivateIP}}{{$SharedStorage.PrivateIP}}{{end -}}
-{{      end}}
+{{      end -}}
 {{    end -}}
 {{  else if eq true $SharedStorage.Install}}
 node-storage                   {{$SharedStorage.StorageIP}}                    {{if ne "" $SharedStorage.PrivateIP}}{{$SharedStorage.PrivateIP}}{{end -}}
-{{  end -}}
+{{  end }}
 ===========================================================================
 Is this ok [y/N]: `
