@@ -6,6 +6,7 @@ type KoreOnToml struct {
 		ClusterID        string `toml:"cluster-id,omitempty"`
 		InstallDir       string `toml:"install-dir,omitempty"`
 		CertValidityDays int    `toml:"cert-validity-days,omitempty"`
+		ImageArchive     string
 
 		//#Airgap
 		ClosedNetwork              bool   `toml:"closed-network,omitempty"`

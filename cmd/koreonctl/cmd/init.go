@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"kore-on/pkg/config"
@@ -51,6 +50,9 @@ func (c *strInitCmd) run() error {
 }
 
 func (c *strInitCmd) init(workDir string) error {
+	// Doker check
+	utils.CheckDocker()
+
 	currTime := time.Now()
 
 	SUCCESS_FORMAT := "\033[1;32m%s\033[0m\n"
@@ -62,7 +64,6 @@ func (c *strInitCmd) init(workDir string) error {
 	}
 
 	koreOnConfigFilePath, err := filepath.Abs(koreOnConfigFile)
-	errors.Is(err, os.ErrNotExist)
 	if err != nil {
 		ioutil.WriteFile(workDir+"/"+koreOnConfigFile, []byte(config.Template), 0600)
 		fmt.Printf(SUCCESS_FORMAT, fmt.Sprintf("Initialize completed, Edit %s file according to your environment and run `koreonctl create`", koreOnConfigFile))

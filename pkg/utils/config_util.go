@@ -3,6 +3,7 @@ package utils
 import (
 	"fmt"
 	"io/ioutil"
+	"kore-on/cmd/koreonctl/conf"
 	"kore-on/pkg/logger"
 	"kore-on/pkg/model"
 	"os"
@@ -59,6 +60,7 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 	// confCorednsVersion := "Support.SupportCorednsVersion"
 	// confDockerVersion := "Support.SupportDockerVersion"
 	// confDockerComposeVersion := "Support.SupportDockerComposeVersion"
+	koreonToml.KoreOn.ImageArchive = conf.KoreOnImageArchive
 
 	if nodePoolSSHPort == 0 {
 		// todo node pool ssh port check
