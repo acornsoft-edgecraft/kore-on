@@ -7,12 +7,10 @@ import (
 	"html/template"
 	"io/ioutil"
 	"kore-on/pkg/logger"
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
-	"syscall"
 
 	"kore-on/cmd/koreonctl/conf/templates"
 
@@ -109,15 +107,15 @@ func (c *strBstionCmd) bastion(workDir string) error {
 
 	fmt.Println("aa == ", commandArgs)
 
-	binary, lookErr := exec.LookPath("yum")
-	if lookErr != nil {
-		logger.Fatal(lookErr)
-	}
+	// binary, lookErr := exec.LookPath("yum")
+	// if lookErr != nil {
+	// 	logger.Fatal(lookErr)
+	// }
 
-	err = syscall.Exec(binary, commandArgs, os.Environ())
-	if err != nil {
-		log.Printf("Command finished with error: %v", err)
-	}
+	// err = syscall.Exec(binary, commandArgs, os.Environ())
+	// if err != nil {
+	// 	log.Printf("Command finished with error: %v", err)
+	// }
 
 	return nil
 }

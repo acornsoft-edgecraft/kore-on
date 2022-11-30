@@ -20,6 +20,6 @@ node-regi                      {{$PrivateRegistry.RegistryIP}}                  
 {{    else}}
 node-regi                               {{$PrivateRegistry.RegistryIP}}           {{if ne "" $PrivateRegistry.PrivateIP}}{{$PrivateRegistry.PrivateIP}}{{end -}}
 {{    end -}}
-{{  end -}}
+{{  end }}
 ===========================================================================
 Is this ok [y/N]: `
