@@ -26,7 +26,7 @@ node-storage                   {{$SharedStorage.StorageIP}}                    {
 {{      end}}
 {{    else}}
 node-regi                               {{$PrivateRegistry.RegistryIP}}           {{if ne "" $PrivateRegistry.PrivateIP}}{{$PrivateRegistry.PrivateIP}}{{end -}}
-{{    end -}}
+{{    end}}
 {{  else if eq true $SharedStorage.Install}}
 node-storage                   {{$SharedStorage.StorageIP}}                    {{if ne "" $SharedStorage.PrivateIP}}{{$SharedStorage.PrivateIP}}{{end -}}
 {{  end -}}

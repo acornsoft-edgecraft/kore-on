@@ -50,7 +50,7 @@ func CreateCmd() *cobra.Command {
 	}
 
 	f := cmd.Flags()
-	f.BoolVar(&create.verbose, "vvv", false, "verbose")
+	f.BoolVar(&create.verbose, "verbose", false, "verbose")
 	f.BoolVarP(&create.step, "step", "", false, "step")
 	f.BoolVarP(&create.dryRun, "dry-run", "d", false, "dryRun")
 	f.StringVar(&create.tags, "tags", create.tags, "Ansible options tags")
