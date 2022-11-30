@@ -3,10 +3,10 @@ package cmd
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"html/template"
 	"io/ioutil"
 	"kore-on/pkg/logger"
+	"kore-on/pkg/utils"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -54,7 +54,7 @@ func (c *strBstionCmd) run() error {
 }
 
 func (c *strBstionCmd) bastion(workDir string) error {
-	if runtime.GOOS == "linux" {
+	if runtime.GOOS != "linux" {
 		logger.Fatal("This command option is only supported on the Linux platform.")
 	}
 
@@ -105,17 +105,10 @@ func (c *strBstionCmd) bastion(workDir string) error {
 		"docker-ce docker-cli",
 	}
 
-	fmt.Println("aa == ", commandArgs)
-
-	// binary, lookErr := exec.LookPath("yum")
-	// if lookErr != nil {
-	// 	logger.Fatal(lookErr)
-	// }
-
-	// err = syscall.Exec(binary, commandArgs, os.Environ())
-	// if err != nil {
-	// 	log.Printf("Command finished with error: %v", err)
-	// }
+	err = utils.SyscallExec(commandArgs[0], commandArgs)
+	if err != nil {
+		logger.Fatal("Command finished with error: %v", err)
+	}
 
 	return nil
 }
