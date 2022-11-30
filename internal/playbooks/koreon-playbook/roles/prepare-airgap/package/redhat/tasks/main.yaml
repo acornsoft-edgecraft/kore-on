@@ -35,7 +35,3 @@
 # Download the package and create a local repository
 - name: Make local repository
   shell: "/tmp/package-download.sh"
-  register: result_p
-
-- debug:
-    msg: "{{ result_p }}"

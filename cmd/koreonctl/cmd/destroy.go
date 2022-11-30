@@ -7,11 +7,8 @@ import (
 	"kore-on/pkg/logger"
 	"kore-on/pkg/model"
 	"kore-on/pkg/utils"
-	"log"
 	"os"
-	"os/exec"
 	"path/filepath"
-	"syscall"
 
 	"kore-on/cmd/koreonctl/conf"
 	"kore-on/cmd/koreonctl/conf/templates"
@@ -39,6 +36,8 @@ func destroyCmd() *cobra.Command {
 			return destroy.run()
 		},
 	}
+
+	destroy.command = "reset-all"
 
 	cmd.AddCommand(
 		destroyPrepareAirGapCmd(),
@@ -182,11 +181,24 @@ func (c *strDestroyCmd) destroy(workDir string) error {
 	// Make provision data
 	data := model.KoreonctlText{}
 	data.KoreOnTemp = koreonToml
-	data.Command = "create"
+	data.Command = c.command
 
 	// Processing template
-	koreonctlText := template.New("koreonctlText")
-	temp, err := koreonctlText.Parse(templates.KoreonctlText)
+	var textVar string
+	switch data.Command {
+	case "reset-all":
+		textVar = templates.DestroyAllText
+	case "reset-cluster":
+		textVar = templates.DestroyClusterText
+	case "reset-registry":
+		textVar = templates.DestroyRegistryText
+	case "reset-storage":
+		textVar = templates.DestroyStorageText
+	case "reset-prepare-airgap":
+		textVar = templates.DestroyPrepareAirgapText
+	}
+	koreonctlText := template.New("DestroyText")
+	temp, err := koreonctlText.Parse(textVar)
 	if err != nil {
 		logger.Errorf("Template has errors. cause(%s)", err.Error())
 		return err
@@ -282,15 +294,15 @@ func (c *strDestroyCmd) destroy(workDir string) error {
 	commandArgs = append(commandArgs, commandArgsVol...)
 	commandArgs = append(commandArgs, commandArgsKoreonctl...)
 
-	binary, lookErr := exec.LookPath("docker")
-	if lookErr != nil {
-		logger.Fatal(lookErr)
-	}
+	// binary, lookErr := exec.LookPath("docker")
+	// if lookErr != nil {
+	// 	logger.Fatal(lookErr)
+	// }
 
-	err = syscall.Exec(binary, commandArgs, os.Environ())
-	if err != nil {
-		log.Printf("Command finished with error: %v", err)
-	}
+	// err = syscall.Exec(binary, commandArgs, os.Environ())
+	// if err != nil {
+	// 	log.Printf("Command finished with error: %v", err)
+	// }
 
 	return nil
 }

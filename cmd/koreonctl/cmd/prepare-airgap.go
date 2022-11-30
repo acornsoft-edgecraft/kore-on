@@ -111,8 +111,8 @@ func (c *strAirGapCmd) airgap(workDir string) error {
 	data.Command = "prepare-airgap"
 
 	// Processing template
-	koreonctlText := template.New("koreonctlText")
-	temp, err := koreonctlText.Parse(templates.KoreonctlText)
+	koreonctlText := template.New("PrepareAirgapText")
+	temp, err := koreonctlText.Parse(templates.PrepareAirgapText)
 	if err != nil {
 		logger.Errorf("Template has errors. cause(%s)", err.Error())
 		return err
