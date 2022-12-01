@@ -223,12 +223,10 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 		if isPrivateRegistryPublicCert {
 			if privateRegistryCrt == "" {
 				logger.Fatal("private-registry.cert-file > ssl-certificate is required.")
-				errorCnt++
 			}
 
 			if privateRegistryKey == "" {
 				logger.Fatal("private-registry.cert-file > ssl-certificate-key is required.")
-				errorCnt++
 			}
 		}
 
@@ -236,23 +234,24 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 			if koreonToml.KoreOn.LocalRepositoryInstall {
 				if koreonToml.KoreOn.LocalRepositoryArchiveFile == "" {
 					logger.Fatal("koreon> When installing a local repository, the local-repository-archive-file entry is required.")
-					errorCnt++
 				}
 			} else {
 				if koreonToml.KoreOn.LocalRepositoryUrl == "" {
 					logger.Fatal("koreon> If you are not installing a local repository, the local-repository-url entry is required.")
-					errorCnt++
 				}
 				if koreonToml.KoreOn.LocalRepositoryArchiveFile != "" {
 					logger.Fatal("koreon> If you are not installing a local repository, the local-repository-archive-file entry should be empty.")
-					errorCnt++
 				}
 			}
 
 			if privateRegistryInstall {
 				if koreonToml.PrivateRegistry.RegistryArchiveFile == "" {
 					logger.Fatal("private-registry >  registry-archive-file is required.")
-					errorCnt++
+				} else {
+					harborVersionCheck := strings.Split(koreonToml.PrivateRegistry.RegistryArchiveFile, "-")
+					if supportHarborVersion != harborVersionCheck[1] {
+						logger.Fatalf("Check the private registry installation version.\nIs the version you are trying to install '%s' correct? If different, re-enter the registry-archive-file entry", harborVersionCheck[1])
+					}
 				}
 			}
 		}
