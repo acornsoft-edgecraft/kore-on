@@ -62,7 +62,8 @@
 - name: Install nginx server for local repository
   ansible.builtin.yum:
     name: nginx
-    enablerepo: local-to-file
+    disablerepo: "*"
+    enablerepo: "local-to-file"
     state: latest
     disable_gpg_check: yes
 

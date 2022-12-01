@@ -103,7 +103,7 @@ api_lb_ip: {{ (NodePool.Master.LbIP == "" and NodePool.Master.IP != None) | tern
 ## - registry_archieve_file: registry archive file path (default: "")
 ## - registry_public_cert: public cert activate (default: false)
 registry_install: {{ PrivateRegistry.Install }}
-registry_version: {{ (PrivateRegistry.RegistryVersion == "") | ternary("v2.6.0", PrivateRegistry.RegistryVersion) }}
+registry_version: {{ PrivateRegistry.RegistryVersion }}
 registry_data_dir: {{ (PrivateRegistry.DataDir == "" ) | ternary("/data/harbor", PrivateRegistry.DataDir) }}
 registry_ip: {{ (PrivateRegistry.RegistryIP == "") | ternary("''", PrivateRegistry.RegistryIP) }}
 registry_domain: {{ (PrivateRegistry.RegistryDomain == "") | ternary("''", PrivateRegistry.RegistryDomain) }}

@@ -34,7 +34,7 @@
       - "{{ harbor_data_dir }}/secret"
       - "{{ harbor_data_dir }}/{{ harbor_offline_file }}"
       - "{{ harbor_data_dir }}/docker-compose"
-    dest: "{{ harbor_archive_dir }}/harbor-{{ ansible_date_time.iso8601_basic_short }}.tgz"
+    dest: "{{ harbor_archive_dir }}/harbor-{{ harbor_version }}-{{ ansible_date_time.iso8601_basic_short }}.tgz"
     format: gz
 
 - name: Prepare-airgap | Archive koreon image
