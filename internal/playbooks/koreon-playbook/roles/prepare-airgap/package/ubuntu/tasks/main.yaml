@@ -6,6 +6,8 @@
     state: directory
   with_items:
     - "{{ package_data_dir }}"
+    - "{{ package_archive_dir }}"
+    - "{{ package_bastion_dir }}"
 
 - name: Download crictl binary
   ansible.builtin.get_url:
@@ -21,7 +23,7 @@
 
 - name: Copy local-repository scripts files
   template:
-    src: "package-download.sh.j2"
+    src: "package-download-{{ ansible_distribution | lower }}-{{ ansible_distribution_major_version }}.sh.j2"
     dest: "/tmp/package-download.sh"
     mode: 0755
 

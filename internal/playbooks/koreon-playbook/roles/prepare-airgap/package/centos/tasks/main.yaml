@@ -28,7 +28,7 @@
 
 - name: Copy local-repository scripts files
   template:
-    src: "package-download-{{ ansible_distribution | lower }}-{{ ansible_distribution_major_version }}.sh.j2"
+    src: "package-download-{{ ansible_distribution | lower }}.sh.j2"
     dest: "/tmp/package-download.sh"
     mode: 0755
 
