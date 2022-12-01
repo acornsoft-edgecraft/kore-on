@@ -60,21 +60,6 @@ func (c *strBstionCmd) bastion(workDir string) error {
 		logger.Fatal("This command option is only supported on the Linux platform.")
 	}
 
-	koreOnConfigFilePath, err := filepath.Abs(conf.KoreOnConfigFile)
-	if err != nil {
-		logger.Fatal(err)
-	}
-
-	koreonToml, err := utils.GetKoreonTomlConfig(koreOnConfigFilePath)
-	if err != nil {
-		logger.Fatal(err)
-	}
-
-	if !koreonToml.KoreOn.ClosedNetwork {
-		logger.Fatal("This command is only supported on the close network")
-		os.Exit(1)
-	}
-
 	// Doker check
 	_, dockerCheck := exec.LookPath("docker")
 	if dockerCheck == nil {
@@ -96,7 +81,7 @@ func (c *strBstionCmd) bastion(workDir string) error {
 	}
 	//untar gzip file
 	archiveFilePath, _ := filepath.Abs(c.archiveFilePath)
-	err = archiver.Unarchive(archiveFilePath, path)
+	err := archiver.Unarchive(archiveFilePath, path)
 	if err != nil {
 		logger.Fatal(err)
 	}
@@ -130,7 +115,8 @@ func (c *strBstionCmd) bastion(workDir string) error {
 		"-y",
 		"--disablerepo=*",
 		"--enablerepo=bastion-local-to-file",
-		"docker-ce docker-cli",
+		"docker-ce",
+		"docker-cli",
 	}
 
 	err = utils.SyscallExec(commandArgs[0], commandArgs)
