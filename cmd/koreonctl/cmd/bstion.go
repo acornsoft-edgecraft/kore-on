@@ -65,6 +65,7 @@ func (c *strBstionCmd) bastion(workDir string) error {
 	if dockerCheck == nil {
 		logger.Info("Docker already.")
 		dockerLoad()
+		os.Exit(1)
 	}
 
 	// mkdir local directory

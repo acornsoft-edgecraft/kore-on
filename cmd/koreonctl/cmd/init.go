@@ -50,9 +50,6 @@ func (c *strInitCmd) run() error {
 }
 
 func (c *strInitCmd) init(workDir string) error {
-	// Doker check
-	utils.CheckDocker()
-
 	currTime := time.Now()
 
 	SUCCESS_FORMAT := "\033[1;32m%s\033[0m\n"
