@@ -56,9 +56,22 @@ make_yum_repo(){
     modifyrepo_c --mdtype=modules modules.yaml repodata/
 }
 
+make_yum_bastion(){
+    cd "$PACKAGE_BASTION_DIR"
+
+    dnf -y download --resolve --alldeps --enablerepo=Docker-CE-Stable --arch x86_64 --downloaddir=./ docker-ce docker-ce-cli
+    dnf -y download --resolve --arch x86_64 --downloaddir=./ audit
+    createrepo .
+}
+
 create_tarball() {
  	cd $REPO_DIR
     tar --exclude archive -zcvf $ARCHIVE_DIR/local-repo.$CURRENT_TIME.tgz ./
+}
+
+create_bastion_tarball() {
+ 	cd "$PACKAGE_BASTION_DIR"
+    tar --exclude archive -zcvf $ARCHIVE_DIR/bastion-package-$CURRENT_TIME.tgz ./
 }
 
 main() {
@@ -79,17 +92,16 @@ main() {
 
     if [ "$ID" == "centos" ]; then
         make_yum_repo
+        make_yum_bastion
     fi
 
     if [ "$ID" == "rhel" ]; then
         make_yum_repo
-    fi
-
-    if [ "$ID" == "ubuntu" ]; then
-        make_apt_repo
+        make_yum_bastion
     fi
 
     create_tarball
+    create_bastion_tarball
 
     echo "Completed"
 }
