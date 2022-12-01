@@ -15,6 +15,7 @@ import (
 	"kore-on/cmd/koreonctl/conf"
 	"kore-on/cmd/koreonctl/conf/templates"
 
+	"github.com/mholt/archiver"
 	"github.com/spf13/cobra"
 )
 
@@ -70,14 +71,15 @@ func (c *strBstionCmd) bastion(workDir string) error {
 	}
 
 	if !koreonToml.KoreOn.ClosedNetwork {
-		logger.Fatal("This command is only supported on the clese network")
+		logger.Fatal("This command is only supported on the close network")
 		os.Exit(1)
 	}
 
 	// Doker check
 	_, dockerCheck := exec.LookPath("docker")
 	if dockerCheck == nil {
-		logger.Fatal("Docker already exists.")
+		logger.Info("Docker already.")
+		dockerLoad()
 	}
 
 	// mkdir local directory
@@ -87,6 +89,16 @@ func (c *strBstionCmd) bastion(workDir string) error {
 		if err != nil {
 			logger.Fatal(err)
 		}
+	}
+
+	if c.archiveFilePath == "" {
+		logger.Fatal("package archive file path is required.")
+	}
+	//untar gzip file
+	archiveFilePath, _ := filepath.Abs(c.archiveFilePath)
+	err = archiver.Unarchive(archiveFilePath, path)
+	if err != nil {
+		logger.Fatal(err)
 	}
 
 	// Processing template
