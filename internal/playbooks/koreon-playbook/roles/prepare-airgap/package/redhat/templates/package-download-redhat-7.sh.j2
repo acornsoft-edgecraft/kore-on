@@ -43,7 +43,7 @@ make_yum_repo(){
     repoquery --qf=%{name} -g --list --grouppkgs=all [groups] | xargs repotrack -a x86_64 -p ./ conntrack-tools
     repoquery --qf=%{name} -g --list --grouppkgs=all [groups] --enablerepo=Docker-CE-Stable | xargs repotrack -a x86_64 -p ./ docker-ce docker-ce-cli
 
-    repoquery --qf=%{name} -g --list --grouppkgs=all [groups] | xargs dnf install --downloadonly --enablerepo=Docker-CE-Stable --disableexcludes=Docker-CE-Stable --downloaddir=./ "{{ containerd_io }}"
+    repoquery --qf=%{name} -g --list --grouppkgs=all [groups] | xargs dnf install -y --downloadonly --enablerepo=Docker-CE-Stable --disableexcludes=Docker-CE-Stable --downloaddir=./ "{{ containerd_io }}"
     repoquery --qf=%{name} -g --list --grouppkgs=all [groups] | xargs dnf install -y --downloadonly --enablerepo=kubernetes --disableexcludes=kubernetes --downloaddir=./ kubectl${K8S_VERIONS} kubelet${K8S_VERIONS} kubeadm${K8S_VERIONS}
 
     createrepo .
