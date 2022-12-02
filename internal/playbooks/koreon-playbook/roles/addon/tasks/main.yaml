@@ -1,0 +1,5 @@
+---
+- import_tasks: addon-nfs-client-provisioner.yaml
+  when: 
+    - addon_install
+    - storage_install

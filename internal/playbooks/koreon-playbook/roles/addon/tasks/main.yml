@@ -1,3 +1,0 @@
----
-- import_tasks: addon-install.yml
-  when: addon_install
