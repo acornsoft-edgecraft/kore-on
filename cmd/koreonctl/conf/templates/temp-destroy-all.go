@@ -22,10 +22,10 @@ node-{{$index}}                         {{$data}}                    {{if ne (le
 node-regi-storage            {{$PrivateRegistry.RegistryIP}}
 {{      else}}
 node-regi                      {{$PrivateRegistry.RegistryIP}}                    {{if ne "" $PrivateRegistry.PrivateIP}}{{$PrivateRegistry.PrivateIP}}{{end}}
-node-storage                   {{$SharedStorage.StorageIP}}                    {{if ne "" $SharedStorage.PrivateIP}}{{$SharedStorage.PrivateIP}}{{end -}}
+node-storage                     {{$SharedStorage.StorageIP}}                    {{if ne "" $SharedStorage.PrivateIP}}{{$SharedStorage.PrivateIP}}{{end -}}
 {{      end -}}
 {{    else}}
-node-regi                               {{$PrivateRegistry.RegistryIP}}           {{if ne "" $PrivateRegistry.PrivateIP}}{{$PrivateRegistry.PrivateIP}}{{end -}}
+node-regi                      {{$PrivateRegistry.RegistryIP}}           {{if ne "" $PrivateRegistry.PrivateIP}}{{$PrivateRegistry.PrivateIP}}{{end -}}
 {{    end -}}
 {{  else if eq true $SharedStorage.Install}}
 node-storage                   {{$SharedStorage.StorageIP}}                    {{if ne "" $SharedStorage.PrivateIP}}{{$SharedStorage.PrivateIP}}{{end -}}
