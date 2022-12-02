@@ -53,7 +53,7 @@ make_apt_repo(){
 
 create_tarball() {
  	cd $REPO_DIR
-    tar --exclude archive -zcvf $ARCHIVE_DIR/local-repo.$CURRENT_TIME.tgz ./
+    tar --exclude archive -zcvf $ARCHIVE_DIR/local-repo-"{{prepare_airgap_k8s_version}}"-$CURRENT_TIME.tgz ./
 }
 
 
