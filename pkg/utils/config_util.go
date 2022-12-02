@@ -235,7 +235,7 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 				if koreonToml.KoreOn.LocalRepositoryArchiveFile == "" {
 					logger.Fatal("koreon> When installing a local repository, the local-repository-archive-file entry is required.")
 				} else {
-					k8sVersionCheck := strings.Split(koreonToml.PrivateRegistry.RegistryArchiveFile, "-")
+					k8sVersionCheck := strings.Split(koreonToml.KoreOn.LocalRepositoryArchiveFile, "-")
 					if supportK8sVersion != k8sVersionCheck[2] {
 						logger.Fatalf("Check the kubernetes installation version.\nIs the version you are trying to install '%s' correct? If different, re-enter the kubernetes.version entry", k8sVersionCheck[2])
 					}
@@ -259,6 +259,7 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 					}
 				}
 			}
+			logger.Fatalf("asdfasd")
 		}
 
 		// Get image support version
