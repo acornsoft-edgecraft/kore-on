@@ -259,7 +259,6 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 					}
 				}
 			}
-			logger.Fatalf("asdfasd")
 		}
 
 		// Get image support version
