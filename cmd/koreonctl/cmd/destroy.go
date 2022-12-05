@@ -175,11 +175,12 @@ func (c *strDestroyCmd) destroy(workDir string) error {
 	koreOnConfigFileName := conf.KoreOnConfigFile
 	koreOnConfigFilePath := conf.KoreOnConfigFileSubDir
 
-	koreonToml, err := utils.GetKoreonTomlConfig(workDir + "/" + koreOnConfigFileName)
-	if err != nil {
-		logger.Fatal(err)
-		os.Exit(1)
-	}
+	// koreonToml, err := utils.GetKoreonTomlConfig(workDir + "/" + koreOnConfigFileName)
+	// if err != nil {
+	// 	logger.Fatal(err)
+	// 	os.Exit(1)
+	// }
+	koreonToml, _ := utils.ValidateKoreonTomlConfig(workDir+"/"+koreOnConfigFileName, "destroy")
 
 	// Make provision data
 	data := model.KoreonctlText{}
@@ -199,6 +200,7 @@ func (c *strDestroyCmd) destroy(workDir string) error {
 		textVar = templates.DestroyStorageText
 	case "reset-prepare-airgap":
 		textVar = templates.DestroyPrepareAirgapText
+		koreonToml.KoreOn.ClosedNetwork = false
 	}
 	koreonctlText := template.New("DestroyText")
 	temp, err := koreonctlText.Parse(textVar)
