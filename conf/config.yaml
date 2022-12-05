@@ -65,6 +65,9 @@ SupportCrictlVersion: {
 SupportEtcdVersion: {
   "v3.4": ["16", "17", "18", "19", "20", "21", "22"]
 }
+SupportDnsUtilsVersion: {
+  "v1.3": [""]
+}
 
 
 ## Harbor
@@ -102,30 +105,35 @@ SupportVersion: {
       "coredns": "v1.7.0",
       "metrics-server": "v0.6",
       "pause": "v3.3",
+      "dns-utils": "v1.3",
     },
     "v1.20": {
       "calico": "v3.20",
       "coredns": "v1.7.0",
       "metrics-server": "v0.6",
       "pause": "v3.4.1",
+      "dns-utils": "v1.3",
     },
     "v1.21": {
       "calico": "v3.21",
       "coredns": "v1.8.0",
       "metrics-server": "v0.6",
       "pause": "v3.5",
+      "dns-utils": "v1.3",
     },
     "v1.22": {
       "calico": "v3.22",
       "coredns": "v1.8.4",
       "metrics-server": "v0.6",
       "pause": "v3.6",
+      "dns-utils": "v1.3",
     },
     "v1.23": {
       "calico": "v3.23",
       "coredns": "v1.8.6",
       "metrics-server": "v0.6",
       "pause": "v3.6",
+      "dns-utils": "v1.3",
     },
   },
   "k8s_support_package": {

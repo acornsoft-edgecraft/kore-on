@@ -14,4 +14,5 @@ type ImageVersion struct {
 	Coredns       string `validate:"coredns,SupportCorednsVersion"`
 	MetricsServer string `validate:"metrics-server,SupportMetricsServerVersion"`
 	Pause         string `validate:"pause,SupportPauseVersion"`
+	DnsUtils      string `validate:"dns-utils,SupportDnsUtilsVersion"`
 }
