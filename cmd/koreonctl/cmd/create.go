@@ -69,7 +69,11 @@ func (c *strCreateCmd) create(workDir string) error {
 	koreOnConfigFileName := conf.KoreOnConfigFile
 	koreOnConfigFilePath := conf.KoreOnConfigFileSubDir
 
-	koreonToml, _ := utils.ValidateKoreonTomlConfig(workDir+"/"+koreOnConfigFileName, "create")
+	koreonToml, err := utils.GetKoreonTomlConfig(workDir + "/" + koreOnConfigFileName)
+	if err != nil {
+		logger.Fatal(err)
+		os.Exit(1)
+	}
 
 	// Make provision data
 	data := model.KoreonctlText{}
