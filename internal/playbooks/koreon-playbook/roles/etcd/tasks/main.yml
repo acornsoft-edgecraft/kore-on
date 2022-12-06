@@ -41,6 +41,26 @@
     owner: "root"
     group: "root"
     creates: "{{ etcd_download_dir }}/etcd-{{ etcd_version }}-linux-amd64/etcd"
+  when:
+    - closed_network
+  
+- name: Get etcd tgz file on online and uncompress it
+  block:
+    - name: Download etcd binary
+      ansible.builtin.get_url:
+        url: "{{ etcd_get_url }}"
+        dest: "/tmp"
+      any_errors_fatal: true
+    - name: Get crictl tgz file and uncompress it
+      unarchive:
+        src: "/tmp/{{ etcd_archive_name }}"
+        dest: "{{ etcd_download_dir }}/"
+        owner: "root"
+        group: "root"
+        creates: "{{ etcd_download_dir }}/etcd-{{ etcd_version }}-linux-amd64/etcd"
+        remote_src: True
+  when:
+    - not closed_network
 
 - name: Copy etcd binaries to destination directory
   copy:
