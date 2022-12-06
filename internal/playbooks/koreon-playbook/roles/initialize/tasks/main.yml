@@ -30,7 +30,6 @@
     name: "nfs-common"
     state: present
     update_cache: yes
-  notify: yum-clean-all
 
 - name: Install nfs-utils
   when: ansible_distribution in ["CentOS", "RedHat"]
@@ -39,3 +38,9 @@
     state: present
     update_cache: yes
   notify: yum-clean-all
+
+- include_tasks: sysctl-dind.yaml
+  when: 
+    - ansible_distribution_major_version is defined
+    - ansible_distribution in ["CentOS", "RedHat"]
+    - ansible_distribution_major_version == "7"
