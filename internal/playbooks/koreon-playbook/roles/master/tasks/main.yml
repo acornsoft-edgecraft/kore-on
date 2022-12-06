@@ -40,6 +40,10 @@
     - "openssl genrsa -out {{ kube_config_dir }}/acloud/acloud-client.key 2048"
     - "openssl req -new -key {{ kube_config_dir }}/acloud/acloud-client.key -subj '/CN=acloud-client' |
         openssl x509 -req -CA {{ cert_dir }}/ca.crt -CAkey {{ cert_dir }}/ca.key -CAcreateserial -out {{ kube_config_dir }}/acloud/acloud-client.crt -days {{ cert_validity_days }} -extensions v3_req_client -extfile {{ master_cert_dir }}/common-openssl.conf"
+   
+    - "openssl ecparam -name secp256r1 -genkey -noout -out {{ cert_dir }}/kubelet-server.key"
+    - "openssl req -new -sha256 -key {{ cert_dir }}/kubelet-server.key -subj '/O=system:nodes/CN=system:node:{{ ansible_hostname }}' |
+        openssl x509 -req -CA {{ cert_dir }}/ca.crt -CAkey {{ cert_dir }}/ca.key -CAcreateserial -out {{ cert_dir }}/kubelet-server.crt -days {{ cert_validity_days }} -extensions v3_req_apiserver -extfile {{ master_cert_dir }}/common-openssl.conf"
 
 # For ubuntu     -------------------------------------------------------------
 - name: Install Kubernetes packages (kubectl, kubelet)

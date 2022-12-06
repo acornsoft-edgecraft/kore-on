@@ -46,10 +46,8 @@
   tasks:
     - name: Bootstrap OS
       ansible.builtin.include_role:
-        name: bootstrap-os/{{ ansible_distribution | lower }}
+        name: initialize
         apply:
           tags:
-            - bootstrap-os
-      when:
-        - ansible_distribution is defined
+            - initialize
   any_errors_fatal: true

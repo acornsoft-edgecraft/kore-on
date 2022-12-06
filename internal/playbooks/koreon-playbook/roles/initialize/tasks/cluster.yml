@@ -247,25 +247,26 @@
     - kube_proxy_mode == 'ipvs'
     - ansible_distribution in ["CentOS", "Ubuntu", "Debian"]
 # -----------------------------------------------------------------------------------------------------
+- name: Initialize | Forwarding IPv4 and letting iptables see bridged traffic
+  block:
+    - name: Initialize | crate sysctl conf file
+      ansible.builtin.file:
+        path: /etc/sysctl.d/k8s.conf
+        state: touch
+    - name: Initialize | add line configure
+      lineinfile:
+        path: /etc/sysctl.d/k8s.conf
+        line: "{{ item }}"
+      with_items:
+        - "net.bridge.bridge-nf-call-iptables=1"
+        - "net.bridge.bridge-nf-call-ip6tables=1"
+        - "net.bridge.bridge-nf-call-arptables=1"
+        - "net.ipv4.ip_forward=1"
 
 - name: Check if bridge-nf-call-iptables key exists
-#  when: ansible_distribution in ["CentOS", "RedHat"]
-  command: "sysctl net.bridge.bridge-nf-call-iptables"
+  command: "sysctl --system"
   failed_when: false
   changed_when: false
-  register: sysctl_bridge_nf_call_iptables
-
-- name: Enable bridge-nf-call tables
-  when: sysctl_bridge_nf_call_iptables.rc == 0
-  sysctl:
-    name: "{{ item }}"
-    state: present
-    value: "1"
-    reload: yes
-  with_items:
-    - net.bridge.bridge-nf-call-iptables
-    - net.bridge.bridge-nf-call-arptables
-    - net.bridge.bridge-nf-call-ip6tables
 
 - name: Create data directory
   file:

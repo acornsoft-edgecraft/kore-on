@@ -1,0 +1,17 @@
+
+---
+- name: Initialize | Run the Docker daemon as a non-root user (Rootless mode)
+  block:
+    - name: Initialize | crate sysctl conf file
+      ansible.builtin.file:
+        path: /etc/sysctl.d/99-dind.conf
+        state: touch
+    - name: Initialize | add line configure
+      lineinfile:
+        path: /etc/sysctl.d/99-dind.conf
+        line: "user.max_user_namespaces=28633"
+
+- name: Check if bridge-nf-call-iptables key exists
+  command: "sysctl --system"
+  failed_when: false
+  changed_when: false
