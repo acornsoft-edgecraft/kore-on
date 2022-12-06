@@ -14,3 +14,8 @@
 - import_tasks: generate-packages-vars.yaml
 
 - meta: refresh_inventory
+
+- include_tasks: download-binary.yaml
+  when:
+    - not closed_network
+
