@@ -1,0 +1,4 @@
+---
+binary_archive_dir: "{{ playbook_dir }}/download"
+crictl_get_url: "https://github.com/kubernetes-sigs/cri-tools/releases/download/{{ package_crictl_version }}/crictl-{{ package_crictl_version }}-{{ ansible_system | lower }}-amd64.tar.gz"
+etcd_get_url: "https://storage.googleapis.com/etcd/{{ package_etcd_version }}/etcd-{{ package_etcd_version }}-{{ ansible_system | lower }}-amd64.tar.gz"
