@@ -28,7 +28,7 @@ DNS.2 = kubernetes.default
 DNS.3 = kubernetes.default.svc
 DNS.4 = kubernetes.default.svc.cluster.local
 DNS.5 = localhost
-DNS.6 = {{ ansible_hostname }}
+DNS.6 = {{ ansible_nodename }}
 {% if not lb_ip | ansible.utils.ipaddr -%}
 DNS.7 = {{ lb_ip }}
 {% endif -%}

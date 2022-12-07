@@ -16,7 +16,7 @@ prepare_airgap_images: [
       "k8s.gcr.io/kube-controller-manager:{{ prepare_airgap_k8s_version }}",
       "k8s.gcr.io/kube-scheduler:{{ prepare_airgap_k8s_version }}",
       "k8s.gcr.io/kube-proxy:{{ prepare_airgap_k8s_version }}",
-      "registry.k8s.io/e2e-test-images/jessie-dnsutils:{{ image_dns_utils_version }}"
+      "registry.k8s.io/e2e-test-images/jessie-dnsutils:{{ image_dns_utils_version | regex_replace('^v', '') }}"
     ]
 
 bastion_images: [

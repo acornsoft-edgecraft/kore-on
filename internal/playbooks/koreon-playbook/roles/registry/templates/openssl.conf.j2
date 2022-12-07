@@ -19,7 +19,7 @@ subjectAltName = @alt_names_registry
 
 [ alt_names_registry ]
 DNS.1 = localhost
-DNS.2 = {{ ansible_hostname }}
+DNS.2 = {{ ansible_nodename }}
 {% if not registry_domain | ansible.utils.ipaddr -%}
 DNS.3 = {{ registry_domain }}
 {% endif -%}
