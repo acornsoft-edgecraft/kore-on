@@ -1,0 +1,67 @@
+---
+# This playbook deploys a kubernetes cluster with platform applications
+# Init generate inventory and vars
+- hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Init | Configuration
+      ansible.builtin.include_role:
+        name: init
+        apply:
+          tags:
+            - init
+  any_errors_fatal: true
+
+# Clear gathered facts from all currently targeted hosts 
+- hosts: all
+  become: false
+  gather_facts: false
+  tasks:
+    - name: Clear gathered facts
+      meta: clear_facts
+
+# Pre-installation check network.
+- hosts: all
+  become: false
+  gather_facts: true
+  vars_files:
+    - "{{ playbook_dir }}/inventory/group_vars/basic.yaml"
+    - "{{ playbook_dir }}/inventory/group_vars/expert.yaml"
+  tasks:
+    - name: Init | Network check
+      ansible.builtin.include_role:
+        name: init/network
+        apply:
+          tags:
+            - init-network
+  any_errors_fatal: true
+
+# install ssl cert
+- hosts: sslhost
+  become: true
+  gather_facts: false
+  vars_files:
+    - "{{ playbook_dir }}/inventory/group_vars/basic.yaml"
+    - "{{ playbook_dir }}/inventory/group_vars/expert.yaml"
+  tasks:
+    - name: Generate certificate
+      ansible.builtin.include_role:
+        name: sslcert
+        apply:
+          tags:
+            - sslcert
+
+# Install etcd
+- hosts: etcd
+  become: true
+  gather_facts: false
+  vars_files:
+    - "{{ playbook_dir }}/inventory/group_vars/basic.yaml"
+    - "{{ playbook_dir }}/inventory/group_vars/expert.yaml"
+  tasks:
+    - name: ETCD Installation
+      ansible.builtin.include_role:
+        name: etcd
+        apply:
+          tags:
+            - etcd
