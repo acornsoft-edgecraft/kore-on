@@ -21,6 +21,8 @@
   apt:
     name: ['docker-ce', 'docker-ce-cli']
     state: present
+    update_cache: yes
+    dpkg_options: 'force-confold,force-confdef'
 
 - name: Hold docker version  (Ubuntu, Debian)
   dpkg_selections:
