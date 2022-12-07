@@ -6,6 +6,6 @@
 
 # Handler showing how to clean yum clean all
 - name: yum-clean-all
-  ansible.builtin.command: dnf clean all
+  ansible.builtin.command: yum clean all
   args:
     warn: no
