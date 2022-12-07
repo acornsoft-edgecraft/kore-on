@@ -25,4 +25,4 @@ etcd_src: "{{ playbook_dir }}/download/etcd-{{ etcd_version }}-linux-amd64.tar.g
 etcd_data_dir: "{{ data_root_dir }}/etcd"
 
 # AWS node name 분기 처리
-node_name: "{{ ansible_hostname|lower }}"
+node_name: "{{ ansible_nodename|lower }}"

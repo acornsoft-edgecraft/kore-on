@@ -3,7 +3,7 @@ node_group: node
 
 is_kube_master: "{{ inventory_hostname in groups['masters'] }}"
 
-node_name: "{{ ansible_hostname|lower }}"
+node_name: "{{ ansible_nodename|lower }}"
 
 # Get kubernetes version type int
 k8s_version_int: "{{ k8s_version | regex_replace('^v', '') }}"
