@@ -5,6 +5,7 @@ CURRENT_TIME=`date '+%Y%m%d_%H%M%S'`
 
 K8S_VERIONS="-{{ prepare_airgap_k8s_version | regex_replace('^v', '') }}"
 REPO_DIR="{{ package_data_dir }}"
+PACKAGE_BASTION_DIR="{{ package_bastion_dir }}"
 ARCHIVE_DIR="{{ package_archive_dir }}"
 
 error_exit() {
@@ -13,9 +14,6 @@ error_exit() {
 }
 
 make_apt_repo(){
-    if [ "$K8S_VERIONS" != "" ]; then
-        K8S_VERIONS=-$(echo $K8S_VERIONS | sed 's/^v//')
-    fi
     cd "$REPO_DIR"
 
     apt-get -y update
@@ -27,7 +25,7 @@ make_apt_repo(){
     apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" ipvsadm
     apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" ipset
 
-    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" containerd.io="{{ package_containerd_version }}"
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" containerd.io="{{ containerd_io }}"
     apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" docker-ce
     apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" docker-ce-cli
 
@@ -42,9 +40,8 @@ make_apt_repo(){
     apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" dpkg-dev
     apt-get install -y dpkg-dev
 
-    for item in {"{{ kube_support_versions | map('regex_replace', '^v', '') | list }}"}; do
-        apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" kubelet=${item}-00 kubeadm=${item}-00 kubectl=${item}-00
-    done
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" kubelet=${K8S_VERIONS}-00 kubeadm=${K8S_VERIONS}-00 kubectl=${K8S_VERIONS}-00
+    
 
     rm -rf lock partial pkgcache.bin srcpkgcache.bin Packages.gz
 

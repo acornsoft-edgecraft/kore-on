@@ -78,7 +78,7 @@ func (c *strBstionCmd) bastion(workDir string) error {
 	}
 
 	if c.archiveFilePath == "" {
-		logger.Fatal("package archive file path is required.")
+		logger.Fatal("package archive file path is required. Run 'koreonctl bastion --help' for usage.")
 	}
 	//untar gzip file
 	archiveFilePath, _ := filepath.Abs(c.archiveFilePath)
@@ -124,7 +124,6 @@ func dockerInstall() error {
 		"--disablerepo=*",
 		"--enablerepo=bastion-local-to-file",
 		"docker-ce",
-		"docker-cli",
 	}
 	commandLen := len(commandArgs)
 	cmd := utils.ExecCommand(commandArgs[0], commandArgs[1:commandLen])

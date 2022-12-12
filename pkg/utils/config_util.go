@@ -7,6 +7,7 @@ import (
 	"kore-on/pkg/logger"
 	"kore-on/pkg/model"
 	"os"
+	"path/filepath"
 	"reflect"
 	"strings"
 
@@ -235,10 +236,12 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 				if koreonToml.KoreOn.LocalRepositoryArchiveFile == "" {
 					logger.Fatal("koreon> When installing a local repository, the local-repository-archive-file entry is required.")
 				} else {
-					k8sVersionCheck := strings.Split(koreonToml.KoreOn.LocalRepositoryArchiveFile, "-")
+					localRepositoryArchiveFile := filepath.Base(koreonToml.KoreOn.LocalRepositoryArchiveFile)
+					k8sVersionCheck := strings.Split(localRepositoryArchiveFile, "-")
 					if supportK8sVersion != k8sVersionCheck[2] {
 						logger.Fatalf("Check the kubernetes installation version.\nIs the version you are trying to install '%s' correct? If different, re-enter the kubernetes.version entry", k8sVersionCheck[2])
 					}
+					koreonToml.KoreOn.LocalRepositoryArchiveFile = localRepositoryArchiveFile
 				}
 			} else {
 				if koreonToml.KoreOn.LocalRepositoryUrl == "" {
@@ -253,10 +256,12 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 				if koreonToml.PrivateRegistry.RegistryArchiveFile == "" {
 					logger.Fatal("private-registry >  registry-archive-file is required.")
 				} else {
-					harborVersionCheck := strings.Split(koreonToml.PrivateRegistry.RegistryArchiveFile, "-")
+					registryArchiveFile := filepath.Base(koreonToml.PrivateRegistry.RegistryArchiveFile)
+					harborVersionCheck := strings.Split(registryArchiveFile, "-")
 					if supportHarborVersion != harborVersionCheck[1] {
 						logger.Fatalf("Check the private registry installation version.\nIs the version you are trying to install '%s' correct? If different, re-enter the registry-archive-file entry", harborVersionCheck[1])
 					}
+					koreonToml.PrivateRegistry.RegistryArchiveFile = registryArchiveFile
 				}
 			}
 		}
@@ -289,6 +294,16 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 		}
 
 		koreonToml.PrepareAirgap = koreon_toml.PrepareAirgap
+	} else if cmd == "destroy" {
+		registryIP := koreonToml.PrepareAirgap.RegistryIP
+
+		if registryIP == "" {
+			logger.Fatal(fmt.Sprintln("Destroy: All > Registry IP Address is required."))
+		} else {
+			koreonToml.PrepareAirgap = koreon_toml.PrepareAirgap
+		}
+
+		koreonToml = koreon_toml
 	} else if cmd == "destroy-prepare-airgap" {
 		registryIP := koreonToml.PrepareAirgap.RegistryIP
 

@@ -11,6 +11,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"syscall"
 
 	"kore-on/cmd/koreonctl/conf"
@@ -25,10 +26,29 @@ type strAirGapCmd struct {
 	privateKey string
 	user       string
 	command    string
+	chekcmd    [][]string
+}
+
+func checkStringContains(got, expected string) {
+	if !strings.Contains(got, expected) {
+		fmt.Errorf("Expected to contain: \n %v\nGot:\n %v\n", expected, got)
+	}
+}
+
+func checkStringOmits(got, expected string) {
+	if strings.Contains(got, expected) {
+		fmt.Errorf("Expected to not contain: \n %v\nGot: %v", expected, got)
+	}
 }
 
 func airGapCmd() *cobra.Command {
 	prepareAirgap := &strAirGapCmd{}
+	prepareAirgap.chekcmd = [][]string{
+		{"--unknown", "--namespace=foo", "child", "--bar=true"},
+		{"--namespace=foo", "--unknown", "child", "--bar=true"},
+		{"--namespace=foo", "child", "--unknown", "--bar=true"},
+		{"--namespace=foo", "child", "--bar=true", "--unknown"},
+	}
 
 	cmd := &cobra.Command{
 		Use:          "prepare-airgap [flags]",
@@ -41,6 +61,37 @@ func airGapCmd() *cobra.Command {
 	}
 
 	cmd.AddCommand(downLoadArchiveCmd())
+
+	var cmdFound bool
+	cmdCheck := cmd.Commands()
+
+	fmt.Println("asdfasdf  == ", len(cmdCheck))
+
+	for _, a := range cmdCheck {
+		fmt.Println("aaaa == ", a.Name())
+		// if a.Name() == os.Args[2] {
+		// 	cmdFound = true
+		// 	break
+		// }
+		for _, b := range os.Args[1:] {
+
+			fmt.Println("aa == ", a.Name())
+			fmt.Println("bb == ", b)
+			if a.Name() == b {
+				cmdFound = true
+				break
+			}
+		}
+	}
+
+	if !cmdFound {
+		args := append([]string{"prepare-airgap"}, os.Args[1:]...)
+		buf := new(bytes.Buffer)
+		cmd.SetOut(buf)
+		cmd.SetErr(buf)
+		cmd.SetArgs(args)
+		fmt.Println("asdfasdfasd=========== ", args)
+	}
 
 	f := cmd.Flags()
 	f.BoolVarP(&prepareAirgap.dryRun, "dry-run", "d", false, "dryRun")
@@ -59,6 +110,7 @@ func downLoadArchiveCmd() *cobra.Command {
 		Long:         "",
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			fmt.Println("asdf ==== ", args)
 			return downLoadArchive.run()
 		},
 	}

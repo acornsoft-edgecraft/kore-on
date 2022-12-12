@@ -19,7 +19,7 @@ frontend healthz
 
 frontend api-https
    mode tcp
-   bind :{{ haproxy_port }}
+   bind 127.0.0.1:{{ haproxy_port }}
    default_backend api-backend
 
 backend api-backend

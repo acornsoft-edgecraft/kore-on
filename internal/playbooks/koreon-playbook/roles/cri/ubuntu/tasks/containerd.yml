@@ -18,7 +18,7 @@
     - ansible_distribution in ["CentOS", "RedHat"]
     - not closed_network
   yum:
-    name: "{{ containerd_pkg }}"
+    name: "{{ containerd_io }}"
     state: present
     update_cache: yes
     enablerepo: Docker-CE-Stable
@@ -29,20 +29,22 @@
     - ansible_distribution in ["CentOS", "RedHat"]
     - closed_network
   yum:
-    name: "{{ containerd_pkg }}"
+    name: "{{ containerd_io }}"
     state: present
+    disablerepo: "*"
+    enablerepo: "local-repo"
     disable_gpg_check: yes
 
 # https://github.com/kubernetes-sigs/cri-tools/releases/download/v1.21.0/crictl-v1.21.0-linux-amd64.tar.gz
 - name: Get crictl tgz file and uncompress it
   unarchive:
-    src: "{{ playbook_dir }}/download/crictl-{{ crictl_version }}-{{ ansible_system | lower }}-amd64.tar.gz"
+    src: "{{ playbook_dir }}/download/crictl-{{ package_crictl_version }}-{{ ansible_system | lower }}-amd64.tar.gz"
     dest: /usr/bin
     owner: "root"
     group: "root"
   when:
     - closed_network
-
+  
 - name: Get crictl tgz file  on online and uncompress it
   block:
     - name: Download crictl binary
@@ -59,7 +61,7 @@
         remote_src: True
   when:
     - not closed_network
-    
+
 - name: Create containerd directory
   file:
     path: /etc/containerd
