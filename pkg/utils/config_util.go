@@ -62,7 +62,6 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 	// confDockerVersion := "Support.SupportDockerVersion"
 	// confDockerComposeVersion := "Support.SupportDockerComposeVersion"
 	koreonToml.KoreOn.ImageArchive = conf.KoreOnImageArchive
-	koreonToml.KoreOn.HelmVersion = IsSupportVersion("", "SupportHelmVersion")
 
 	if nodePoolSSHPort == 0 {
 		// todo node pool ssh port check
