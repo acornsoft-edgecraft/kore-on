@@ -1,7 +1,7 @@
 ---
 # Kubernetes service check
 - name: Kubernetes service check
-  kubernetes.core.k8s:
+  kubernetes.core.k8s_info:
     kind: Pod
     namespace: kube-system
     field_selectors:

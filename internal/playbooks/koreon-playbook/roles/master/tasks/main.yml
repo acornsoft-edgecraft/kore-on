@@ -362,19 +362,19 @@
 # ---------------------------------------------------------------------------
 
 # MetricsServer ------------------------------------------------------------------
-- name: MetricsServer | Kubelet CSR Pending find
-  shell: "kubectl --kubeconfig={{ kubeadminconfig }} get csr | grep Pending | awk '{print $1}'"
-  delegate_to: "{{ groups['masters'][0] }}"
-  run_once: true
-  register: kubelet_csr
+#- name: MetricsServer | Kubelet CSR Pending find
+#  shell: "kubectl --kubeconfig={{ kubeadminconfig }} get csr | grep Pending | awk '{print $1}'"
+#  delegate_to: "{{ groups['masters'][0] }}"
+#  run_once: true
+#  register: kubelet_csr
 
-- name: MetricsServer | Kubelet CSR approve
-  command: "kubectl --kubeconfig={{ kubeadminconfig }} certificate approve {{ item }}"
-  with_items: "{{ kubelet_csr.stdout }}"
-  delegate_to: "{{ groups['masters'][0] }}"
-  run_once: true
-  when:
-    - kubelet_csr.stdout != ""
+#- name: MetricsServer | Kubelet CSR approve
+#  command: "kubectl --kubeconfig={{ kubeadminconfig }} certificate approve {{ item }}"
+#  with_items: "{{ kubelet_csr.stdout }}"
+#  delegate_to: "{{ groups['masters'][0] }}"
+#  run_once: true
+#  when:
+#    - kubelet_csr.stdout != ""
 
 - name: MetricsServer | Copy metrics-server config file
   when: metrics_server
@@ -405,4 +405,4 @@
   shell: "kubectl --kubeconfig={{ kubeadminconfig }} delete pods -n kube-system -l k8s-app=kube-proxy"
   delegate_to: "{{ groups['masters'][0] }}"
   run_once: true
-  ignore_errors: true
+  ignore_errors: tru#e
