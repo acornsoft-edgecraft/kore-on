@@ -7,6 +7,7 @@ type PackageVersion struct {
 	DockerCompose string `validate:"docker-compose,SupportDockerComposeVersion"`
 	Crictl        string `validate:"crictl,SupportCrictlVersion"`
 	Etcd          string `validate:"etcd,SupportEtcdVersion"`
+	Helm          string `validate:"helm,SupportHelmVersion"`
 }
 
 type ImageVersion struct {

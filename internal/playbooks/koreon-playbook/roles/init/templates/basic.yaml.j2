@@ -150,9 +150,11 @@ prepare_airgap_registry_version: {{ PrepareAirgap.RegistryVersion }}
 prepare_airgap_registry_ip: {{ PrepareAirgap.RegistryIP }}
 prepare_airgap_registry_data_dir: "/data"
 prepare_airgap_registry_install_dir: "/var/lib/kore-on"
+
+#- [supports packages/images]
 ## packages
-{% for image in (SupportVersion.PackageVersion | dict2items) %}
-package_{{ image.key | regex_replace('((?!^)|\\b[a-zA-Z][a-z]*)([A-Z][a-z]*|\\d+)', '\\1_\\2') | lower }}_version: {{ image.value}}
+{% for package in (SupportVersion.PackageVersion | dict2items) %}
+package_{{ package.key | regex_replace('((?!^)|\\b[a-zA-Z][a-z]*)([A-Z][a-z]*|\\d+)', '\\1_\\2') | lower }}_version: {{ package.value}}
 {% endfor %}
 ## images
 {% for image in (SupportVersion.ImageVersion | dict2items) %}

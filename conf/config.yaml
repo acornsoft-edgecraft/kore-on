@@ -148,30 +148,35 @@ SupportVersion: {
       "docker-compose": "v2.10",
       "crictl": "v1.19",
       "etcd": "v3.4",
+      "helm": "v3.10",
     },
     "v1.20": {
       "containerd": "v1.5",
       "docker-compose": "v2.10",
       "crictl": "v1.20",
       "etcd": "v3.4",
+      "helm": "v3.10",
     },
     "v1.21": {
       "containerd": "v1.5",
       "docker-compose": "v2.10",
       "crictl": "v1.21",
       "etcd": "v3.4",
+      "helm": "v3.10",
     },
     "v1.22": {
       "containerd": "v1.5",
       "docker-compose": "v2.10",
       "crictl": "v1.22",
       "etcd": "v3.4",
+      "helm": "v3.10",
     },
     "v1.23": {
       "containerd": "v1.6",
       "docker-compose": "v2.10",
       "crictl": "v1.23",
       "etcd": "v3.4",
+      "helm": "v3.10",
     },
   }
 }
