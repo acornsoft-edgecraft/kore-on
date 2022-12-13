@@ -45,6 +45,10 @@
     - "openssl req -new -sha256 -key {{ cert_dir }}/kubelet-server.key -subj '/O=system:nodes/CN=system:node:{{ ansible_nodename }}' |
         openssl x509 -req -CA {{ cert_dir }}/ca.crt -CAkey {{ cert_dir }}/ca.key -CAcreateserial -out {{ cert_dir }}/kubelet-server.crt -days {{ cert_validity_days }} -extensions v3_req_apiserver -extfile {{ master_cert_dir }}/common-openssl.conf"
 
+    - "openssl genrsa -out {{ cert_dir }}/metrics-server.key 2048"
+    - "openssl req -new -sha256 -key {{ cert_dir }}/metrics-server.key -subj '/CN=metrics-server' |
+        openssl x509 -req -CA {{ cert_dir }}/ca.crt -CAkey {{ cert_dir }}/ca.key -CAcreateserial -out {{ cert_dir }}/metrics-server.crt -days {{ cert_validity_days }} -extensions v3_req_metricsserver -extfile {{ master_cert_dir }}/common-openssl.conf"
+
 # For ubuntu     -------------------------------------------------------------
 - name: Install Kubernetes packages (kubectl, kubelet)
   when: ansible_distribution in ["Ubuntu", "Debian"]

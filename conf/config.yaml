@@ -94,6 +94,12 @@ SupportDockerComposeVersion: {
   "v2.3": ["4"],
   "v1.29": ["2"]
 }
+
+## Helm
+SupportHelmVersion: {
+  "v3.10": ["0","1","2"]
+}
+
 #-end Support versions
 
 # This is the version supported by k8s images for k8s version.

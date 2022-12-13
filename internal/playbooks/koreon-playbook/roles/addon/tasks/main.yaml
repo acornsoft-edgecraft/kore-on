@@ -1,4 +1,8 @@
 ---
+- import_tasks: check-k8s.yaml
+  when:
+    - addon_install
+
 - import_tasks: addon-nfs-client-provisioner.yaml
   when: 
     - addon_install

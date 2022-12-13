@@ -62,6 +62,7 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 	// confDockerVersion := "Support.SupportDockerVersion"
 	// confDockerComposeVersion := "Support.SupportDockerComposeVersion"
 	koreonToml.KoreOn.ImageArchive = conf.KoreOnImageArchive
+	koreonToml.KoreOn.HelmVersion = IsSupportVersion("", "SupportHelmVersion")
 
 	if nodePoolSSHPort == 0 {
 		// todo node pool ssh port check
@@ -294,16 +295,6 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 		}
 
 		koreonToml.PrepareAirgap = koreon_toml.PrepareAirgap
-	} else if cmd == "destroy" {
-		registryIP := koreonToml.PrepareAirgap.RegistryIP
-
-		if registryIP == "" {
-			logger.Fatal(fmt.Sprintln("Destroy: All > Registry IP Address is required."))
-		} else {
-			koreonToml.PrepareAirgap = koreon_toml.PrepareAirgap
-		}
-
-		koreonToml = koreon_toml
 	} else if cmd == "destroy-prepare-airgap" {
 		registryIP := koreonToml.PrepareAirgap.RegistryIP
 
