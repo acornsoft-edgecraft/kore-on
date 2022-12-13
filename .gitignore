@@ -365,3 +365,5 @@ packages.yaml
 *-client-kubeconfig
 inventory.ini
 *.toml
+
+z-test-*

@@ -230,6 +230,8 @@
         apply:
           tags:
             - node
+      tags:
+        - storage
 
 # install kubernetes addon services
 - hosts: masters[0]
