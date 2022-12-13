@@ -22,7 +22,6 @@ local_repository_port: {{ (KoreOn.LocalRepositoryPort == 0) | ternary(8080, Kore
 local_repository_archive_file: {{ KoreOn.LocalRepositoryArchiveFile }}
 local_repository_url: {{ (KoreOn.LocalRepositoryUrl == "") | ternary("''", KoreOn.LocalRepositoryUrl) }}
 koreon_image_archive: {{ KoreOn.ImageArchive }}
-koreon_helm_version: {{ KoreOn.HelmVersion }}
 #-end [koreon]
 
 #- [kubernetes]

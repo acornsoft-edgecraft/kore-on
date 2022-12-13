@@ -129,7 +129,7 @@
 
 - name: Copy kubeadm conf file
   template:
-    src: "{{ 'kubernetes/kubeadm.yaml.j2' if (k8s_version is version('v1.24.1', '<')) else 'kubernetes/kubeadm-'+(k8s_major_version)+'.yaml.j2' }}"
+    src: "{{ 'kubernetes/kubeadm.yaml.j2' if (k8s_version is version('v1.24.0', '<')) else 'kubernetes/kubeadm-'+(k8s_major_version)+'.yaml.j2' }}"
     dest: "{{ kube_config_dir }}/kubeadm.yaml"
   notify:
    - Master | wait for kube-scheduler
@@ -375,6 +375,34 @@
 #  run_once: true
 #  when:
 #    - kubelet_csr.stdout != ""
+
+- name: MetricsServer | Create secrets_encryption
+  block:
+    - name: Slurp hosts file
+      ansible.builtin.slurp:
+        src: "{{ item }}"
+      with_items:
+        - /etc/kubernetes/pki/ca.crt
+        - /etc/kubernetes/pki/metrics-server.crt
+        - /etc/kubernetes/pki/metrics-server.key
+      register: pki_certs
+      run_once: true
+    - name: CREATE MONGOSECRETS SECRET
+      kubernetes.core.k8s:
+        kubeconfig: "/etc/kubernetes/admin.conf"
+        state: present
+        definition: 
+          apiVersion: v1
+          kind: Secret
+          type: Opaque             
+          metadata:
+            name: "metrics-server-certs"
+            namespace: "kube-system"
+          data:
+            ca.crt: "{{ pki_certs.results[0]['content'] }}"
+            metrics-server.crt: "{{ pki_certs.results[1]['content'] }}"
+            metrics-server.key: "{{ pki_certs.results[2]['content'] }}"
+      delegate_to: "{{ groups['masters'][0] }}"
 
 - name: MetricsServer | Copy metrics-server config file
   when: metrics_server
