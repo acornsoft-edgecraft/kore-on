@@ -1,0 +1,15 @@
+---
+# Kubernetes service check
+- name: Kubernetes service check
+  kubernetes.core.k8s:
+    kind: Pod
+    namespace: kube-system
+    field_selectors:
+      - status.phase=Running
+  any_errors_fatal: true
+
+- name: Download Helm From the Binary Releases
+  ansible.builtin.get_url:
+    url: "https://get.helm.sh/helm-{{ koreon_helm_version }}-linux-amd64.tar.gz"
+    dest: "{{ harbor_data_dir }}/{{ harbor_offline_file }}"
+  any_errors_fatal: true
