@@ -194,32 +194,17 @@ spec:
         volumeMounts:
         - mountPath: /tmp
           name: tmp-dir
-        - mountPath: /etc/kubernetes/pki/ca.crt
-          name: k8s-ca
-          readOnly: true
-        - mountPath: /etc/kubernetes/pki/metrics-server.key
-          name: metrics-server-key
-          readOnly: true
-        - mountPath: /etc/kubernetes/pki/metrics-server.crt
-          name: metrics-server-crt
+        - mountPath: /etc/kubernetes/pki
+          name: k8s-certs
           readOnly: true
       priorityClassName: system-cluster-critical
       serviceAccountName: metrics-server
       volumes:
       - emptyDir: {}
         name: tmp-dir
-      - name: k8s-ca
-        hostPath:
-          path: /etc/kubernetes/pki/ca.crt
-          type: File
-      - name: metrics-server-key
-        hostPath:
-          path: /etc/kubernetes/pki/metrics-server.key
-          type: File
-      - name: metrics-server-crt
-        hostPath:
-          path: /etc/kubernetes/pki/metrics-server.crt
-          type: File
+      - name: k8s-certs
+        secret:
+          secretName: metrics-server-certs
 ---
 apiVersion: policy/v1beta1
 kind: PodDisruptionBudget
