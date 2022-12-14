@@ -6,6 +6,10 @@
 
 # Handler showing how to clean yum clean all
 - name: yum-clean-all
-  ansible.builtin.command: yum clean all
+  ansible.builtin.command: "{{ item }}"
   args:
     warn: no
+  with_items:
+    - "yum clean all"
+    - "rm -rf /var/cache/{{ (ansible_distribution_major_version | int < 8) | ternary('yum', 'dnf') }}"
+

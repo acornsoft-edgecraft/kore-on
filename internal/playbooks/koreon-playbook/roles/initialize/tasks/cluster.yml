@@ -26,6 +26,8 @@
     enabled: false
     state: stopped
   failed_when: false
+  notify: yum-clean-all
+
 
 - name: Populate service facts
   ansible.builtin.service_facts:

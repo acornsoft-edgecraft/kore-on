@@ -61,7 +61,6 @@ oom_score = 0
         [plugins.cri.registry.configs."{{ registry_domain }}"]
           [plugins.cri.registry.configs."{{ registry_domain }}".tls]
             ca_file = "/etc/docker/certs.d/{{ registry_domain }}/ca.crt"
-            insecure_skip_verify = true
 {% endif %}
     [plugins.cri.x509_key_pair_streaming]
       tls_cert_file = ""

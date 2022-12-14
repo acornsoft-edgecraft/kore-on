@@ -1,0 +1,90 @@
+#!/bin/bash
+
+CURRENT_DATE=`date '+%Y%m%d'`
+CURRENT_TIME=`date '+%Y%m%d_%H%M%S'`
+
+K8S_VERIONS="-{{ prepare_airgap_k8s_version | regex_replace('^v', '') }}"
+REPO_DIR="{{ package_data_dir }}"
+PACKAGE_BASTION_DIR="{{ package_bastion_dir }}"
+ARCHIVE_DIR="{{ package_archive_dir }}"
+
+error_exit() {
+    echo "error: ${1:-"unknown error"}" 1>&2
+    exit 1
+}
+
+make_apt_repo(){
+    cd "$REPO_DIR"
+
+    apt-get -y update
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" nfs-common libnfsidmap2 libtirpc3 rpcbind keyutils libtirpc-common
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" nfs-kernel-server
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" nginx
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" python3
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" audit
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" ipvsadm
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" ipset
+
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" containerd.io="{{ containerd_io }}"
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" docker-ce
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" docker-ce-cli
+
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" jq
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" libonig2
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" telnet
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" vim
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" curl
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" net-tools
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" dnsutils
+
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" dpkg-dev
+    apt-get install -y dpkg-dev
+
+    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" kubelet=${K8S_VERIONS}-00 kubeadm=${K8S_VERIONS}-00 kubectl=${K8S_VERIONS}-00
+    
+
+    rm -rf lock partial pkgcache.bin srcpkgcache.bin Packages.gz
+
+    dpkg-scanpackages -m . | gzip -c > Packages.gz
+}
+
+create_tarball() {
+ 	cd $REPO_DIR
+    tar --exclude archive -zcvf $ARCHIVE_DIR/local-repo-"{{prepare_airgap_k8s_version}}"-$CURRENT_TIME.tgz ./
+}
+
+
+main() {
+
+    for var in `grep -ri "ID" /etc/os-release`
+    do
+    KEY=$(echo $var | cut -f1 -d=)
+    VALUE=$(echo $var | cut -f2 -d= | sed 's/\"//g;s/platform\://')
+
+    case "$KEY" in
+        ID)                 ID=${VALUE} ;;
+        ID_LIKE)            ID_LIKE=${VALUE} ;;
+        VERSION_ID)         VERSION_ID=${VALUE} ;;
+        PLATFORM_ID)        PLATFORM_ID=${VALUE} ;;
+        *)
+    esac
+    done
+
+    if [ "$ID" == "centos" ]; then
+        make_yum_repo
+    fi
+
+    if [ "$ID" == "rhel" ]; then
+        make_yum_repo
+    fi
+
+    if [ "$ID" == "ubuntu" ]; then
+        make_apt_repo
+    fi
+
+    create_tarball
+
+    echo "Completed"
+}
+
+main "${@}"

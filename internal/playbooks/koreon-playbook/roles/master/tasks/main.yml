@@ -304,9 +304,10 @@
       alias psg="ps -ef | grep "
       alias wp="watch -n1 'kubectl get pods --all-namespaces -o wide'"
       alias k="kubectl "
-    with_items:
-      - /root/
-      - ~/
+  with_items:
+    - "/root/"
+    - "{{ ansible_user_dir }}/"
+
 - name: Add alias to .base_profile
   when: ansible_distribution in ["CentOS", "RedHat"]
   blockinfile:
@@ -326,9 +327,9 @@
       alias wp="watch -n1 'kubectl get pods --all-namespaces -o wide'"
       alias k="kubectl "
       alias cert="openssl x509 -text -noout -in "
-    with_items:
-      - /root/
-      - ~/
+  with_items:
+    - "/root/"
+    - "{{ ansible_user_dir }}/"
 
 # Untaint Master node ---------------------------------------------------------
 - name: ADDON | Untaint master node
