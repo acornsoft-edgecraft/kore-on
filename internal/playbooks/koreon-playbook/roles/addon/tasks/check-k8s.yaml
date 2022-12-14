@@ -2,6 +2,7 @@
 # Kubernetes service check
 - name: Kubernetes service check
   kubernetes.core.k8s_info:
+    kubeconfig: "{{ kubeadminconfig }}"
     kind: Pod
     namespace: kube-system
     field_selectors:

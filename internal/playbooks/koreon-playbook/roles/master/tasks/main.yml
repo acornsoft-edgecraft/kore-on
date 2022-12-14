@@ -289,8 +289,8 @@
 - name: Add alias to .base_profile
   when: ansible_distribution in ["Ubuntu", "Debian"]
   blockinfile:
-    dest: /root/.profile
-    marker: "## {mark} added by knit --------------------"
+    dest: "{{ item }}.profile"
+    marker: "## {mark} added by koreon --------------------"
     block: |
       export ETCDCTL_API=3
       export ETCDCTL_CACERT=/etc/kubernetes/pki/etcd/ca.crt
@@ -304,12 +304,14 @@
       alias psg="ps -ef | grep "
       alias wp="watch -n1 'kubectl get pods --all-namespaces -o wide'"
       alias k="kubectl "
-
+    with_items:
+      - /root/
+      - ~/
 - name: Add alias to .base_profile
   when: ansible_distribution in ["CentOS", "RedHat"]
   blockinfile:
-    dest: /root/.bash_profile
-    marker: "## {mark} added by knit --------------------"
+    dest: "{{ item }}.bash_profile"
+    marker: "## {mark} added by koreon --------------------"
     block: |
       export ETCDCTL_API=3
       export ETCDCTL_CACERT=/etc/kubernetes/pki/etcd/ca.crt
@@ -324,6 +326,9 @@
       alias wp="watch -n1 'kubectl get pods --all-namespaces -o wide'"
       alias k="kubectl "
       alias cert="openssl x509 -text -noout -in "
+    with_items:
+      - /root/
+      - ~/
 
 # Untaint Master node ---------------------------------------------------------
 - name: ADDON | Untaint master node
@@ -389,7 +394,7 @@
       run_once: true
     - name: CREATE MONGOSECRETS SECRET
       kubernetes.core.k8s:
-        kubeconfig: "/etc/kubernetes/admin.conf"
+        kubeconfig: "{{ kubeadminconfig }}"
         state: present
         definition: 
           apiVersion: v1
