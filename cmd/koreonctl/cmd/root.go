@@ -45,6 +45,7 @@ func init() {
 		destroyCmd(),
 		airGapCmd(),
 		bastionCmd(),
+		addonCmd(),
 	)
 
 }
