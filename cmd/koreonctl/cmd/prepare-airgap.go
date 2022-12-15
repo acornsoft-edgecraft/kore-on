@@ -11,7 +11,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
 	"syscall"
 
 	"kore-on/cmd/koreonctl/conf"
@@ -26,29 +25,10 @@ type strAirGapCmd struct {
 	privateKey string
 	user       string
 	command    string
-	chekcmd    [][]string
-}
-
-func checkStringContains(got, expected string) {
-	if !strings.Contains(got, expected) {
-		fmt.Errorf("Expected to contain: \n %v\nGot:\n %v\n", expected, got)
-	}
-}
-
-func checkStringOmits(got, expected string) {
-	if strings.Contains(got, expected) {
-		fmt.Errorf("Expected to not contain: \n %v\nGot: %v", expected, got)
-	}
 }
 
 func airGapCmd() *cobra.Command {
 	prepareAirgap := &strAirGapCmd{}
-	prepareAirgap.chekcmd = [][]string{
-		{"--unknown", "--namespace=foo", "child", "--bar=true"},
-		{"--namespace=foo", "--unknown", "child", "--bar=true"},
-		{"--namespace=foo", "child", "--unknown", "--bar=true"},
-		{"--namespace=foo", "child", "--bar=true", "--unknown"},
-	}
 
 	cmd := &cobra.Command{
 		Use:          "prepare-airgap [flags]",
@@ -62,37 +42,38 @@ func airGapCmd() *cobra.Command {
 
 	cmd.AddCommand(downLoadArchiveCmd())
 
-	var cmdFound bool
-	cmdCheck := cmd.Commands()
+	// SubCommand validation
+	utils.CheckCommand(cmd)
 
-	fmt.Println("asdfasdf  == ", len(cmdCheck))
+	// if os.Args[1] == "prepare-airgap" {
+	// 	// utils.CheckCommand(cmd)
+	// 	var cmdCheck []string
+	// 	var strContains string
 
-	for _, a := range cmdCheck {
-		fmt.Println("aaaa == ", a.Name())
-		// if a.Name() == os.Args[2] {
-		// 	cmdFound = true
-		// 	break
-		// }
-		for _, b := range os.Args[1:] {
+	// 	for _, v := range cmd.Commands() {
+	// 		cmdCheck = append(cmdCheck, v.Name())
+	// 	}
 
-			fmt.Println("aa == ", a.Name())
-			fmt.Println("bb == ", b)
-			if a.Name() == b {
-				cmdFound = true
-				break
-			}
-		}
-	}
-
-	if !cmdFound {
-		args := append([]string{"prepare-airgap"}, os.Args[1:]...)
-		buf := new(bytes.Buffer)
-		cmd.SetOut(buf)
-		cmd.SetErr(buf)
-		cmd.SetArgs(args)
-		fmt.Println("asdfasdfasd=========== ", args)
-	}
-
+	// 	subcmd := os.Args[2]
+	// 	for _, cv := range cmdCheck {
+	// 		if cv != subcmd && string(subcmd[0]) != "-" {
+	// 			for _, v := range cmdCheck {
+	// 				if strings.Contains(v, subcmd) {
+	// 					strContains = v
+	// 					break
+	// 				}
+	// 			}
+	// 			args := append([]string{cmd.Name()}, os.Args[1:]...)
+	// 			buf := new(bytes.Buffer)
+	// 			cmd.SetErr(buf)
+	// 			fmt.Println("unknown command ", args)
+	// 			errMessage := fmt.Sprintf("Did you mean this?\n\t%s\n\nRun 'koreonctl %s --help' for usage.", strContains, cmd.Name())
+	// 			fmt.Print(errMessage)
+	// 			os.Exit(1)
+	// 			break
+	// 		}
+	// 	}
+	// }
 	f := cmd.Flags()
 	f.BoolVarP(&prepareAirgap.dryRun, "dry-run", "d", false, "dryRun")
 	f.StringVarP(&prepareAirgap.privateKey, "private-key", "p", "", "Specify ssh key path")
@@ -110,7 +91,6 @@ func downLoadArchiveCmd() *cobra.Command {
 		Long:         "",
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			fmt.Println("asdf ==== ", args)
 			return downLoadArchive.run()
 		},
 	}

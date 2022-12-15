@@ -289,13 +289,16 @@
 - name: Copy kubeconfig file in user home directory
   ansible.builtin.copy:
     src: /etc/kubernetes/acloud/acloud-client-kubeconfig
-    dest: "{{ (item == 'root') | ternary('/root', '/home/{{ item }}') }}/.kube/config"
+    dest: "{{ (item == 'root') | ternary('/root', '/home/' + item) }}/.kube/config"
+    remote_src: true
     owner: "{{ item }}"
     group: "{{ item }}"
     mode: "0644"
   with_items:
     - "root"
     - "{{ ansible_user_id }}"
+  delegate_to: "{{ groups['masters'][0] }}"
+  run_once: true
 
 - name: Add alias to .base_profile
   when: ansible_distribution in ["Ubuntu", "Debian"]
