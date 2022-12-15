@@ -46,7 +46,7 @@ func AddonCmd() *cobra.Command {
 	addon.tags = ""
 	addon.inventory = "./internal/playbooks/koreon-playbook/inventory/inventory.ini"
 	addon.playbookFiles = []string{
-		"./internal/playbooks/koreon-playbook/addon.yaml",
+		"./internal/playbooks/koreon-playbook/add-on.yaml",
 	}
 
 	f := cmd.Flags()
@@ -63,7 +63,7 @@ func AddonCmd() *cobra.Command {
 func (c *strAddonCmd) run() error {
 	koreOnConfigFileName := viper.GetString("KoreOn.KoreOnConfigFile")
 	koreOnConfigFilePath := utils.IskoreOnConfigFilePath(koreOnConfigFileName)
-	koreonToml, value := utils.ValidateKoreonTomlConfig(koreOnConfigFilePath, "addon")
+	koreonToml, value := utils.ValidateKoreonTomlConfig(koreOnConfigFilePath, "add-on")
 
 	if value {
 		b, err := json.Marshal(koreonToml)

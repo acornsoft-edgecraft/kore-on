@@ -26,11 +26,11 @@ spec:
             - name: PROVISIONER_NAME # do not change
               value: nfs-provisioner
             - name: NFS_SERVER # do not change
-              value: "{{ nfs_ip }}"
+              value: "{{ storage_ip }}"
             - name: NFS_PATH # do not change
-              value: "{{ nfs_volume_dir }}"  # path to nfs directory setup
+              value: "{{ shared_volume_dir }}"  # path to nfs directory setup
       volumes:
        - name: nfs-provisioner-v # same as volumemouts name
          nfs:
-           server: "{{ nfs_ip }}"
-           path: "{{ nfs_volume_dir }}"
+           server: "{{ storage_ip }}"
+           path: "{{ shared_volume_dir }}"

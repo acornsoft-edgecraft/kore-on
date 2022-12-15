@@ -28,10 +28,10 @@
 
 - name: Delete some files and directories
   when:
-  - not ((nfs_volume_dir is undefined) or (nfs_volume_dir is none) or (nfs_volume_dir|trim == ''))
+  - not ((shared_volume_dir is undefined) or (shared_volume_dir is none) or (shared_volume_dir|trim == ''))
   shell: "rm -rf {{ item }}"
   with_items:
-    - "{{ nfs_volume_dir }}/*"
+    - "{{ shared_volume_dir }}/*"
     - /etc/exports
   tags: ['files']
 

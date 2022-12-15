@@ -1,4 +1,19 @@
 ---
+# Input Password
+- name: Input Private Registry Password
+  vars_prompt:
+    - name: username
+      prompt: What is your username?
+      private: false
+
+    - name: password
+      prompt: Enter password
+      unsafe: true
+      private: true
+  
+- debug:
+    msg: "{{ username }}   /  {{ password }}"
+
 # Kubernetes service check
 - name: Kubernetes service check
   kubernetes.core.k8s_info:

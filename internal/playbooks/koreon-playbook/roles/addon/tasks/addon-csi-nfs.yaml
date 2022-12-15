@@ -31,7 +31,7 @@
   run_once: true
 
 - name: Storage NFS | Create Storage NFS
-  when: nfs_ip != "" and storage_type == "nfs"
+  when: storage_ip != "" and storage_type == "nfs"
   shell: "kubectl apply --kubeconfig={{ kubeadminconfig }} -f {{ kube_addon_dir }}/{{ item }}"
   with_items:
     - "nfs-client-provisioner/nfs-rbac.yaml"
