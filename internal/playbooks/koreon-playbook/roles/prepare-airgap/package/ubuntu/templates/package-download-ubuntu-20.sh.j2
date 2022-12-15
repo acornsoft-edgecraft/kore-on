@@ -1,4 +1,6 @@
 #!/bin/bash
+## required repo list
+## docker, kubernetes, nvidia
 
 CURRENT_DATE=`date '+%Y%m%d'`
 CURRENT_TIME=`date '+%Y%m%d_%H%M%S'`
@@ -13,35 +15,126 @@ error_exit() {
     exit 1
 }
 
+# params <pack_name>
+function is_resolved() {
+  if [ ${#RESOLVED[@]} -eq 0 ]; then
+    return 0
+  fi
+
+  for PACKAGE in ${RESOLVED[@]};
+  do
+    if [ "$PACKAGE" = "$1" ]; then
+      return 1
+    fi
+  done
+}
+
+# params <pack_name>
+# params <pack_name> recursion
+function resolve_recursion() {
+  echo $1
+  if ! is_resolved $1 || [[ -z "$2" ]]; then
+    GET=$(apt-cache depends --recurse --no-recommends --no-suggests --no-conflicts --no-breaks --no-replaces --no-enhances --no-pre-depends $1 | awk '/Depends:/ {print $2}')
+    while IFS= read line;
+    do
+     echo $line
+       [ -z "$line" ] && continue
+       if ! is_resolved $line; then
+         resolve_recursion $line recursion
+       fi
+    done <<< "$GET"
+  fi
+
+  RESOLVED+=("$1")
+}
+
 make_apt_repo(){
     cd "$REPO_DIR"
 
-    apt-get -y update
-    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" nfs-common libnfsidmap2 libtirpc3 rpcbind keyutils libtirpc-common
-    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" nfs-kernel-server
-    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" nginx
-    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" python3
-    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" audit
-    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" ipvsadm
-    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" ipset
+    apt-get update -y
 
-    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" containerd.io="{{ containerd_io }}"
-    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" docker-ce
-    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" docker-ce-cli
+    (
+    resolve_recursion containerd.io="{{ containerd_io }}"
 
-    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" jq
-    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" libonig2
-    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" telnet
-    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" vim
-    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" curl
-    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" net-tools
-    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" dnsutils
+    resolve_recursion kubelet=${K8S_VERIONS}-00
+    resolve_recursion kubeadm=${K8S_VERIONS}-00
+    resolve_recursion kubectl=${K8S_VERIONS}-00
 
-    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" dpkg-dev
-    apt-get install -y dpkg-dev
+    resolve_recursion docker-ce
+    resolve_recursion docker-ce-cli
+    resolve_recursion docker-compose-plugin
 
-    apt-get install -y -d --reinstall -o Dir::cache=$repo_dir -o Dir::Cache::archives="./" kubelet=${K8S_VERIONS}-00 kubeadm=${K8S_VERIONS}-00 kubectl=${K8S_VERIONS}-00
+    resolve_recursion nvidia-container-toolkit
+
+    resolve_recursion nginx
+
+    resolve_recursion jq
+    resolve_recursion ipvsadm
+    resolve_recursion ipset
+    resolve_recursion audit
+    resolve_recursion python3
+    resolve_recursion wget
+    resolve_recursion libonig2
+    resolve_recursion telnet
+    resolve_recursion vim
+    resolve_recursion curl
+    resolve_recursion net-tools
+    resolve_recursion nfs-kernel-server
+    resolve_recursion libnfsidmap2
+    resolve_recursion libtirpc3
+    resolve_recursion rpcbind
+    resolve_recursion keyutils
+    resolve_recursion libtirpc-common
+    resolve_recursion dnsutils
+    resolve_recursion dpkg-dev
+    resolve_recursion nfs-kernel-server
+    resolve_recursion tcpdump
+
+    resolve_recursion conntrack
+    resolve_recursion ebtables
+    resolve_recursion iproute2
+    resolve_recursion util-linux
+    resolve_recursion udev
+    resolve_recursion ethtool
+
+    ) | sed -E 's#(<|>)##g' | sort -u | while read line; do
+
+    echo "Downloading $line"
+    status=0
+    apt-get install -y --download-only --reinstall --allow-downgrades --allow-change-held-packages $line || ((status=$?))
+    if [ $status -eq 0 ]; then
+    echo "OK."
+    else
+    echo "Failed $line"
+
+    # Virtual Pcakage Provided. Package Selection
+    FLAG_ON=
+    APT_PRINT=$(apt-get install -y --download-only --reinstall --allow-downgrades --allow-change-held-packages $line 2>&1 || true)
+    while read lineapt;
+    do
+
+        # Package debconf-2.0 is a virtual package provided by:
+        if [[ "$lineapt" =~ by:$ ]]; then
+        FLAG_ON=1
+        continue
+        fi
+
+        if [ ! -z "$FLAG_ON" ]; then
+        LINE_PURE=$(echo $lineapt | sed 's#^\s+##')
+        APT_PACK_NAME=$(echo $LINE_PURE | awk '{print $1}')
+        APT_PACK_VER=$(echo $LINE_PURE | awk '{print $2}')
+        echo "It's downloading $APT_PACK_NAME=$APT_PACK_VER"
+        apt-get install -y --download-only --reinstall --allow-downgrades --allow-change-held-packages $APT_PACK_NAME=$APT_PACK_VER
+        break
+        fi
+
+    done <<< "$APT_PRINT"
+
+    fi
+
+    done
     
+    apt-get install -y dpkg-dev
 
     rm -rf lock partial pkgcache.bin srcpkgcache.bin Packages.gz
 
@@ -55,6 +148,10 @@ create_tarball() {
 
 
 main() {
+set -e
+
+RESOLVED=()
+
 
     for var in `grep -ri "ID" /etc/os-release`
     do

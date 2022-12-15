@@ -55,6 +55,7 @@
   until: result is succeeded
   retries: 5
   delay: 10
+  notify: yum-clean-metadata
 
 - name: Install epel
   yum:

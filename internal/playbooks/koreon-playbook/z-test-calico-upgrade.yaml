@@ -1,6 +1,0 @@
----
-# Test Calico upgrade
-- hosts: master[0]
-  become: true
-  tasks:
-    - name: Calico version check

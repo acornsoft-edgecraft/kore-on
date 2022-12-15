@@ -1,8 +1,0 @@
----
-# Test debug
-- hosts: registry
-  tasks:
-    - debug: 
-        # msg: "{{ 'aaa' if (ansible_distribution == 'redhat') else (ansible_distribution | lower) }}"
-        # msg: "{{ false  if (ansible_distribution in ['RedHat']) }}"
-        msg: "{{ install_dir }}/harbor"

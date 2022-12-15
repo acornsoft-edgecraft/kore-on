@@ -21,7 +21,7 @@
       meta: clear_facts
 
 # Pre-installation check network.
-- hosts: all
+- hosts: masters[0]
   become: false
   gather_facts: true
   vars_files:
@@ -37,7 +37,7 @@
   any_errors_fatal: true
 
 # Configure system package repository
-- hosts: masters
+- hosts: masters[0]
   become: false
   gather_facts: false
   vars_files:

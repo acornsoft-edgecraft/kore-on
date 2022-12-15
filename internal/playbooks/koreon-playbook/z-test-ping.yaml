@@ -1,7 +1,0 @@
----
-# Test debug
-- hosts: package-download
-  become: true
-  gather_facts: false
-  tasks:
-    - ping:

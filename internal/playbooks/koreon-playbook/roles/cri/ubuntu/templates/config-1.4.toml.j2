@@ -131,7 +131,6 @@ oom_score = 0
         [plugins."io.containerd.grpc.v1.cri".registry.configs."{{ registry_domain }}"]
           [plugins."io.containerd.grpc.v1.cri".registry.configs."{{ registry_domain }}".tls]
             ca_file = "/etc/docker/certs.d/{{ registry_domain }}/ca.crt"
-            insecure_skip_verify = true
 {% endif %}
     [plugins."io.containerd.grpc.v1.cri".image_decryption]
       key_model = ""
