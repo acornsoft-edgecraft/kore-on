@@ -4,7 +4,6 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"errors"
 	"os"
 
 	"kore-on/pkg/logger"
@@ -34,9 +33,10 @@ func init() {
 	KoreOnCtlCmd.CompletionOptions.HiddenDefaultCmd = true
 
 	KoreOnCtlCmd.SetFlagErrorFunc(func(c *cobra.Command, err error) error {
-		c.Println(err)
+		c.Println("Error: ", err)
 		c.Println(c.UsageString())
-		return errors.New("koreonctlErr")
+		os.Exit(1)
+		return nil
 	})
 
 	KoreOnCtlCmd.AddCommand(

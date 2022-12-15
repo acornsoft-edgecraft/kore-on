@@ -49,6 +49,40 @@ func destroyCmd() *cobra.Command {
 		destroyStorageCmd(),
 	)
 
+	// SubCommand validation
+	utils.CheckCommand(cmd)
+
+	// if os.Args[1] == "destroy" {
+
+	// 	// utils.CheckCommand(cmd)
+	// 	var cmdCheck []string
+	// 	var strContains string
+
+	// 	for _, v := range cmd.Commands() {
+	// 		cmdCheck = append(cmdCheck, v.Name())
+	// 	}
+
+	// 	subcmd := os.Args[2]
+	// 	for _, cv := range cmdCheck {
+	// 		if cv != subcmd && string(subcmd[0]) != "-" {
+	// 			for _, v := range cmdCheck {
+	// 				if strings.Contains(v, subcmd) {
+	// 					strContains = v
+	// 					break
+	// 				}
+	// 			}
+	// 			args := append([]string{""}, os.Args[1:]...)
+	// 			buf := new(bytes.Buffer)
+	// 			cmd.SetErr(buf)
+	// 			fmt.Println("unknown command ", args)
+	// 			errMessage := fmt.Sprintf("Did you mean this?\n\t%s\n\nRun 'koreonctl %s --help' for usage.", strContains, cmd.Name())
+	// 			fmt.Print(errMessage)
+	// 			os.Exit(1)
+	// 			break
+	// 		}
+	// 	}
+	// }
+
 	f := cmd.Flags()
 	f.BoolVar(&destroy.verbose, "verbose", false, "verbose")
 	f.BoolVarP(&destroy.dryRun, "dry-run", "d", false, "dryRun")
