@@ -128,8 +128,8 @@ registry_ssl_ca_key: {{ PrivateRegistry.CertFile.SslCertificateKey }}
 ## - 
 ## Optional
 storage_install: {{ SharedStorage.Install }}
-nfs_ip: {{ SharedStorage.StorageIP }}
-nfs_volume_dir: {{ (SharedStorage.VolumeDir == "") | ternary("/data/storage", SharedStorage.VolumeDir) }}
+storage_ip: {{ SharedStorage.StorageIP }}
+shared_volume_dir: {{ (SharedStorage.VolumeDir == "") | ternary("/data/storage", SharedStorage.VolumeDir) }}
 #-end [shared-storage]
 
 

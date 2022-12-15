@@ -3,7 +3,8 @@
   when:
     - addon_install
 
-- import_tasks: addon-nfs-client-provisioner.yaml
-  when: 
+- import_tasks: addon-csi-nfs.yaml
+  tags:
+    - addon-csi-nfs
+  when:
     - addon_install
-    - storage_install

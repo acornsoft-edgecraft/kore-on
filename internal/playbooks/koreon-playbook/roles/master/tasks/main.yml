@@ -281,10 +281,21 @@
 - name: Get kubeconfig file
   fetch:
     src: /etc/kubernetes/acloud/acloud-client-kubeconfig
-    dest: "{{ playbook_dir }}/inventory/acloud-client-kubeconfig"
+    dest: "{{ playbook_dir }}/download/acloud-client-kubeconfig"
     flat: yes
   delegate_to: "{{ groups['masters'][0] }}"
   run_once: true
+
+- name: Copy kubeconfig file in user home directory
+  ansible.builtin.copy:
+    src: /etc/kubernetes/acloud/acloud-client-kubeconfig
+    dest: "{{ (item == 'root') | ternary('/root', '/home/{{ item }}') }}/.kube/config"
+    owner: "{{ item }}"
+    group: "{{ item }}"
+    mode: "0644"
+  with_items:
+    - "root"
+    - "{{ ansible_user_id }}"
 
 - name: Add alias to .base_profile
   when: ansible_distribution in ["Ubuntu", "Debian"]
@@ -296,8 +307,6 @@
       export ETCDCTL_CACERT=/etc/kubernetes/pki/etcd/ca.crt
       export ETCDCTL_CERT=/etc/kubernetes/pki/etcd/peer.crt
       export ETCDCTL_KEY=/etc/kubernetes/pki/etcd/peer.key
-
-      export KUBECONFIG=/etc/kubernetes/admin.conf
 
       alias ll='ls -al'
       alias etcdlet="etcdctl --endpoints={{ etcd_access_addresses }} "
@@ -318,8 +327,6 @@
       export ETCDCTL_CACERT=/etc/kubernetes/pki/etcd/ca.crt
       export ETCDCTL_CERT=/etc/kubernetes/pki/etcd/peer.crt
       export ETCDCTL_KEY=/etc/kubernetes/pki/etcd/peer.key
-
-      export KUBECONFIG=/etc/kubernetes/admin.conf
 
       alias ll='ls -al'
       alias etcdlet="etcdctl --endpoints={{ etcd_access_addresses }} "

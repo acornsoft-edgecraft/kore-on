@@ -7,6 +7,7 @@
     namespace: kube-system
     field_selectors:
       - status.phase=Running
+  delegate_to: "{{ groups['masters'][0] }}"
   any_errors_fatal: true
 
 - name: Get helm tgz file and uncompress it
