@@ -1,8 +1,0 @@
----
-# Install cri
-- hosts: cluster
-  become: true
-  roles:
-    - { role: cri, tags: cri}
-    - { role: cri, tags: cri, vars: {param: "test"} }
-    - { role: cri, tags: cri, vars: {param: "aaa"} }
