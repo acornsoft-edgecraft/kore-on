@@ -1,7 +1,7 @@
 ---
 - name: Ensure nfs mount directory
   file:
-    path: "{{ nfs_volume_dir }}"
+    path: "{{ shared_volume_dir }}"
     state: directory
 
 - name: Cluster | Disable firewalld
