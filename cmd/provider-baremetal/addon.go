@@ -17,7 +17,7 @@ import (
 )
 
 // Commands structure
-type strApplyCmd struct {
+type strAddonCmd struct {
 	dryRun        bool
 	verbose       bool
 	step          bool
@@ -29,41 +29,41 @@ type strApplyCmd struct {
 	extravars     map[string]interface{}
 }
 
-func ApplyCmd() *cobra.Command {
-	apply := &strApplyCmd{}
+func AddonCmd() *cobra.Command {
+	addon := &strAddonCmd{}
 
 	cmd := &cobra.Command{
-		Use:          "apply [flags]",
+		Use:          "addon [flags]",
 		Short:        "Upgrade kubernetes cluster, registry",
 		Long:         "",
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return apply.run()
+			return addon.run()
 		},
 	}
 
 	// Default value for command struct
-	apply.tags = ""
-	apply.inventory = "./internal/playbooks/koreon-playbook/inventory/inventory.ini"
-	apply.playbookFiles = []string{
+	addon.tags = ""
+	addon.inventory = "./internal/playbooks/koreon-playbook/inventory/inventory.ini"
+	addon.playbookFiles = []string{
 		"./internal/playbooks/koreon-playbook/addon.yaml",
 	}
 
 	f := cmd.Flags()
-	f.BoolVar(&apply.verbose, "verbose", false, "verbose")
-	f.BoolVarP(&apply.step, "step", "", false, "step")
-	f.BoolVarP(&apply.dryRun, "dry-run", "d", false, "dryRun")
-	f.StringVar(&apply.tags, "tags", apply.tags, "Ansible options tags")
-	f.StringVarP(&apply.privateKey, "private-key", "p", "", "Specify ssh key path")
-	f.StringVarP(&apply.user, "user", "u", "", "login user")
+	f.BoolVar(&addon.verbose, "verbose", false, "verbose")
+	f.BoolVarP(&addon.step, "step", "", false, "step")
+	f.BoolVarP(&addon.dryRun, "dry-run", "d", false, "dryRun")
+	f.StringVar(&addon.tags, "tags", addon.tags, "Ansible options tags")
+	f.StringVarP(&addon.privateKey, "private-key", "p", "", "Specify ssh key path")
+	f.StringVarP(&addon.user, "user", "u", "", "login user")
 
 	return cmd
 }
 
-func (c *strApplyCmd) run() error {
+func (c *strAddonCmd) run() error {
 	koreOnConfigFileName := viper.GetString("KoreOn.KoreOnConfigFile")
 	koreOnConfigFilePath := utils.IskoreOnConfigFilePath(koreOnConfigFileName)
-	koreonToml, value := utils.ValidateKoreonTomlConfig(koreOnConfigFilePath, "apply")
+	koreonToml, value := utils.ValidateKoreonTomlConfig(koreOnConfigFilePath, "addon")
 
 	if value {
 		b, err := json.Marshal(koreonToml)
