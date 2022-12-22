@@ -46,6 +46,7 @@ func AddonCmd() *cobra.Command {
 			return addon.run()
 		},
 	}
+	cmd.AddCommand(AddonDeleteCmd())
 
 	// Default value for command struct
 	addon.tags = ""
@@ -61,6 +62,38 @@ func AddonCmd() *cobra.Command {
 	f.StringVar(&addon.tags, "tags", addon.tags, "Ansible options tags")
 	f.StringVarP(&addon.privateKey, "private-key", "p", "", "Specify ssh key path")
 	f.StringVarP(&addon.user, "user", "u", "", "login user")
+
+	return cmd
+}
+
+func AddonDeleteCmd() *cobra.Command {
+	addonDelete := &strAddonCmd{}
+
+	cmd := &cobra.Command{
+		Use:   "delete [flags]",
+		Short: "Deployment Applications in kubernetes cluster",
+		Long: "This command deploys the application to Kubernetes.\n" +
+			"Use helm as the package manager for Kubernetes.",
+		SilenceUsage: true,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return addonDelete.run()
+		},
+	}
+
+	// Default value for command struct
+	addonDelete.tags = ""
+	addonDelete.inventory = "./internal/playbooks/koreon-playbook/inventory/inventory.ini"
+	addonDelete.playbookFiles = []string{
+		"./internal/playbooks/koreon-playbook/delete-add-on.yaml",
+	}
+	f := cmd.Flags()
+	f.BoolVar(&addonDelete.verbose, "verbose", false, "verbose")
+	f.BoolVarP(&addonDelete.dryRun, "dry-run", "d", false, "dryRun")
+	f.BoolVar(&addonDelete.installHelm, "install-helm", false, "Helm installation options")
+	f.StringVar(&addonDelete.helmBinaryFile, "helm-binary-file", "", "helm binary file")
+	f.StringVar(&addonDelete.tags, "tags", addonDelete.tags, "Ansible options tags")
+	f.StringVarP(&addonDelete.privateKey, "private-key", "p", "", "Specify ssh key path")
+	f.StringVarP(&addonDelete.user, "user", "u", "", "login user")
 
 	return cmd
 }
