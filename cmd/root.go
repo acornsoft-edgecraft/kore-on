@@ -35,6 +35,13 @@ func init() {
 
 	RootCmd.CompletionOptions.HiddenDefaultCmd = true
 
+	RootCmd.SetFlagErrorFunc(func(c *cobra.Command, err error) error {
+		c.Println("Error: ", err)
+		c.Println(c.UsageString())
+		os.Exit(1)
+		return nil
+	})
+
 	RootCmd.AddCommand(
 		common.InitCmd(),
 		baremetal.CreateCmd(),
