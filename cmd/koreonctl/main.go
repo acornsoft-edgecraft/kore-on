@@ -13,7 +13,7 @@ func timeElapsed() func() {
 	start := time.Now()
 	return func() {
 		timeElapsed := time.Since(start)
-		fmt.Println("This function took", timeElapsed, "time")
+		fmt.Println("Duration", timeElapsed, "time")
 	}
 }
 

@@ -69,7 +69,6 @@ func (c *strInitCmd) init(workDir string) error {
 		os.Rename(koreOnConfigFilePath, koreOnConfigFilePath+"_"+currTime.Format("20060102150405"))
 		ioutil.WriteFile(workDir+"/"+koreOnConfigFile, []byte(config.Template), 0600)
 		fmt.Printf(SUCCESS_FORMAT, fmt.Sprintf("Initialize completed, Edit %s file according to your environment and run `koreonctl create`", koreOnConfigFile))
-
 	}
 	return nil
 }

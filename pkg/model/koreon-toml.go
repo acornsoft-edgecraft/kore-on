@@ -7,6 +7,9 @@ type KoreOnToml struct {
 		InstallDir       string `toml:"install-dir,omitempty"`
 		CertValidityDays int    `toml:"cert-validity-days,omitempty"`
 		ImageArchive     string
+		HelmCubeRepoUrl  string
+		HelmCubeRepoID   string
+		HelmCubeRepoPW   string
 
 		//#Airgap
 		ClosedNetwork              bool   `toml:"closed-network,omitempty"`

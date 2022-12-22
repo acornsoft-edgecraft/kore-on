@@ -1,0 +1,45 @@
+---
+- name: Add CUBE Helm charts repository
+  command: |
+    helm repo add cube "{{ Addon.HelmCubeRepoUrl }}"
+    --username "{{ Addon.HelmCubeRepoID | b64decode }}"
+    --password "{{ Addon.HelmCubeRepoPW | b64decode }}"
+  delegate_to: "{{ groups['masters'][0] }}"
+
+# Create Package directory
+- name: Addon | Create addon directory
+  ansible.builtin.file:
+    path: "{{ Addon.AddonDataDir }}/csi-driver-nfs"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Populate service facts
+  ansible.builtin.shell: ps -ef | grep kubelet | grep 'root-dir' | grep -Po '\-\-root\-dir=\K[^\s]+'
+  register: result
+
+- name: Addon | copy csi-driver-nfs values file
+  vars:
+    kubelet_root_dir: "{{ result.stdout }}"
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ Addon.AddonDataDir }}/{{ item.dest }}"
+    backup: true
+    mode: 0644
+  with_items:
+    - { src: "values.yaml.j2", dest: "csi-driver-nfs/values.yaml" }
+  delegate_to: "{{ groups['masters'][0] }}"
+  run_once: true
+
+- name: Addon | deployment csi-driver-nfs
+  kubernetes.core.helm:
+    name: csi-driver-nfs
+    chart_ref: cube/csi-driver-nfs
+    release_namespace: kube-system
+    update_repo_cache: True
+    disable_hook: True
+    atomic: true
+    values_files:
+      - "{{ Addon.AddonDataDir }}/csi-driver-nfs/values.yaml"
+  run_once: true

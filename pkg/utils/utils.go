@@ -12,8 +12,12 @@ import (
 	"runtime"
 	"sort"
 	"strings"
+	"syscall"
 
+	"github.com/apenella/go-ansible/pkg/stdoutcallback/results"
+	"github.com/fatih/color"
 	"github.com/spf13/viper"
+	"golang.org/x/term"
 )
 
 func FileExists(name string) bool {
@@ -244,6 +248,45 @@ func ExecCommand(c string, commandArgs []string) *exec.Cmd {
 
 	cmd := exec.Command(binary, commandArgs...)
 	return cmd
+}
+
+// InputPrompt receives a string value using the label
+func InputPrompt(label string) string {
+	var s string
+	r := bufio.NewReader(os.Stdin)
+	for {
+		fmt.Fprint(os.Stderr, label+" ")
+		s, _ = r.ReadString('\n')
+		if s != "" {
+			break
+		}
+	}
+	return strings.TrimSpace(s)
+}
+
+// The entered password will not be displayed on the screen
+func SensitivePrompt(label string) string {
+	var s string
+	for {
+		fmt.Fprint(os.Stderr, label+" ")
+		pw, _ := term.ReadPassword(int(syscall.Stdin))
+		s = string(pw)
+		if s != "" {
+			break
+		} else {
+			fmt.Println()
+		}
+	}
+	fmt.Println()
+	return s
+}
+
+// customTrasnformer
+func OutputColored() results.TransformerFunc {
+	return func(message string) string {
+		yellow := color.New(color.FgYellow).SprintFunc()
+		return fmt.Sprintf("%v", yellow(message))
+	}
 }
 
 func prettyPrint(b []byte) ([]byte, error) {
