@@ -19,22 +19,15 @@
   delegate_to: "{{ groups['masters'][0] }}"
   run_once: true
 
-# - name: Addon | deployment koreboard
-#   kubernetes.core.helm:
-#     name: koreboard
-#     chart_ref: "{{ Apps.Koreboard.ChartRef }}"
-#     release_namespace: monitoring
-#     create_namespace: true
-#     update_repo_cache: True
-#     disable_hook: True
-#     atomic: true
-#     values:
-#       backend:
-#         service:
-#           type: NodePort
-#           nodePort: 30081
-#       frontend:
-#         service:
-#           type: NodePort
-#           nodePort: 30080
-#   run_once: true
+- name: Addon | deployment koreboard
+  kubernetes.core.helm:
+    name: koreboard
+    chart_ref: "{{ Apps.Koreboard.ChartRef }}"
+    release_namespace: monitoring
+    create_namespace: true
+    update_repo_cache: True
+    disable_hook: True
+    atomic: true
+    values_files:
+      - "{{ Addon.AddonDataDir }}/koreboard/values.yaml"
+  run_once: true
