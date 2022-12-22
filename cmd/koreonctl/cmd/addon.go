@@ -20,30 +20,40 @@ import (
 )
 
 type strAddonCmd struct {
-	dryRun     bool
-	verbose    bool
-	privateKey string
-	user       string
+	dryRun         bool
+	verbose        bool
+	privateKey     string
+	user           string
+	installHelm    bool
+	helmBinaryFile string
 }
 
 func addonCmd() *cobra.Command {
 	addon := &strAddonCmd{}
 
 	cmd := &cobra.Command{
-		Use:          "addon [flags]",
-		Short:        "deployment kubernetes cluster",
-		Long:         "This command installs the Kubernetes cluster and registry.",
+		Use:   "addon [flags]",
+		Short: "Deployment Applications in kubernetes cluster",
+		Long: "This command deploys the application to Kubernetes.\n" +
+			"Use helm as the package manager for Kubernetes.",
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return addon.run()
 		},
 	}
 
+	cmd.AddCommand(addonInitCmd())
+
+	// SubCommand validation
+	utils.CheckCommand(cmd)
+
 	f := cmd.Flags()
 	f.BoolVar(&addon.verbose, "vvv", false, "verbose")
 	f.BoolVarP(&addon.dryRun, "dry-run", "d", false, "dryRun")
 	f.StringVarP(&addon.privateKey, "private-key", "p", "", "Specify ssh key path")
 	f.StringVarP(&addon.user, "user", "u", "", "login user")
+	f.BoolVar(&addon.installHelm, "install-helm", false, "Helm installation options")
+	f.StringVar(&addon.helmBinaryFile, "helm-binary-file", "", "helm binary file")
 
 	return cmd
 }
@@ -75,14 +85,19 @@ func (c *strAddonCmd) addon(workDir string) error {
 		os.Exit(1)
 	}
 
+	addonToml, err := utils.GetKoreonTomlConfig(workDir + "/" + conf.AddOnConfigFile)
+	if err != nil {
+		logger.Fatal(err)
+	}
+
 	// Make provision data
-	data := model.KoreonctlText{}
-	data.KoreOnTemp = koreonToml
-	data.Command = "create"
+	data := model.AddonText{}
+	data.AddonTemp = addonToml
+	data.Command = "addon"
 
 	// Processing template
-	koreonctlText := template.New("CreateText")
-	temp, err := koreonctlText.Parse(templates.CreateText)
+	koreonctlText := template.New("AddonText")
+	temp, err := koreonctlText.Parse(templates.AddonText)
 	if err != nil {
 		logger.Errorf("Template has errors. cause(%s)", err.Error())
 		return err

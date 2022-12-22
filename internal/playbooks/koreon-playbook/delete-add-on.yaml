@@ -35,17 +35,17 @@
             - init-network
   any_errors_fatal: true
 
-# Deployment Addons
+# Configure system package repository
 - hosts: masters[0]
   become: true
   gather_facts: false
   tasks:
-    - name: Addon | Deployment Addon in k8s cluster
+    - name: Addon | Delete Addon in k8s cluster
       ansible.builtin.include_role:
-        name: addon/addon-deploy
+        name: addon/addon-delete
         apply:
           tags:
-            - addon-deploy
+            - addon-delete
       tags:
-        - addon-deploy
+        - addon-delete
   any_errors_fatal: true

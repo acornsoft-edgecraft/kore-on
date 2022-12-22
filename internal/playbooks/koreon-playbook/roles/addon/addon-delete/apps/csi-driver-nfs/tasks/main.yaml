@@ -1,0 +1,8 @@
+---
+- name: Remove csi-driver-nfs
+  kubernetes.core.helm:
+    name: csi-driver-nfs
+    state: absent
+    namespace: kube-system
+    update_repo_cache: True
+    wait: true

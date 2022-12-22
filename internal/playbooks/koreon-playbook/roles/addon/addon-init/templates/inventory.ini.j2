@@ -1,0 +1,9 @@
+[all]
+{% if Addon.K8sMasterIP %}
+k8s-controlplane    ansible_ssh_host={{ Addon.K8sMasterIP }}    ansible_ssh_port={{ (Addon.SSHPort == 0) | ternary(22, Addon.SSHPort) }}
+{% endif %}
+
+[masters]
+{% if Addon.K8sMasterIP %}
+k8s-controlplane
+{% endif %}

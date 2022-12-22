@@ -21,6 +21,12 @@
     dest: "{{ package_archive_dir }}"
   any_errors_fatal: true
 
+- name: Download helm binary
+  ansible.builtin.get_url:
+    url: "{{ helm_get_url }}"
+    dest: "{{ package_archive_dir }}"
+  any_errors_fatal: true
+
 - name: Package | Install dnf
   ansible.builtin.yum:
     name: dnf

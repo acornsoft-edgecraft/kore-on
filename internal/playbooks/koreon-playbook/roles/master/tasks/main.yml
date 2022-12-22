@@ -286,20 +286,6 @@
   delegate_to: "{{ groups['masters'][0] }}"
   run_once: true
 
-- name: Copy kubeconfig file in user home directory
-  ansible.builtin.copy:
-    src: /etc/kubernetes/acloud/acloud-client-kubeconfig
-    dest: "{{ (item == 'root') | ternary('/root', '/home/' + item) }}/.kube/config"
-    remote_src: true
-    owner: "{{ item }}"
-    group: "{{ item }}"
-    mode: "0644"
-  with_items:
-    - "root"
-    - "{{ ansible_user_id }}"
-  delegate_to: "{{ groups['masters'][0] }}"
-  run_once: true
-
 - name: Add alias to .base_profile
   when: ansible_distribution in ["Ubuntu", "Debian"]
   blockinfile:
@@ -310,6 +296,7 @@
       export ETCDCTL_CACERT=/etc/kubernetes/pki/etcd/ca.crt
       export ETCDCTL_CERT=/etc/kubernetes/pki/etcd/peer.crt
       export ETCDCTL_KEY=/etc/kubernetes/pki/etcd/peer.key
+      export KUBECONFIG=/etc/kubernetes/acloud/acloud-client-kubeconfig
 
       alias ll='ls -al'
       alias etcdlet="etcdctl --endpoints={{ etcd_access_addresses }} "
@@ -330,6 +317,7 @@
       export ETCDCTL_CACERT=/etc/kubernetes/pki/etcd/ca.crt
       export ETCDCTL_CERT=/etc/kubernetes/pki/etcd/peer.crt
       export ETCDCTL_KEY=/etc/kubernetes/pki/etcd/peer.key
+      export KUBECONFIG=/etc/kubernetes/acloud/acloud-client-kubeconfig
 
       alias ll='ls -al'
       alias etcdlet="etcdctl --endpoints={{ etcd_access_addresses }} "
@@ -342,7 +330,7 @@
     - "{{ ansible_user_dir }}/"
 
 # Untaint Master node ---------------------------------------------------------
-- name: ADDON | Untaint master node
+- name: Untaint master node
   when: not master_isolated
   shell: "kubectl --kubeconfig={{ kubeadminconfig }} taint nodes {{ item }} node-role.kubernetes.io/control-plane:NoSchedule-"
   with_items: "{{ node_name }}"

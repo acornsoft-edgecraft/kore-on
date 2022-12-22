@@ -1,0 +1,51 @@
+
+---
+- import_tasks: check-k8s.yaml
+
+## Delete CSI driver nfs
+- name: Addon | Delete csi-driver-nfs
+  ansible.builtin.include_role:
+    name: addon/apps/csi-driver-nfs
+    apply:
+      tags:
+        - addon-csi-nfs
+  tags:
+    - addon-csi-nfs
+  when:
+    - Apps.CsiDriverNfs.Install
+
+## Delete Elasticsearch
+- name: Addon | Delete elasticsearch
+  ansible.builtin.include_role:
+    name: addon/apps/elasticsearch
+    apply:
+      tags:
+        - addon-elasticsearch
+  tags:
+    - addon-elasticsearch
+  when:
+    - Apps.Elasticsearch.Install
+
+## Delete FluentBit
+- name: Addon | Delete fluent-bit
+  ansible.builtin.include_role:
+    name: addon/apps/fluent-bit
+    apply:
+      tags:
+        - addon-fluent-bit
+  tags:
+    - addon-fluent-bit
+  when:
+    - Apps.FluentBit.Install
+
+## Delete Koreboard
+- name: Addon | Delete koreboard
+  ansible.builtin.include_role:
+    name: addon/apps/koreboard
+    apply:
+      tags:
+        - addon-koreboard
+  tags:
+    - addon-koreboard
+  when:
+    - Apps.Koreboard.Install

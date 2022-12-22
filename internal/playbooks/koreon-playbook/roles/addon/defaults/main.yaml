@@ -1,6 +1,0 @@
----
-node_name: "{{ ansible_nodename|lower }}"
-
-addon_manager_ns: "{{ release_name }}-addon"
-
-helm_get_url: "https://get.helm.sh/helm-{{ package_helm_version }}-{{ ansible_system | lower }}-amd64.tar.gz"

@@ -1,0 +1,16 @@
+---
+- name: Add fluent-bit charts repository
+  command: |
+    helm repo add "{{ Apps.FluentBit.ChartRefName }}" "{{ Apps.FluentBit.ChartRef }}"
+  delegate_to: "{{ groups['masters'][0] }}"
+
+- name: Addon | deployment fluent-bit
+  kubernetes.core.helm:
+    name: fluent-bit
+    chart_ref: "{{ Apps.FluentBit.ChartRefName }}/fluent-bit"
+    release_namespace: efk
+    create_namespace: true
+    update_repo_cache: True
+    disable_hook: True
+    atomic: true
+  run_once: true

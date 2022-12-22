@@ -1,0 +1,45 @@
+---
+- name: Get helm tgz file and uncompress it
+  block:
+    - name: Get helm tgz file and uncompress it
+      unarchive:
+        src: "{{ playbook_dir }}/download/{{Addon.HelmBinaryFile}}"
+        dest: /tmp
+        owner: "root"
+        group: "root"
+        remote_src: false
+    - name: Copy to heml in /usr/bin
+      ansible.builtin.copy:
+        src: /tmp/{{ ansible_system | lower }}-amd64/helm
+        dest: /usr/bin
+        owner: "root"
+        group: "root"
+        mode: "0755"
+        remote_src: yes
+  when:
+    - (Addon.HelmBinaryFile != "")
+  
+- name: Get helm tgz file  on online and uncompress it
+  block:
+    - name: Download helm binary
+      ansible.builtin.get_url:
+        url: "{{ helm_get_url }}"
+        dest: "/tmp"
+      any_errors_fatal: true
+    - name: Get helm tgz file and uncompress it
+      unarchive:
+        src: "/tmp/helm-{{ Addon.HelmVersion }}-{{ ansible_system | lower }}-amd64.tar.gz"
+        dest: /tmp
+        owner: "root"
+        group: "root"
+        remote_src: True
+    - name: Copy to heml in /usr/bin
+      ansible.builtin.copy:
+        src: /tmp/{{ ansible_system | lower }}-amd64/helm
+        dest: /usr/bin
+        owner: "root"
+        group: "root"
+        mode: "0755"
+        remote_src: yes
+  when:
+    - (Addon.HelmBinaryFile == "")

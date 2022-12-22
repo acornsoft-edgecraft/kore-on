@@ -1,0 +1,8 @@
+---
+- name: Remove test release and waiting suppression ending
+  kubernetes.core.helm:
+    name: koreboard
+    state: absent
+    namespace: monitoring
+    update_repo_cache: True
+    wait: true

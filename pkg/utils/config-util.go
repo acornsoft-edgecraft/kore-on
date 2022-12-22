@@ -49,6 +49,39 @@ func GetKoreonTomlConfig(koreOnConfigFilePath string) (model.KoreOnToml, error) 
 	return koreonToml, err
 }
 
+func GetAddonTomlConfig(path string) (model.AddonToml, error) {
+
+	errorCnt = 0
+	// configFullPath := workDir + "/" + conf.KoreonConfigFile
+
+	var c []byte
+	var err error
+
+	if !FileExists(path) {
+		logger.Fatal(fmt.Sprintf("%s file is not found. Run koreonctl addon init first", path))
+		os.Exit(1)
+	}
+
+	c, err = ioutil.ReadFile(path)
+	if err != nil {
+		logger.Fatal(err.Error())
+		os.Exit(1)
+	}
+
+	str := string(c)
+	str = strings.Replace(str, "\\", "/", -1)
+	c = []byte(str)
+
+	var addonToml = model.AddonToml{}
+	err = toml.Unmarshal(c, &addonToml)
+	if err != nil {
+		logger.Fatal(err.Error())
+		errorCnt++
+	}
+
+	return addonToml, err
+}
+
 func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.KoreOnToml, bool) {
 	var koreon_toml model.KoreOnToml
 	errorCnt = 0
@@ -62,6 +95,7 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 	// confDockerVersion := "Support.SupportDockerVersion"
 	// confDockerComposeVersion := "Support.SupportDockerComposeVersion"
 	koreonToml.KoreOn.ImageArchive = conf.KoreOnImageArchive
+	koreonToml.KoreOn.HelmCubeRepoUrl = conf.HelmCubeRepoUrl
 
 	if nodePoolSSHPort == 0 {
 		// todo node pool ssh port check
@@ -304,6 +338,38 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 		}
 
 		koreonToml = koreon_toml
+	} else if cmd == "add-on" {
+		k8sVersion := koreonToml.PrepareAirgap.K8sVersion
+
+		supportK8sVersion := IsSupportVersion(k8sVersion, confK8sVersion)
+
+		// Get image support version
+		supportK8sList := GetSupportVersion(supportK8sVersion, "k8s_support_image")
+		if supportK8sList == nil {
+			logger.Fatal("Prepare Air Gap > Support package and container image not found.:\n")
+			errorCnt++
+		}
+		// Get package support version
+		supportPackageList := GetSupportVersion(supportK8sVersion, "k8s_support_package")
+		if supportPackageList == nil {
+			logger.Fatal("Prepare Air Gap > Support package and container image not found.:\n")
+			errorCnt++
+		}
+
+		// Set image support version
+		k8sSupportImagesVersion := setField(&koreonToml.SupportVersion.ImageVersion, supportK8sList)
+		if k8sSupportImagesVersion != nil {
+			logger.Fatal(k8sSupportImagesVersion)
+			errorCnt++
+		}
+
+		// Set package support version
+		packageSupportVersion := setField(&koreonToml.SupportVersion.PackageVersion, supportPackageList)
+		if packageSupportVersion != nil {
+			logger.Fatal(packageSupportVersion)
+			errorCnt++
+		}
+
 	}
 
 	if errorCnt > 0 {
