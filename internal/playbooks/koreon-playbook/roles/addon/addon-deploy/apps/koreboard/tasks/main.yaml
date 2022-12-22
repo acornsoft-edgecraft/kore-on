@@ -1,28 +1,40 @@
 ---
-- name: Addon | deployment koreboard
-  kubernetes.core.helm:
-    name: koreboard
-    chart_ref: "{{ Apps.Koreboard.ChartRef }}"
-    release_namespace: monitoring
-    create_namespace: true
-    update_repo_cache: True
-    disable_hook: True
-    atomic: true
-    values:
-      backend:
-        service:
-          type: NodePort
-          nodePort: 30081
-      frontend:
-        service:
-          type: NodePort
-          nodePort: 30080
+# Create Package directory
+- name: Addon | Create addon directory
+  ansible.builtin.file:
+    path: "{{ Addon.AddonDataDir }}/koreboard"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Addon | copy koreboard values file
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ Addon.AddonDataDir }}/{{ item.dest }}"
+    backup: true
+    mode: 0644
+  with_items:
+    - { src: "values.yaml.j2", dest: "koreboard/values.yaml" }
+  delegate_to: "{{ groups['masters'][0] }}"
   run_once: true
 
-# - name: Remove test release and waiting suppression ending
+# - name: Addon | deployment koreboard
 #   kubernetes.core.helm:
 #     name: koreboard
-#     state: absent
-#     namespace: monitoring
+#     chart_ref: "{{ Apps.Koreboard.ChartRef }}"
+#     release_namespace: monitoring
+#     create_namespace: true
 #     update_repo_cache: True
-#     wait: true
+#     disable_hook: True
+#     atomic: true
+#     values:
+#       backend:
+#         service:
+#           type: NodePort
+#           nodePort: 30081
+#       frontend:
+#         service:
+#           type: NodePort
+#           nodePort: 30080
+#   run_once: true

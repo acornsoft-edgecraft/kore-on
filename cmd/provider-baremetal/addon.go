@@ -138,10 +138,11 @@ func (c *strAddonCmd) run() error {
 	}
 
 	ansiblePlaybookOptions := &playbook.AnsiblePlaybookOptions{
-		Inventory: c.inventory,
-		Verbose:   c.verbose,
-		Tags:      c.tags,
-		ExtraVars: c.result,
+		Inventory:     c.inventory,
+		Verbose:       c.verbose,
+		Tags:          c.tags,
+		ExtraVars:     c.result,
+		ExtraVarsFile: []string{"@internal/playbooks/koreon-playbook/download/test-values.yaml"},
 	}
 
 	executorTimeMeasurement := measure.NewExecutorTimeMeasurement(
