@@ -5,7 +5,7 @@
 ## Delete CSI driver nfs
 - name: Addon | Delete csi-driver-nfs
   ansible.builtin.include_role:
-    name: addon/apps/csi-driver-nfs
+    name: addon/addon-delete/apps/csi-driver-nfs
     apply:
       tags:
         - addon-csi-nfs
@@ -17,7 +17,7 @@
 ## Delete Elasticsearch
 - name: Addon | Delete elasticsearch
   ansible.builtin.include_role:
-    name: addon/apps/elasticsearch
+    name: addon/addon-delete/apps/elasticsearch
     apply:
       tags:
         - addon-elasticsearch
@@ -29,7 +29,7 @@
 ## Delete FluentBit
 - name: Addon | Delete fluent-bit
   ansible.builtin.include_role:
-    name: addon/apps/fluent-bit
+    name: addon/addon-delete/apps/fluent-bit
     apply:
       tags:
         - addon-fluent-bit
@@ -41,7 +41,7 @@
 ## Delete Koreboard
 - name: Addon | Delete koreboard
   ansible.builtin.include_role:
-    name: addon/apps/koreboard
+    name: addon/addon-delete/apps/koreboard
     apply:
       tags:
         - addon-koreboard

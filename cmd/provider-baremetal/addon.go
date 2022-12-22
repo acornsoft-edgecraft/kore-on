@@ -48,6 +48,9 @@ func AddonCmd() *cobra.Command {
 	}
 	cmd.AddCommand(AddonDeleteCmd())
 
+	// SubCommand validation
+	utils.CheckCommand(cmd)
+
 	// Default value for command struct
 	addon.tags = ""
 	addon.inventory = "./internal/playbooks/koreon-playbook/inventory/inventory.ini"

@@ -43,6 +43,9 @@ func AirGapCmd() *cobra.Command {
 
 	cmd.AddCommand(DownLoadArchiveCmd())
 
+	// SubCommand validation
+	utils.CheckCommand(cmd)
+
 	// Default value for command struct
 	prepareAirgap.tags = ""
 	prepareAirgap.inventory = "./internal/playbooks/koreon-playbook/inventory/inventory.ini"
