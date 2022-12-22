@@ -13,3 +13,5 @@ etcd_access_addresses: |-
 scripts_dir: "{{ install_dir }}/scripts"
 backup_dir: "{{ data_root_dir }}/backup"
 maxbackup_day: 7
+
+helm_get_url: "https://get.helm.sh/helm-{{ package_helm_version }}-{{ ansible_system | lower }}-amd64.tar.gz"
