@@ -90,15 +90,6 @@
     update_cache: yes
 # ----------------------------------------------------------------------------
 
-# For required Python library ------------------------------------------------
-- name: install pre-requisites
-  ansible.builtin.pip:
-    name:
-      - pyyaml
-      - kubernetes 
-      - jsonpatch
-# ----------------------------------------------------------------------------
-
 - name: Install utils
   package:
     name: jq
