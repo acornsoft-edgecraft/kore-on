@@ -28,7 +28,7 @@ type strAddonCmd struct {
 	playbookFiles  []string
 	privateKey     string
 	user           string
-	extravars      map[string]interface{}
+	extravarsFile  map[string]interface{}
 	addonExtravars map[string]interface{}
 	result         map[string]interface{}
 }
@@ -150,6 +150,31 @@ func (c *strAddonCmd) run() error {
 			}
 		}
 		c.result = result
+
+		resultFiles := make(map[string]interface{})
+		for k, v := range c.addonExtravars {
+			if k == "Apps" {
+				for i, j := range v.(map[string]interface{}) {
+					fmt.Println("key == ", i)
+					for t, d := range j.(map[string]interface{}) {
+						if t == "Install" {
+							if d == true {
+								if t == "Values" {
+
+								}
+							}
+						}
+						if t == "Values" {
+							key := fmt.Sprintf("%s_%s", k, i)
+							resultFiles[key] = d
+							fmt.Println("values == ", d)
+						}
+					}
+				}
+			}
+		}
+		logger.Fatal()
+
 	}
 
 	if len(c.playbookFiles) < 1 {
