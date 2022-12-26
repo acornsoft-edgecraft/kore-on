@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"kore-on/pkg/logger"
 	"kore-on/pkg/utils"
+	"os"
 
 	"github.com/apenella/go-ansible/pkg/execute"
 	"github.com/apenella/go-ansible/pkg/execute/measure"
@@ -48,7 +49,7 @@ func TestCmd() *cobra.Command {
 	test.tags = ""
 	test.inventory = "./internal/playbooks/koreon-playbook/inventory/inventory.ini"
 	test.playbookFiles = []string{
-		"./internal/playbooks/koreon-playbook/z-test-addon.yaml",
+		"./internal/playbooks/koreon-playbook/z-test-template.yaml",
 	}
 
 	f := cmd.Flags()
@@ -64,28 +65,28 @@ func TestCmd() *cobra.Command {
 }
 
 func (c *strTestCmd) run() error {
-	// koreOnConfigFileName := viper.GetString("KoreOn.KoreOnConfigFile")
-	// koreOnConfigFilePath := utils.IskoreOnConfigFilePath(koreOnConfigFileName)
-	// koreonToml, value := utils.ValidateKoreonTomlConfig(koreOnConfigFilePath, "add-on")
+	koreOnConfigFileName := viper.GetString("KoreOn.KoreOnConfigFile")
+	koreOnConfigFilePath := utils.IskoreOnConfigFilePath(koreOnConfigFileName)
+	koreonToml, value := utils.ValidateKoreonTomlConfig(koreOnConfigFilePath, "create")
 
-	// if value {
-	// 	// Prompt user for more input
-	// 	id := utils.InputPrompt("# Enter the username for the private registry.\nusername:")
-	// 	koreonToml.KoreOn.HelmCubeRepoID = base64.StdEncoding.EncodeToString([]byte(id))
+	if value {
+		// Prompt user for more input
+		id := utils.InputPrompt("# Enter the username for the private registry.\nusername:")
+		koreonToml.KoreOn.HelmCubeRepoID = base64.StdEncoding.EncodeToString([]byte(id))
 
-	// 	pw := utils.SensitivePrompt("# Enter the password for the private registry.\npassword:")
-	// 	koreonToml.KoreOn.HelmCubeRepoPW = base64.StdEncoding.EncodeToString([]byte(pw))
+		pw := utils.SensitivePrompt("# Enter the password for the private registry.\npassword:")
+		koreonToml.KoreOn.HelmCubeRepoPW = base64.StdEncoding.EncodeToString([]byte(pw))
 
-	// 	b, err := json.Marshal(koreonToml)
-	// 	if err != nil {
-	// 		logger.Fatal(err)
-	// 		os.Exit(1)
-	// 	}
-	// 	if err := json.Unmarshal(b, &c.extravars); err != nil {
-	// 		logger.Fatal(err.Error())
-	// 		os.Exit(1)
-	// 	}
-	// }
+		b, err := json.Marshal(koreonToml)
+		if err != nil {
+			logger.Fatal(err)
+			os.Exit(1)
+		}
+		if err := json.Unmarshal(b, &c.extravars); err != nil {
+			logger.Fatal(err.Error())
+			os.Exit(1)
+		}
+	}
 
 	addonConfigFileName := viper.GetString("Addon.AddonConfigFile")
 	addonPath := utils.IskoreOnConfigFilePath(addonConfigFileName)
@@ -115,11 +116,11 @@ func (c *strTestCmd) run() error {
 		}
 
 		result := make(map[string]interface{})
-		// for k, v := range c.extravars {
-		// 	if _, ok := c.extravars[k]; ok {
-		// 		result[k] = v
-		// 	}
-		// }
+		for k, v := range c.extravars {
+			if _, ok := c.extravars[k]; ok {
+				result[k] = v
+			}
+		}
 		for k, v := range c.addonExtravars {
 			if _, ok := c.addonExtravars[k]; ok {
 				result[k] = v

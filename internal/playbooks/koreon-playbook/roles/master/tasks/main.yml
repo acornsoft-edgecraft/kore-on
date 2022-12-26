@@ -366,49 +366,38 @@
 # ---------------------------------------------------------------------------
 
 # MetricsServer ------------------------------------------------------------------
-#- name: MetricsServer | Kubelet CSR Pending find
-#  shell: "kubectl --kubeconfig={{ kubeadminconfig }} get csr | grep Pending | awk '{print $1}'"
-#  delegate_to: "{{ groups['masters'][0] }}"
-#  run_once: true
-#  register: kubelet_csr
-
-#- name: MetricsServer | Kubelet CSR approve
-#  command: "kubectl --kubeconfig={{ kubeadminconfig }} certificate approve {{ item }}"
-#  with_items: "{{ kubelet_csr.stdout }}"
-#  delegate_to: "{{ groups['masters'][0] }}"
-#  run_once: true
-#  when:
-#    - kubelet_csr.stdout != ""
-
 - name: MetricsServer | Create secrets_encryption
-  block:
-    - name: Slurp hosts file
-      ansible.builtin.slurp:
-        src: "{{ item }}"
-      with_items:
-        - /etc/kubernetes/pki/ca.crt
-        - /etc/kubernetes/pki/metrics-server.crt
-        - /etc/kubernetes/pki/metrics-server.key
-      register: pki_certs
-      run_once: true
-    - name: CREATE MONGOSECRETS SECRET
-      kubernetes.core.k8s:
-        kubeconfig: "{{ kubeadminconfig }}"
-        state: present
-        definition: 
-          apiVersion: v1
-          kind: Secret
-          type: Opaque             
-          metadata:
-            name: "metrics-server-certs"
-            namespace: "kube-system"
-          data:
-            ca.crt: "{{ pki_certs.results[0]['content'] }}"
-            metrics-server.crt: "{{ pki_certs.results[1]['content'] }}"
-            metrics-server.key: "{{ pki_certs.results[2]['content'] }}"
-      delegate_to: "{{ groups['masters'][0] }}"
+  ansible.builtin.slurp:
+    src: "{{ item }}"
+  with_items:
+    - /etc/kubernetes/pki/ca.crt
+    - /etc/kubernetes/pki/metrics-server.crt
+    - /etc/kubernetes/pki/metrics-server.key
+  register: pki_certs
+  run_once: true
+  delegate_to: "{{ groups['masters'][0] }}"
 
-- name: MetricsServer | Copy metrics-server config file
+- name: Metrics-server | Copy Metrics-server secret file
+  vars:
+    metrics_server_ca_crt: "{{ pki_certs.results[0]['content'] }}"
+    metrics_server_crt: "{{ pki_certs.results[1]['content'] }}"
+    metrics_server_key: "{{ pki_certs.results[2]['content'] }}"
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ kube_addon_dir }}/{{ item.dest }}"
+  with_items:
+  - { src: "metrics-server/metrics-server-secret.yaml.j2", dest: "metrics-server/metrics-server-secret.yaml" }
+  delegate_to: "{{ groups['masters'][0] }}"
+  run_once: true
+
+- name: Metrics-server | Create Metrics-server secret
+  shell: "kubectl apply --kubeconfig={{ kubeadminconfig }} -f {{ kube_addon_dir }}/{{ item }}"
+  with_items:
+  - "metrics-server/metrics-server-secret.yaml"
+  delegate_to: "{{ groups['masters'][0] }}"
+  run_once: true
+
+- name: Metrics-server | Copy metrics-server config file
   when: metrics_server
   template:
     src: "{{ item.src }}"
@@ -418,7 +407,7 @@
   delegate_to: "{{ groups['masters'][0] }}"
   run_once: true
 
-- name: MetricsServer | Create MetricsServer
+- name: Metrics-server | Create MetricsServer
   shell: "kubectl apply --kubeconfig={{ kubeadminconfig }} -f {{ kube_addon_dir }}/{{ item }}"
   with_items:
   - "metrics-server/metrics-server.yaml"

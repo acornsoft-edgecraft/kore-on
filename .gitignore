@@ -367,3 +367,5 @@ inventory.ini
 *.toml
 
 z-test-*
+internal/playbooks/koreon-playbook/download
+*test.yaml
