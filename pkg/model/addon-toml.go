@@ -5,6 +5,8 @@ type AddonToml struct {
 		K8sMasterIP    string `toml:"k8s-master-ip,omitempty"`
 		SSHPort        int    `toml:"ssh-port,omitempty"`
 		AddonDataDir   string `toml:"addon-data-dir,omitempty"`
+		ClosedNetwork  bool   `toml:"closed-network,omitempty"`
+		KubeConfig     string
 		HelmVersion    string
 		HelmInstall    bool
 		HelmBinaryFile string
@@ -20,39 +22,47 @@ type AddonToml struct {
 }
 
 type AppsCsiDriverNfs struct {
-	Install         bool   `toml:"install,omitempty"`
-	ChartRefName    string `toml:"chart_ref_name,omitempty"`
-	ChartRef        string `toml:"chart_ref,omitempty"`
-	ChartRefID      string
-	ChartRefPW      string
-	StorageIP       string `toml:"storage_ip,omitempty"`
-	SharedVolumeDir string `toml:"shared_volume_dir,omitempty"`
-	NfsVersion      string `toml:"nfs_version,omitempty"`
+	Install      bool   `toml:"install,omitempty"`
+	ChartRefName string `toml:"chart_ref_name,omitempty"`
+	ChartRef     string `toml:"chart_ref,omitempty"`
+	ChartName    string `toml:"chart_name,omitempty"`
+	ChartRefID   string
+	ChartRefPW   string
+	Values       string `toml:"values,omitempty"`
+	ValuesFile   string `toml:"values_file,omitempty"`
 }
 
 type AppsBitnamiNginx struct {
 	Install      bool   `toml:"install,omitempty"`
 	ChartRefName string `toml:"chart_ref_name,omitempty"`
 	ChartRef     string `toml:"chart_ref,omitempty"`
-	Port         string `toml:"port,omitempty"`
+	ChartName    string `toml:"chart_name,omitempty"`
+	Values       string `toml:"values,omitempty"`
+	ValuesFile   string `toml:"values_file,omitempty"`
 }
 
 type AppsElasticsearch struct {
 	Install      bool   `toml:"install,omitempty"`
 	ChartRefName string `toml:"chart_ref_name,omitempty"`
 	ChartRef     string `toml:"chart_ref,omitempty"`
+	ChartName    string `toml:"chart_name,omitempty"`
 	Values       string `toml:"values,omitempty"`
+	ValuesFile   string `toml:"values_file,omitempty"`
 }
 type AppsFluentBit struct {
 	Install      bool   `toml:"install,omitempty"`
 	ChartRefName string `toml:"chart_ref_name,omitempty"`
 	ChartRef     string `toml:"chart_ref,omitempty"`
+	ChartName    string `toml:"chart_name,omitempty"`
 	Values       string `toml:"values,omitempty"`
+	ValuesFile   string `toml:"values_file,omitempty"`
 }
 
 type AppsKoreboard struct {
 	Install      bool   `toml:"install,omitempty"`
 	ChartRefName string `toml:"chart_ref_name,omitempty"`
 	ChartRef     string `toml:"chart_ref,omitempty"`
+	ChartName    string `toml:"chart_name,omitempty"`
 	Values       string `toml:"values,omitempty"`
+	ValuesFile   string `toml:"values_file,omitempty"`
 }

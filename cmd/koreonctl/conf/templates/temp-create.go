@@ -19,7 +19,7 @@ node-{{$index}}                         {{$data}}                    {{if ne (le
 {{  if eq true $PrivateRegistry.Install -}}
 {{    if eq true $SharedStorage.Install -}}
 {{      if eq $PrivateRegistry.RegistryIP $SharedStorage.StorageIP}}
-node-regi-storage            {{$PrivateRegistry.RegistryIP}}
+node-regi-storage              {{$PrivateRegistry.RegistryIP}}
 {{      else}}
 node-regi                      {{$PrivateRegistry.RegistryIP}}                    {{if ne "" $PrivateRegistry.PrivateIP}}{{$PrivateRegistry.PrivateIP}}{{end}}
 node-storage                     {{$SharedStorage.StorageIP}}                    {{if ne "" $SharedStorage.PrivateIP}}{{$SharedStorage.PrivateIP}}{{end -}}

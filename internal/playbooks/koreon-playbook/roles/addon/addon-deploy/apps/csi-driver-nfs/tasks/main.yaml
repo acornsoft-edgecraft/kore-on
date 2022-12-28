@@ -1,15 +1,15 @@
 ---
 - name: Add CUBE Helm charts repository
   command: |
-    helm repo add cube "{{ Addon.HelmCubeRepoUrl }}"
-    --username "{{ Addon.HelmCubeRepoID | b64decode }}"
-    --password "{{ Addon.HelmCubeRepoPW | b64decode }}"
+    helm repo add "{{ Apps.CsiDriverNfs.ChartRefName }}" "{{ Apps.CsiDriverNfs.ChartRef }}"
+    --username "{{ Apps.CsiDriverNfs.ChartRefID | b64decode }}"
+    --password "{{ Apps.CsiDriverNfs.ChartRefPW | b64decode }}"
   delegate_to: "{{ groups['masters'][0] }}"
 
 # Create Package directory
 - name: Addon | Create addon directory
   ansible.builtin.file:
-    path: "{{ Addon.AddonDataDir }}/csi-driver-nfs"
+    path: "{{ Addon.AddonDataDir }}/{{ Apps.CsiDriverNfs.ChartName }}"
     state: directory
     owner: root
     group: root
@@ -28,18 +28,19 @@
     backup: true
     mode: 0644
   with_items:
-    - { src: "values.yaml.j2", dest: "csi-driver-nfs/values.yaml" }
+    - { src: "values.yaml.j2", dest: "{{ Apps.CsiDriverNfs.ChartName }}/values.yaml" }
   delegate_to: "{{ groups['masters'][0] }}"
   run_once: true
 
 - name: Addon | deployment csi-driver-nfs
   kubernetes.core.helm:
     name: csi-driver-nfs
-    chart_ref: cube/csi-driver-nfs
+    kubeconfig: "{{ Addon.KubeConfig }}"
+    chart_ref: "{{ Apps.CsiDriverNfs.ChartRefName }}/{{ Apps.CsiDriverNfs.ChartName }}"
     release_namespace: kube-system
-    update_repo_cache: True
+    update_repo_cache: "{{ Apps.CsiDriverNfs.ChartRef is search('.tgz') | ternary(false, true) }}"
     disable_hook: True
     atomic: true
     values_files:
-      - "{{ Addon.AddonDataDir }}/csi-driver-nfs/values.yaml"
+      - "{{ Addon.AddonDataDir }}/{{ Apps.CsiDriverNfs.ChartName }}/values.yaml"
   run_once: true

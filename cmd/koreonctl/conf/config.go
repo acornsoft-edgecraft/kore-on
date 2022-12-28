@@ -10,3 +10,7 @@ const (
 	KoreOnConfigFileSubDir = "internal/playbooks/koreon-playbook/download"
 	HelmCubeRepoUrl        = "https://hcapital-harbor.acloud.run/chartrepo/cube"
 )
+
+var Addon = map[string]string{
+	"KubeConfigDir": "/etc/kubernetes/acloud",
+}

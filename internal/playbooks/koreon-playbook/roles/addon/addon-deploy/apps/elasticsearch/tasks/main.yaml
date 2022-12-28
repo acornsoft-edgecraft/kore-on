@@ -4,35 +4,36 @@
     helm repo add "{{ Apps.Elasticsearch.ChartRefName }}" "{{ Apps.Elasticsearch.ChartRef }}"
   delegate_to: "{{ groups['masters'][0] }}"
 
-# # Create Package directory
-# - name: Addon | Create addon directory
-#   ansible.builtin.file:
-#     path: "{{ Addon.AddonDataDir }}/elasticsearch"
-#     state: directory
-#     owner: root
-#     group: root
-#     mode: "0755"
+# Create Package directory
+- name: Addon | Create addon directory
+  ansible.builtin.file:
+    path: "{{ Addon.AddonDataDir }}/{{ Apps.Elasticsearch.ChartName }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
 
-# - name: Addon | copy elasticsearch values file
-#   template:
-#     src: "{{ item.src }}"
-#     dest: "{{ Addon.AddonDataDir }}/{{ item.dest }}"
-#     backup: true
-#     mode: 0644
-#   with_items:
-#     - { src: "values.yaml.j2", dest: "elasticsearch/values.yaml" }
-#   delegate_to: "{{ groups['masters'][0] }}"
-#   run_once: true
+- name: Addon | copy elasticsearch values file
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ Addon.AddonDataDir }}/{{ item.dest }}"
+    backup: true
+    mode: 0644
+  with_items:
+    - { src: "values.yaml.j2", dest: "{{ Apps.Elasticsearch.ChartName }}/values.yaml" }
+  delegate_to: "{{ groups['masters'][0] }}"
+  run_once: true
 
 - name: Addon | deployment elasticsearch
   kubernetes.core.helm:
     name: elasticsearch
-    chart_ref: bitnami/elasticsearch
+    kubeconfig: "{{ Addon.KubeConfig }}"
+    chart_ref: "{{ Apps.Elasticsearch.ChartRefName }}/{{ Apps.Elasticsearch.ChartName }}"
     release_namespace: efk
     create_namespace: true
-    update_repo_cache: True
+    update_repo_cache: "{{ Apps.Elasticsearch.ChartRef is search('.tgz') | ternary(false, true) }}"
     disable_hook: True
     atomic: true
     values_files:
-      - "{{ Addon.AddonDataDir }}/elasticsearch/values.yaml"
+      - "{{ Addon.AddonDataDir }}/{{ Apps.Elasticsearch.ChartName }}/values.yaml"
   run_once: true

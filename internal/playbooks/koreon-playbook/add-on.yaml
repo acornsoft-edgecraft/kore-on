@@ -43,6 +43,7 @@
     - name: Addon | Deployment Addon in k8s cluster
       ansible.builtin.include_role:
         name: addon/addon-deploy
+        # tasks_from: test
         apply:
           tags:
             - addon-deploy

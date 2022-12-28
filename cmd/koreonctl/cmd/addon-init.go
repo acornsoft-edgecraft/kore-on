@@ -41,7 +41,7 @@ func (c *strAddonInitCmd) run() error {
 
 	workDir, _ := os.Getwd()
 	var err error = nil
-	logger.Infof("Start provisioning for cloud infrastructure")
+	logger.Infof("Star Deployment in k8s cluster")
 
 	if err = c.init(workDir); err != nil {
 		return err

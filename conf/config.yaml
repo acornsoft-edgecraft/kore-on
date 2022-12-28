@@ -8,6 +8,7 @@ KoreOn:
   # HelmCubeRepoUrl: "https://hcapital-harbor.acloud.run/chartrepo/cube"
 
 Addon:
+  KubeConfigDir: /etc/kubernetes/acloud
   AddonConfigFile: "addon.toml"
   HelmCubeRepoUrl: "https://hcapital-harbor.acloud.run/chartrepo/cube"
 

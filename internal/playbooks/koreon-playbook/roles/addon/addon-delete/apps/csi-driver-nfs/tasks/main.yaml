@@ -2,7 +2,8 @@
 - name: Remove csi-driver-nfs
   kubernetes.core.helm:
     name: csi-driver-nfs
+    kubeconfig: "{{ Addon.KubeConfig }}"
     state: absent
     namespace: kube-system
-    update_repo_cache: True
+    update_repo_cache: "{{ Apps.CsiDriverNfs.ChartRef is search('.tgz') | ternary(false, true) }}"
     wait: true

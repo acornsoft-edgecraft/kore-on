@@ -6,10 +6,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"kore-on/cmd/koreonctl/conf"
 	"kore-on/pkg/logger"
 	"kore-on/pkg/utils"
-	"path/filepath"
-	"reflect"
 
 	"github.com/apenella/go-ansible/pkg/execute"
 	"github.com/apenella/go-ansible/pkg/execute/measure"
@@ -35,6 +34,7 @@ type strAddonCmd struct {
 	extravarsFile  map[string]interface{}
 	addonExtravars map[string]interface{}
 	result         map[string]interface{}
+	command        string
 }
 
 func AddonCmd() *cobra.Command {
@@ -88,6 +88,7 @@ func AddonDeleteCmd() *cobra.Command {
 	}
 
 	// Default value for command struct
+	addonDelete.command = "delete"
 	addonDelete.tags = ""
 	addonDelete.inventory = "./internal/playbooks/koreon-playbook/inventory/inventory.ini"
 	addonDelete.playbookFiles = []string{
@@ -121,7 +122,7 @@ func (c *strAddonCmd) run() error {
 		}
 
 		// Prompt user for more input
-		if addonToml.Apps.CsiDriverNfs.Install {
+		if c.command != "delete" && addonToml.Apps.CsiDriverNfs.Install {
 			id := utils.InputPrompt("# Enter the username for the private registry.\nusername:")
 			addonToml.Apps.CsiDriverNfs.ChartRefID = base64.StdEncoding.EncodeToString([]byte(id))
 
@@ -133,6 +134,8 @@ func (c *strAddonCmd) run() error {
 		if addonToml.Addon.AddonDataDir == "" {
 			addonToml.Addon.AddonDataDir = "/data/addon"
 		}
+
+		addonToml.Addon.KubeConfig = conf.Addon["KubeConfigDir"] + "/" + conf.KoreOnKubeConfig
 
 		b, err := json.Marshal(addonToml)
 		if err != nil {
@@ -154,36 +157,6 @@ func (c *strAddonCmd) run() error {
 			}
 		}
 		c.result = result
-		// resultFiles := make(map[string]interface{})
-		// for k, v := range c.addonExtravars {
-		// 	if k == "Apps" {
-		// 		for i, j := range v.(map[string]interface{}) {
-		// 			if addonToml.Apps[i].Install {
-
-		// 			}
-		// 			for t, d := range j.(map[string]interface{}) {
-		// 				fmt.Println("==== ", addonToml.Apps.FluentBit)
-		// 				if t == "Install" && d != true {
-		// 					break
-		// 				}
-		// 				fmt.Println("====================================-")
-		// 				fmt.Println("key == ", i)
-
-		// 				if t == "Values" {
-		// 					key := fmt.Sprintf("%s_%s", k, i)
-		// 					resultFiles[key] = d
-		// 					fmt.Println("values == ", d)
-		// 				}
-		// 				fmt.Println("xxxxxxxxxxxxx")
-		// 			}
-		// 		}
-		// 	}
-		// }
-
-		// setValueFile(addonToml.Apps)
-		aaa := getValuesFromInterface(&addonToml.Apps, "FluentBit")
-		fmt.Println(aaa)
-		logger.Fatal()
 
 	}
 
@@ -209,11 +182,52 @@ func (c *strAddonCmd) run() error {
 	}
 
 	ansiblePlaybookOptions := &playbook.AnsiblePlaybookOptions{
-		Inventory:     c.inventory,
-		Verbose:       c.verbose,
-		Tags:          c.tags,
-		ExtraVars:     c.result,
-		ExtraVarsFile: []string{"@internal/playbooks/koreon-playbook/download/test-values.yaml"},
+		Inventory: c.inventory,
+		Verbose:   c.verbose,
+		Tags:      c.tags,
+		ExtraVars: c.result,
+		// ExtraVarsFile: []string{"@internal/playbooks/koreon-playbook/download/test-values.yaml"},
+	}
+
+	// Set values file and ExtraVarsFile
+	rApps := make(map[string]interface{})
+	apps, err := json.Marshal(addonToml.Apps)
+	if err != nil {
+		logger.Fatal(err)
+	}
+	if err := json.Unmarshal(apps, &rApps); err != nil {
+		logger.Fatal(err.Error())
+	}
+
+	resultYaml := make(map[string]interface{})
+
+	for k, v := range rApps {
+		for i, j := range v.(map[string]interface{}) {
+			if i == "Install" && j == true {
+				dataYaml, _ := utils.SetValuesFile(k, v.(map[string]interface{}))
+
+				for k, v := range dataYaml {
+					if _, ok := dataYaml[k]; ok {
+						resultYaml[k] = v
+					}
+				}
+			}
+		}
+	}
+	c.extravarsFile = map[string]interface{}{
+		"addon_apps": resultYaml,
+	}
+	bytes, err := yaml.Marshal(c.extravarsFile)
+	if err != nil {
+		logger.Fatal(err)
+	}
+	subPath := viper.GetString("KoreOn.KoreOnConfigFileSubDir")
+
+	ioutil.WriteFile(subPath+"/extravars-file.yaml", []byte(bytes), 0600)
+
+	err = ansiblePlaybookOptions.AddExtraVarsFile("@" + subPath + "/extravars-file.yaml")
+	if err != nil {
+		logger.Fatal(err)
 	}
 
 	executorTimeMeasurement := measure.NewExecutorTimeMeasurement(
@@ -243,100 +257,4 @@ func (c *strAddonCmd) run() error {
 	}
 
 	return nil
-}
-
-func setValueFile(s interface{}) error {
-	// v := reflect.ValueOf(s)
-	// vt := v.Type()
-	// if !v.CanAddr() {
-	// 	return fmt.Errorf("cannot assign to the item passed, item must be a pointer in order to assign")
-	// }
-
-	filename, _ := filepath.Abs("internal/playbooks/koreon-playbook/download/koreboard-values.yaml")
-	yamlFile, err := ioutil.ReadFile(filename)
-	if err != nil {
-		logger.Fatal(err)
-	}
-
-	var values map[string]interface{}
-
-	err = yaml.Unmarshal(yamlFile, &values)
-	if err != nil {
-		logger.Fatal(err)
-	}
-	m3 := map[string]interface{}{
-		"aaa": values,
-	}
-
-	fmt.Println(m3)
-
-	// val := reflect.ValueOf(s)
-
-	// // If it's an interface or a pointer, unwrap it.
-	// if val.Kind() == reflect.Ptr && val.Elem().Kind() == reflect.Struct {
-	// 	val = val.Elem()
-	// } else {
-	// 	return fmt.Errorf("[ERROR]: %s", "must be a struct")
-	// }
-	// valNumFields := val.NumField()
-
-	// for i := 0; i < valNumFields; i++ {
-	// 	field := val.Field(i)
-	// 	fieldKind := field.Kind()
-
-	// 	// Check if it's a pointer to a struct.
-	// 	if fieldKind == reflect.Ptr && field.Elem().Kind() == reflect.Struct {
-	// 		if field.CanInterface() {
-	// 			// Recurse using an interface of the field.
-	// 			fmt.Println("field ==", field.Interface())
-	// 		}
-
-	// 		// Move onto the next field.
-	// 		continue
-	// 	}
-
-	// 	// Check if it's a struct value.
-	// 	if fieldKind == reflect.Struct {
-	// 		if field.CanAddr() && field.Addr().CanInterface() {
-	// 			// Recurse using an interface of the pointer value of the field.
-	// 			fmt.Println("field pointer ==", field.Addr().Interface())
-	// 		}
-
-	// 		// Move onto the next field.
-	// 		continue
-	// 	}
-
-	// 	// Check if it's a string or a pointer to a string.
-	// 	if fieldKind == reflect.String || (fieldKind == reflect.Ptr && field.Elem().Kind() == reflect.String) {
-	// 		typeField := val.Type().Field(i)
-
-	// 		fmt.Println("typeField == ", typeField)
-
-	// 		// Set the string value to the sanitized string if it's allowed.
-	// 		// It should always be allowed at this point.
-	// 		// if field.CanSet() {
-	// 		// 	field.SetString(policy.Sanitize(field.String()))
-	// 		// }
-
-	// 		continue
-	// 	}
-	// }
-
-	return nil
-}
-
-// GetValuesFromInterface - 지정된 Interface 형식의 Structure에서 지정한 FIeld 이름을 기준으로 값을 Array로 반환 (using Reflect)
-func getValuesFromInterface(val interface{}, fields ...string) []interface{} {
-	returnArray := make([]interface{}, 0)
-	structVal := reflect.ValueOf(val).Elem()
-
-	for i := 0; i < structVal.NumField(); i++ {
-		fmt.Println("=== ", structVal.Field(i))
-	}
-
-	for _, name := range fields {
-		field := structVal.FieldByName(name).Interface()
-		returnArray = append(returnArray, field)
-	}
-	return returnArray
 }

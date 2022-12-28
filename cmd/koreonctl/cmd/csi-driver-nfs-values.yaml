@@ -1,0 +1,7 @@
+storageClass:
+  create: true
+  parameters:
+    mountOptions:
+    - nfsvers=4.1
+    server: 192.168.77.239
+    share: /data/storage
