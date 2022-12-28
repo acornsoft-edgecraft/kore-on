@@ -62,7 +62,7 @@ func (c *strAddonCmd) run() error {
 
 	workDir, _ := os.Getwd()
 	var err error = nil
-	logger.Infof("Start provisioning for cloud infrastructure")
+	logger.Infof("Start deployment for k8s cluster")
 
 	if err = c.addon(workDir); err != nil {
 		return err
@@ -76,16 +76,9 @@ func (c *strAddonCmd) addon(workDir string) error {
 
 	koreonImageName := conf.KoreOnImageName
 	koreOnImage := conf.KoreOnImage
-	koreOnConfigFileName := conf.KoreOnConfigFile
 	koreOnConfigFilePath := conf.KoreOnConfigFileSubDir
 
-	koreonToml, err := utils.GetKoreonTomlConfig(workDir + "/" + koreOnConfigFileName)
-	if err != nil {
-		logger.Fatal(err)
-		os.Exit(1)
-	}
-
-	addonToml, err := utils.GetKoreonTomlConfig(workDir + "/" + conf.AddOnConfigFile)
+	addonToml, err := utils.GetAddonTomlConfig(workDir + "/" + conf.AddOnConfigFile)
 	if err != nil {
 		logger.Fatal(err)
 	}
@@ -124,7 +117,7 @@ func (c *strAddonCmd) addon(workDir string) error {
 		"-it",
 	}
 
-	if !koreonToml.KoreOn.ClosedNetwork {
+	if !addonToml.Addon.ClosedNetwork {
 		commandArgs = append(commandArgs, "--pull")
 		commandArgs = append(commandArgs, "always")
 	}
@@ -137,7 +130,7 @@ func (c *strAddonCmd) addon(workDir string) error {
 	commandArgsKoreonctl := []string{
 		koreOnImage,
 		"./" + koreonImageName,
-		"apply",
+		"addon",
 	}
 
 	if c.privateKey != "" {

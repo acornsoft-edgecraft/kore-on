@@ -6,9 +6,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"kore-on/pkg/logger"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"runtime"
 	"sort"
 	"strings"
@@ -16,8 +18,10 @@ import (
 
 	"github.com/apenella/go-ansible/pkg/stdoutcallback/results"
 	"github.com/fatih/color"
+	"github.com/iancoleman/strcase"
 	"github.com/spf13/viper"
 	"golang.org/x/term"
+	"gopkg.in/yaml.v2"
 )
 
 func FileExists(name string) bool {
@@ -279,6 +283,35 @@ func SensitivePrompt(label string) string {
 	}
 	fmt.Println()
 	return s
+}
+
+func SetValuesFile(key string, v map[string]interface{}) (map[string]interface{}, error) {
+	addonPath := viper.GetString("KoreOn.KoreOnConfigFileSubDir")
+	var addonYaml string
+	var dataYaml map[string]interface{}
+	if v["ValuesFile"].(string) != "" {
+		filename := filepath.Base(v["ValuesFile"].(string))
+		addonYaml = addonPath + "/" + filename
+		yamlFile, err := ioutil.ReadFile(addonYaml)
+		if err != nil {
+			logger.Fatal(err)
+		}
+
+		var values map[string]interface{}
+
+		err = yaml.Unmarshal(yamlFile, &values)
+		if err != nil {
+			logger.Fatal(err)
+		}
+
+		valuesKey := strcase.ToSnake(key) + "_values"
+
+		dataYaml = map[string]interface{}{
+			valuesKey: values,
+		}
+	}
+
+	return dataYaml, nil
 }
 
 // customTrasnformer

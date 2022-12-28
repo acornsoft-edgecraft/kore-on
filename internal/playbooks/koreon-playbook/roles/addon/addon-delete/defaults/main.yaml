@@ -1,6 +1,6 @@
 ---
 node_name: "{{ ansible_nodename|lower }}"
-kubeadminconfig: /etc/kubernetes/admin.conf
+kubeadminconfig: "{{ Addon.KubeConfig }}"
 
 package_helm_version: "{{ Addon.HelmVersion }}"
 

@@ -49,6 +49,7 @@ require (
 require (
 	github.com/apenella/go-ansible v1.1.7
 	github.com/google/subcommands v1.2.0
+	github.com/iancoleman/strcase v0.2.0
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect
 	github.com/mholt/archiver v3.1.1+incompatible
 	github.com/mitchellh/mapstructure v1.5.0 // indirect

@@ -192,7 +192,7 @@ func (c *strDestroyCmd) run() error {
 
 	workDir, _ := os.Getwd()
 	var err error = nil
-	logger.Infof("Start provisioning for cloud infrastructure")
+	logger.Infof("Start destroy cloud infrastructure")
 
 	if err = c.destroy(workDir); err != nil {
 		return err

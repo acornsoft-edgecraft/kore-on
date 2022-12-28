@@ -7,7 +7,7 @@
     owner: root
     group: root
     mode: "0755"
-
+    
 - name: Addon | copy koreboard values file
   template:
     src: "{{ item.src }}"
@@ -22,10 +22,11 @@
 - name: Addon | deployment koreboard
   kubernetes.core.helm:
     name: koreboard
+    kubeconfig: "{{ Addon.KubeConfig }}"
     chart_ref: "{{ Apps.Koreboard.ChartRef }}"
     release_namespace: monitoring
     create_namespace: true
-    update_repo_cache: True
+    update_repo_cache: "{{ Apps.Koreboard.ChartRef is search('.tgz') | ternary(false, true) }}"
     disable_hook: True
     atomic: true
     values_files:

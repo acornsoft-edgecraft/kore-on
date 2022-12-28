@@ -2,7 +2,8 @@
 - name: Remove test release and waiting suppression ending
   kubernetes.core.helm:
     name: elasticsearch
+    kubeconfig: "{{ Addon.KubeConfig }}"
     state: absent
     namespace: efk
-    update_repo_cache: True
+    update_repo_cache: "{{ Apps.Elasticsearch.ChartRef is search('.tgz') | ternary(false, true) }}"
     wait: true
