@@ -321,6 +321,17 @@ func OutputColored() results.TransformerFunc {
 		return fmt.Sprintf("%v", yellow(message))
 	}
 }
+func StrucToJson(s interface{}) (map[string]interface{}, error) {
+	var data map[string]interface{}
+	b, err := json.Marshal(s)
+	if err != nil {
+		return nil, err
+	}
+	if err := json.Unmarshal(b, &data); err != nil {
+		return nil, err
+	}
+	return data, nil
+}
 
 func prettyPrint(b []byte) ([]byte, error) {
 	var out bytes.Buffer
