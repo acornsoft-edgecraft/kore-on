@@ -110,21 +110,65 @@ func (c *strBstionCmd) bastion(workDir string) error {
 		logger.Fatal(err)
 	}
 
-	dockerInstall()
+	c.dockerInstall()
 	dockerLoad()
 
 	return nil
 }
 
-func dockerInstall() error {
-	commandArgs := []string{
-		"yum",
-		"install",
-		"-y",
-		"--disablerepo=*",
-		"--enablerepo=bastion-local-to-file",
-		"docker-ce",
+func (c *strBstionCmd) dockerInstall() error {
+	var commandArgs = []string{}
+	if c.archiveFilePath != "" {
+		if !utils.CheckUserInput("> Do you want to install docker-ce? ", "y") {
+			fmt.Println("nothing to changed. exit")
+			os.Exit(1)
+		}
+		commandArgs = []string{
+			"sudo",
+			"yum",
+			"install",
+			"-y",
+			"--disablerepo=*",
+			"--enablerepo=bastion-local-to-file",
+			"docker-ce",
+		}
+		runExecCommand(commandArgs)
+	} else {
+		if !utils.CheckUserInput("> Is this bastion node online network status?\n Are you sure you want to install docker-ce on this node? ", "y") {
+			fmt.Println("nothing to changed. exit")
+			os.Exit(1)
+		}
+		commandArgs = []string{
+			"sudo",
+			"yum",
+			"install",
+			"-y",
+			"yum-utils",
+		}
+		runExecCommand(commandArgs)
+
+		commandArgs = []string{
+			"sudo",
+			"yum-config-manager",
+			"--add-repo",
+			"https://download.docker.com/linux/centos/docker-ce.repo",
+		}
+		runExecCommand(commandArgs)
+
+		commandArgs = []string{
+			"sudo",
+			"yum",
+			"install",
+			"-y",
+			"docker-ce",
+		}
+		runExecCommand(commandArgs)
 	}
+
+	return nil
+}
+
+func runExecCommand(commandArgs []string) error {
 	commandLen := len(commandArgs)
 	cmd := utils.ExecCommand(commandArgs[0], commandArgs[1:commandLen])
 	out, err := cmd.Output()
@@ -132,8 +176,9 @@ func dockerInstall() error {
 	if err != nil {
 		if ee, ok := err.(*exec.ExitError); ok {
 			fmt.Println("ExitError:", string(ee.Stderr))
+			return fmt.Errorf("ExitError: %v", string(ee.Stderr))
 		} else {
-			fmt.Println("err:", err)
+			return fmt.Errorf("err: %v", err)
 		}
 	}
 	return nil
