@@ -19,7 +19,7 @@
         dest: /tmp
         owner: "root"
         group: "root"
-        remote_src: True
+        remote_src: false
     - name: Copy to heml in /usr/bin
       ansible.builtin.copy:
         src: /tmp/{{ ansible_system | lower }}-amd64/helm

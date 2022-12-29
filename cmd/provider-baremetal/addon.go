@@ -15,6 +15,7 @@ import (
 	"os"
 	"text/template"
 
+	"github.com/apenella/go-ansible/pkg/adhoc"
 	"github.com/apenella/go-ansible/pkg/execute"
 	"github.com/apenella/go-ansible/pkg/execute/measure"
 	"github.com/apenella/go-ansible/pkg/options"
@@ -158,6 +159,7 @@ func (c *strAddonCmd) run() error {
 
 		// Prompt user for more input
 		if c.command != "delete" && addonToml.Apps.CsiDriverNfs.Install {
+
 			id := utils.InputPrompt("# Enter the username for the private registry.\nusername:")
 			addonToml.Apps.CsiDriverNfs.ChartRefID = base64.StdEncoding.EncodeToString([]byte(id))
 
@@ -292,4 +294,31 @@ func (c *strAddonCmd) run() error {
 	}
 
 	return nil
+}
+
+func (c *strAddonCmd) checkHelmRepoLogin() {
+	ansibleConnectionOptions := &options.AnsibleConnectionOptions{
+		PrivateKey: c.privateKey,
+		User:       c.user,
+	}
+
+	ansibleAdhocOptions := &adhoc.AnsibleAdhocOptions{
+		Inventory:  c.inventory,
+		ModuleName: "command",
+		Args:       "helm ",
+	}
+
+	adhoc := &adhoc.AnsibleAdhocCmd{
+		Pattern:           "all",
+		Options:           ansibleAdhocOptions,
+		ConnectionOptions: ansibleConnectionOptions,
+		StdoutCallback:    "oneline",
+	}
+
+	fmt.Println("Command: ", adhoc.String())
+
+	err := adhoc.Run(context.TODO())
+	if err != nil {
+		panic(err)
+	}
 }

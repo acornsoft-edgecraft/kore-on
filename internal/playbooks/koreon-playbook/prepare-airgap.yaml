@@ -10,6 +10,8 @@
         apply:
           tags:
             - init
+      tags:
+        - bootstrap-os
   any_errors_fatal: true
 
 # Clear gathered facts from all currently targeted hosts 
@@ -19,6 +21,8 @@
   tasks:
     - name: Clear gathered facts
       meta: clear_facts
+      tags:
+        - bootstrap-os
 
 # Pre-installation check network.
 - hosts: all
@@ -34,6 +38,8 @@
         apply:
           tags:
             - init-network
+      tags:
+        - bootstrap-os
   any_errors_fatal: true
 
 # Configure system package repository
@@ -50,6 +56,8 @@
         apply:
           tags:
             - bootstrap-os
+      tags:
+        - bootstrap-os
       when:
         - ansible_distribution is defined
   any_errors_fatal: true

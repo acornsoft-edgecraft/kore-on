@@ -10,6 +10,8 @@
         apply:
           tags:
             - init
+      tags:
+        - init
 
 # Clear gathered facts from all currently targeted hosts 
 - hosts: all
@@ -68,6 +70,8 @@
         apply:
           tags:
             - bootstrap-os
+      tags:
+        - bootstrap-os
       when:
         - ansible_distribution is defined
   any_errors_fatal: true
