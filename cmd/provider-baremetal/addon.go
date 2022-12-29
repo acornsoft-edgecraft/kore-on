@@ -1,14 +1,19 @@
 package cmd
 
 import (
+	"bytes"
 	"context"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"kore-on/cmd/koreonctl/conf"
+	"kore-on/cmd/koreonctl/conf/templates"
 	"kore-on/pkg/logger"
+	"kore-on/pkg/model"
 	"kore-on/pkg/utils"
+	"os"
+	"text/template"
 
 	"github.com/apenella/go-ansible/pkg/execute"
 	"github.com/apenella/go-ansible/pkg/execute/measure"
@@ -113,6 +118,36 @@ func (c *strAddonCmd) run() error {
 	if err != nil {
 		logger.Fatal(err)
 	} else {
+		// Make provision data
+		data := model.AddonText{}
+		data.AddonTemp = addonToml
+		data.Command = "addon"
+
+		addon_temp, err := utils.StrucToJson(data)
+		if err != nil {
+			logger.Fatal(err)
+		}
+
+		// Processing template
+		koreonctlText := template.New("AddonText")
+		temp, err := koreonctlText.Parse(templates.AddonText)
+		if err != nil {
+			logger.Errorf("Template has errors. cause(%s)", err.Error())
+			return err
+		}
+		// TODO: 진행상황을 어떻게 클라이언트에 보여줄 것인가?
+		var buff bytes.Buffer
+		err = temp.Execute(&buff, addon_temp)
+		if err != nil {
+			logger.Errorf("Template execution failed. cause(%s)", err.Error())
+			return err
+		}
+
+		if !utils.CheckUserInput(buff.String(), "y") {
+			fmt.Println("nothing to changed. exit")
+			os.Exit(1)
+		}
+
 		// Install Helm
 		if c.installHelm {
 			addonToml.Addon.HelmInstall = c.installHelm
