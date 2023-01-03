@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"kore-on/cmd/koreonctl/conf"
 	"kore-on/cmd/koreonctl/conf/templates"
@@ -13,6 +14,7 @@ import (
 	"kore-on/pkg/model"
 	"kore-on/pkg/utils"
 	"os"
+	"strings"
 	"text/template"
 
 	"github.com/apenella/go-ansible/pkg/adhoc"
@@ -157,13 +159,30 @@ func (c *strAddonCmd) run() error {
 			addonToml.Addon.HelmBinaryFile = c.helmBinaryFile
 		}
 
-		// Prompt user for more input
-		if c.command != "delete" && addonToml.Apps.CsiDriverNfs.Install {
+		// Apps configuration for csi-driver-nfs
+		if c.command != "delete" && !addonToml.Addon.ClosedNetwork && addonToml.Apps.CsiDriverNfs.Install {
 
-			id := utils.InputPrompt("# Enter the username for the private registry.\nusername:")
+			id := utils.InputPrompt("\n## To deploy csi-driver-nfs, you need to login as a private repository (Helm Chart) user.\nusername:")
+			pw := utils.SensitivePrompt("password:")
+
+			// commandArgs := "helm search repo " + addonToml.Apps.CsiDriverNfs.ChartRefName + "/" + addonToml.Apps.CsiDriverNfs.ChartName +
+			// 	" --output json"
+
+			// rs, err := c.checkHelmRepoLogin(id, pw, commandArgs)
+			// if err != nil {
+			// 	logger.Fatal(err)
+			// }
+
+			commandArgs := "helm repo add " + addonToml.Apps.CsiDriverNfs.ChartRefName + " " + addonToml.Apps.CsiDriverNfs.ChartRef +
+				" --username " + id +
+				" --password " + pw
+
+			err := c.checkHelmRepoLogin(id, pw, commandArgs)
+			if err != nil {
+				logger.Fatal(err)
+			}
+
 			addonToml.Apps.CsiDriverNfs.ChartRefID = base64.StdEncoding.EncodeToString([]byte(id))
-
-			pw := utils.SensitivePrompt("# Enter the password for the private registry.\npassword:")
 			addonToml.Apps.CsiDriverNfs.ChartRefPW = base64.StdEncoding.EncodeToString([]byte(pw))
 		}
 
@@ -296,29 +315,44 @@ func (c *strAddonCmd) run() error {
 	return nil
 }
 
-func (c *strAddonCmd) checkHelmRepoLogin() {
+// ansible ad-hoc used
+func (c *strAddonCmd) checkHelmRepoLogin(id string, pw string, commandArgs string) error {
+	var err error
+
+	buff := new(bytes.Buffer)
+
 	ansibleConnectionOptions := &options.AnsibleConnectionOptions{
-		PrivateKey: c.privateKey,
-		User:       c.user,
+		Connection: "local",
 	}
 
+	executorTimeMeasurement := measure.NewExecutorTimeMeasurement(
+		execute.NewDefaultExecute(
+			execute.WithWrite(io.Writer(buff)),
+		),
+	)
+
 	ansibleAdhocOptions := &adhoc.AnsibleAdhocOptions{
-		Inventory:  c.inventory,
+		Inventory:  " 127.0.0.1,",
 		ModuleName: "command",
-		Args:       "helm ",
+		Args:       commandArgs,
 	}
 
 	adhoc := &adhoc.AnsibleAdhocCmd{
 		Pattern:           "all",
+		Exec:              executorTimeMeasurement,
 		Options:           ansibleAdhocOptions,
 		ConnectionOptions: ansibleConnectionOptions,
-		StdoutCallback:    "oneline",
+		StdoutCallback:    "json",
 	}
 
-	fmt.Println("Command: ", adhoc.String())
-
-	err := adhoc.Run(context.TODO())
+	err = adhoc.Run(context.TODO())
 	if err != nil {
-		panic(err)
+		firstIndex := strings.Index(buff.String(), "stderr")
+		lastIndex := strings.LastIndex(buff.String(), "stderr_lines")
+		tempStr := buff.String()[firstIndex+9 : lastIndex-1]
+		tmpLastIndex := strings.LastIndex(tempStr, ",")
+		return fmt.Errorf(tempStr[0:tmpLastIndex])
 	}
+
+	return nil
 }

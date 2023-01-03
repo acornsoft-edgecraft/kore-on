@@ -1,0 +1,34 @@
+---
+# Create Package directory
+- name: Addon | Create addon directory
+  ansible.builtin.file:
+    path: "{{ Addon.AddonDataDir }}/koreboard"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+    
+- name: Addon | copy koreboard values file
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ Addon.AddonDataDir }}/{{ item.dest }}"
+    backup: true
+    mode: 0644
+  with_items:
+    - { src: "values.yaml.j2", dest: "koreboard/values.yaml" }
+  delegate_to: "{{ groups['masters'][0] }}"
+  run_once: true
+
+- name: Addon | deployment koreboard
+  kubernetes.core.helm:
+    name: koreboard
+    kubeconfig: "{{ Addon.KubeConfig }}"
+    chart_ref: "{{ Apps.Koreboard.ChartRef }}"
+    release_namespace: monitoring
+    create_namespace: true
+    update_repo_cache: "{{ Apps.Koreboard.ChartRef is search('.tgz') | ternary(false, true) }}"
+    disable_hook: True
+    atomic: true
+    values_files:
+      - "{{ Addon.AddonDataDir }}/koreboard/values.yaml"
+  run_once: true

@@ -1,11 +1,8 @@
 package cmd
 
 import (
-	"bytes"
 	"fmt"
-	"html/template"
 	"kore-on/pkg/logger"
-	"kore-on/pkg/model"
 	"kore-on/pkg/utils"
 	"log"
 	"os"
@@ -14,7 +11,6 @@ import (
 	"syscall"
 
 	"kore-on/cmd/koreonctl/conf"
-	"kore-on/cmd/koreonctl/conf/templates"
 
 	"github.com/spf13/cobra"
 )
@@ -137,31 +133,31 @@ func (c *strAirGapCmd) airgap(workDir string) error {
 		os.Exit(1)
 	}
 
-	// Make provision data
-	data := model.KoreonctlText{}
-	data.KoreOnTemp = koreonToml
-	data.Command = "prepare-airgap"
+	// // Make provision data
+	// data := model.KoreonctlText{}
+	// data.KoreOnTemp = koreonToml
+	// data.Command = "prepare-airgap"
 
-	// Processing template
-	koreonctlText := template.New("PrepareAirgapText")
-	temp, err := koreonctlText.Parse(templates.PrepareAirgapText)
-	if err != nil {
-		logger.Errorf("Template has errors. cause(%s)", err.Error())
-		return err
-	}
+	// // Processing template
+	// koreonctlText := template.New("PrepareAirgapText")
+	// temp, err := koreonctlText.Parse(templates.PrepareAirgapText)
+	// if err != nil {
+	// 	logger.Errorf("Template has errors. cause(%s)", err.Error())
+	// 	return err
+	// }
 
-	// TODO: 진행상황을 어떻게 클라이언트에 보여줄 것인가?
-	var buff bytes.Buffer
-	err = temp.Execute(&buff, data)
-	if err != nil {
-		logger.Errorf("Template execution failed. cause(%s)", err.Error())
-		return err
-	}
+	// // TODO: 진행상황을 어떻게 클라이언트에 보여줄 것인가?
+	// var buff bytes.Buffer
+	// err = temp.Execute(&buff, data)
+	// if err != nil {
+	// 	logger.Errorf("Template execution failed. cause(%s)", err.Error())
+	// 	return err
+	// }
 
-	if !utils.CheckUserInput(buff.String(), "y") {
-		fmt.Println("nothing to changed. exit")
-		os.Exit(1)
-	}
+	// if !utils.CheckUserInput(buff.String(), "y") {
+	// 	fmt.Println("nothing to changed. exit")
+	// 	os.Exit(1)
+	// }
 
 	commandArgs := []string{
 		"docker",

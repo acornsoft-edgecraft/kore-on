@@ -51,6 +51,7 @@ require (
 	github.com/google/subcommands v1.2.0
 	github.com/iancoleman/strcase v0.2.0
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect
+	github.com/matheusoliveira/go-ordered-map v0.2.0
 	github.com/mholt/archiver v3.1.1+incompatible
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect

@@ -142,6 +142,12 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 			logger.Fatal("Prepare Air Gap > Support package and container image not found.:\n")
 			errorCnt++
 		}
+		// Get helm chart package support version
+		supportHelmChartList := GetSupportVersion(supportK8sVersion, "k8s_support_package")
+		if supportPackageList == nil {
+			logger.Fatal("Prepare Air Gap > Support helm chart package version not found.:\n")
+			errorCnt++
+		}
 
 		// Set image support version
 		k8sSupportImagesVersion := setField(&koreon_toml.SupportVersion.ImageVersion, supportK8sList)
@@ -154,6 +160,13 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 		packageSupportVersion := setField(&koreon_toml.SupportVersion.PackageVersion, supportPackageList)
 		if packageSupportVersion != nil {
 			logger.Fatal(packageSupportVersion)
+			errorCnt++
+		}
+
+		// Set package support version
+		helmChartSupportVersion := setField(&koreon_toml.SupportVersion.HelmChartVersion, supportHelmChartList)
+		if packageSupportVersion != nil {
+			logger.Fatal(helmChartSupportVersion)
 			errorCnt++
 		}
 

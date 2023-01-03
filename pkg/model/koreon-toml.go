@@ -99,8 +99,9 @@ type KoreOnToml struct {
 	} `toml:"prepare-airgap,omitempty"`
 
 	SupportVersion struct {
-		PackageVersion PackageVersion
-		ImageVersion   ImageVersion
+		PackageVersion   PackageVersion
+		ImageVersion     ImageVersion
+		HelmChartVersion HelmChartVersion
 	}
 }
 

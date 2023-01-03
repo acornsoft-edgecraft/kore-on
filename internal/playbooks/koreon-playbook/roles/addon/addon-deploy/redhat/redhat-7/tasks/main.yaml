@@ -1,0 +1,54 @@
+---
+- import_tasks: check-k8s.yaml
+
+- import_tasks: install-helm.yaml
+  when:
+    - Addon.HelmInstall
+
+## Deployment CSI driver nfs
+- name: Addon | Deployment csi-driver-nfs
+  ansible.builtin.include_role:
+    name: addon/addon-deploy/redhat/redhat-7/apps/csi-driver-nfs
+    apply:
+      tags:
+        - addon-csi-nfs
+  tags:
+    - addon-csi-nfs
+  when:
+    - Apps.CsiDriverNfs.Install
+
+## Deployment Elasticsearch
+- name: Addon | Deployment elasticsearch
+  ansible.builtin.include_role:
+    name: addon/addon-deploy/redhat/redhat-7/apps/elasticsearch
+    apply:
+      tags:
+        - addon-elasticsearch
+  tags:
+    - addon-elasticsearch
+  when:
+    - Apps.Elasticsearch.Install
+
+## Deployment FluentBit
+- name: Addon | Deployment fluent-bit
+  ansible.builtin.include_role:
+    name: addon/addon-deploy/redhat/redhat-7/apps/fluent-bit
+    apply:
+      tags:
+        - addon-fluent-bit
+  tags:
+    - addon-fluent-bit
+  when:
+    - Apps.FluentBit.Install
+
+## Deployment Koreboard
+- name: Addon | Deployment koreboard
+  ansible.builtin.include_role:
+    name: addon/addon-deploy/redhat/redhat-7/apps/koreboard
+    apply:
+      tags:
+        - addon-koreboard
+  tags:
+    - addon-koreboard
+  when:
+    - Apps.Koreboard.Install

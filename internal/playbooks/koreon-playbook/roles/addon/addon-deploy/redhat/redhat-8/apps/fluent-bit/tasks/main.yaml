@@ -1,0 +1,39 @@
+---
+- name: Add fluent-bit charts repository
+  command: |
+    helm repo add "{{ Apps.FluentBit.ChartRefName }}" "{{ Apps.FluentBit.ChartRef }}"
+  delegate_to: "{{ groups['masters'][0] }}"
+
+# Create Package directory
+- name: Addon | Create fluent-bit directory
+  ansible.builtin.file:
+    path: "{{ Addon.AddonDataDir }}/{{ Apps.FluentBit.ChartName }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Addon | copy fluent-bit values file
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ Addon.AddonDataDir }}/{{ item.dest }}"
+    backup: true
+    mode: 0644
+  with_items:
+    - { src: "values.yaml.j2", dest: "{{ Apps.FluentBit.ChartName }}/values.yaml" }
+  delegate_to: "{{ groups['masters'][0] }}"
+  run_once: true
+
+- name: Addon | deployment fluent-bit
+  kubernetes.core.helm:
+    name: fluent-bit
+    kubeconfig: "{{ Addon.KubeConfig }}"
+    chart_ref: "{{ Apps.FluentBit.ChartRefName }}/{{ Apps.FluentBit.ChartName }}"
+    release_namespace: efk
+    create_namespace: true
+    update_repo_cache: "{{ Apps.FluentBit.ChartRef is search('.tgz') | ternary(false, true) }}"
+    disable_hook: True
+    atomic: true
+    values_files:
+      - "{{ Addon.AddonDataDir }}/{{ Apps.FluentBit.ChartName }}/values.yaml"
+  run_once: true

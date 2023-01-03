@@ -105,8 +105,18 @@ SupportDockerComposeVersion: {
 SupportHelmVersion: {
   "v3.10": ["0","1","2","3"]
 }
-
 #-end Support versions
+
+#-- Helm Chart versions
+## https://hcapital-harbor.acloud.run/chartrepo/cube
+ChartCsiDriverNfsVersion: {
+  "v4.1": ["0","1"]
+}
+## https://github.com/kore3lab/dashboard/tree/master/scripts/install/kubernetes
+ChartKoreboardVersion: {
+  "v0.5": ["0","1","2","3","4","5"]
+}
+#--end Helm Chart versions
 
 # This is the version supported by k8s images for k8s version.
 # This is the version supported by localrepo packages for k8s version.
@@ -184,5 +194,27 @@ SupportVersion: {
       "etcd": "v3.4",
       "helm": "v3.10",
     },
+  },
+  "helm_chart_package": {
+    "v1.29": {
+      "csi-driver-nfs": "v4.1",
+      "koreboard": "v0.5",
+    },
+    "v1.20": {
+      "csi-driver-nfs": "v4.1",
+      "koreboard": "v0.5",
+    },
+    "v1.21": {
+      "csi-driver-nfs": "v4.1",
+      "koreboard": "v0.5",
+    },
+    "v1.22": {
+      "csi-driver-nfs": "v4.1",
+      "koreboard": "v0.5",
+    },
+    "v1.23": {
+      "csi-driver-nfs": "v4.1",
+      "koreboard": "v0.5",
+    }
   }
 }

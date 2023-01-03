@@ -34,6 +34,9 @@ RUN ansible-galaxy collection install community.general
 RUN ansible-galaxy collection install community.crypto
 RUN ansible-galaxy collection install ansible.posix
 RUN ansible-galaxy collection install ansible.utils
+RUN curl -O https://get.helm.sh/helm-v3.10.3-linux-amd64.tar.gz
+RUN tar -zxvf helm-v3.10.3-linux-amd64.tar.gz
+RUN mv linux-amd64/helm /usr/bin/helm 
 
 # Copy binary and config files from /build to root folder of scratch container.
 COPY --from=builder ["/build/kore-on", "/"]

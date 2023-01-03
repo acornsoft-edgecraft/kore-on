@@ -1,25 +1,30 @@
 #- Image List
 ## Required image items.
 prepare_airgap_images: [
-      "docker.io/nginx:latest",
-      "docker.io/haproxy:latest",
-      "gcr.io/kubernetes-e2e-test-images/dnsutils:1.3",
-      "k8s.gcr.io/pause:{{ image_pause_version | regex_replace('^v', '') }}",
-      "docker.io/coredns/coredns:{{ image_coredns_version | regex_replace('^v', '') }}",
-      "docker.io/calico/cni:{{ image_calico_version }}",
-      "docker.io/calico/node:{{ image_calico_version }}",
-      "docker.io/calico/kube-controllers:{{ image_calico_version }}",
-      "docker.io/calico/typha:{{ image_calico_version }}",
-      "docker.io/calico/pod2daemon-flexvol:{{ image_calico_version }}",
-      "k8s.gcr.io/metrics-server/metrics-server:{{ image_metrics_server_version }}",
-      "k8s.gcr.io/kube-apiserver:{{ prepare_airgap_k8s_version }}",
-      "k8s.gcr.io/kube-controller-manager:{{ prepare_airgap_k8s_version }}",
-      "k8s.gcr.io/kube-scheduler:{{ prepare_airgap_k8s_version }}",
-      "k8s.gcr.io/kube-proxy:{{ prepare_airgap_k8s_version }}",
-      "registry.k8s.io/e2e-test-images/jessie-dnsutils:{{ image_dns_utils_version | regex_replace('^v', '') }}"
-    ]
+  "docker.io/nginx:latest",
+  "docker.io/haproxy:latest",
+  "gcr.io/kubernetes-e2e-test-images/dnsutils:1.3",
+  "k8s.gcr.io/pause:{{ image_pause_version | regex_replace('^v', '') }}",
+  "docker.io/coredns/coredns:{{ image_coredns_version | regex_replace('^v', '') }}",
+  "docker.io/calico/cni:{{ image_calico_version }}",
+  "docker.io/calico/node:{{ image_calico_version }}",
+  "docker.io/calico/kube-controllers:{{ image_calico_version }}",
+  "docker.io/calico/typha:{{ image_calico_version }}",
+  "docker.io/calico/pod2daemon-flexvol:{{ image_calico_version }}",
+  "k8s.gcr.io/metrics-server/metrics-server:{{ image_metrics_server_version }}",
+  "k8s.gcr.io/kube-apiserver:{{ prepare_airgap_k8s_version }}",
+  "k8s.gcr.io/kube-controller-manager:{{ prepare_airgap_k8s_version }}",
+  "k8s.gcr.io/kube-scheduler:{{ prepare_airgap_k8s_version }}",
+  "k8s.gcr.io/kube-proxy:{{ prepare_airgap_k8s_version }}",
+  "registry.k8s.io/e2e-test-images/jessie-dnsutils:{{ image_dns_utils_version | regex_replace('^v', '') }}"
+]
 
 bastion_images: [
   "ghcr.io/acornsoft-edgecraft/kore-on:latest"
+]
+
+prepare_airgap_helm_charts: [
+  "https://github.com/kore3lab/dashboard/blob/master/scripts/install/kubernetes/kore-board-{{ chart_koreboard_version | regex_replace('^v', '') }}.tgz"
+  "https://hcapital-harbor.acloud.run/chartrepo/cube/csi-driver-nfs-{{ chart_csi_driver_nfs_version }}.tgz"
 ]
 #-end Image List
