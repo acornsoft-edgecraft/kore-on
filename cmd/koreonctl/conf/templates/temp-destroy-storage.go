@@ -22,4 +22,4 @@ node-storage                   {{$SharedStorage.StorageIP}}                    {
 node-storage                   {{$SharedStorage.StorageIP}}                    {{if ne "" $SharedStorage.PrivateIP}}{{$SharedStorage.PrivateIP}}{{end -}}
 {{  end }}
 ===========================================================================
-Is this ok [y/N]: `
+Is this ok [y/n]: `

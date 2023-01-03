@@ -31,4 +31,4 @@ k8s-master-1                 {{$Master}}
 {{- end }}
 
 
-> Is this ok [y/N]: `
+> Is this ok [y/n]: `

@@ -17,4 +17,4 @@ master-{{$index}}                       {{$data}}                    {{if ne (le
 node-{{$index}}                         {{$data}}                    {{if ne (len $Node.PrivateIP) 0}}{{index $Node.PrivateIP $index}}{{end -}} 
 {{  end}}
 ===========================================================================
-Is this ok [y/N]: `
+Is this ok [y/n]: `

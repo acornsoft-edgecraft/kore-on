@@ -3,5 +3,5 @@ storageClass:
   parameters:
     mountOptions:
     - nfsvers=4.1
-    server: 192.168.77.239
+    server: 192.168.77.119
     share: /data/storage
