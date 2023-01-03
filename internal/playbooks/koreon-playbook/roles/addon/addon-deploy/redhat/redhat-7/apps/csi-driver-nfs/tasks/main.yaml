@@ -38,9 +38,23 @@
     kubeconfig: "{{ Addon.KubeConfig }}"
     chart_ref: "{{ Apps.CsiDriverNfs.ChartRefName }}/{{ Apps.CsiDriverNfs.ChartName }}"
     release_namespace: kube-system
-    update_repo_cache: "{{ Apps.CsiDriverNfs.ChartRef is search('.tgz') | ternary(false, true) }}"
-    disable_hook: True
-    atomic: true
+    # update_repo_cache: "{{ Apps.CsiDriverNfs.ChartRef is search('.tgz') | ternary(false, true) }}"
+    # atomic: true
     values_files:
       - "{{ Addon.AddonDataDir }}/{{ Apps.CsiDriverNfs.ChartName }}/values.yaml"
-  run_once: true
+  delegate_to: "{{ groups['masters'][0] }}"
+  # run_once: true
+
+
+# - name: Addon | deployment csi-driver-nfs
+#   kubernetes.core.helm:
+#     name: csi-driver-nfs
+#     kubeconfig: "{{ Addon.KubeConfig }}"
+#     chart_ref: "{{ Apps.CsiDriverNfs.ChartRefName }}/{{ Apps.CsiDriverNfs.ChartName }}"
+#     release_namespace: kube-system
+#     # update_repo_cache: "{{ Apps.CsiDriverNfs.ChartRef is search('.tgz') | ternary(false, true) }}"
+#     # atomic: true
+#     values_files:
+#       - "{{ Addon.AddonDataDir }}/{{ Apps.CsiDriverNfs.ChartName }}/values.yaml"
+#   delegate_to: "{{ groups['masters'][0] }}"
+#   run_once: true

@@ -22,4 +22,4 @@ node-regi                               {{$PrivateRegistry.RegistryIP}}         
 {{    end -}}
 {{  end }}
 ===========================================================================
-Is this ok [y/N]: `
+Is this ok [y/n]: `

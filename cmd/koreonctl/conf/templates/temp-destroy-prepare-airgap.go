@@ -12,4 +12,4 @@ Node Name                      IP Address              Private IP Adderss
 ===========================================================================
 prepare-airgap-node             {{$PrepareAirgap.RegistryIP}}
 ===========================================================================
-Is this ok [y/N]: `
+Is this ok [y/n]: `

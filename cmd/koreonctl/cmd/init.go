@@ -55,7 +55,7 @@ func (c *strInitCmd) init(workDir string) error {
 	SUCCESS_FORMAT := "\033[1;32m%s\033[0m\n"
 	koreOnConfigFile := conf.KoreOnConfigFile
 
-	if !utils.CheckUserInput("Do you really want to init? \nIs this ok [y/N]: ", "y") {
+	if !utils.CheckUserInput("Do you really want to init? \nIs this ok [y/n]: ", "y") {
 		fmt.Println("nothing to changed. exit")
 		os.Exit(1)
 	}

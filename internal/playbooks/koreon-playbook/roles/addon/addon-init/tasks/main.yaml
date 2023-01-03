@@ -1,2 +1,4 @@
 ---
 - import_tasks: generate-inventory.yaml
+
+- meta: refresh_inventory

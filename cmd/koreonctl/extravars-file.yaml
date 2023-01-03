@@ -1,0 +1,18 @@
+addon_apps:
+  csi_driver_nfs_values:
+    storageClass:
+      create: true
+      parameters:
+        mountOptions:
+        - nfsvers=4.1
+        server: 192.168.77.119
+        share: /data/storage
+  koreboard_values:
+    backend:
+      service:
+        nodePort: 30081
+        type: NodePort
+    frontend:
+      service:
+        nodePort: 30080
+        type: NodePort
