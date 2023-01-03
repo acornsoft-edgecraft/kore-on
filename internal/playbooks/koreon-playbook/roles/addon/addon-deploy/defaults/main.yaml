@@ -1,7 +1,0 @@
----
-node_name: "{{ ansible_nodename|lower }}"
-kubeadminconfig: "{{ Addon.KubeConfig }}"
-
-package_helm_version: "{{ Addon.HelmVersion }}"
-
-helm_get_url: "https://get.helm.sh/helm-{{ Addon.HelmVersion }}-{{ ansible_system | lower }}-amd64.tar.gz"

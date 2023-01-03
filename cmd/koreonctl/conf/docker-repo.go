@@ -1,6 +1,6 @@
 package conf
 
-const docker_repo_7 = `
+const docker_repo_rhel = `
 [Docker-CE-Stable]
 async = 1
 baseurl = https://download.docker.com/linux/centos/$releasever/$basearch/stable

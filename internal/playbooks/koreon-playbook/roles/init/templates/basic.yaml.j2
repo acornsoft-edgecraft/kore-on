@@ -150,7 +150,7 @@ prepare_airgap_registry_ip: {{ PrepareAirgap.RegistryIP }}
 prepare_airgap_registry_data_dir: "/data"
 prepare_airgap_registry_install_dir: "/var/lib/kore-on"
 
-#- [supports packages/images]
+#- [supports packages/images/helmchart]
 ## packages
 {% for package in (SupportVersion.PackageVersion | dict2items) %}
 package_{{ package.key | regex_replace('((?!^)|\\b[a-zA-Z][a-z]*)([A-Z][a-z]*|\\d+)', '\\1_\\2') | lower }}_version: {{ package.value}}
@@ -158,5 +158,9 @@ package_{{ package.key | regex_replace('((?!^)|\\b[a-zA-Z][a-z]*)([A-Z][a-z]*|\\
 ## images
 {% for image in (SupportVersion.ImageVersion | dict2items) %}
 image_{{ image.key | regex_replace('((?!^)|\\b[a-zA-Z][a-z]*)([A-Z][a-z]*|\\d+)', '\\1_\\2') | lower }}_version: {{ image.value}}
+{% endfor %}
+## helm chart packages
+{% for helm_chart in (SupportVersion.HelmChartVersion | dict2items) %}
+chart_{{ helm_chart.key | regex_replace('((?!^)|\\b[a-zA-Z][a-z]*)([A-Z][a-z]*|\\d+)', '\\1_\\2') | lower }}_version: {{ helm_chart.value}}
 {% endfor %}
 #-end [prepare-airgap]

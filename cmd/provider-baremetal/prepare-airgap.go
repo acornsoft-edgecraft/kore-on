@@ -1,12 +1,16 @@
 package cmd
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"kore-on/cmd/koreonctl/conf/templates"
 	"kore-on/pkg/logger"
+	"kore-on/pkg/model"
 	"kore-on/pkg/utils"
 	"os"
+	"text/template"
 
 	"github.com/apenella/go-ansible/pkg/execute"
 	"github.com/apenella/go-ansible/pkg/options"
@@ -110,6 +114,32 @@ func (c *strAirGapCmd) run() error {
 		}
 	}
 
+	// Make provision data
+	data := model.KoreonctlText{}
+	data.KoreOnTemp = koreonToml
+	data.Command = "prepare-airgap"
+
+	// Processing template
+	koreonctlText := template.New("PrepareAirgapText")
+	temp, err := koreonctlText.Parse(templates.PrepareAirgapText)
+	if err != nil {
+		logger.Errorf("Template has errors. cause(%s)", err.Error())
+		return err
+	}
+
+	// TODO: 진행상황을 어떻게 클라이언트에 보여줄 것인가?
+	var buff bytes.Buffer
+	err = temp.Execute(&buff, data)
+	if err != nil {
+		logger.Errorf("Template execution failed. cause(%s)", err.Error())
+		return err
+	}
+
+	if !utils.CheckUserInput(buff.String(), "y") {
+		fmt.Println("nothing to changed. exit")
+		os.Exit(1)
+	}
+
 	if len(c.playbookFiles) < 1 {
 		return fmt.Errorf("[ERROR]: %s", "To run ansible-playbook playbook file path must be specified")
 	}
@@ -151,7 +181,7 @@ func (c *strAirGapCmd) run() error {
 
 	options.AnsibleForceColor()
 
-	err := playbook.Run(context.TODO())
+	err = playbook.Run(context.TODO())
 	if err != nil {
 		return err
 	}

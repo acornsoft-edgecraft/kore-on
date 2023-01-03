@@ -17,3 +17,8 @@ type ImageVersion struct {
 	Pause         string `validate:"pause,SupportPauseVersion"`
 	DnsUtils      string `validate:"dns-utils,SupportDnsUtilsVersion"`
 }
+
+type HelmChartVersion struct {
+	CsiDriverNfs string `validate:"csi-driver-nfs,ChartCsiDriverNfsVersion"`
+	Koreboard    string `validate:"koreboard,ChartKoreboardVersion"`
+}

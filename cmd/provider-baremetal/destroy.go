@@ -1,12 +1,16 @@
 package cmd
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"kore-on/cmd/koreonctl/conf/templates"
 	"kore-on/pkg/logger"
+	"kore-on/pkg/model"
 	"kore-on/pkg/utils"
 	"os"
+	"text/template"
 
 	"github.com/apenella/go-ansible/pkg/execute"
 	"github.com/apenella/go-ansible/pkg/options"
@@ -41,7 +45,7 @@ func DestroyCmd() *cobra.Command {
 		},
 	}
 	// Default value for command struct
-	destroy.tags = ""
+	destroy.tags = "reset-all"
 	destroy.inventory = "./internal/playbooks/koreon-playbook/inventory/inventory.ini"
 	destroy.playbookFiles = []string{
 		"./internal/playbooks/koreon-playbook/reset.yaml",
@@ -73,6 +77,46 @@ func (c *strDestroyCmd) run() error {
 			logger.Fatal(err.Error())
 			os.Exit(1)
 		}
+	}
+
+	// Make provision data
+	data := model.KoreonctlText{}
+	data.KoreOnTemp = koreonToml
+	data.Command = c.tags
+
+	// Processing template
+	var textVar string
+	switch data.Command {
+	case "reset-all":
+		textVar = templates.DestroyAllText
+	case "reset-cluster":
+		textVar = templates.DestroyClusterText
+	case "reset-registry":
+		textVar = templates.DestroyRegistryText
+	case "reset-storage":
+		textVar = templates.DestroyStorageText
+	case "reset-prepare-airgap":
+		textVar = templates.DestroyPrepareAirgapText
+		koreonToml.KoreOn.ClosedNetwork = false
+	}
+	koreonctlText := template.New("DestroyText")
+	temp, err := koreonctlText.Parse(textVar)
+	if err != nil {
+		logger.Errorf("Template has errors. cause(%s)", err.Error())
+		return err
+	}
+
+	// TODO: 진행상황을 어떻게 클라이언트에 보여줄 것인가?
+	var buff bytes.Buffer
+	err = temp.Execute(&buff, data)
+	if err != nil {
+		logger.Errorf("Template execution failed. cause(%s)", err.Error())
+		return err
+	}
+
+	if !utils.CheckUserInput(buff.String(), "y") {
+		fmt.Println("nothing to changed. exit")
+		os.Exit(1)
 	}
 
 	if len(c.playbookFiles) < 1 {
@@ -123,7 +167,7 @@ func (c *strDestroyCmd) run() error {
 
 	options.AnsibleForceColor()
 
-	err := playbook.Run(context.TODO())
+	err = playbook.Run(context.TODO())
 	if err != nil {
 		return err
 	}
