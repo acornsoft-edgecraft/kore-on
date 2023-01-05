@@ -13,7 +13,7 @@ import (
 	"github.com/apenella/go-ansible/pkg/options"
 )
 
-// ansible ad-hoc used
+// Check Helm Repo Login - ansible ad-hoc used
 func checkHelmRepoLogin(id string, pw string, commandArgs string) error {
 	var err error
 
@@ -50,6 +50,44 @@ func checkHelmRepoLogin(id string, pw string, commandArgs string) error {
 		tempStr := buff.String()[firstIndex+9 : lastIndex-1]
 		tmpLastIndex := strings.LastIndex(tempStr, ",")
 		return fmt.Errorf(tempStr[0:tmpLastIndex])
+	}
+
+	return nil
+}
+
+// Get Kubeconfig for acloud user
+func getKubeconfig() error {
+	var err error
+
+	buff := new(bytes.Buffer)
+
+	ansibleConnectionOptions := &options.AnsibleConnectionOptions{
+		Connection: "local",
+	}
+
+	executorTimeMeasurement := measure.NewExecutorTimeMeasurement(
+		execute.NewDefaultExecute(
+			execute.WithWrite(io.Writer(buff)),
+		),
+	)
+
+	ansibleAdhocOptions := &adhoc.AnsibleAdhocOptions{
+		Inventory:  " 127.0.0.1,",
+		ModuleName: "command",
+		Args:       "",
+	}
+
+	adhoc := &adhoc.AnsibleAdhocCmd{
+		Pattern:           "all",
+		Exec:              executorTimeMeasurement,
+		Options:           ansibleAdhocOptions,
+		ConnectionOptions: ansibleConnectionOptions,
+		StdoutCallback:    "json",
+	}
+
+	err = adhoc.Run(context.TODO())
+	if err != nil {
+		return err
 	}
 
 	return nil
