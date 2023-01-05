@@ -105,7 +105,7 @@ func (c *strAirGapCmd) run() error {
 	koreOnConfigFilePath := utils.IskoreOnConfigFilePath(koreOnConfigFileName)
 	koreonToml, errBool := utils.ValidateKoreonTomlConfig(koreOnConfigFilePath, "prepare-airgap")
 	if !errBool {
-		message := "설정이 잘못 되었습니다. 'koreon.toml' 파일을 확인해 주세요!!"
+		message := "Settings are incorrect. Please check the 'korean.toml' file!!"
 		logger.Fatal(fmt.Errorf("%s", message))
 	}
 

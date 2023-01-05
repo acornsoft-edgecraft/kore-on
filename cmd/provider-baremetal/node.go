@@ -1,12 +1,16 @@
 package cmd
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"kore-on/cmd/koreonctl/conf/templates"
 	"kore-on/pkg/logger"
+	"kore-on/pkg/model"
 	"kore-on/pkg/utils"
 	"os"
+	"text/template"
 
 	"github.com/apenella/go-ansible/pkg/execute"
 	"github.com/apenella/go-ansible/pkg/options"
@@ -85,20 +89,39 @@ func addNodeCmd() *cobra.Command {
 }
 
 func (c *strNodeCmd) run() error {
+	var err error
 	koreOnConfigFileName := viper.GetString("KoreOn.KoreOnConfigFile")
 	koreOnConfigFilePath := utils.IskoreOnConfigFilePath(koreOnConfigFileName)
-	koreonToml, value := utils.ValidateKoreonTomlConfig(koreOnConfigFilePath, "node")
+	koreonToml, errBool := utils.ValidateKoreonTomlConfig(koreOnConfigFilePath, "node")
+	if !errBool {
+		message := "Settings are incorrect. Please check the 'korean.toml' file!!"
+		logger.Fatal(fmt.Errorf("%s", message))
+	}
 
-	if value {
-		b, err := json.Marshal(koreonToml)
-		if err != nil {
-			logger.Fatal(err)
-			os.Exit(1)
-		}
-		if err := json.Unmarshal(b, &c.extravars); err != nil {
-			logger.Fatal(err.Error())
-			os.Exit(1)
-		}
+	// Make provision data
+	data := model.KoreonctlText{}
+	data.KoreOnTemp = koreonToml
+	data.Command = "node"
+
+	// Processing template
+	koreonctlText := template.New("NodeText")
+	temp, err := koreonctlText.Parse(templates.PrepareAirgapText)
+	if err != nil {
+		logger.Errorf("Template has errors. cause(%s)", err.Error())
+		return err
+	}
+
+	// TODO: 진행상황을 어떻게 클라이언트에 보여줄 것인가?
+	var buff bytes.Buffer
+	err = temp.Execute(&buff, data)
+	if err != nil {
+		logger.Errorf("Template execution failed. cause(%s)", err.Error())
+		return err
+	}
+
+	if !utils.CheckUserInput(buff.String(), "y") {
+		fmt.Println("nothing to changed. exit")
+		os.Exit(1)
 	}
 
 	if len(c.playbookFiles) < 1 {
@@ -115,6 +138,16 @@ func (c *strNodeCmd) run() error {
 
 	if len(c.user) < 1 {
 		return fmt.Errorf("[ERROR]: %s", "To run ansible-playbook an ssh login user must be specified")
+	}
+
+	b, err := json.Marshal(koreonToml)
+	if err != nil {
+		logger.Fatal(err)
+		os.Exit(1)
+	}
+	if err := json.Unmarshal(b, &c.extravars); err != nil {
+		logger.Fatal(err.Error())
+		os.Exit(1)
 	}
 
 	ansiblePlaybookConnectionOptions := &options.AnsibleConnectionOptions{
@@ -142,7 +175,7 @@ func (c *strNodeCmd) run() error {
 
 	options.AnsibleForceColor()
 
-	err := playbook.Run(context.TODO())
+	err = playbook.Run(context.TODO())
 	if err != nil {
 		return err
 	}

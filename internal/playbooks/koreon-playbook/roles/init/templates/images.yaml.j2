@@ -24,17 +24,19 @@ bastion_images: [
 ]
 
 prepare_airgap_helm_charts: [
-
+{% if ListVersion.ListHelmChartVersion.CsiDriverNfs != None %}
 {% for item in (ListVersion.ListHelmChartVersion.CsiDriverNfs | dict2items) %}
 {%   for data in item.value %}
   "https://hcapital-harbor.acloud.run/chartrepo/cube/charts/csi-driver-nfs-{{ data }}.tgz",
 {%   endfor %}
 {% endfor %}
+{% endif %}
+{% if ListVersion.ListHelmChartVersion.Koreboard != None %}
 {% for item in (ListVersion.ListHelmChartVersion.Koreboard | dict2items) %}
 {%   for data in item.value %}
   "https://github.com/kore3lab/dashboard/raw/master/scripts/install/kubernetes/kore-board-{{ data | regex_replace('^v', '') }}.tgz",
 {%   endfor %}
 {% endfor %}
-  
+{% endif %}
 ]
 #-end Image List
