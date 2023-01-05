@@ -45,7 +45,12 @@ func DestroyCmd() *cobra.Command {
 		},
 	}
 
-	cmd.AddCommand(emptyCmd())
+	cmd.AddCommand(
+		destroyPrepareAirGapCmd(),
+		destroyClusterCmd(),
+		destroyRegistryCmd(),
+		destroyStorageCmd(),
+	)
 
 	// SubCommand validation
 	utils.CheckCommand(cmd)
@@ -64,6 +69,102 @@ func DestroyCmd() *cobra.Command {
 	f.StringVar(&destroy.tags, "tags", destroy.tags, "Ansible options tags")
 	f.StringVarP(&destroy.privateKey, "private-key", "p", "", "Specify ssh key path")
 	f.StringVarP(&destroy.user, "user", "u", "", "login user")
+
+	return cmd
+}
+
+func destroyPrepareAirGapCmd() *cobra.Command {
+	destroyPrepareAirGapCmd := &strDestroyCmd{}
+
+	cmd := &cobra.Command{
+		Use:          "prepare-airgap [flags]",
+		Short:        "Destroy prepare-airgap",
+		Long:         "This command deletes the registry of the prepare-airgap host and deletes related directories.",
+		SilenceUsage: true,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return destroyPrepareAirGapCmd.run()
+		},
+	}
+
+	destroyPrepareAirGapCmd.tags = "reset-prepare-airgap"
+
+	f := cmd.Flags()
+	f.BoolVarP(&destroyPrepareAirGapCmd.verbose, "verbose", "v", false, "verbose")
+	f.BoolVarP(&destroyPrepareAirGapCmd.dryRun, "dry-run", "d", false, "dryRun")
+	f.StringVarP(&destroyPrepareAirGapCmd.privateKey, "private-key", "p", "", "Specify ssh key path")
+	f.StringVarP(&destroyPrepareAirGapCmd.user, "user", "u", "", "login user")
+
+	return cmd
+}
+
+func destroyClusterCmd() *cobra.Command {
+	destroyClusterCmd := &strDestroyCmd{}
+
+	cmd := &cobra.Command{
+		Use:          "cluster [flags]",
+		Short:        "Destroy cluster",
+		Long:         "This command only deletes the Kubernetes cluster.",
+		SilenceUsage: true,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return destroyClusterCmd.run()
+		},
+	}
+
+	destroyClusterCmd.tags = "reset-cluster"
+
+	f := cmd.Flags()
+	f.BoolVarP(&destroyClusterCmd.verbose, "verbose", "v", false, "verbose")
+	f.BoolVarP(&destroyClusterCmd.dryRun, "dry-run", "d", false, "dryRun")
+	f.StringVarP(&destroyClusterCmd.privateKey, "private-key", "p", "", "Specify ssh key path")
+	f.StringVarP(&destroyClusterCmd.user, "user", "u", "", "login user")
+
+	return cmd
+}
+
+func destroyRegistryCmd() *cobra.Command {
+	destroyRegistryCmd := &strDestroyCmd{}
+
+	cmd := &cobra.Command{
+		Use:          "registry [flags]",
+		Short:        "Destroy registry",
+		Long:         "This command deletes the installed registry(harbor) and deletes related services and directories.",
+		SilenceUsage: true,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return destroyRegistryCmd.run()
+		},
+	}
+
+	destroyRegistryCmd.tags = "reset-registry"
+
+	f := cmd.Flags()
+	f.BoolVarP(&destroyRegistryCmd.verbose, "verbose", "v", false, "verbose")
+	f.BoolVarP(&destroyRegistryCmd.dryRun, "dry-run", "d", false, "dryRun")
+	f.StringVarP(&destroyRegistryCmd.privateKey, "private-key", "p", "", "Specify ssh key path")
+	f.StringVarP(&destroyRegistryCmd.user, "user", "u", "", "login user")
+
+	return cmd
+}
+
+func destroyStorageCmd() *cobra.Command {
+	destroyStorageCmd := &strDestroyCmd{}
+
+	cmd := &cobra.Command{
+		Use:          "storage [flags]",
+		Short:        "Destroy storage",
+		Long:         "This command deletes the installed storage(NFS) and deletes related services and directories.",
+		SilenceUsage: true,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return destroyStorageCmd.run()
+		},
+	}
+
+	destroyStorageCmd.tags = "reset-storage"
+
+	f := cmd.Flags()
+	f.BoolVarP(&destroyStorageCmd.verbose, "verbose", "v", false, "verbose")
+	f.BoolVarP(&destroyStorageCmd.dryRun, "dry-run", "d", false, "dryRun")
+	f.StringVarP(&destroyStorageCmd.privateKey, "private-key", "p", "", "Specify ssh key path")
+	f.StringVarP(&destroyStorageCmd.user, "user", "u", "", "login user")
 
 	return cmd
 }
@@ -89,8 +190,6 @@ func (c *strDestroyCmd) run() error {
 	data := model.KoreonctlText{}
 	data.KoreOnTemp = koreonToml
 	data.Command = c.tags
-
-	fmt.Println(data.Command)
 
 	// Processing template
 	var textVar string
