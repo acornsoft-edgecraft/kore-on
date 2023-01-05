@@ -48,37 +48,6 @@ func destroyCmd() *cobra.Command {
 	// SubCommand validation
 	utils.CheckCommand(cmd)
 
-	// if os.Args[1] == "destroy" {
-
-	// 	// utils.CheckCommand(cmd)
-	// 	var cmdCheck []string
-	// 	var strContains string
-
-	// 	for _, v := range cmd.Commands() {
-	// 		cmdCheck = append(cmdCheck, v.Name())
-	// 	}
-
-	// 	subcmd := os.Args[2]
-	// 	for _, cv := range cmdCheck {
-	// 		if cv != subcmd && string(subcmd[0]) != "-" {
-	// 			for _, v := range cmdCheck {
-	// 				if strings.Contains(v, subcmd) {
-	// 					strContains = v
-	// 					break
-	// 				}
-	// 			}
-	// 			args := append([]string{""}, os.Args[1:]...)
-	// 			buf := new(bytes.Buffer)
-	// 			cmd.SetErr(buf)
-	// 			fmt.Println("unknown command ", args)
-	// 			errMessage := fmt.Sprintf("Did you mean this?\n\t%s\n\nRun 'koreonctl %s --help' for usage.", strContains, cmd.Name())
-	// 			fmt.Print(errMessage)
-	// 			os.Exit(1)
-	// 			break
-	// 		}
-	// 	}
-	// }
-
 	f := cmd.Flags()
 	f.BoolVar(&destroy.verbose, "verbose", false, "verbose")
 	f.BoolVarP(&destroy.dryRun, "dry-run", "d", false, "dryRun")
@@ -210,46 +179,6 @@ func (c *strDestroyCmd) destroy(workDir string) error {
 		logger.Fatal(err)
 		os.Exit(1)
 	}
-
-	// // Make provision data
-	// data := model.KoreonctlText{}
-	// data.KoreOnTemp = koreonToml
-	// data.Command = c.command
-
-	// // Processing template
-	// var textVar string
-	// switch data.Command {
-	// case "reset-all":
-	// 	textVar = templates.DestroyAllText
-	// case "reset-cluster":
-	// 	textVar = templates.DestroyClusterText
-	// case "reset-registry":
-	// 	textVar = templates.DestroyRegistryText
-	// case "reset-storage":
-	// 	textVar = templates.DestroyStorageText
-	// case "reset-prepare-airgap":
-	// 	textVar = templates.DestroyPrepareAirgapText
-	// 	koreonToml.KoreOn.ClosedNetwork = false
-	// }
-	// koreonctlText := template.New("DestroyText")
-	// temp, err := koreonctlText.Parse(textVar)
-	// if err != nil {
-	// 	logger.Errorf("Template has errors. cause(%s)", err.Error())
-	// 	return err
-	// }
-
-	// // TODO: 진행상황을 어떻게 클라이언트에 보여줄 것인가?
-	// var buff bytes.Buffer
-	// err = temp.Execute(&buff, data)
-	// if err != nil {
-	// 	logger.Errorf("Template execution failed. cause(%s)", err.Error())
-	// 	return err
-	// }
-
-	// if !utils.CheckUserInput(buff.String(), "y") {
-	// 	fmt.Println("nothing to changed. exit")
-	// 	os.Exit(1)
-	// }
 
 	commandArgs := []string{
 		"docker",

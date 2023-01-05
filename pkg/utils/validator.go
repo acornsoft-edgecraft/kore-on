@@ -24,10 +24,16 @@ func CheckCommand(cmd *cobra.Command) error {
 			buf := new(bytes.Buffer)
 			cmd.SetErr(buf)
 			fmt.Println("Error: unknown command", args)
-			fmt.Println(fmt.Sprintf("Run 'koreonctl %s --help' for usage.", cmd.Name()))
+			fmt.Printf("Run 'koreonctl %s --help' for usage.", cmd.Name())
 			os.Exit(1)
 		}
 		subcmd := os.Args[2]
+		for _, cv := range cmdCheck {
+			if cv.Name() == subcmd {
+				return nil
+			}
+		}
+
 		for _, cv := range cmdCheck {
 			if cv.Name() != subcmd && string(subcmd[0]) != "-" {
 				strContains := ""
