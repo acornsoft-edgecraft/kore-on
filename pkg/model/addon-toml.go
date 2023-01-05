@@ -26,6 +26,7 @@ type AppsCsiDriverNfs struct {
 	ChartRefName string `toml:"chart_ref_name,omitempty"`
 	ChartRef     string `toml:"chart_ref,omitempty"`
 	ChartName    string `toml:"chart_name,omitempty"`
+	ChartVersion string `toml:"chart_version,omitempty"`
 	ChartRefID   string
 	ChartRefPW   string
 	Values       string `toml:"values,omitempty"`
@@ -37,6 +38,7 @@ type AppsBitnamiNginx struct {
 	ChartRefName string `toml:"chart_ref_name,omitempty"`
 	ChartRef     string `toml:"chart_ref,omitempty"`
 	ChartName    string `toml:"chart_name,omitempty"`
+	ChartVersion string `toml:"chart_version,omitempty"`
 	Values       string `toml:"values,omitempty"`
 	ValuesFile   string `toml:"values_file,omitempty"`
 }
@@ -46,6 +48,7 @@ type AppsElasticsearch struct {
 	ChartRefName string `toml:"chart_ref_name,omitempty"`
 	ChartRef     string `toml:"chart_ref,omitempty"`
 	ChartName    string `toml:"chart_name,omitempty"`
+	ChartVersion string `toml:"chart_version,omitempty"`
 	Values       string `toml:"values,omitempty"`
 	ValuesFile   string `toml:"values_file,omitempty"`
 }
@@ -54,6 +57,7 @@ type AppsFluentBit struct {
 	ChartRefName string `toml:"chart_ref_name,omitempty"`
 	ChartRef     string `toml:"chart_ref,omitempty"`
 	ChartName    string `toml:"chart_name,omitempty"`
+	ChartVersion string `toml:"chart_version,omitempty"`
 	Values       string `toml:"values,omitempty"`
 	ValuesFile   string `toml:"values_file,omitempty"`
 }

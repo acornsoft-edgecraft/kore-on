@@ -8,7 +8,7 @@
       any_errors_fatal: true
     - name: Get helm tgz file and uncompress it
       unarchive:
-        src: "/tmp/helm-{{ Addon.HelmVersion }}-{{ ansible_system | lower }}-amd64.tar.gz"
+        src: "/tmp/helm-{{ package_helm_version }}-{{ ansible_system | lower }}-amd64.tar.gz"
         dest: /tmp
         owner: "root"
         group: "root"
@@ -21,5 +21,3 @@
         group: "root"
         mode: "0755"
         remote_src: yes
-  when:
-    - (Addon.HelmBinaryFile == "")

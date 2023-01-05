@@ -1,8 +1,0 @@
-backend:
-  service:
-    nodePort: 30081
-    type: NodePort
-frontend:
-  service:
-    nodePort: 30080
-    type: NodePort

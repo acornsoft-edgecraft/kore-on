@@ -11,6 +11,7 @@ import (
 
 	"kore-on/pkg/config"
 	"kore-on/pkg/logger"
+	"kore-on/pkg/utils"
 
 	"github.com/spf13/cobra"
 )
@@ -52,6 +53,10 @@ func init() {
 		baremetal.NodeCmd(),
 		baremetal.TestCmd(),
 	)
+
+	// SubCommand validation
+	utils.CheckCommand(RootCmd)
+
 }
 
 func initConfig() {

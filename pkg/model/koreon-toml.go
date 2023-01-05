@@ -10,6 +10,7 @@ type KoreOnToml struct {
 		HelmCubeRepoUrl  string
 		HelmCubeRepoID   string
 		HelmCubeRepoPW   string
+		HelmChartProject string
 
 		//#Airgap
 		ClosedNetwork              bool   `toml:"closed-network,omitempty"`
@@ -28,7 +29,7 @@ type KoreOnToml struct {
 		ServiceCidr      string   `toml:"service-cidr,omitempty"`
 		PodCidr          string   `toml:"pod-cidr,omitempty"`
 		NodePortRange    string   `toml:"node-port-range,omitempty"`
-		AuditLogEnable   *bool    `toml:"audit-log-enable"`
+		AuditLogEnable   bool     `toml:"audit-log-enable,omitempty"`
 		ApiSans          []string `toml:"api-sans,omitempty"`
 
 		Calico struct {
@@ -102,6 +103,12 @@ type KoreOnToml struct {
 		PackageVersion   PackageVersion
 		ImageVersion     ImageVersion
 		HelmChartVersion HelmChartVersion
+	}
+
+	ListVersion struct {
+		ListPackageVersion   ListPackageVersion
+		ListImageVersion     ListImageVersion
+		ListHelmChartVersion ListHelmChartVersion
 	}
 }
 

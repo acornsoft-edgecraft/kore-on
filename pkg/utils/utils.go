@@ -185,7 +185,7 @@ func GetSupportVersion(version string, key string) map[string]interface{} {
 	return nil
 }
 
-func ListSupportVersion(conf string) string {
+func ListSupportVersion(conf string) map[string][]string {
 	supportversion := viper.GetStringMapStringSlice(conf)
 
 	keys := make([]string, 0, len(supportversion))
@@ -200,14 +200,16 @@ func ListSupportVersion(conf string) string {
 		}
 	}
 
-	b, err := json.Marshal(supportversion)
-	if err != nil {
-		logger.Fatal(err)
-		os.Exit(1)
-	}
+	// b, err := json.Marshal(supportversion)
+	// if err != nil {
+	// 	logger.Fatal(err)
+	// 	os.Exit(1)
+	// }
 
-	b, _ = prettyPrint(b)
-	return string(b)
+	// b, _ = prettyPrint(b)
+	// return string(b)
+	return supportversion
+
 }
 
 func CheckDocker() error {
@@ -321,6 +323,7 @@ func OutputColored() results.TransformerFunc {
 		return fmt.Sprintf("%v", yellow(message))
 	}
 }
+
 func StrucToJson(s interface{}) (map[string]interface{}, error) {
 	var data map[string]interface{}
 	b, err := json.Marshal(s)

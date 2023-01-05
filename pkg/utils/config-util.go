@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"kore-on/cmd/koreonctl/conf"
@@ -40,6 +41,10 @@ func GetKoreonTomlConfig(koreOnConfigFilePath string) (model.KoreOnToml, error) 
 	c = []byte(str)
 
 	var koreonToml = model.KoreOnToml{}
+	// default values
+	koreonToml.NodePool.Master.HaproxyInstall = true
+	koreonToml.Kubernetes.AuditLogEnable = true
+
 	err = toml.Unmarshal(c, &koreonToml)
 	if err != nil {
 		logger.Fatal(err.Error())
@@ -106,6 +111,7 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 		k8sVersion := koreonToml.PrepareAirgap.K8sVersion
 		registryIP := koreonToml.PrepareAirgap.RegistryIP
 		registryVersion := koreonToml.PrepareAirgap.RegistryVersion
+		koreon_toml.KoreOn.HelmCubeRepoUrl = conf.HelmCubeRepoUrl
 
 		supportK8sVersion := IsSupportVersion(k8sVersion, confK8sVersion)
 		supportHarborVersion := IsSupportVersion(registryVersion, confHarborVersion)
@@ -143,31 +149,37 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 			errorCnt++
 		}
 		// Get helm chart package support version
-		supportHelmChartList := GetSupportVersion(supportK8sVersion, "k8s_support_package")
+		supportHelmChartList := GetSupportVersion(supportK8sVersion, "helm_chart_package")
 		if supportPackageList == nil {
 			logger.Fatal("Prepare Air Gap > Support helm chart package version not found.:\n")
 			errorCnt++
 		}
 
 		// Set image support version
-		k8sSupportImagesVersion := setField(&koreon_toml.SupportVersion.ImageVersion, supportK8sList)
-		if k8sSupportImagesVersion != nil {
-			logger.Fatal(k8sSupportImagesVersion)
+		k8sSupportImagesVersion, err := setField(&koreon_toml.SupportVersion.ImageVersion, supportK8sList)
+		if err != nil {
+			logger.Fatal(err)
 			errorCnt++
+		} else if err := json.Unmarshal(k8sSupportImagesVersion, &koreon_toml.ListVersion); err != nil {
+			logger.Fatal(err)
 		}
 
 		// Set package support version
-		packageSupportVersion := setField(&koreon_toml.SupportVersion.PackageVersion, supportPackageList)
-		if packageSupportVersion != nil {
-			logger.Fatal(packageSupportVersion)
+		packageSupportVersion, err := setField(&koreon_toml.SupportVersion.PackageVersion, supportPackageList)
+		if err != nil {
+			logger.Fatal(err)
 			errorCnt++
+		} else if err := json.Unmarshal(packageSupportVersion, &koreon_toml.ListVersion); err != nil {
+			logger.Fatal(err)
 		}
 
 		// Set package support version
-		helmChartSupportVersion := setField(&koreon_toml.SupportVersion.HelmChartVersion, supportHelmChartList)
-		if packageSupportVersion != nil {
-			logger.Fatal(helmChartSupportVersion)
+		helmChartSupportVersion, err := setField(&koreon_toml.SupportVersion.HelmChartVersion, supportHelmChartList)
+		if err != nil {
+			logger.Fatal(err)
 			errorCnt++
+		} else if err := json.Unmarshal(helmChartSupportVersion, &koreon_toml.ListVersion); err != nil {
+			logger.Fatal(err)
 		}
 
 		koreonToml = koreon_toml
@@ -327,17 +339,21 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 		}
 
 		// Set image support version
-		k8sSupportImagesVersion := setField(&koreonToml.SupportVersion.ImageVersion, supportK8sList)
-		if k8sSupportImagesVersion != nil {
-			logger.Fatal(k8sSupportImagesVersion)
+		k8sSupportImagesVersion, err := setField(&koreonToml.SupportVersion.ImageVersion, supportK8sList)
+		if err != nil {
+			logger.Fatal(err)
 			errorCnt++
+		} else if err := json.Unmarshal(k8sSupportImagesVersion, &koreon_toml.ListVersion); err != nil {
+			logger.Fatal(err)
 		}
 
 		// Set package support version
-		packageSupportVersion := setField(&koreonToml.SupportVersion.PackageVersion, supportPackageList)
-		if packageSupportVersion != nil {
-			logger.Fatal(packageSupportVersion)
+		packageSupportVersion, err := setField(&koreonToml.SupportVersion.PackageVersion, supportPackageList)
+		if err != nil {
+			logger.Fatal(err)
 			errorCnt++
+		} else if err := json.Unmarshal(packageSupportVersion, &koreon_toml.ListVersion); err != nil {
+			logger.Fatal(err)
 		}
 
 		koreonToml.PrepareAirgap = koreon_toml.PrepareAirgap
@@ -370,17 +386,21 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 		}
 
 		// Set image support version
-		k8sSupportImagesVersion := setField(&koreonToml.SupportVersion.ImageVersion, supportK8sList)
-		if k8sSupportImagesVersion != nil {
+		k8sSupportImagesVersion, err := setField(&koreonToml.SupportVersion.ImageVersion, supportK8sList)
+		if err != nil {
 			logger.Fatal(k8sSupportImagesVersion)
 			errorCnt++
+		} else if err := json.Unmarshal(k8sSupportImagesVersion, &koreon_toml.ListVersion); err != nil {
+			logger.Fatal(err)
 		}
 
 		// Set package support version
-		packageSupportVersion := setField(&koreonToml.SupportVersion.PackageVersion, supportPackageList)
-		if packageSupportVersion != nil {
+		packageSupportVersion, err := setField(&koreonToml.SupportVersion.PackageVersion, supportPackageList)
+		if err != nil {
 			logger.Fatal(packageSupportVersion)
 			errorCnt++
+		} else if err := json.Unmarshal(packageSupportVersion, &koreon_toml.ListVersion); err != nil {
+			logger.Fatal(err)
 		}
 
 	}
@@ -406,21 +426,33 @@ func checkSharedStorage(koreonToml model.KoreOnToml) int {
 	return errorCnt
 }
 
-func setField(item interface{}, supportList map[string]interface{}) error {
+func setField(item interface{}, supportList map[string]interface{}) ([]byte, error) {
 	v := reflect.ValueOf(item).Elem()
 	if !v.CanAddr() {
-		return fmt.Errorf("cannot assign to the item passed, item must be a pointer in order to assign")
+		return nil, fmt.Errorf("cannot assign to the item passed, item must be a pointer in order to assign")
 	}
+
+	result := make(map[string]interface{})
+	versions := make(map[string]interface{})
 
 	for i := 0; i < v.NumField(); i++ {
 		typeField := v.Type().Field(i)
 		tag := typeField.Tag.Get("validate")
 		r := strings.Split(tag, ",")
 		if len(r) != 2 {
-			return fmt.Errorf("tag entry error in %s field", typeField.Name)
+			return nil, fmt.Errorf("tag entry error in %s field", typeField.Name)
 		}
 		value := IsSupportVersion(fmt.Sprintf("%v", supportList[string(r[0])]), r[1])
 		v.Field(i).SetString(value)
+
+		// list Versions
+		versions[typeField.Name] = ListSupportVersion(r[1])
+		result["List"+v.Type().Name()] = versions
 	}
-	return nil
+
+	data, err := json.Marshal(result)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
 }

@@ -8,3 +8,7 @@
   when: 
     - registry_install
     - closed_network
+
+- import_tasks: registry-service.yaml
+  when: 
+    - registry_install
