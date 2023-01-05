@@ -46,6 +46,11 @@ func CreateCmd() *cobra.Command {
 		},
 	}
 
+	cmd.AddCommand(emptyCmd())
+
+	// SubCommand validation
+	utils.CheckCommand(cmd)
+
 	// Default value for command struct
 	create.tags = ""
 	create.inventory = "./internal/playbooks/koreon-playbook/inventory/inventory.ini"
@@ -61,6 +66,20 @@ func CreateCmd() *cobra.Command {
 	f.StringVarP(&create.privateKey, "private-key", "p", "", "Specify ssh key path")
 	f.StringVarP(&create.user, "user", "u", "", "login user")
 
+	return cmd
+}
+
+func emptyCmd() *cobra.Command {
+
+	cmd := &cobra.Command{
+		Use:          "",
+		Short:        "",
+		Long:         "",
+		SilenceUsage: true,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return nil
+		},
+	}
 	return cmd
 }
 

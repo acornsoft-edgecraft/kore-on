@@ -4,7 +4,11 @@ const AddonText = `
 {{- $Master := .AddonTemp.Addon.K8sMasterIP }}
 {{- $Apps := .AddonTemp.Apps }}
 {{- $check := false }}
-## Inventory for {{.Command}} task.
+{{- $task := "Installation" }}
+{{- if eq "delete" .Command }}
+{{- $task = "DELETE" }}
+{{- end}}
+## Inventory for {{ $task }} task.
 ===========================================================================
 Node Name                      IP Address              Private IP Adderss
 ===========================================================================
@@ -13,7 +17,7 @@ k8s-master-1                 {{$Master}}
 {{ end -}}
 ===========================================================================
 
- Installation Application List
+ {{ $task }} Application List
 -------------------------------
 {{- range $k, $v := $Apps -}}
 {{-   range $i, $j := $v -}}

@@ -1,0 +1,45 @@
+---
+- name: Pull helm-chart packages
+  ansible.builtin.uri:
+    url: "{{ item }}"
+    method: GET
+    validate_certs: false
+    headers:
+      accept: application/json
+      Content-Type: application/json
+      Authorization: Basic {{ cube_auth | b64encode }}
+    dest: "/tmp"
+  with_items:
+    - "{{ prepare_airgap_helm_charts }}"
+
+- name: Create project
+  ansible.builtin.uri:
+    url: "https://{{ _url }}/projects"
+    method: POST
+    ca_path: "{{ harbor_data_dir }}/cert/ca.crt"
+    validate_certs: false
+    headers:
+      accept: application/json
+      Content-Type: application/json
+      Authorization: Basic {{ basic_auth | b64encode }}
+    body_format: json
+    body:
+      project_name: "{{ item }}"
+      public: true
+      storage_limit: -1
+      metadata:
+        public: "true"
+  register: _result
+  failed_when: false
+  with_items: 
+    - "{{ helm_chart_project }}"
+
+- name: Push helm-chart package
+  ansible.builtin.command: |
+    curl --cacert "{{ harbor_data_dir }}/cert/ca.crt"
+    -u "{{ basic_auth }}"
+    -X POST "https://{{ prepare_airgap_registry_ip }}/api/chartrepo/{{ helm_chart_project }}/charts"
+    -H "Content-Type: multipart/form-data"
+    -F "chart=@/tmp/{{ item | split('/') | last }};type=application/x-compressed-tar"
+  with_items:
+    - "{{ prepare_airgap_helm_charts }}"

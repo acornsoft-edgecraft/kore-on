@@ -1,4 +1,15 @@
 ---
+- name: Add Helm charts repository
+  vars:
+    Name: "{{ ChartRef | split('//') | last }}"
+    CaFile: "/etc/docker/certs.d/{{ Name | split('/') | first }}/ca.crt"
+  command: |
+    helm repo add "{{ ChartRefName }}" "{{ ChartRef }}"
+    --ca-file "{{ CaFile }}"
+  delegate_to: "{{ groups['masters'][0] }}"
+  when:
+    - Addon.ClosedNetwork
+
 # Create Package directory
 - name: Addon | Create addon directory
   ansible.builtin.file:
@@ -23,10 +34,10 @@
   kubernetes.core.helm:
     name: koreboard
     kubeconfig: "{{ Addon.KubeConfig }}"
-    chart_ref: "{{ Apps.Koreboard.ChartRef }}"
+    chart_ref: "{{ ChartRef is search('.tgz') | ternary(ChartRef, ChartRefName + '/' + ChartName) }}"
     release_namespace: monitoring
     create_namespace: true
-    update_repo_cache: "{{ Apps.Koreboard.ChartRef is search('.tgz') | ternary(false, true) }}"
+    update_repo_cache: "{{ ChartRef is search('.tgz') | ternary(false, true) }}"
     disable_hook: True
     atomic: true
     values_files:

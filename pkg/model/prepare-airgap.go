@@ -22,3 +22,25 @@ type HelmChartVersion struct {
 	CsiDriverNfs string `validate:"csi-driver-nfs,ChartCsiDriverNfsVersion"`
 	Koreboard    string `validate:"koreboard,ChartKoreboardVersion"`
 }
+
+// List Versions
+type ListPackageVersion struct {
+	Containerd    map[string][]string `validate:"containerd,SupportContainerdVersion"`
+	DockerCompose map[string][]string `validate:"docker-compose,SupportDockerComposeVersion"`
+	Crictl        map[string][]string `validate:"crictl,SupportCrictlVersion"`
+	Etcd          map[string][]string `validate:"etcd,SupportEtcdVersion"`
+	Helm          map[string][]string `validate:"helm,SupportHelmVersion"`
+}
+
+type ListImageVersion struct {
+	Calico        map[string][]string `validate:"calico,SupportCalicoVersion"`
+	Coredns       map[string][]string `validate:"coredns,SupportCorednsVersion"`
+	MetricsServer map[string][]string `validate:"metrics-server,SupportMetricsServerVersion"`
+	Pause         map[string][]string `validate:"pause,SupportPauseVersion"`
+	DnsUtils      map[string][]string `validate:"dns-utils,SupportDnsUtilsVersion"`
+}
+
+type ListHelmChartVersion struct {
+	CsiDriverNfs map[string][]string `validate:"csi-driver-nfs,ChartCsiDriverNfsVersion"`
+	Koreboard    map[string][]string `validate:"koreboard,ChartKoreboardVersion"`
+}

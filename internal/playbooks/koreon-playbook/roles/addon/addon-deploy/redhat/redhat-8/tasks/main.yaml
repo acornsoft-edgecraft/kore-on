@@ -7,6 +7,12 @@
 
 ## Deployment CSI driver nfs
 - name: Addon | Deployment csi-driver-nfs
+  vars:
+    ChartRefName: "{{ Apps.CsiDriverNfs.ChartRefName }}"
+    ChartRef: "{{ Apps.CsiDriverNfs.ChartRef }}"
+    ChartName: "{{ Apps.CsiDriverNfs.ChartName }}"
+    ChartRefID: "{{ Apps.CsiDriverNfs.ChartRefID | b64decode }}"
+    ChartRefPW: "{{ Apps.CsiDriverNfs.ChartRefPW | b64decode }}"
   ansible.builtin.include_role:
     name: addon/addon-deploy/redhat/redhat-8/apps/csi-driver-nfs
     apply:
@@ -16,6 +22,22 @@
     - addon-csi-nfs
   when:
     - Apps.CsiDriverNfs.Install
+
+## Deployment Koreboard
+- name: Addon | Deployment koreboard
+  vars:
+    ChartRefName: "{{ Apps.Koreboard.ChartRefName }}"
+    ChartRef: "{{ Apps.Koreboard.ChartRef }}"
+    ChartName: "{{ Apps.Koreboard.ChartName }}"
+  ansible.builtin.include_role:
+    name: addon/addon-deploy/redhat/redhat-8/apps/koreboard
+    apply:
+      tags:
+        - addon-koreboard
+  tags:
+    - addon-koreboard
+  when:
+    - Apps.Koreboard.Install
 
 ## Deployment Elasticsearch
 - name: Addon | Deployment elasticsearch
@@ -40,15 +62,3 @@
     - addon-fluent-bit
   when:
     - Apps.FluentBit.Install
-
-## Deployment Koreboard
-- name: Addon | Deployment koreboard
-  ansible.builtin.include_role:
-    name: addon/addon-deploy/redhat/redhat-8/apps/koreboard
-    apply:
-      tags:
-        - addon-koreboard
-  tags:
-    - addon-koreboard
-  when:
-    - Apps.Koreboard.Install

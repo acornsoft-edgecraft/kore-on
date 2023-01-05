@@ -12,3 +12,5 @@ harbor_install_dir: "{{ prepare_airgap_registry_install_dir }}/harbor"
 harbor_offline_installer_file: harbor-offline-installer-{{ harbor_version }}.tgz
 harbor_offline_file: harbor-offline-installer-{{ harbor_version }}.tar.gz
 harbor_download_url: https://github.com/goharbor/harbor/releases/download/{{ harbor_version }}/{{ harbor_offline_installer_file }}
+
+helm_get_url: "https://get.helm.sh/helm-{{ package_helm_version }}-{{ ansible_system | lower }}-amd64.tar.gz"

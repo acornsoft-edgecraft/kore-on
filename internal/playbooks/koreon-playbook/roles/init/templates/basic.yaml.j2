@@ -42,7 +42,7 @@ kube_proxy_mode: {{ (Kubernetes.KubeProxyMode == "") | ternary("ipvs", Kubernete
 service_ip_range: {{ (Kubernetes.ServiceCidr == "") | ternary("10.96.0.0/20", Kubernetes.ServiceCidr) }}
 pod_ip_range: {{ (Kubernetes.PodCidr == "") | ternary("10.4.0.0/20", Kubernetes.PodCidr) }}
 node_port_range: {{ (Kubernetes.NodePortRange == "") | ternary("30000-32767", Kubernetes.NodePortRange) }}
-audit_log_enable: {{ (Kubernetes.AuditLogEnable == None) | ternary(true, Kubernetes.AuditLogEnable) }}
+audit_log_enable: {{ Kubernetes.AuditLogEnable }}
 api_sans: {{ (Kubernetes.ApiSans == None) | ternary([NodePool.Master.IP[0]], Kubernetes.ApiSans) }}
 #-end [kubernetes]
 
@@ -84,7 +84,7 @@ data_root_dir: {{ (NodePool.DataDir == "") | ternary("/data", NodePool.DataDir) 
 ## - lb-port: Enter the port when using a load balancer (default: "6443")
 ## - api_lb_ip: authmatic input (only: lb_ip:lb_port)
 master_isolated: {{ NodePool.Master.Isolated }}
-haproxy: {{ NodePool.Master.HaproxyInstall }}
+haproxy: {{ NodePool.Master.HaproxyInstall | default(true)}}
 lb_ip: {{ (NodePool.Master.LbIP == "" and NodePool.Master.IP != None) | ternary(NodePool.Master.IP[0], NodePool.Master.LbIP) }}
 lb_port: {{ (NodePool.Master.LbPort == 0) | ternary(6443, NodePool.Master.LbPort) }}
 api_lb_ip: {{ (NodePool.Master.LbIP == "" and NodePool.Master.IP != None) | ternary(NodePool.Master.IP[0], NodePool.Master.LbIP) }}:{{ (NodePool.Master.LbPort == 0) | ternary(6443, NodePool.Master.LbPort) }}
@@ -151,6 +151,7 @@ prepare_airgap_registry_data_dir: "/data"
 prepare_airgap_registry_install_dir: "/var/lib/kore-on"
 
 #- [supports packages/images/helmchart]
+helm_chart_project: {{ KoreOn.HelmChartProject }}
 ## packages
 {% for package in (SupportVersion.PackageVersion | dict2items) %}
 package_{{ package.key | regex_replace('((?!^)|\\b[a-zA-Z][a-z]*)([A-Z][a-z]*|\\d+)', '\\1_\\2') | lower }}_version: {{ package.value}}

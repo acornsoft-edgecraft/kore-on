@@ -9,6 +9,7 @@ const (
 	AddOnConfigFile        = "addon.toml"
 	KoreOnConfigFileSubDir = "internal/playbooks/koreon-playbook/download"
 	HelmCubeRepoUrl        = "https://hcapital-harbor.acloud.run/chartrepo/cube"
+	HelmChartProject       = "helm-charts"
 )
 
 var Addon = map[string]string{

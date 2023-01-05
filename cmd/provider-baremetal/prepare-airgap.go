@@ -3,13 +3,16 @@ package cmd
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"kore-on/cmd/koreonctl/conf"
 	"kore-on/cmd/koreonctl/conf/templates"
 	"kore-on/pkg/logger"
 	"kore-on/pkg/model"
 	"kore-on/pkg/utils"
 	"os"
+	"strings"
 	"text/template"
 
 	"github.com/apenella/go-ansible/pkg/execute"
@@ -100,18 +103,10 @@ func DownLoadArchiveCmd() *cobra.Command {
 func (c *strAirGapCmd) run() error {
 	koreOnConfigFileName := viper.GetString("KoreOn.KoreOnConfigFile")
 	koreOnConfigFilePath := utils.IskoreOnConfigFilePath(koreOnConfigFileName)
-	koreonToml, value := utils.ValidateKoreonTomlConfig(koreOnConfigFilePath, "prepare-airgap")
-
-	if value {
-		b, err := json.Marshal(koreonToml)
-		if err != nil {
-			logger.Fatal(err)
-			os.Exit(1)
-		}
-		if err := json.Unmarshal(b, &c.extravars); err != nil {
-			logger.Fatal(err.Error())
-			os.Exit(1)
-		}
+	koreonToml, errBool := utils.ValidateKoreonTomlConfig(koreOnConfigFilePath, "prepare-airgap")
+	if !errBool {
+		message := "설정이 잘못 되었습니다. 'koreon.toml' 파일을 확인해 주세요!!"
+		logger.Fatal(fmt.Errorf("%s", message))
 	}
 
 	// Make provision data
@@ -140,6 +135,28 @@ func (c *strAirGapCmd) run() error {
 		os.Exit(1)
 	}
 
+	// Prompt login
+	id := utils.InputPrompt("\n## To helm chart pull csi-driver-nfs, you need to login as a private repository (Helm Chart) user.\nusername:")
+	pw := utils.SensitivePrompt("password:")
+	koreonToml.KoreOn.HelmChartProject = conf.HelmChartProject
+	koreonToml.KoreOn.HelmCubeRepoID = base64.StdEncoding.EncodeToString([]byte(id))
+	koreonToml.KoreOn.HelmCubeRepoPW = base64.StdEncoding.EncodeToString([]byte(pw))
+
+	commandArgs := "helm registry login " + koreonToml.KoreOn.HelmCubeRepoUrl +
+		" --username " + id +
+		" --password " + pw
+
+	err = checkHelmRepoLogin(id, pw, commandArgs)
+	if err != nil {
+		str := fmt.Sprintf("%s", err)
+		fi := strings.Index(str, "Error")
+		li := strings.LastIndex(str, "\"")
+		err = fmt.Errorf(str[fi : li+1])
+		logger.Fatal(err)
+	} else {
+		fmt.Println("Login Succeeded!!")
+	}
+
 	if len(c.playbookFiles) < 1 {
 		return fmt.Errorf("[ERROR]: %s", "To run ansible-playbook playbook file path must be specified")
 	}
@@ -154,6 +171,16 @@ func (c *strAirGapCmd) run() error {
 
 	if len(c.user) < 1 {
 		return fmt.Errorf("[ERROR]: %s", "To run ansible-playbook an ssh login user must be specified")
+	}
+
+	b, err := json.Marshal(koreonToml)
+	if err != nil {
+		logger.Fatal(err)
+		os.Exit(1)
+	}
+	if err := json.Unmarshal(b, &c.extravars); err != nil {
+		logger.Fatal(err.Error())
+		os.Exit(1)
 	}
 
 	ansiblePlaybookConnectionOptions := &options.AnsibleConnectionOptions{

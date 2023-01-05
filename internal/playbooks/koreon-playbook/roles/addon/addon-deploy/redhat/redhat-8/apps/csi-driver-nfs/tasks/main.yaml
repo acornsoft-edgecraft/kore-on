@@ -1,15 +1,28 @@
 ---
-- name: Add CUBE Helm charts repository
+- name: Add Helm charts repository [Not Closed Network]
   command: |
-    helm repo add "{{ Apps.CsiDriverNfs.ChartRefName }}" "{{ Apps.CsiDriverNfs.ChartRef }}"
-    --username "{{ Apps.CsiDriverNfs.ChartRefID | b64decode }}"
-    --password "{{ Apps.CsiDriverNfs.ChartRefPW | b64decode }}"
+    helm repo add "{{ ChartRefName }}" "{{ ChartRef }}"
+    "{{ (ChartRefID == "") | ternary('', '--username '+ ChartRefID) }}"
+    "{{ (ChartRefPW == "") | ternary('', '--password '+ ChartRefPW) }}"
   delegate_to: "{{ groups['masters'][0] }}"
+  when:
+    - not Addon.ClosedNetwork
+
+- name: Add Helm charts repository [Closed Network]
+  vars:
+    Name: "{{ ChartRef | split('//') | last }}"
+    CaFile: "/etc/docker/certs.d/{{ Name | split('/') | first }}/ca.crt"
+  command: |
+    helm repo add "{{ ChartRefName }}" "{{ ChartRef }}"
+    --ca-file "{{ CaFile }}"
+  delegate_to: "{{ groups['masters'][0] }}"
+  when:
+    - Addon.ClosedNetwork
 
 # Create Package directory
 - name: Addon | Create addon directory
   ansible.builtin.file:
-    path: "{{ Addon.AddonDataDir }}/{{ Apps.CsiDriverNfs.ChartName }}"
+    path: "{{ Addon.AddonDataDir }}/{{ ChartName }}"
     state: directory
     owner: root
     group: root
@@ -28,7 +41,7 @@
     backup: true
     mode: 0644
   with_items:
-    - { src: "values.yaml.j2", dest: "{{ Apps.CsiDriverNfs.ChartName }}/values.yaml" }
+    - { src: "values.yaml.j2", dest: "{{ ChartName }}/values.yaml" }
   delegate_to: "{{ groups['masters'][0] }}"
   run_once: true
 
@@ -36,11 +49,11 @@
   kubernetes.core.helm:
     name: csi-driver-nfs
     kubeconfig: "{{ Addon.KubeConfig }}"
-    chart_ref: "{{ Apps.CsiDriverNfs.ChartRefName }}/{{ Apps.CsiDriverNfs.ChartName }}"
+    chart_ref: "{{ ChartRef is search('.tgz') | ternary(ChartRef, ChartRefName + '/' + ChartName) }}"
     release_namespace: kube-system
-    update_repo_cache: "{{ Apps.CsiDriverNfs.ChartRef is search('.tgz') | ternary(false, true) }}"
-    disable_hook: True
+    update_repo_cache: "{{ ChartRef is search('.tgz') | ternary(false, true) }}"
     atomic: true
     values_files:
-      - "{{ Addon.AddonDataDir }}/{{ Apps.CsiDriverNfs.ChartName }}/values.yaml"
+      - "{{ Addon.AddonDataDir }}/{{ ChartName }}/values.yaml"
+  delegate_to: "{{ groups['masters'][0] }}"
   run_once: true

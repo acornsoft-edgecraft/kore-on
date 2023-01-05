@@ -44,6 +44,12 @@ func DestroyCmd() *cobra.Command {
 			return destroy.run()
 		},
 	}
+
+	cmd.AddCommand(emptyCmd())
+
+	// SubCommand validation
+	utils.CheckCommand(cmd)
+
 	// Default value for command struct
 	destroy.tags = "reset-all"
 	destroy.inventory = "./internal/playbooks/koreon-playbook/inventory/inventory.ini"
@@ -83,6 +89,8 @@ func (c *strDestroyCmd) run() error {
 	data := model.KoreonctlText{}
 	data.KoreOnTemp = koreonToml
 	data.Command = c.tags
+
+	fmt.Println(data.Command)
 
 	// Processing template
 	var textVar string
