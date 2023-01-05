@@ -87,10 +87,16 @@ func destroyPrepareAirGapCmd() *cobra.Command {
 	}
 
 	destroyPrepareAirGapCmd.tags = "reset-prepare-airgap"
+	destroyPrepareAirGapCmd.inventory = "./internal/playbooks/koreon-playbook/inventory/inventory.ini"
+	destroyPrepareAirGapCmd.playbookFiles = []string{
+		"./internal/playbooks/koreon-playbook/reset.yaml",
+	}
 
 	f := cmd.Flags()
 	f.BoolVarP(&destroyPrepareAirGapCmd.verbose, "verbose", "v", false, "verbose")
 	f.BoolVarP(&destroyPrepareAirGapCmd.dryRun, "dry-run", "d", false, "dryRun")
+	f.StringVarP(&destroyPrepareAirGapCmd.inventory, "inventory", "i", destroyPrepareAirGapCmd.inventory, "Specify ansible playbook inventory")
+	f.StringVar(&destroyPrepareAirGapCmd.tags, "tags", destroyPrepareAirGapCmd.tags, "Ansible options tags")
 	f.StringVarP(&destroyPrepareAirGapCmd.privateKey, "private-key", "p", "", "Specify ssh key path")
 	f.StringVarP(&destroyPrepareAirGapCmd.user, "user", "u", "", "login user")
 
@@ -111,10 +117,16 @@ func destroyClusterCmd() *cobra.Command {
 	}
 
 	destroyClusterCmd.tags = "reset-cluster"
+	destroyClusterCmd.inventory = "./internal/playbooks/koreon-playbook/inventory/inventory.ini"
+	destroyClusterCmd.playbookFiles = []string{
+		"./internal/playbooks/koreon-playbook/reset.yaml",
+	}
 
 	f := cmd.Flags()
 	f.BoolVarP(&destroyClusterCmd.verbose, "verbose", "v", false, "verbose")
 	f.BoolVarP(&destroyClusterCmd.dryRun, "dry-run", "d", false, "dryRun")
+	f.StringVarP(&destroyClusterCmd.inventory, "inventory", "i", destroyClusterCmd.inventory, "Specify ansible playbook inventory")
+	f.StringVar(&destroyClusterCmd.tags, "tags", destroyClusterCmd.tags, "Ansible options tags")
 	f.StringVarP(&destroyClusterCmd.privateKey, "private-key", "p", "", "Specify ssh key path")
 	f.StringVarP(&destroyClusterCmd.user, "user", "u", "", "login user")
 
@@ -135,10 +147,16 @@ func destroyRegistryCmd() *cobra.Command {
 	}
 
 	destroyRegistryCmd.tags = "reset-registry"
+	destroyRegistryCmd.inventory = "./internal/playbooks/koreon-playbook/inventory/inventory.ini"
+	destroyRegistryCmd.playbookFiles = []string{
+		"./internal/playbooks/koreon-playbook/reset.yaml",
+	}
 
 	f := cmd.Flags()
 	f.BoolVarP(&destroyRegistryCmd.verbose, "verbose", "v", false, "verbose")
 	f.BoolVarP(&destroyRegistryCmd.dryRun, "dry-run", "d", false, "dryRun")
+	f.StringVarP(&destroyRegistryCmd.inventory, "inventory", "i", destroyRegistryCmd.inventory, "Specify ansible playbook inventory")
+	f.StringVar(&destroyRegistryCmd.tags, "tags", destroyRegistryCmd.tags, "Ansible options tags")
 	f.StringVarP(&destroyRegistryCmd.privateKey, "private-key", "p", "", "Specify ssh key path")
 	f.StringVarP(&destroyRegistryCmd.user, "user", "u", "", "login user")
 
@@ -159,10 +177,16 @@ func destroyStorageCmd() *cobra.Command {
 	}
 
 	destroyStorageCmd.tags = "reset-storage"
+	destroyStorageCmd.inventory = "./internal/playbooks/koreon-playbook/inventory/inventory.ini"
+	destroyStorageCmd.playbookFiles = []string{
+		"./internal/playbooks/koreon-playbook/reset.yaml",
+	}
 
 	f := cmd.Flags()
 	f.BoolVarP(&destroyStorageCmd.verbose, "verbose", "v", false, "verbose")
 	f.BoolVarP(&destroyStorageCmd.dryRun, "dry-run", "d", false, "dryRun")
+	f.StringVarP(&destroyStorageCmd.inventory, "inventory", "i", destroyStorageCmd.inventory, "Specify ansible playbook inventory")
+	f.StringVar(&destroyStorageCmd.tags, "tags", destroyStorageCmd.tags, "Ansible options tags")
 	f.StringVarP(&destroyStorageCmd.privateKey, "private-key", "p", "", "Specify ssh key path")
 	f.StringVarP(&destroyStorageCmd.user, "user", "u", "", "login user")
 
