@@ -196,7 +196,7 @@ func destroyStorageCmd() *cobra.Command {
 func (c *strDestroyCmd) run() error {
 	koreOnConfigFileName := viper.GetString("KoreOn.KoreOnConfigFile")
 	koreOnConfigFilePath := utils.IskoreOnConfigFilePath(koreOnConfigFileName)
-	koreonToml, value := utils.ValidateKoreonTomlConfig(koreOnConfigFilePath, "destroy")
+	koreonToml, value := utils.ValidateKoreonTomlConfig(koreOnConfigFilePath, c.tags)
 
 	if value {
 		b, err := json.Marshal(koreonToml)
