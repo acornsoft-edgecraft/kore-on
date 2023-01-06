@@ -44,7 +44,7 @@
   tasks:
     - name: Init | Network check
       ansible.builtin.include_role:
-        name: init/network--
+        name: init/network
         apply:
           tags:
             - init
