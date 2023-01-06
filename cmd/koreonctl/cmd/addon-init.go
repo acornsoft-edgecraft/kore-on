@@ -31,6 +31,11 @@ func addonInitCmd() *cobra.Command {
 		},
 	}
 
+	cmd.AddCommand(emptyCmd())
+
+	// SubCommand validation
+	utils.CheckCommand(cmd)
+
 	f := cmd.Flags()
 	f.BoolVar(&addonInit.verbose, "vvv", false, "verbose")
 

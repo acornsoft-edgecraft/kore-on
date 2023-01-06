@@ -35,12 +35,31 @@ func createCmd() *cobra.Command {
 		},
 	}
 
+	cmd.AddCommand(emptyCmd())
+
+	// SubCommand validation
+	utils.CheckCommand(cmd)
+
 	f := cmd.Flags()
 	f.BoolVar(&create.verbose, "vvv", false, "verbose")
 	f.BoolVarP(&create.dryRun, "dry-run", "d", false, "dryRun")
 	f.StringVarP(&create.privateKey, "private-key", "p", "", "Specify ssh key path")
 	f.StringVarP(&create.user, "user", "u", "", "login user")
 
+	return cmd
+}
+
+func emptyCmd() *cobra.Command {
+
+	cmd := &cobra.Command{
+		Use:          "",
+		Short:        "",
+		Long:         "",
+		SilenceUsage: true,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return nil
+		},
+	}
 	return cmd
 }
 
