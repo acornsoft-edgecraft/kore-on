@@ -1,0 +1,72 @@
+---
+- import_tasks: check-k8s.yaml
+
+- import_tasks: install-helm.yaml
+  when:
+    - Addon.HelmInstall
+
+## Deployment CSI driver nfs
+- name: Addon | Deployment csi-driver-nfs
+  vars:
+    ChartRefName: "{{ Apps.CsiDriverNfs.ChartRefName }}"
+    ChartRef: "{{ Apps.CsiDriverNfs.ChartRef }}"
+    ChartName: "{{ Apps.CsiDriverNfs.ChartName }}"
+    ChartRefID: "{{ Apps.CsiDriverNfs.ChartRefID | b64decode }}"
+    ChartRefPW: "{{ Apps.CsiDriverNfs.ChartRefPW | b64decode }}"
+  ansible.builtin.include_role:
+    name: addon/addon-deploy/redhat/redhat-7/apps/csi-driver-nfs
+    apply:
+      tags:
+        - addon-csi-nfs
+  tags:
+    - addon-csi-nfs
+  when:
+    - Apps.CsiDriverNfs.Install
+
+## Deployment Koreboard
+- name: Addon | Deployment koreboard
+  vars:
+    ChartRefName: "{{ Apps.Koreboard.ChartRefName }}"
+    ChartRef: "{{ Apps.Koreboard.ChartRef }}"
+    ChartName: "{{ Apps.Koreboard.ChartName }}"
+  ansible.builtin.include_role:
+    name: addon/addon-deploy/redhat/redhat-7/apps/koreboard
+    apply:
+      tags:
+        - addon-koreboard
+  tags:
+    - addon-koreboard
+  when:
+    - Apps.Koreboard.Install
+
+## Deployment Elasticsearch
+- name: Addon | Deployment elasticsearch
+  vars:
+    ChartRefName: "{{ Apps.Elasticsearch.ChartRefName }}"
+    ChartRef: "{{ Apps.Elasticsearch.ChartRef }}"
+    ChartName: "{{ Apps.Elasticsearch.ChartName }}"
+  ansible.builtin.include_role:
+    name: addon/addon-deploy/redhat/redhat-8/apps/elasticsearch
+    apply:
+      tags:
+        - addon-elasticsearch
+  tags:
+    - addon-elasticsearch
+  when:
+    - Apps.Elasticsearch.Install
+
+## Deployment FluentBit
+- name: Addon | Deployment fluent-bit
+  vars:
+    ChartRefName: "{{ Apps.FluentBit.ChartRefName }}"
+    ChartRef: "{{ Apps.FluentBit.ChartRef }}"
+    ChartName: "{{ Apps.FluentBit.ChartName }}"
+  ansible.builtin.include_role:
+    name: addon/addon-deploy/redhat/redhat-8/apps/fluent-bit
+    apply:
+      tags:
+        - addon-fluent-bit
+  tags:
+    - addon-fluent-bit
+  when:
+    - Apps.FluentBit.Install

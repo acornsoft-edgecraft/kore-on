@@ -1,0 +1,11 @@
+{% set name = "FluentBit" %}
+{% set apps_name = name | regex_replace('((?!^)|\\b[a-zA-Z][a-z]*)([A-Z][a-z]*|\\d+)', '\\1_\\2') | lower + "_values"  %}
+{% if Apps[name].Install %}
+{%   if Apps[name].Values != "" and  Apps[name].ValuesFile != "" %}
+{{ Apps[name].Values }}
+{%   elif Apps[name].Values != "" and  Apps[name].ValuesFile == "" %}
+{{ Apps[name].Values }}
+{%   elif Apps[name].Values == "" and  Apps[name].ValuesFile != "" %}
+{{ addon_apps[apps_name] | to_yaml}}
+{%   endif %}
+{% endif %}
