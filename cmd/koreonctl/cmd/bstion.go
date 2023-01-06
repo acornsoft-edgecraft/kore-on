@@ -37,6 +37,11 @@ func bastionCmd() *cobra.Command {
 		},
 	}
 
+	cmd.AddCommand(emptyCmd())
+
+	// SubCommand validation
+	utils.CheckCommand(cmd)
+
 	f := cmd.Flags()
 	f.BoolVar(&bastionCmd.verbose, "vvv", false, "verbose")
 	f.StringVar(&bastionCmd.archiveFilePath, "archive-file-path", "", "archive file path")
@@ -119,7 +124,7 @@ func (c *strBstionCmd) bastion(workDir string) error {
 func (c *strBstionCmd) dockerInstall() error {
 	var commandArgs = []string{}
 	if c.archiveFilePath != "" {
-		if !utils.CheckUserInput("> Do you want to install docker-ce? ", "y") {
+		if !utils.CheckUserInput("> Do you want to install docker-ce? [y/n]", "y") {
 			fmt.Println("nothing to changed. exit")
 			os.Exit(1)
 		}

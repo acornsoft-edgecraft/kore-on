@@ -31,6 +31,11 @@ func initCmd() *cobra.Command {
 		},
 	}
 
+	cmd.AddCommand(emptyCmd())
+
+	// SubCommand validation
+	utils.CheckCommand(cmd)
+
 	f := cmd.Flags()
 	f.BoolVar(&init.verbose, "vvv", false, "verbose")
 

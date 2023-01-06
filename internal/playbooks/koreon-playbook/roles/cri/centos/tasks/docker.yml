@@ -82,8 +82,8 @@
   when:
     - not ansible_facts.services["docker.service"].state in "running"
 
-- name: Enable Docker/Containerd
+- name: Enable Docker
   ansible.builtin.systemd:
-    name: ['docker', 'containerd']
+    name: docker
     daemon_reload: yes
     enabled: yes
