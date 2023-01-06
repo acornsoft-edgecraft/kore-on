@@ -1,0 +1,51 @@
+---
+- name: Add Helm charts repository [Not Closed Network]
+  command: |
+    helm repo add "{{ ChartRefName }}" "{{ ChartRef }}"
+  delegate_to: "{{ groups['masters'][0] }}"
+  when:
+    - not Addon.ClosedNetwork
+
+- name: Add Helm charts repository [Closed Network]
+  vars:
+    Name: "{{ ChartRef | split('//') | last }}"
+    CaFile: "/etc/docker/certs.d/{{ Name | split('/') | first }}/ca.crt"
+  command: |
+    helm repo add "{{ ChartRefName }}" "{{ ChartRef }}"
+    --ca-file "{{ CaFile }}"
+  delegate_to: "{{ groups['masters'][0] }}"
+  when:
+    - Addon.ClosedNetwork
+
+# Create Package directory
+- name: Addon | Create addon directory
+  ansible.builtin.file:
+    path: "{{ Addon.AddonDataDir }}/{{ ChartName }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Addon | copy {{ ChartName }} values file
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ Addon.AddonDataDir }}/{{ item.dest }}"
+    backup: true
+    mode: 0644
+  with_items:
+    - { src: "values.yaml.j2", dest: "{{ ChartName }}/values.yaml" }
+  delegate_to: "{{ groups['masters'][0] }}"
+  run_once: true
+
+- name: Addon | deployment {{ ChartName }}
+  kubernetes.core.helm:
+    name: "{{ ChartName }}"
+    kubeconfig: "{{ Addon.KubeConfig }}"
+    chart_ref: "{{ ChartRef is search('.tgz') | ternary(ChartRef, ChartRefName + '/' + ChartName) }}"
+    release_namespace: kube-system
+    update_repo_cache: "{{ ChartRef is search('.tgz') | ternary(false, true) }}"
+    atomic: true
+    values_files:
+      - "{{ Addon.AddonDataDir }}/{{ ChartName }}/values.yaml"
+  delegate_to: "{{ groups['masters'][0] }}"
+  run_once: true

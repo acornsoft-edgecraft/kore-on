@@ -357,7 +357,7 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 		}
 
 		koreonToml.PrepareAirgap = koreon_toml.PrepareAirgap
-	} else if cmd == "destroy-prepare-airgap" {
+	} else if cmd == "reset-prepare-airgap" {
 		registryIP := koreonToml.PrepareAirgap.RegistryIP
 
 		if registryIP == "" {
@@ -367,6 +367,12 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 		}
 
 		koreonToml = koreon_toml
+	} else if cmd == "reset-cluster" {
+		koreonToml.PrepareAirgap.RegistryIP = ""
+	} else if cmd == "reset-registry" {
+		koreonToml.PrepareAirgap.RegistryIP = ""
+	} else if cmd == "reset-storage" {
+		koreonToml.PrepareAirgap.RegistryIP = ""
 	} else if cmd == "add-on" {
 		k8sVersion := koreonToml.PrepareAirgap.K8sVersion
 
