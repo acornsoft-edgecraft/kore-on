@@ -83,8 +83,8 @@ data_root_dir: {{ (NodePool.DataDir == "") | ternary("/data", NodePool.DataDir) 
 ## - lb-ip: Enter the IP address when using a load balancer (default: master[0] ip address)
 ## - lb-port: Enter the port when using a load balancer (default: "6443")
 ## - api_lb_ip: authmatic input (only: lb_ip:lb_port)
-master_isolated: {{ NodePool.Master.Isolated }}
-haproxy: {{ NodePool.Master.HaproxyInstall | default(true)}}
+master_isolated: {{ NodePool.Master.Isolated | lower }}
+haproxy: {{ NodePool.Master.HaproxyInstall | lower }}
 lb_ip: {{ (NodePool.Master.LbIP == "" and NodePool.Master.IP != None) | ternary(NodePool.Master.IP[0], NodePool.Master.LbIP) }}
 lb_port: {{ (NodePool.Master.LbPort == 0) | ternary(6443, NodePool.Master.LbPort) }}
 api_lb_ip: {{ (NodePool.Master.LbIP == "" and NodePool.Master.IP != None) | ternary(NodePool.Master.IP[0], NodePool.Master.LbIP) }}:{{ (NodePool.Master.LbPort == 0) | ternary(6443, NodePool.Master.LbPort) }}

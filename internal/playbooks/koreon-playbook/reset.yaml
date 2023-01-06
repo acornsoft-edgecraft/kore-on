@@ -33,6 +33,7 @@
         - reset-registry
         - reset-storage
         - reset-prepare-airgap
+        - reset-all
 
 # Init | Network Check.
 - hosts: all
@@ -52,12 +53,14 @@
             - reset-registry
             - reset-storage
             - reset-prepare-airgap
+            - reset-all
       tags:
         - init-network
         - reset-cluster
         - reset-registry
         - reset-storage
         - reset-prepare-airgap
+        - reset-all
   any_errors_fatal: true
 
 # clean master and worker node
@@ -76,6 +79,7 @@
             - reset-cluster
       tags:
         - reset-cluster
+        - reset-all
 
 # clean private registry
 - hosts: registry
@@ -91,8 +95,10 @@
         apply:
           tags:
             - reset-registry
+            - reset-all
       tags:
         - reset-registry
+        - reset-all
 
 # clean storage
 - hosts: storage
@@ -108,8 +114,10 @@
         apply:
           tags:
             - reset-storage
+            - reset-all
       tags:
         - reset-storage
+        - reset-all
 
 # clean prepare-airgap
 - hosts: prepare_airgap
