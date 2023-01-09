@@ -1,15 +1,24 @@
 ---
-- include_tasks: containerd.yml
-  when:
-  - container_runtime == 'containerd'
-  - param in "cluster" | default("")
+#- include_tasks: containerd.yml
+#  when:
+#  - container_runtime == 'containerd'
+#  - param in "cluster" | default("")
+#
+#- include_tasks: docker.yml
+#  when:
+#  - container_runtime == 'docker'
+#  - param in "cluster" | default("")
+#
+## only docker is available for harbor registry
+#- include_tasks: docker.yml
+#  when:
+#  - param in "registry" | default("")
 
-- include_tasks: docker.yml
+- name: CRI | container_runtime
+  ansible.builtin.include_role:
+    name: cri/{{ ansible_distribution | lower }}
+    tasks_from: containerd-v1.7
   when:
-  - container_runtime == 'docker'
-  - param in "cluster" | default("")
-
-# only docker is available for harbor registry
-- include_tasks: docker.yml
-  when:
-  - param in "registry" | default("")
+    - container_runtime == 'containerd'
+    - param in "cluster" | default("")
+    - package_containerd_version is version('v1.6', '>=')
