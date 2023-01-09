@@ -426,4 +426,4 @@
   shell: "kubectl --kubeconfig={{ kubeadminconfig }} delete pods -n kube-system -l k8s-app=kube-proxy"
   delegate_to: "{{ groups['masters'][0] }}"
   run_once: true
-  ignore_errors: tru#e
+  ignore_errors: true
