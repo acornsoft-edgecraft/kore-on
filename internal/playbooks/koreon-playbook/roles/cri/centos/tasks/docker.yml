@@ -16,7 +16,7 @@
     state: directory
 
 # Install docker package  --------------------------------------------------
-# For CentOS
+# For RedHat
 # yum repository에 enabled=no로 되어 있으므로 enablerepo=Docker-CE-Stable 로 활성화 한다.
 # disable_gpg_check=yes 로 설정하여 GPG key 정확성을 check하는 인터렉션을 방지한다.
 - name: yum clean packages
