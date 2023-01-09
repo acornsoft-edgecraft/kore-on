@@ -103,34 +103,9 @@ oom_score = 0
       conf_dir = "/etc/cni/net.d"
       max_conf_num = 1
       conf_template = ""
-    [plugins."io.containerd.grpc.v1.cri".registry]
-      [plugins."io.containerd.grpc.v1.cri".registry.mirrors]
 {% if closed_network %}
-        [plugins."io.containerd.grpc.v1.cri".registry.mirrors."docker.io"]
-          endpoint = ["https://{{ registry_domain }}{{ harbor_version is version('v2.0', '>=') | ternary('/v2', '') }}/docker.io"]
-        [plugins."io.containerd.grpc.v1.cri".registry.mirrors."quay.io"]
-          endpoint = ["https://{{ registry_domain }}{{ harbor_version is version('v2.0', '>=') | ternary('/v2', '') }}/quay.io"]
-        [plugins."io.containerd.grpc.v1.cri".registry.mirrors."k8s.gcr.io"]
-          endpoint = ["https://{{ registry_domain }}{{ harbor_version is version('v2.0', '>=') | ternary('/v2', '') }}/k8s.gcr.io"]
-        [plugins."io.containerd.grpc.v1.cri".registry.mirrors."registry.gitlab.com"]
-          endpoint = ["https://{{ registry_domain }}{{ harbor_version is version('v2.0', '>=') | ternary('/v2', '') }}/registry.gitlab.com"]
-        [plugins."io.containerd.grpc.v1.cri".registry.mirrors."ghcr.io"]
-          endpoint = ["https://{{ registry_domain }}{{ harbor_version is version('v2.0', '>=') | ternary('/v2', '') }}/ghcr.io"]
-        [plugins."io.containerd.grpc.v1.cri".registry.mirrors."gcr.io"]
-          endpoint = ["https://{{ registry_domain }}{{ harbor_version is version('v2.0', '>=') | ternary('/v2', '') }}/gcr.io"]
-        [plugins."io.containerd.grpc.v1.cri".registry.mirrors."docker.elastic.co"]
-          endpoint = ["https://{{ registry_domain }}{{ harbor_version is version('v2.0', '>=') | ternary('/v2', '') }}/docker.elastic.co"]
-        [plugins."io.containerd.grpc.v1.cri".registry.mirrors."{{ registry_domain }}"]
-          endpoint = ["https://{{ registry_domain }}"]
-{% else %}
-        [plugins."io.containerd.grpc.v1.cri".registry.mirrors."docker.io"]
-          endpoint = ["https://registry-1.docker.io"]
-{% endif %}
-{% if not registry_public_cert %}
-      [plugins."io.containerd.grpc.v1.cri".registry.configs]
-        [plugins."io.containerd.grpc.v1.cri".registry.configs."{{ registry_domain }}"]
-          [plugins."io.containerd.grpc.v1.cri".registry.configs."{{ registry_domain }}".tls]
-            ca_file = "/etc/docker/certs.d/{{ registry_domain }}/ca.crt"
+    [plugins."io.containerd.grpc.v1.cri".registry]
+      config_path = "/etc/containerd/certs.d"
 {% endif %}
     [plugins."io.containerd.grpc.v1.cri".image_decryption]
       key_model = ""

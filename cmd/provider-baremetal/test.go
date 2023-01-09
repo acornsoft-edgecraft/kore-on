@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"context"
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"kore-on/pkg/logger"
@@ -49,7 +48,7 @@ func TestCmd() *cobra.Command {
 	test.tags = ""
 	test.inventory = "./internal/playbooks/koreon-playbook/inventory/inventory.ini"
 	test.playbookFiles = []string{
-		"./internal/playbooks/koreon-playbook/z-test-template.yaml",
+		"./internal/playbooks/koreon-playbook/z-test-cri.yaml",
 	}
 
 	f := cmd.Flags()
@@ -71,11 +70,11 @@ func (c *strTestCmd) run() error {
 
 	if value {
 		// Prompt user for more input
-		id := utils.InputPrompt("# Enter the username for the private registry.\nusername:")
-		koreonToml.KoreOn.HelmCubeRepoID = base64.StdEncoding.EncodeToString([]byte(id))
+		// id := utils.InputPrompt("# Enter the username for the private registry.\nusername:")
+		// koreonToml.KoreOn.HelmCubeRepoID = base64.StdEncoding.EncodeToString([]byte(id))
 
-		pw := utils.SensitivePrompt("# Enter the password for the private registry.\npassword:")
-		koreonToml.KoreOn.HelmCubeRepoPW = base64.StdEncoding.EncodeToString([]byte(pw))
+		// pw := utils.SensitivePrompt("# Enter the password for the private registry.\npassword:")
+		// koreonToml.KoreOn.HelmCubeRepoPW = base64.StdEncoding.EncodeToString([]byte(pw))
 
 		b, err := json.Marshal(koreonToml)
 		if err != nil {
@@ -95,13 +94,13 @@ func (c *strTestCmd) run() error {
 		logger.Fatal(err)
 	} else {
 		// Prompt user for more input
-		if addonToml.Apps.CsiDriverNfs.Install {
-			id := utils.InputPrompt("# Enter the username for the private registry.\nusername:")
-			addonToml.Apps.CsiDriverNfs.ChartRefID = base64.StdEncoding.EncodeToString([]byte(id))
+		// if addonToml.Apps.CsiDriverNfs.Install {
+		// 	id := utils.InputPrompt("# Enter the username for the private registry.\nusername:")
+		// 	addonToml.Apps.CsiDriverNfs.ChartRefID = base64.StdEncoding.EncodeToString([]byte(id))
 
-			pw := utils.SensitivePrompt("# Enter the password for the private registry.\npassword:")
-			addonToml.Apps.CsiDriverNfs.ChartRefPW = base64.StdEncoding.EncodeToString([]byte(pw))
-		}
+		// 	pw := utils.SensitivePrompt("# Enter the password for the private registry.\npassword:")
+		// 	addonToml.Apps.CsiDriverNfs.ChartRefPW = base64.StdEncoding.EncodeToString([]byte(pw))
+		// }
 
 		if addonToml.Addon.AddonDataDir == "" {
 			addonToml.Addon.AddonDataDir = "/data/addon"

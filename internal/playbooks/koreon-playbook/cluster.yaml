@@ -101,6 +101,7 @@
   vars_files:
     - "{{ playbook_dir }}/inventory/group_vars/basic.yaml"
     - "{{ playbook_dir }}/inventory/group_vars/expert.yaml"
+    - "{{ playbook_dir }}/inventory/group_vars/images.yaml"
   tasks:
     - name: CRI | Install Container Runtime Interface
       ansible.builtin.include_role:
