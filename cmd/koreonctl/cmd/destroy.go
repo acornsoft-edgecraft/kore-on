@@ -211,22 +211,7 @@ func (c *strDestroyCmd) destroy(workDir string) error {
 		commandArgsVol = append(commandArgsVol, fmt.Sprintf("type=bind,source=%s,target=/home/%s,readonly", keyPath, key))
 	}
 
-	if c.command == "reset-prepare-airgap" {
-		commandArgsKoreonctl = append(commandArgsKoreonctl, "--tags")
-		commandArgsKoreonctl = append(commandArgsKoreonctl, c.command)
-	}
-
-	if c.command == "reset-cluster" {
-		commandArgsKoreonctl = append(commandArgsKoreonctl, "--tags")
-		commandArgsKoreonctl = append(commandArgsKoreonctl, c.command)
-	}
-
-	if c.command == "reset-registry" {
-		commandArgsKoreonctl = append(commandArgsKoreonctl, "--tags")
-		commandArgsKoreonctl = append(commandArgsKoreonctl, c.command)
-	}
-
-	if c.command == "reset-storage" {
+	if c.command != "" {
 		commandArgsKoreonctl = append(commandArgsKoreonctl, "--tags")
 		commandArgsKoreonctl = append(commandArgsKoreonctl, c.command)
 	}

@@ -37,6 +37,8 @@ const AddonTemplate = `
 ## - chart_ref_name: helm chart repo name.
 ## - chart_ref: helm chart repository url.
 ## - chart_name: deployment chart name.
+## - chart_version: deployment chart version.
+## - release_namespace: k8s namespace (default: "kube-system").
 ## - values_file: chart values file path (If both "values" and "value_file" exist, "values" is used.	)
 ## - values: chart values (If both "values" and "value_file" exist, "values" is used.	)
 ## -
@@ -45,9 +47,10 @@ const AddonTemplate = `
 ## -
 #install = true
 #chart_ref_name = "helm-charts"
-#chart_ref = "https://192.168.77.119/chartrepo/helm-charts"
+#chart_ref = "https://hcapital-harbor.acloud.run/chartrepo/cube"
 #chart_name = "csi-driver-nfs"
 #chart_version = "<chart version>"
+#release_namespace = "kube-system"
 #values_file = "./csi-driver-nfs-values.yaml"
 #values = """
 storageClass:
@@ -55,7 +58,7 @@ storageClass:
   parameters:
     mountOptions:
     - nfsvers=4.1
-    server: 192.168.77.119
+    server: x.x.x.x
     share: /data/storage
 """
 
@@ -65,6 +68,8 @@ storageClass:
 ## - chart_ref_name: helm chart repo name.
 ## - chart_ref: helm chart repository url.
 ## - chart_name: deployment chart name.
+## - chart_version: deployment chart version.
+## - release_namespace: k8s namespace (default: "monitoring").
 ## - values_file: chart values file path (If both "values" and "value_file" exist, "values" is used.	)
 ## - values: chart values (If both "values" and "value_file" exist, "values" is used.	)
 ## -
@@ -76,6 +81,7 @@ storageClass:
 #chart_ref = "<chart repo url>"
 #chart_name = "<chart name>"
 #chart_version = "<chart version>"
+#release_namespace = "monitoring"
 #values_file = "<values.yaml to path>"
 #values = """
 """

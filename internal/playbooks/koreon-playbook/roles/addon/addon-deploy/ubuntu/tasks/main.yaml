@@ -46,7 +46,7 @@
     ChartRef: "{{ Apps.Elasticsearch.ChartRef }}"
     ChartName: "{{ Apps.Elasticsearch.ChartName }}"
   ansible.builtin.include_role:
-    name: addon/addon-deploy/{{ ansible_distribution | lower }}/{{ ansible_distribution | lower }}-{{ansible_distribution_major_version}}/apps/elasticsearch
+    name: addon/addon-deploy/{{ ansible_distribution | lower }}/{{ ansible_distribution | lower }}-{{ansible_distribution_major_version}}apps/elasticsearch
     apply:
       tags:
         - addon-elasticsearch

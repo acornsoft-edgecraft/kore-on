@@ -14,7 +14,7 @@
     ChartRefID: "{{ Apps.CsiDriverNfs.ChartRefID | b64decode }}"
     ChartRefPW: "{{ Apps.CsiDriverNfs.ChartRefPW | b64decode }}"
   ansible.builtin.include_role:
-    name: addon/addon-deploy/redhat/redhat-7/apps/csi-driver-nfs
+    name: addon/addon-deploy/{{ ansible_distribution | lower }}/{{ ansible_distribution | lower }}-{{ansible_distribution_major_version}}/apps/csi-driver-nfs
     apply:
       tags:
         - addon-csi-nfs
@@ -30,7 +30,7 @@
     ChartRef: "{{ Apps.Koreboard.ChartRef }}"
     ChartName: "{{ Apps.Koreboard.ChartName }}"
   ansible.builtin.include_role:
-    name: addon/addon-deploy/redhat/redhat-7/apps/koreboard
+    name: addon/addon-deploy/{{ ansible_distribution | lower }}/{{ ansible_distribution | lower }}-{{ansible_distribution_major_version}}/apps/koreboard
     apply:
       tags:
         - addon-koreboard
@@ -46,7 +46,7 @@
     ChartRef: "{{ Apps.Elasticsearch.ChartRef }}"
     ChartName: "{{ Apps.Elasticsearch.ChartName }}"
   ansible.builtin.include_role:
-    name: addon/addon-deploy/redhat/redhat-8/apps/elasticsearch
+    name: addon/addon-deploy/{{ ansible_distribution | lower }}/{{ ansible_distribution | lower }}-{{ansible_distribution_major_version}}/apps/elasticsearch
     apply:
       tags:
         - addon-elasticsearch
@@ -62,7 +62,7 @@
     ChartRef: "{{ Apps.FluentBit.ChartRef }}"
     ChartName: "{{ Apps.FluentBit.ChartName }}"
   ansible.builtin.include_role:
-    name: addon/addon-deploy/redhat/redhat-8/apps/fluent-bit
+    name: addon/addon-deploy/{{ ansible_distribution | lower }}/{{ ansible_distribution | lower }}-{{ansible_distribution_major_version}}/apps/fluent-bit
     apply:
       tags:
         - addon-fluent-bit

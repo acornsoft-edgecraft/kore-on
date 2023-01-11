@@ -1,0 +1,15 @@
+---
+# Kubernetes service check
+- name: Kubernetes service check
+  command: |
+    kubectl --kubeconfig="{{ Addon.KubeConfig }}"
+    -n kube-system
+    get pod
+    -l=tier=control-plane
+    -o jsonpath='{.items[?(@.status.containerStatuses[*].ready!=true)].metadata.name}'
+  register: result
+
+- name: Kubernetes status failed
+  ansible.builtin.fail:
+    msg: The system may not be provisioned according to the KUBERNETES status.
+  when: result.stdout != ""

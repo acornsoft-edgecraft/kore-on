@@ -8,13 +8,13 @@
   when: 
     - closed_network
 
-# For required Python library ------------------------------------------------
-- name: install pre-requisites
-  ansible.builtin.pip:
-    name:
-      - pyyaml
-      - kubernetes 
-      - jsonpatch
-  when:
-    - ansible_distribution_major_version | int >= 8
-# ----------------------------------------------------------------------------
+# # For required Python library ------------------------------------------------
+# - name: install pre-requisites
+#   ansible.builtin.pip:
+#     name:
+#       - pyyaml
+#       - kubernetes 
+#       - jsonpatch
+#   when:
+#     - ansible_distribution_major_version | int >= 8
+# # ----------------------------------------------------------------------------
