@@ -367,6 +367,8 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 		}
 
 		koreonToml = koreon_toml
+	} else if cmd == "reset-all" {
+		koreonToml.PrepareAirgap.RegistryIP = ""
 	} else if cmd == "reset-cluster" {
 		koreonToml.PrepareAirgap.RegistryIP = ""
 	} else if cmd == "reset-registry" {
