@@ -37,15 +37,26 @@
   delegate_to: "{{ groups['masters'][0] }}"
   run_once: true
 
+# - name: Addon | deployment {{ ChartName }}
+#   kubernetes.core.helm:
+#     name: "{{ ChartName }}"
+#     kubeconfig: "{{ Addon.KubeConfig }}"
+#     chart_ref: "{{ ChartRef is search('.tgz') | ternary(ChartRef, ChartRefName + '/' + ChartName) }}"
+#     release_namespace: kube-system
+#     update_repo_cache: "{{ ChartRef is search('.tgz') | ternary(false, true) }}"
+#     atomic: true
+#     values_files:
+#       - "{{ Addon.AddonDataDir }}/{{ ChartName }}/values.yaml"
+#   delegate_to: "{{ groups['masters'][0] }}"
+#   run_once: true
+
 - name: Addon | deployment {{ ChartName }}
-  kubernetes.core.helm:
-    name: "{{ ChartName }}"
-    kubeconfig: "{{ Addon.KubeConfig }}"
-    chart_ref: "{{ ChartRef is search('.tgz') | ternary(ChartRef, ChartRefName + '/' + ChartName) }}"
-    release_namespace: kube-system
-    update_repo_cache: "{{ ChartRef is search('.tgz') | ternary(false, true) }}"
-    atomic: true
-    values_files:
-      - "{{ Addon.AddonDataDir }}/{{ ChartName }}/values.yaml"
+  command: |
+    helm upgrade -i --reset-values --atomic --no-hooks --create-namespace 
+    --kubeconfig "{{ Addon.KubeConfig }}"
+    --namespace {{ Addon.ReleaseNamespace | default('efk') }}
+    --values="{{ Addon.AddonDataDir }}/{{ ChartName }}/values.yaml"
+    "{{ ChartName }}" 
+    "{{ ChartRef is search('.tgz') | ternary(ChartRef, ChartRefName + '/' + ChartName) }}"
   delegate_to: "{{ groups['masters'][0] }}"
   run_once: true

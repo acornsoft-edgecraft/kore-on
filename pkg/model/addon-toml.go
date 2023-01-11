@@ -22,51 +22,56 @@ type AddonToml struct {
 }
 
 type AppsCsiDriverNfs struct {
-	Install      bool   `toml:"install,omitempty"`
-	ChartRefName string `toml:"chart_ref_name,omitempty"`
-	ChartRef     string `toml:"chart_ref,omitempty"`
-	ChartName    string `toml:"chart_name,omitempty"`
-	ChartVersion string `toml:"chart_version,omitempty"`
-	ChartRefID   string
-	ChartRefPW   string
-	Values       string `toml:"values,omitempty"`
-	ValuesFile   string `toml:"values_file,omitempty"`
+	Install          bool   `toml:"install,omitempty"`
+	ChartRefName     string `toml:"chart_ref_name,omitempty"`
+	ChartRef         string `toml:"chart_ref,omitempty"`
+	ChartName        string `toml:"chart_name,omitempty"`
+	ReleaseNamespace string `toml:"chart_name,omitempty"`
+	ChartVersion     string `toml:"chart_version,omitempty"`
+	ChartRefID       string
+	ChartRefPW       string
+	Values           string `toml:"values,omitempty"`
+	ValuesFile       string `toml:"values_file,omitempty"`
 }
 
 type AppsBitnamiNginx struct {
-	Install      bool   `toml:"install,omitempty"`
-	ChartRefName string `toml:"chart_ref_name,omitempty"`
-	ChartRef     string `toml:"chart_ref,omitempty"`
-	ChartName    string `toml:"chart_name,omitempty"`
-	ChartVersion string `toml:"chart_version,omitempty"`
-	Values       string `toml:"values,omitempty"`
-	ValuesFile   string `toml:"values_file,omitempty"`
+	Install          bool   `toml:"install,omitempty"`
+	ChartRefName     string `toml:"chart_ref_name,omitempty"`
+	ChartRef         string `toml:"chart_ref,omitempty"`
+	ChartName        string `toml:"chart_name,omitempty"`
+	ReleaseNamespace string `toml:"chart_name,omitempty"`
+	ChartVersion     string `toml:"chart_version,omitempty"`
+	Values           string `toml:"values,omitempty"`
+	ValuesFile       string `toml:"values_file,omitempty"`
 }
 
 type AppsElasticsearch struct {
-	Install      bool   `toml:"install,omitempty"`
-	ChartRefName string `toml:"chart_ref_name,omitempty"`
-	ChartRef     string `toml:"chart_ref,omitempty"`
-	ChartName    string `toml:"chart_name,omitempty"`
-	ChartVersion string `toml:"chart_version,omitempty"`
-	Values       string `toml:"values,omitempty"`
-	ValuesFile   string `toml:"values_file,omitempty"`
+	Install          bool   `toml:"install,omitempty"`
+	ChartRefName     string `toml:"chart_ref_name,omitempty"`
+	ChartRef         string `toml:"chart_ref,omitempty"`
+	ChartName        string `toml:"chart_name,omitempty"`
+	ReleaseNamespace string `toml:"chart_name,omitempty"`
+	ChartVersion     string `toml:"chart_version,omitempty"`
+	Values           string `toml:"values,omitempty"`
+	ValuesFile       string `toml:"values_file,omitempty"`
 }
 type AppsFluentBit struct {
-	Install      bool   `toml:"install,omitempty"`
-	ChartRefName string `toml:"chart_ref_name,omitempty"`
-	ChartRef     string `toml:"chart_ref,omitempty"`
-	ChartName    string `toml:"chart_name,omitempty"`
-	ChartVersion string `toml:"chart_version,omitempty"`
-	Values       string `toml:"values,omitempty"`
-	ValuesFile   string `toml:"values_file,omitempty"`
+	Install          bool   `toml:"install,omitempty"`
+	ChartRefName     string `toml:"chart_ref_name,omitempty"`
+	ChartRef         string `toml:"chart_ref,omitempty"`
+	ChartName        string `toml:"chart_name,omitempty"`
+	ReleaseNamespace string `toml:"chart_name,omitempty"`
+	ChartVersion     string `toml:"chart_version,omitempty"`
+	Values           string `toml:"values,omitempty"`
+	ValuesFile       string `toml:"values_file,omitempty"`
 }
 
 type AppsKoreboard struct {
-	Install      bool   `toml:"install,omitempty"`
-	ChartRefName string `toml:"chart_ref_name,omitempty"`
-	ChartRef     string `toml:"chart_ref,omitempty"`
-	ChartName    string `toml:"chart_name,omitempty"`
-	Values       string `toml:"values,omitempty"`
-	ValuesFile   string `toml:"values_file,omitempty"`
+	Install          bool   `toml:"install,omitempty"`
+	ChartRefName     string `toml:"chart_ref_name,omitempty"`
+	ChartRef         string `toml:"chart_ref,omitempty"`
+	ChartName        string `toml:"chart_name,omitempty"`
+	ReleaseNamespace string `toml:"chart_name,omitempty"`
+	Values           string `toml:"values,omitempty"`
+	ValuesFile       string `toml:"values_file,omitempty"`
 }

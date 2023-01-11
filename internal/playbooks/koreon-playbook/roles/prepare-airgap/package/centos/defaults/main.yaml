@@ -1,5 +1,6 @@
 ---
 package_data_dir: "{{ prepare_airgap_registry_data_dir }}/packages"
+package_pip_dir: "{{ prepare_airgap_registry_data_dir }}/pip-packages"
 package_archive_dir: "{{ prepare_airgap_registry_data_dir }}/archive"
 package_bastion_dir: "{{ prepare_airgap_registry_data_dir }}/bastion"
 
