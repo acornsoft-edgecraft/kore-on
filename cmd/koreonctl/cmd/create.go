@@ -49,20 +49,6 @@ func createCmd() *cobra.Command {
 	return cmd
 }
 
-func emptyCmd() *cobra.Command {
-
-	cmd := &cobra.Command{
-		Use:          "",
-		Short:        "",
-		Long:         "",
-		SilenceUsage: true,
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return nil
-		},
-	}
-	return cmd
-}
-
 func (c *strCreateCmd) run() error {
 
 	workDir, _ := os.Getwd()
