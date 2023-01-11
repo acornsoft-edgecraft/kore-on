@@ -13,12 +13,14 @@
             - reset-registry
             - reset-storage
             - reset-prepare-airgap
+            - reset-all
       tags:
         - init
         - reset-cluster
         - reset-registry
         - reset-storage
         - reset-prepare-airgap
+        - reset-all
 
 # Clear gathered facts from all currently targeted hosts 
 - hosts: all
@@ -77,6 +79,7 @@
         apply:
           tags:
             - reset-cluster
+            - reset-all
       tags:
         - reset-cluster
         - reset-all
