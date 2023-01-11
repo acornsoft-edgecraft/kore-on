@@ -1,6 +1,0 @@
-
-[bastion-local-to-file]
-name=bastion-local-repo
-baseurl=file:///Users/dongmook/github-workspace/edgecraft/kore-on/cmd/koreonctl/local
-gpgcheck=0
-enabled=0

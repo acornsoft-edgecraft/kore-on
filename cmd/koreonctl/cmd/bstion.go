@@ -22,7 +22,6 @@ import (
 type strBstionCmd struct {
 	verbose         bool
 	archiveFilePath string
-	command         string
 }
 
 func bastionCmd() *cobra.Command {
