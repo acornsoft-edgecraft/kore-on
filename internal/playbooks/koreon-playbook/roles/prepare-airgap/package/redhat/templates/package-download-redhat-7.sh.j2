@@ -33,6 +33,7 @@ make_yum_repo(){
     repoquery --qf=%{name} -g --list --grouppkgs=all [groups] | xargs repotrack -a x86_64 -p ./ audit
 
     repoquery --qf=%{name} -g --list --grouppkgs=all [groups] | xargs repotrack -a x86_64 -p ./ nfs-utils
+    repoquery --qf=%{name} -g --list --grouppkgs=all [groups] | xargs repotrack -a x86_64 -p ./ nfs-server
     repoquery --qf=%{name} -g --list --grouppkgs=all [groups] | xargs repotrack -a x86_64 -p ./ lvm2
     repoquery --qf=%{name} -g --list --grouppkgs=all [groups] | xargs repotrack -a x86_64 -p ./ NetworkManager
     repoquery --qf=%{name} -g --list --grouppkgs=all [groups] | xargs repotrack -a x86_64 -p ./ ipvsadm
