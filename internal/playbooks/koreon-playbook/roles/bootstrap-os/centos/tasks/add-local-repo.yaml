@@ -6,18 +6,17 @@
     src: "/etc/yum.repos.d"
     dest: "/etc/yum.repos.d.back-{{ ansible_date_time.iso8601_basic_short }}"
 
-- name: Remove /etc/yum.repos.d directory
-  ansible.builtin.file:
-    path: "/etc/yum.repos.d"
-    state: absent
+- name: Disable yum repository
+  ansible.builtin.command: |
+    yum --cacheonly repolist
+  register: _result
 
-- name: Create /etc/yum.repos.d directory
-  ansible.builtin.file:
-    path: "/etc/yum.repos.d"
-    state: directory
-    owner: root
-    group: root
-    mode: "0644"
+- name: Disable yum repository
+  ansible.builtin.command: |
+    yum-config-manager --disable "{{ item | split(' ') | first }}"
+  with_items: 
+    - "{{ _result.stdout_lines[2:] }}"
+  notify: yum-clean-metadata
 
 - name: Add local repository
   yum_repository:

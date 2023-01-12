@@ -1,24 +1,14 @@
 ---
-# # Add local repo ------------------------------------------------------------------
+## Backup repo ------------------------------------------------------------------
 - name: Backup /etc/apt/sources.list.d directory
   ansible.builtin.copy:
     remote_src: true
     src: "/etc/apt/sources.list.d"
     dest: "/etc/apt/sources.list.d.back-{{ ansible_date_time.iso8601_basic_short }}"
 
-- name: Remove /etc/apt/sources.list.d directory
-  ansible.builtin.file:
-    path: "/etc/apt/sources.list.d"
-    state: absent
+## Disable Repo list ---------------------------------------------------------------
 
-- name: Create /etc/apt/sources.list.d directory
-  ansible.builtin.file:
-    path: "/etc/apt/sources.list.d"
-    state: directory
-    owner: root
-    group: root
-    mode: "0644"
-
+## Add Local Repo ---------------------------------------------------------------
 - name: Add local repository
   ansible.builtin.apt_repository:
     repo: "deb {{ (local_repository_url == '') | ternary('http://' + registry_ip + ':' + (local_repository_port | string), local_repository_url, omit) }} stable main"
