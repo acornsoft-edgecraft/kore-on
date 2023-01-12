@@ -1,5 +1,5 @@
 ---
-# # Add local repo ------------------------------------------------------------------
+## Add local repo ------------------------------------------------------------------
 - name: Backup /etc/yum.repos.d directory
   ansible.builtin.copy:
     remote_src: true
@@ -10,6 +10,11 @@
   ansible.builtin.command: |
     yum --cacheonly repolist
   register: _result
+
+- debug:
+    msg: "{{ item | split(' ') | first }}"
+  with_items: 
+    - "{{ _result.stdout_lines[5:] }}"
 
 - name: Disable yum repository
   ansible.builtin.command: |
