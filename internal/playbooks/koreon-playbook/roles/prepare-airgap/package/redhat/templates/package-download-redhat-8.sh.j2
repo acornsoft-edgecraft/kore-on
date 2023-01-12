@@ -33,6 +33,7 @@ make_yum_repo(){
     dnf -y download --resolve --arch x86_64 --downloaddir=./ audit
 
     dnf -y download --resolve --arch x86_64 --downloaddir=./ nfs-utils
+    dnf -y download --resolve --arch x86_64 --downloaddir=./ nfs-server
     dnf -y download --resolve --arch x86_64 --downloaddir=./ lvm2
     dnf -y download --resolve --arch x86_64 --downloaddir=./ NetworkManager
     dnf -y download --resolve --arch x86_64 --downloaddir=./ ipvsadm
