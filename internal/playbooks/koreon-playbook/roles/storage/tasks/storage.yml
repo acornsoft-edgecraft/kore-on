@@ -27,20 +27,48 @@
   notify: reload nfs
 
 - name: Install nfs server
-  when: ansible_distribution in ["Ubuntu", "Debian"]
   apt:
     name:
       - nfs-common
       - nfs-kernel-server
     state: present
     update_cache: yes
+  when: 
+    - ansible_distribution in ["Ubuntu", "Debian"]
+    - not closed_network
 
 - name: Install nfs server
-  when: ansible_distribution in ["CentOS", "RedHat"]
   yum:
     name: nfs-utils
     state: present
     update_cache: yes
+  when:
+    - ansible_distribution in ["CentOS", "RedHat"]
+    - not closed_network
+
+- name: Install nfs server
+  apt:
+    name:
+      - nfs-common
+      - nfs-kernel-server
+    state: present
+    disablerepo: "*"
+    enablerepo: "local-repo"
+    disable_gpg_check: yes
+  when:
+    - ansible_distribution in ["Ubuntu", "Debian"]
+    - closed_network
+
+- name: Install nfs server
+  yum:
+    name: nfs-utils
+    state: present
+    disablerepo: "*"
+    enablerepo: "local-repo"
+    disable_gpg_check: yes
+  when:
+    - ansible_distribution in ["CentOS", "RedHat"]
+    - closed_network
 
 - name: Enable & start rpcbind
   when: ansible_distribution in ["CentOS", "RedHat"]
