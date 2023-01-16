@@ -33,7 +33,7 @@
   tags: ['iptables']
 
 - name: Delete some files and directories
-  shell: "rm -rf {{ item }}"
+  command: "rm -rf {{ item }}"
   with_items:
     - /usr/local/bin/docker-compose
     - /usr/bin/docker-compose
@@ -52,7 +52,11 @@
     - /tmp/harbor-backup.tgz
     - /tmp/harbor
     - /tmp/registry-restore.sh
-    - "{{ data_root_dir }}/*"
+    - "{{ data_root_dir }}/archive"
+    - "{{ data_root_dir }}/bastion"
+    - "{{ data_root_dir }}/harbor"
+    - "{{ data_root_dir }}/docker"
+    - "{{ data_root_dir }}/packages"
     - "{{ install_dir }}"
   tags: ['files']
 
@@ -77,3 +81,8 @@
   tags:
     - service
     - network
+
+- name: systemctl daemon-reload
+  systemd:
+    daemon_reload: yes
+  when: packages_removed.changed
