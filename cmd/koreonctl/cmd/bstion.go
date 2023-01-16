@@ -14,6 +14,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"time"
 
 	"github.com/mholt/archiver"
 	"github.com/spf13/cobra"
@@ -136,6 +137,9 @@ func (c *strBstionCmd) dockerInstall() error {
 		}
 		runExecCommand(commandArgs)
 
+		// Calling Sleep method
+		time.Sleep(5 * time.Second)
+
 		commandArgs = []string{
 			"sudo",
 			"systemctl",
@@ -181,6 +185,9 @@ func (c *strBstionCmd) dockerInstall() error {
 			"docker-ce",
 		}
 		runExecCommand(commandArgs)
+
+		// Calling Sleep method
+		time.Sleep(5 * time.Second)
 
 		commandArgs = []string{
 			"sudo",
