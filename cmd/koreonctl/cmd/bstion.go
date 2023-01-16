@@ -137,6 +137,22 @@ func (c *strBstionCmd) dockerInstall() error {
 			"docker-ce",
 		}
 		runExecCommand(commandArgs)
+
+		commandArgs = []string{
+			"sudo",
+			"systemctl",
+			"enable",
+			"docker",
+		}
+		runExecCommand(commandArgs)
+
+		commandArgs = []string{
+			"sudo",
+			"systemctl",
+			"start",
+			"docker",
+		}
+		runExecCommand(commandArgs)
 	} else {
 		if !utils.CheckUserInput("> Is this bastion node online network status?\n Are you sure you want to install docker-ce on this node? ", "y") {
 			fmt.Println("nothing to changed. exit")
@@ -165,6 +181,22 @@ func (c *strBstionCmd) dockerInstall() error {
 			"install",
 			"-y",
 			"docker-ce",
+		}
+		runExecCommand(commandArgs)
+
+		commandArgs = []string{
+			"sudo",
+			"systemctl",
+			"enable",
+			"docker",
+		}
+		runExecCommand(commandArgs)
+
+		commandArgs = []string{
+			"sudo",
+			"systemctl",
+			"start",
+			"docker",
 		}
 		runExecCommand(commandArgs)
 	}

@@ -17,13 +17,13 @@ func CheckKoreonToml(value *model.KoreOnToml) error {
 
 func CheckCommand(cmd *cobra.Command) error {
 	cmdCheck := cmd.Commands()
-	if cmd.Name() == "init" && false {
-		fmt.Println("== ", cmd.Name())
-	}
 
 	if os.Args[1] == cmd.Name() {
 		if len(os.Args[1:]) < 2 {
 			if cmd.Name() == "init" {
+				return nil
+			}
+			if cmd.Name() == "bastion" {
 				return nil
 			}
 			args := append([]string{"koreonctl"}, os.Args[1:]...)
