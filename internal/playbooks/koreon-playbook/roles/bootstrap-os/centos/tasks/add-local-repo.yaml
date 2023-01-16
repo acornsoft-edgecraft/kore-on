@@ -1,27 +1,8 @@
 ---
 ## Add local repo ------------------------------------------------------------------
-- name: Backup /etc/yum.repos.d directory
-  ansible.builtin.copy:
-    remote_src: true
-    src: "/etc/yum.repos.d"
-    dest: "/etc/yum.repos.d.back-{{ ansible_date_time.iso8601_basic_short }}"
-
 - name: Disable yum repository
   ansible.builtin.command: |
-    yum --cacheonly repolist
-  register: _result
-
-- debug:
-    msg: "{{ item | split(' ') | first }}"
-  with_items: 
-    - "{{ _result.stdout_lines[5:] }}"
-
-- name: Disable yum repository
-  ansible.builtin.command: |
-    yum-config-manager --disable "{{ item | split(' ') | first }}"
-  with_items: 
-    - "{{ _result.stdout_lines[2:] }}"
-  notify: yum-clean-metadata
+    yum-config-manager --disable *
 
 - name: Add local repository
   yum_repository:
