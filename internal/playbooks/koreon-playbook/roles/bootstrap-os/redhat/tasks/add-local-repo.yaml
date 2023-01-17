@@ -6,9 +6,9 @@
     src: "/etc/yum.repos.d"
     dest: "/etc/yum.repos.d.back-{{ ansible_date_time.iso8601_basic_short }}"
     
-- name: Disable yum repository
+- name: Disabling the Subscription-Manager Repository
   ansible.builtin.command: |
-    yum-config-manager --disable *
+    subscription-manager config --rhsm.manage_repos=0
 
 - name: Add local repository
   yum_repository:
