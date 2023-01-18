@@ -18,7 +18,7 @@
 - name: CRI | container_runtime
   ansible.builtin.include_role:
     name: cri/{{ ansible_distribution | lower }}
-    tasks_from: containerd
+    tasks_from: containerd-v1.7
   when:
     - container_runtime == 'containerd'
     - param in "cluster" | default("")
