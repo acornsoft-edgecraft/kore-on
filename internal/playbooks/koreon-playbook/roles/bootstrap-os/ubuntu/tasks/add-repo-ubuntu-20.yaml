@@ -22,25 +22,25 @@
     state: present
     filename: docker
 
-- name: Add Nvidia APT GPG key
-  ansible.builtin.apt_key:
-    url: https://nvidia.github.io/libnvidia-container/gpgkey
-    state: present
+# - name: Add Nvidia APT GPG key
+#   ansible.builtin.apt_key:
+#     url: https://nvidia.github.io/libnvidia-container/gpgkey
+#     state: present
 
-- name: Adding Nvidia repository
-  ansible.builtin.apt_repository:
-    repo: "deb https://nvidia.github.io/libnvidia-container/stable/ubuntu18.04/$(ARCH) /"
-    state: present
-    filename: nvidia
+# - name: Adding Nvidia repository
+#   ansible.builtin.apt_repository:
+#     repo: "deb https://nvidia.github.io/libnvidia-container/stable/ubuntu18.04/$(ARCH) /"
+#     state: present
+#     filename: nvidia
 
 - name: Add Nginx APT GPG key
   ansible.builtin.apt_key:
     url: https://nginx.org/keys/nginx_signing.key
     state: present
 
-- name: Adding Nvidia repository
+- name: Adding Nginx repository
   ansible.builtin.apt_repository:
     repo: "deb https://nginx.org/packages/ubuntu/ focal nginx"
     state: present
-    filename: nvidia
+    filename: nginx
 # ----------------------------------------------------------------
