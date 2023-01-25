@@ -122,7 +122,7 @@ func (c *strBstionCmd) bastion(workDir string) error {
 func (c *strBstionCmd) dockerInstall() error {
 	var commandArgs = []string{}
 	if c.archiveFilePath != "" {
-		if !utils.CheckUserInput("> Do you want to install docker-ce? [y/n]", "y") {
+		if !utils.CheckUserInput("> Do you want to install docker-ce? [y/n] ", "y") {
 			fmt.Println("nothing to changed. exit")
 			os.Exit(1)
 		}
@@ -188,6 +188,13 @@ func (c *strBstionCmd) dockerInstall() error {
 
 		// Calling Sleep method
 		time.Sleep(5 * time.Second)
+
+		commandArgs = []string{
+			"sudo",
+			"systemctl",
+			"daemon-reload",
+		}
+		runExecCommand(commandArgs)
 
 		commandArgs = []string{
 			"sudo",
