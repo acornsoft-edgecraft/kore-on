@@ -139,22 +139,7 @@ func (c *strBstionCmd) dockerInstall() error {
 
 		// Calling Sleep method
 		time.Sleep(5 * time.Second)
-
-		commandArgs = []string{
-			"sudo",
-			"systemctl",
-			"enable",
-			"docker",
-		}
-		runExecCommand(commandArgs)
-
-		commandArgs = []string{
-			"sudo",
-			"systemctl",
-			"start",
-			"docker",
-		}
-		runExecCommand(commandArgs)
+		dockerRestart()
 	} else {
 		if !utils.CheckUserInput("> Is this bastion node online network status?\n Are you sure you want to install docker-ce on this node? [y/n] ", "y") {
 			fmt.Println("nothing to changed. exit")
@@ -188,29 +173,7 @@ func (c *strBstionCmd) dockerInstall() error {
 
 		// Calling Sleep method
 		time.Sleep(5 * time.Second)
-
-		commandArgs = []string{
-			"sudo",
-			"systemctl",
-			"daemon-reload",
-		}
-		runExecCommand(commandArgs)
-
-		commandArgs = []string{
-			"sudo",
-			"systemctl",
-			"enable",
-			"docker",
-		}
-		runExecCommand(commandArgs)
-
-		commandArgs = []string{
-			"sudo",
-			"systemctl",
-			"start",
-			"docker",
-		}
-		runExecCommand(commandArgs)
+		dockerRestart()
 	}
 
 	return nil
@@ -251,4 +214,31 @@ func dockerLoad() error {
 		}
 	}
 	return nil
+}
+
+func dockerRestart() {
+	var commandArgs = []string{}
+	commandArgs = []string{
+		"sudo",
+		"systemctl",
+		"daemon-reload",
+	}
+	runExecCommand(commandArgs)
+
+	commandArgs = []string{
+		"sudo",
+		"systemctl",
+		"enable",
+		"docker",
+	}
+	runExecCommand(commandArgs)
+
+	commandArgs = []string{
+		"sudo",
+		"systemctl",
+		"start",
+		"docker",
+	}
+	runExecCommand(commandArgs)
+
 }
