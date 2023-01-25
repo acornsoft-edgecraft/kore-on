@@ -2,29 +2,29 @@ package config
 
 const AddonTemplate = `
 ##################################################################################
-## You can check supported applications with the 'list' command  	        			##
-## and add applications to install. It can be used as below.				          	##
+## You can check supported applications with the 'list' command                 ##
+## and add applications to install. It can be used as below.                    ##
 ##                                                                              ##
-## ※ If both "values" and "value_file" exist, "values" is used.				        	##
-## -- Sample --													                                      	##
-## [apps.application-name]													                          	##
-## install = true																                                ##
-## chart_ref_name = "xxx"												                            		##
-## chart_ref = "https://helm-chart-address or helm-package-address(or path)"	  ##
-## values="""																	                                  ##
-## helm-chart-values															                              ##
-## """																	                                    		##
-## value_file = "helm-chart-values file path"								                  	##
+## ※ If both "values" and "value_file" exist, "values" is used.                 ##
+## -- Sample --                                                                 ##
+## [apps.application-name]                                                      ##
+## install = true                                                               ##
+## chart_ref_name = "xxx"                                                       ##
+## chart_ref = "https://helm-chart-address or helm-package-address(or path)"    ##
+## values="""                                                                   ##
+## helm-chart-values                                                            ##
+## """                                                                          ##
+## value_file = "helm-chart-values file path"                                   ##
 ##################################################################################
 
 [addon]
 ## Required
 ## - k8s-master-ip: K8s control plane node ip address. (Deployment runs on this node.)
-##					If you want to deploy locally, you must use the --kubeconfig option.
+##                  If you want to deploy locally, you must use the --kubeconfig option.
 ## -
 ## Optional
 ## - ssh-port: K8s Controlplane Node ssh port (default: 22)
-## - addon-data-dir: addon data(helm vales, k8s deployment yaml) dir (default: "/data/addon") 
+## - addon-data-dir: addon data(helm vales, k8s deployment yaml) dir (default: "/data/addon")
 ## -
 #k8s-master-ip = "x.x.x.x"
 #ssh-port = 22
@@ -51,7 +51,7 @@ const AddonTemplate = `
 #chart_name = "csi-driver-nfs"
 #chart_version = "<chart version>"
 #release_namespace = "kube-system"
-#values_file = "./csi-driver-nfs-values.yaml"
+#values_file = "<values.yaml to path>"
 #values = """
 storageClass:
   create: true
@@ -84,5 +84,14 @@ storageClass:
 #release_namespace = "monitoring"
 #values_file = "<values.yaml to path>"
 #values = """
+backend:
+  service:
+    nodePort: 30081
+    type: NodePort
+frontend:
+  service:
+    nodePort: 30080
+    type: NodePort
+
 """
 `
