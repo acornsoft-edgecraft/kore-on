@@ -60,6 +60,28 @@
         - bootstrap-os
       when:
         - ansible_distribution is defined
+        - not ansible_distribution in ["CentOS"]
+  any_errors_fatal: true
+
+## Configure system package repository
+- hosts: all
+  become: true
+  gather_facts: false
+  vars_files:
+    - "{{ playbook_dir }}/inventory/group_vars/basic.yaml"
+    - "{{ playbook_dir }}/inventory/group_vars/expert.yaml"
+  tasks:
+    - name: Bootstrap OS
+      ansible.builtin.include_role:
+        name: bootstrap-os/{{ ansible_distribution | lower }}-{{ ansible_distribution_release | lower }}
+        apply:
+          tags:
+            - bootstrap-os
+      tags:
+        - bootstrap-os
+      when:
+        - ansible_distribution is defined
+        - ansible_distribution in ["CentOS"]
   any_errors_fatal: true
 
 # The pre-preparation stage of the air gap network.
