@@ -37,7 +37,6 @@ const AddonTemplate = `
 ## - chart_ref_name: helm chart repo name.
 ## - chart_ref: helm chart repository url.
 ## - chart_name: deployment chart name.
-## - chart_version: deployment chart version.
 ## - release_namespace: k8s namespace (default: "kube-system").
 ## - values_file: chart values file path (If both "values" and "value_file" exist, "values" is used.	)
 ## - values: chart values (If both "values" and "value_file" exist, "values" is used.	)
@@ -68,7 +67,6 @@ storageClass:
 ## - chart_ref_name: helm chart repo name.
 ## - chart_ref: helm chart repository url.
 ## - chart_name: deployment chart name.
-## - chart_version: deployment chart version.
 ## - release_namespace: k8s namespace (default: "monitoring").
 ## - values_file: chart values file path (If both "values" and "value_file" exist, "values" is used.	)
 ## - values: chart values (If both "values" and "value_file" exist, "values" is used.	)
