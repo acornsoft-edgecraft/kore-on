@@ -16,32 +16,16 @@
     state: directory
 
 # Install docker package  --------------------------------------------------
-# For RedHat
-# yum repository에 enabled=no로 되어 있으므로 enablerepo=Docker-CE-Stable 로 활성화 한다.
-# disable_gpg_check=yes 로 설정하여 GPG key 정확성을 check하는 인터렉션을 방지한다.
-- name: yum clean packages
-  command: yum clean packages
-  ignore_errors: true
-
-- name: Install Docker
-  yum:
-    name: ["docker-ce", "docker-ce-cli"]
+# For ubuntu
+- name: Install Docker (Ubuntu, Debian)
+  apt:
+    name: ['docker-ce', 'docker-ce-cli']
     state: present
-    disablerepo: "*"
-    enablerepo: "local-repo"
-    update_cache: yes
-    disable_gpg_check: yes
-  when:
-    - closed_network
 
-- name: Install Docker
-  yum:
-    name: ["docker-ce", "docker-ce-cli"]
-    state: present
-    enablerepo: Docker-CE-Stable
-    disable_gpg_check: yes
-  when:
-    - not closed_network
+- name: Hold docker version  (Ubuntu, Debian)
+  dpkg_selections:
+    name: docker-ce
+    selection: hold
 
 # Set docker root dir and configuration   ------------------------------------------------
 - name: Copy daemon.json file to /etc/docker
