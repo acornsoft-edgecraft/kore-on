@@ -49,7 +49,10 @@ func AirGapCmd() *cobra.Command {
 		},
 	}
 
-	cmd.AddCommand(DownLoadArchiveCmd())
+	cmd.AddCommand(
+		DownLoadArchiveCmd(),
+		ImageUploadCmd(),
+	)
 
 	// SubCommand validation
 	utils.CheckCommand(cmd)
@@ -98,6 +101,37 @@ func DownLoadArchiveCmd() *cobra.Command {
 	f.StringVar(&downLoadArchive.tags, "tags", downLoadArchive.tags, "Ansible options tags")
 	f.StringVarP(&downLoadArchive.privateKey, "private-key", "p", "", "Specify ssh key path")
 	f.StringVarP(&downLoadArchive.user, "user", "u", "", "login user")
+
+	return cmd
+}
+
+func ImageUploadCmd() *cobra.Command {
+	imageUpload := &strAirGapCmd{}
+
+	cmd := &cobra.Command{
+		Use:          "image-upload [flags]",
+		Short:        "Images Pull and Push to private registry",
+		Long:         "",
+		SilenceUsage: true,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return imageUpload.run()
+		},
+	}
+
+	// Default value for command struct
+	imageUpload.tags = ""
+	imageUpload.command = "image-upload"
+	imageUpload.inventory = "./internal/playbooks/koreon-playbook/inventory/inventory.ini"
+	imageUpload.playbookFiles = []string{
+		"./internal/playbooks/koreon-playbook/prepare-airgap-pull-push-image.yaml",
+	}
+
+	f := cmd.Flags()
+	f.BoolVarP(&imageUpload.verbose, "verbose", "v", false, "verbose")
+	f.BoolVarP(&imageUpload.dryRun, "dry-run", "d", false, "dryRun")
+	f.StringVar(&imageUpload.tags, "tags", imageUpload.tags, "Ansible options tags")
+	f.StringVarP(&imageUpload.privateKey, "private-key", "p", "", "Specify ssh key path")
+	f.StringVarP(&imageUpload.user, "user", "u", "", "login user")
 
 	return cmd
 }
