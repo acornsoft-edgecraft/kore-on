@@ -17,20 +17,20 @@
 # # ---------------------------------------------------------------------------------
 
 # # Add local repo ------------------------------------------------------------------
-- name: Backup /etc/yum.repos.d directory
+- name: Backup /etc/apt/sources.list.d directory
   ansible.builtin.copy:
     remote_src: true
-    src: "/etc/yum.repos.d"
-    dest: "/etc/yum.repos.d.back-{{ ansible_date_time.iso8601_basic_short }}"
+    src: "/etc/apt/sources.list.d"
+    dest: "/etc/apt/sources.list.d.back-{{ ansible_date_time.iso8601_basic_short }}"
 
-- name: Remove /etc/yum.repos.d directory
+- name: Remove /etc/apt/sources.list.d directory
   ansible.builtin.file:
-    path: "/etc/yum.repos.d"
+    path: "/etc/apt/sources.list.d"
     state: absent
 
-- name: Create /etc/yum.repos.d directory
+- name: Create /etc/apt/sources.list.d directory
   ansible.builtin.file:
-    path: "/etc/yum.repos.d"
+    path: "/etc/apt/sources.list.d"
     state: directory
     owner: root
     group: root
@@ -45,20 +45,17 @@
   when: ansible_facts.services["nginx.service"] is defined
   any_errors_fatal: true
 
-
 - name: Add local repo for create nginx
-  yum_repository:
-    name: local-to-file
-    description: "Local Repo configure for nginx server"
-    baseurl: "file:///data/localrepo"
-  notify: yum-clean-metadata
+  ansible.builtin.apt_repository:
+    repo: "deb file:/data/localrepo focal main"
+    filename: local-to-file
+    state: present
 
 - name: Install nginx server for local repository
-  ansible.builtin.yum:
+  ansible.builtin.apt:
     name: nginx
-    enablerepo: local-to-file
     state: latest
-    disable_gpg_check: yes
+    update_cache: yes
 
 - name: Update nginx.conf
   ansible.builtin.replace:
@@ -84,17 +81,17 @@
     enabled: yes
     state: restarted
 
-- name: Add local repository
-  yum_repository:
-    name: local-repo
-    description: "Local Repo configure"
-    gpgcheck: false
-    enabled: true
-    baseurl: "{{ (local_repository_url == '') | ternary('http://' + registry_ip + ':' + (local_repository_port | string), local_repository_url, omit) }}"
-  notify: yum-clean-metadata
+# - name: Add local repository
+#   yum_repository:
+#     name: local-repo
+#     description: "Local Repo configure"
+#     gpgcheck: false
+#     enabled: true
+#     baseurl: "{{ (local_repository_url == '') | ternary('http://' + registry_ip + ':' + (local_repository_port | string), local_repository_url, omit) }}"
+#   notify: yum-clean-metadata
 
-- name: Remove repository (and clean up left-over metadata)
-  yum_repository:
-    name: local-to-file
-    state: absent
-  notify: yum-clean-metadata
+# - name: Remove repository (and clean up left-over metadata)
+#   yum_repository:
+#     name: local-to-file
+#     state: absent
+#   notify: yum-clean-metadata
