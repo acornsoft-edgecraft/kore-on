@@ -36,7 +36,10 @@ func airGapCmd() *cobra.Command {
 		},
 	}
 
-	cmd.AddCommand(downLoadArchiveCmd())
+	cmd.AddCommand(
+		downLoadArchiveCmd(),
+		imageUploadCmd(),
+	)
 
 	// SubCommand validation
 	utils.CheckCommand(cmd)
@@ -68,6 +71,29 @@ func downLoadArchiveCmd() *cobra.Command {
 	f.BoolVarP(&downLoadArchive.dryRun, "dry-run", "d", false, "dryRun")
 	f.StringVarP(&downLoadArchive.privateKey, "private-key", "p", "", "Specify ssh key path")
 	f.StringVarP(&downLoadArchive.user, "user", "u", "", "login user")
+
+	return cmd
+}
+
+func imageUploadCmd() *cobra.Command {
+	imageUpload := &strAirGapCmd{}
+
+	cmd := &cobra.Command{
+		Use:          "image-upload [flags]",
+		Short:        "Images Pull and Push to private registry",
+		Long:         "",
+		SilenceUsage: true,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return imageUpload.run()
+		},
+	}
+
+	imageUpload.command = "image-upload"
+
+	f := cmd.Flags()
+	f.BoolVarP(&imageUpload.dryRun, "dry-run", "d", false, "dryRun")
+	f.StringVarP(&imageUpload.privateKey, "private-key", "p", "", "Specify ssh key path")
+	f.StringVarP(&imageUpload.user, "user", "u", "", "login user")
 
 	return cmd
 }
@@ -132,6 +158,10 @@ func (c *strAirGapCmd) airgap(workDir string) error {
 	}
 
 	//- koreonctl commands
+	if c.command == "image-upload" {
+		commandArgsKoreonctl = append(commandArgsKoreonctl, "image-upload")
+	}
+
 	if c.command == "download-archive" {
 		commandArgsKoreonctl = append(commandArgsKoreonctl, "download-archive")
 	}
