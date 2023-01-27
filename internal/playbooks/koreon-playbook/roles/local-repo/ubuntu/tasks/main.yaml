@@ -13,10 +13,9 @@
     group: "root"
     creates: "{{ data_root_dir }}/localrepo/repodata"
   any_errors_fatal: true
-  
-# # ---------------------------------------------------------------------------------
 
-# # Add local repo ------------------------------------------------------------------
+
+# Add local repo ------------------------------------------------------------------
 - name: Backup apt repository
   ansible.builtin.copy:
     remote_src: true
@@ -43,6 +42,15 @@
     mode: "0644"
   with_items: 
     - "/etc/apt/sources.list.d"
+
+- name: Create apt repository
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: file
+    owner: root
+    group: root
+    mode: "0644"
+  with_items: 
     - "/etc/apt/sources.list"
 
 - name: Add local repo for create nginx
