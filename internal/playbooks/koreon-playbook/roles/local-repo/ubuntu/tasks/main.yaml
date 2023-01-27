@@ -46,7 +46,7 @@
 - name: Create apt repository
   ansible.builtin.file:
     path: "{{ item }}"
-    state: file
+    state: touch
     owner: root
     group: root
     mode: "0644"
