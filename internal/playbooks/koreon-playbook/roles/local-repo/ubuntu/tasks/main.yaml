@@ -27,11 +27,8 @@
 
 - name: Remove apt repository
   ansible.builtin.file:
-    path: "{{ item }}"
+    path: /etc/apt/sources.list.d
     state: absent
-  with_items: 
-    - /etc/apt/sources.list.d
-    - /etc/apt/sources.list
 
 - name: Create apt repository
   ansible.builtin.file:
@@ -41,10 +38,17 @@
     group: root
     mode: "0644"
 
-- name: Create apt repository
-  ansible.builtin.file:
+- name: Replace apt repository
+  ansible.builtin.replace:
     path: /etc/apt/sources.list
-    state: touch
+    regexp: "{{ item.From }}"
+    replace: "{{ item.To }}"
+    owner: root
+    group: root
+    mode: '0644'
+  with_items:
+    - { From: '^deb', To: '#deb' }
+
 
 - name: Add local repo for create nginx
   ansible.builtin.apt_repository:
