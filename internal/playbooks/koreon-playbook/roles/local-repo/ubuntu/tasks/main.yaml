@@ -35,23 +35,16 @@
 
 - name: Create apt repository
   ansible.builtin.file:
-    path: "{{ item }}"
+    path: /etc/apt/sources.list.d
     state: directory
     owner: root
     group: root
     mode: "0644"
-  with_items: 
-    - "/etc/apt/sources.list.d"
 
 - name: Create apt repository
   ansible.builtin.file:
-    path: "{{ item }}"
+    path: /etc/apt/sources.list
     state: touch
-    owner: root
-    group: root
-    mode: "0644"
-  with_items: 
-    - "/etc/apt/sources.list"
 
 - name: Add local repo for create nginx
   ansible.builtin.apt_repository:
