@@ -17,24 +17,39 @@
 # # ---------------------------------------------------------------------------------
 
 # # Add local repo ------------------------------------------------------------------
-- name: Backup /etc/apt/sources.list.d directory
+- name: Backup apt repository
   ansible.builtin.copy:
     remote_src: true
-    src: "/etc/apt/sources.list.d"
-    dest: "/etc/apt/sources.list.d.back-{{ ansible_date_time.iso8601_basic_short }}"
+    src: "{{ item }}"
+    dest: "{{ item }}.back-{{ ansible_date_time.iso8601_basic_short }}"
+  with_items: 
+    - "/etc/apt/sources.list.d"
+    - "/etc/apt/sources.list"
 
-- name: Remove /etc/apt/sources.list.d directory
+- name: Remove apt repository
   ansible.builtin.file:
-    path: "/etc/apt/sources.list.d"
+    path: "{{ item }}"
     state: absent
+  with_items: 
+    - "/etc/apt/sources.list.d"
+    - "/etc/apt/sources.list"
 
-- name: Create /etc/apt/sources.list.d directory
+- name: Create apt repository
   ansible.builtin.file:
-    path: "/etc/apt/sources.list.d"
+    path: "{{ item }}"
     state: directory
     owner: root
     group: root
     mode: "0644"
+  with_items: 
+    - "/etc/apt/sources.list.d"
+    - "/etc/apt/sources.list"
+
+- name: Add local repo for create nginx
+  ansible.builtin.apt_repository:
+    repo: "deb [trusted=yes] file:{{ data_root_dir }}/localrepo ./"
+    filename: local-to-file
+    state: present
 
 - name: Populate service facts
   ansible.builtin.service_facts:
@@ -44,12 +59,6 @@
     msg: Nginx is installed, why? To proceed, please delete nginx and run it again
   when: ansible_facts.services["nginx.service"] is defined
   any_errors_fatal: true
-
-- name: Add local repo for create nginx
-  ansible.builtin.apt_repository:
-    repo: "deb file:/data/localrepo focal main"
-    filename: local-to-file
-    state: present
 
 - name: Install nginx server for local repository
   ansible.builtin.apt:
