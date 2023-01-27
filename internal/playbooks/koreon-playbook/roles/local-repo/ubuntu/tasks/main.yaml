@@ -13,10 +13,9 @@
     group: "root"
     creates: "{{ data_root_dir }}/localrepo/repodata"
   any_errors_fatal: true
-  
-# # ---------------------------------------------------------------------------------
 
-# # Add local repo ------------------------------------------------------------------
+
+# Add local repo ------------------------------------------------------------------
 - name: Backup apt repository
   ansible.builtin.copy:
     remote_src: true
