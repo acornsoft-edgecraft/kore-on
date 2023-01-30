@@ -49,21 +49,11 @@
   with_items:
     - { From: '^deb', To: '#deb' }
 
-
 - name: Add local repo for create nginx
   ansible.builtin.apt_repository:
     repo: "deb [trusted=yes] file:{{ data_root_dir }}/localrepo ./"
     filename: local-to-file
     state: present
-
-- name: Populate service facts
-  ansible.builtin.service_facts:
-
-- name: check if Nginx is installed
-  fail:
-    msg: Nginx is installed, why? To proceed, please delete nginx and run it again
-  when: ansible_facts.services["nginx.service"] is defined
-  any_errors_fatal: true
 
 - name: Install nginx server for local repository
   ansible.builtin.apt:
@@ -94,18 +84,3 @@
     name: nginx
     enabled: yes
     state: restarted
-
-# - name: Add local repository
-#   yum_repository:
-#     name: local-repo
-#     description: "Local Repo configure"
-#     gpgcheck: false
-#     enabled: true
-#     baseurl: "{{ (local_repository_url == '') | ternary('http://' + registry_ip + ':' + (local_repository_port | string), local_repository_url, omit) }}"
-#   notify: yum-clean-metadata
-
-# - name: Remove repository (and clean up left-over metadata)
-#   yum_repository:
-#     name: local-to-file
-#     state: absent
-#   notify: yum-clean-metadata

@@ -46,7 +46,6 @@ func init() {
 		common.InitCmd(),
 		baremetal.CreateCmd(),
 		baremetal.AddonCmd(),
-		baremetal.ApplyCmd(),
 		baremetal.DestroyCmd(),
 		baremetal.AirGapCmd(),
 		baremetal.NodeCmd(),

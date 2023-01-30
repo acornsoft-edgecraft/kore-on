@@ -21,6 +21,12 @@
     dest: "{{ package_archive_dir }}"
   any_errors_fatal: true
 
+- name: Download helm binary
+  ansible.builtin.get_url:
+    url: "{{ helm_get_url }}"
+    dest: "{{ package_archive_dir }}"
+  any_errors_fatal: true
+
 - name: Copy local-repository scripts files
   template:
     src: "package-download-{{ ansible_distribution | lower }}-{{ ansible_distribution_major_version }}.sh.j2"

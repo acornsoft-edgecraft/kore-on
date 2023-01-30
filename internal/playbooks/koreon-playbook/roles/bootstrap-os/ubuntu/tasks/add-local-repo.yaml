@@ -16,7 +16,6 @@
     state: absent
   with_items: 
     - "/etc/apt/sources.list.d"
-    - "/etc/apt/sources.list"
 
 - name: Create apt repository
   ansible.builtin.file:
@@ -27,7 +26,17 @@
     mode: "0644"
   with_items: 
     - "/etc/apt/sources.list.d"
-    - "/etc/apt/sources.list"
+
+- name: Replace apt repository
+  ansible.builtin.replace:
+    path: /etc/apt/sources.list
+    regexp: "{{ item.From }}"
+    replace: "{{ item.To }}"
+    owner: root
+    group: root
+    mode: '0644'
+  with_items:
+    - { From: '^deb', To: '#deb' }
 
 ## Add Local Repo ---------------------------------------------------------------
 - name: Add local repository
