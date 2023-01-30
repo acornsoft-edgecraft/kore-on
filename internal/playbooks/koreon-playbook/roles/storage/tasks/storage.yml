@@ -27,7 +27,7 @@
   notify: reload nfs
 
 - name: Install nfs server
-  apt:
+  ansible.builtin.apt:
     name:
       - nfs-common
       - nfs-kernel-server
@@ -47,14 +47,13 @@
     - not closed_network
 
 - name: Install nfs server
-  apt:
+  ansible.builtin.apt:
     name:
       - nfs-common
       - nfs-kernel-server
     state: present
-    disablerepo: "*"
-    enablerepo: "local-repo"
-    disable_gpg_check: yes
+    state: present
+    update_cache: yes
   when:
     - ansible_distribution in ["Ubuntu", "Debian"]
     - closed_network
