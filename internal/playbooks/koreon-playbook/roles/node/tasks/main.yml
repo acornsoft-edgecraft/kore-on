@@ -72,13 +72,6 @@
     path: /var/lib/kubelet
     state: directory
 
-- name: Calculate kubeadm CA cert hash
-  when: not kubelet_conf.stat.exists
-  shell: openssl x509 -pubkey -in {{ master_cert_dir }}/ca.crt | openssl rsa -pubin -outform der 2>/dev/null | openssl dgst -sha256 -hex | sed 's/^.* //'
-  register: kubeadm_ca_hash
-  delegate_to: "{{ groups['masters'][0] }}"
-  run_once: true
-
 - name: Create kubeadm token for joining nodes with 24h expiration (default)
   when: not kubelet_conf.stat.exists
   command: "kubeadm token create"
