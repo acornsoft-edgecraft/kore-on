@@ -13,7 +13,7 @@
 
 - name: Add Docker-ce APT GPG key
   ansible.builtin.apt_key:
-    url: https://download.docker.com/linux/ubuntu/gpg
+    url: https://download.docker.com/linux/{{ ansible_distribution | lower }}/gpg
     state: present
 
 - name: Adding Docker-ce repository
@@ -44,3 +44,7 @@
     state: present
     filename: nginx
 # ----------------------------------------------------------------
+
+- name: Run the equivalent of "apt-get update" as a separate step
+  ansible.builtin.apt:
+    update_cache: true

@@ -17,15 +17,25 @@
 
 # Install docker package  --------------------------------------------------
 # For ubuntu
-- name: Install Docker (Ubuntu, Debian)
-  apt:
-    name: ['docker-ce', 'docker-ce-cli']
-    state: present
+- name: Install Docker
+  ansible.builtin.apt:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+    state: latest
+    update_cache: true
+  
 
 - name: Hold docker version  (Ubuntu, Debian)
-  dpkg_selections:
-    name: docker-ce
+  ansible.builtin.dpkg_selections:
+    name: "{{ item }}"
     selection: hold
+  with_items:
+    - docker-ce
+    - docker-ce-cli
+    - containerd.io
+
 
 # Set docker root dir and configuration   ------------------------------------------------
 - name: Copy daemon.json file to /etc/docker

@@ -42,16 +42,6 @@
     group: root
     mode: "0644"
 
-- name: Populate service facts
-  ansible.builtin.service_facts:
-
-- name: check if Nginx is installed
-  fail:
-    msg: Nginx is installed, why? To proceed, please delete nginx and run it again
-  when: ansible_facts.services["nginx.service"] is defined
-  any_errors_fatal: true
-
-
 - name: Add local repo for create nginx
   yum_repository:
     name: local-to-file
