@@ -21,7 +21,7 @@ import (
 )
 
 // Commands structure
-type strNodeCmd struct {
+type strClusterNodeCmd struct {
 	dryRun        bool
 	verbose       bool
 	inventory     string
@@ -32,8 +32,8 @@ type strNodeCmd struct {
 	extravars     map[string]interface{}
 }
 
-func NodeCmd() *cobra.Command {
-	node := &strNodeCmd{}
+func ClusterNodeCmd() *cobra.Command {
+	clusterNode := &strClusterNodeCmd{}
 
 	cmd := &cobra.Command{
 		Use:          "node [flags]",
@@ -49,17 +49,17 @@ func NodeCmd() *cobra.Command {
 	utils.CheckCommand(cmd)
 
 	f := cmd.Flags()
-	f.BoolVar(&node.verbose, "verbose", false, "verbose")
-	f.BoolVarP(&node.dryRun, "dry-run", "d", false, "dryRun")
-	f.StringVar(&node.tags, "tags", node.tags, "Ansible options tags")
-	f.StringVarP(&node.privateKey, "private-key", "p", "", "Specify ssh key path")
-	f.StringVarP(&node.user, "user", "u", "", "login user")
+	f.BoolVar(&clusterNode.verbose, "verbose", false, "verbose")
+	f.BoolVarP(&clusterNode.dryRun, "dry-run", "d", false, "dryRun")
+	f.StringVar(&clusterNode.tags, "tags", clusterNode.tags, "Ansible options tags")
+	f.StringVarP(&clusterNode.privateKey, "private-key", "p", "", "Specify ssh key path")
+	f.StringVarP(&clusterNode.user, "user", "u", "", "login user")
 
 	return cmd
 }
 
 func addNodeCmd() *cobra.Command {
-	addNode := &strNodeCmd{}
+	addNode := &strClusterNodeCmd{}
 
 	cmd := &cobra.Command{
 		Use:          "add [flags]",
@@ -88,7 +88,7 @@ func addNodeCmd() *cobra.Command {
 	return cmd
 }
 
-func (c *strNodeCmd) run() error {
+func (c *strClusterNodeCmd) run() error {
 	var err error
 	koreOnConfigFileName := viper.GetString("KoreOn.KoreOnConfigFile")
 	koreOnConfigFilePath := utils.IskoreOnConfigFilePath(koreOnConfigFileName)
