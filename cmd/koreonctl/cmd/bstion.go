@@ -133,7 +133,7 @@ func (c *strBstionCmd) bastion(workDir string) error {
 			runExecCommand(commandArgs)
 
 			//Replace apt repository
-			exec.Command("bash", "-c", `sudo sed 's/^deb/#deb/g' /etc/apt/sources.list`)
+			exec.Command("bash", "-c", `sudo -i sed 's/^deb/#deb/g' /etc/apt/sources.list`)
 
 			bastionTemp = templates.UbuntuBastionLocalRepoText
 			repoPath = "/etc/apt/sources.list.d/bastion-local-to-file.list"
@@ -179,6 +179,13 @@ func (c *strBstionCmd) dockerInstall() error {
 		}
 		if c.osRelease == "ubuntu" {
 			//docker install
+			commandArgs = []string{
+				"sudo",
+				"apt-get",
+				"update",
+			}
+			runExecCommand(commandArgs)
+
 			commandArgs = []string{
 				"sudo",
 				"apt-get",
