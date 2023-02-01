@@ -225,14 +225,30 @@ func (c *strBstionCmd) dockerInstall() error {
 				"/etc/apt/keyrings",
 			}
 			runExecCommand(commandArgs)
-
-			// use pipe in command (add docker repo)
-			cmd := `curl -fsSL https://download.docker.com/linux/ubuntu/gpg|sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg`
-			exec.Command("bash", "-c", cmd)
-			cmd = `echo 'deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] ` +
-				`https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable|` +
-				`sudo tee /etc/apt/sources.list.d/docker.list > /dev/null`
-			exec.Command("bash", "-c", cmd)
+			commandArgs = []string{
+				"sudo",
+				"curl",
+				"-fsSL",
+				"https://download.docker.com/linux/ubuntu/gpg",
+				"-o",
+				"./docker.keyring",
+			}
+			runExecCommand(commandArgs)
+			commandArgs = []string{
+				"sudo",
+				"apt-key",
+				"add",
+				"./docker.keyring",
+			}
+			runExecCommand(commandArgs)
+			commandArgs = []string{
+				"sudo",
+				"echo",
+				"deb [arch=$(dpkg --print-architecture)] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable",
+				">",
+				"/etc/apt/sources.list.d/docker.list",
+			}
+			runExecCommand(commandArgs)
 
 			commandArgs = []string{
 				"sudo",
