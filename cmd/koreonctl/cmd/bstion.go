@@ -168,7 +168,13 @@ func (c *strBstionCmd) bastion(workDir string) error {
 func (c *strBstionCmd) dockerInstall() error {
 
 	var commandArgs = []string{}
-	os_release := runExecCommand([]string{"grep -ri 'ID=' /etc/os-release | awk 'NR==1 {print $0}' | cut -f2 -d= | sed 's/\"//g'"})
+	commandArgs = []string{
+		"sh",
+		"-c",
+		"sudo",
+		"grep -ri 'ID=' /etc/os-release | awk 'NR==1 {print $0}' | cut -f2 -d= | sed 's/\"//g'",
+	}
+	os_release := runExecCommand(commandArgs)
 	if c.archiveFilePath != "" {
 		if !utils.CheckUserInput("> Do you want to install docker-ce? [y/n] ", "y") {
 			fmt.Println("nothing to changed. exit")
