@@ -234,21 +234,23 @@ func (c *strBstionCmd) dockerInstall() error {
 				"./docker.keyring",
 			}
 			runExecCommand(commandArgs)
-			commandArgs = []string{
-				"sudo",
-				"apt-key",
-				"add",
-				"./docker.keyring",
-			}
-			runExecCommand(commandArgs)
-			commandArgs = []string{
-				"sudo",
-				"echo",
-				"deb [arch=$(dpkg --print-architecture)] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable",
-				">",
-				"/etc/apt/sources.list.d/docker.list",
-			}
-			runExecCommand(commandArgs)
+			// commandArgs = []string{
+			// 	"sudo",
+			// 	"apt-key",
+			// 	"add",
+			// 	"./docker.keyring",
+			// }
+			// runExecCommand(commandArgs)
+			exec.Command("sudo apt-key add ./docker.keyring")
+			// commandArgs = []string{
+			// 	"sudo",
+			// 	"echo",
+			// 	"deb [arch=$(dpkg --print-architecture)] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable",
+			// 	">",
+			// 	"/etc/apt/sources.list.d/docker.list",
+			// }
+			// runExecCommand(commandArgs)
+			exec.Command("sudo echo 'deb [arch=$(dpkg --print-architecture)] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable' > /etc/apt/sources.list.d/docker.list")
 
 			commandArgs = []string{
 				"sudo",
