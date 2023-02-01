@@ -224,40 +224,41 @@ func (c *strBstionCmd) dockerInstall() error {
 			runExecCommand(commandArgs)
 
 			// use pipe in command (add docker repo keyring)
-			cmd_1 := exec.Command("curl -fsSL https://download.docker.com/linux/ubuntu/gpg")
-			cmd_2 := exec.Command("sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg")
-			cmd_2.Stdin, err = cmd_1.StdoutPipe()
-			if err != nil {
-				logger.Fatal(err)
-			}
-			cmd_2.Stdout = os.Stdout
-			if err := cmd_2.Start(); err != nil {
-				logger.Fatal(err)
-			}
-			if err := cmd_1.Run(); err != nil {
-				logger.Fatal(err)
-			}
-			if err := cmd_2.Wait(); err != nil {
-				logger.Fatal(err)
-			}
+			exec.Command("bash", "-c", "curl -fsSL https://download.docker.com/linux/ubuntu/gpg|sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg")
+			// cmd_1 := exec.Command("curl -fsSL https://download.docker.com/linux/ubuntu/gpg")
+			// cmd_2 := exec.Command("sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg")
+			// cmd_2.Stdin, err = cmd_1.StdoutPipe()
+			// if err != nil {
+			// 	logger.Fatal(err)
+			// }
+			// cmd_2.Stdout = os.Stdout
+			// if err := cmd_2.Start(); err != nil {
+			// 	logger.Fatal(err)
+			// }
+			// if err := cmd_1.Run(); err != nil {
+			// 	logger.Fatal(err)
+			// }
+			// if err := cmd_2.Wait(); err != nil {
+			// 	logger.Fatal(err)
+			// }
 
 			// use pipe in command (add docker repo)
-			cmd_1 = exec.Command("echo 'deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable")
-			cmd_2 = exec.Command("sudo tee /etc/apt/sources.list.d/docker.list > /dev/null")
-			cmd_2.Stdin, err = cmd_1.StdoutPipe()
-			if err != nil {
-				logger.Fatal(err)
-			}
-			cmd_2.Stdout = os.Stdout
-			if err := cmd_2.Start(); err != nil {
-				logger.Fatal(err)
-			}
-			if err := cmd_1.Run(); err != nil {
-				logger.Fatal(err)
-			}
-			if err := cmd_2.Wait(); err != nil {
-				logger.Fatal(err)
-			}
+			// cmd_1 = exec.Command("echo 'deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable")
+			// cmd_2 = exec.Command("sudo tee /etc/apt/sources.list.d/docker.list > /dev/null")
+			// cmd_2.Stdin, err = cmd_1.StdoutPipe()
+			// if err != nil {
+			// 	logger.Fatal(err)
+			// }
+			// cmd_2.Stdout = os.Stdout
+			// if err := cmd_2.Start(); err != nil {
+			// 	logger.Fatal(err)
+			// }
+			// if err := cmd_1.Run(); err != nil {
+			// 	logger.Fatal(err)
+			// }
+			// if err := cmd_2.Wait(); err != nil {
+			// 	logger.Fatal(err)
+			// }
 
 			commandArgs = []string{
 				"sudo",
