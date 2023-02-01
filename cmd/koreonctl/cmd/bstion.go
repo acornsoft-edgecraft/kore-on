@@ -64,7 +64,11 @@ func (c *strBstionCmd) run() error {
 
 func (c *strBstionCmd) bastion(workDir string) error {
 	// system info
-	c.osRelease = sysinfo.Go().OS
+	host, err := sysinfo.Host()
+	if err != nil {
+		logger.Fatal(err)
+	}
+	c.osRelease = host.Info().OS.Platform
 	fmt.Println("osRelease == ", c.osRelease)
 	if runtime.GOOS != "linux" {
 		logger.Fatal("This command option is only supported on the Linux platform.")
