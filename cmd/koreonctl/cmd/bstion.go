@@ -44,9 +44,6 @@ func bastionCmd() *cobra.Command {
 	// SubCommand validation
 	utils.CheckCommand(cmd)
 
-	// system info
-	bastionCmd.osRelease = sysinfo.Go().OS
-
 	f := cmd.Flags()
 	f.BoolVar(&bastionCmd.verbose, "vvv", false, "verbose")
 	f.StringVar(&bastionCmd.archiveFilePath, "archive-file-path", "", "archive file path")
@@ -66,6 +63,9 @@ func (c *strBstionCmd) run() error {
 }
 
 func (c *strBstionCmd) bastion(workDir string) error {
+	// system info
+	c.osRelease = sysinfo.Go().OS
+	fmt.Println("osRelease == ", c.osRelease)
 	if runtime.GOOS != "linux" {
 		logger.Fatal("This command option is only supported on the Linux platform.")
 	}
