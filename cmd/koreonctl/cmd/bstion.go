@@ -133,13 +133,7 @@ func (c *strBstionCmd) bastion(workDir string) error {
 			runExecCommand(commandArgs)
 
 			//Replace apt repository
-			commandArgs = []string{
-				"sudo",
-				"sed",
-				"'s/^deb/#deb/g'",
-				"/etc/apt/sources.list",
-			}
-			runExecCommand(commandArgs)
+			exec.Command("bash", "-c", `sudo sed 's/^deb/#deb/g' /etc/apt/sources.list`)
 
 			bastionTemp = templates.UbuntuBastionLocalRepoText
 			repoPath = "/etc/apt/sources.list.d/bastion-local-to-file.list"
@@ -226,11 +220,11 @@ func (c *strBstionCmd) dockerInstall() error {
 			runExecCommand(commandArgs)
 
 			// use pipe in command (add docker repo)
-			cmd := "'curl -fsSL https://download.docker.com/linux/ubuntu/gpg|sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg'"
+			cmd := `curl -fsSL https://download.docker.com/linux/ubuntu/gpg|sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg`
 			exec.Command("bash", "-c", cmd)
-			cmd = "echo 'deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] " +
-				"https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable|" +
-				"sudo tee /etc/apt/sources.list.d/docker.list > /dev/null"
+			cmd = `echo 'deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] ` +
+				`https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable|` +
+				`sudo tee /etc/apt/sources.list.d/docker.list > /dev/null`
 			exec.Command("bash", "-c", cmd)
 
 			commandArgs = []string{
