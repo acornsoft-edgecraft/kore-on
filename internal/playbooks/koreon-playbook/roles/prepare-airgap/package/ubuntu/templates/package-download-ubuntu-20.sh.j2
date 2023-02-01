@@ -133,17 +133,16 @@ make_apt_repo(){
 
     rm -rf lock partial pkgcache.bin srcpkgcache.bin Packages.gz
 
-    dpkg-scanpackages -m . | gzip -c > Packages.gz
+    dpkg-scanpackages -m . | gzip -9c > Packages.gz
 }
 
 make_apt_bastion(){
     cd "$PACKAGE_BASTION_DIR"
 
-    apt-get install -y -d --reinstall -o Dir::cache=$REPO_DIR -o Dir::Cache::archives="./" docker-ce
-    apt-get install -y -d --reinstall -o Dir::cache=$REPO_DIR -o Dir::Cache::archives="./" docker-ce-cli
+    apt-get install -y --download-only --reinstall --allow-downgrades --allow-change-held-packages -o Dir::cache=$REPO_DIR -o Dir::Cache::archives="./" docker-ce
 
-    rm -rf lock partial pkgcache.bin srcpkgcache.bin Packages.gz
-    dpkg-scanpackages -m . | gzip -c > Packages.gz
+    rm -rf lock partial pkgcache.bin srcpkgcache.bin Packages.gz Packages
+    dpkg-scanpackages -m . > Packages
 }
 
 create_tarball() {

@@ -8,5 +8,5 @@ gpgcheck=0
 enabled=1`
 
 const UbuntuBastionLocalRepoText = `
-deb [trusted=yes] file:/{{.}} ./
+deb [trusted=yes] file:{{.}} ./
 `
