@@ -16,6 +16,7 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/elastic/go-sysinfo"
 	"github.com/mholt/archiver"
 	"github.com/spf13/cobra"
 )
@@ -23,6 +24,7 @@ import (
 type strBstionCmd struct {
 	verbose         bool
 	archiveFilePath string
+	osRelease       string
 }
 
 func bastionCmd() *cobra.Command {
@@ -41,6 +43,9 @@ func bastionCmd() *cobra.Command {
 
 	// SubCommand validation
 	utils.CheckCommand(cmd)
+
+	// system info
+	bastionCmd.osRelease = sysinfo.Go().OS
 
 	f := cmd.Flags()
 	f.BoolVar(&bastionCmd.verbose, "vvv", false, "verbose")
@@ -74,7 +79,6 @@ func (c *strBstionCmd) bastion(workDir string) error {
 	}
 
 	if c.archiveFilePath != "" {
-		os_release := runExecCommand([]string{"grep -ri 'ID=' /etc/os-release | awk 'NR==1 {print $0}' | cut -f2 -d= | sed 's/\"//g'"})
 		// mkdir local directory
 		path := "local"
 		if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
@@ -95,7 +99,7 @@ func (c *strBstionCmd) bastion(workDir string) error {
 		bastionText := template.New("bastionLocalRepoText")
 		var bastionTemp string
 		var repoPath string
-		if os_release == "ubuntu" {
+		if c.osRelease == "ubuntu" {
 			var theTime = time.Now().Format("20060102150405")
 			//Backup apt repository
 			commandArgs := []string{
@@ -132,7 +136,7 @@ func (c *strBstionCmd) bastion(workDir string) error {
 
 			bastionTemp = templates.UbuntuBastionLocalRepoText
 			repoPath = "/etc/apt/sources.list.d/bastion-local-to-file.list"
-		} else if os_release == "centos" || os_release == "rhel" {
+		} else if c.osRelease == "centos" || c.osRelease == "rhel" {
 			bastionTemp = templates.BastionLocalRepoText
 			repoPath = "/etc/yum.repos.d/bastion-local.repo"
 		} else {
@@ -166,21 +170,13 @@ func (c *strBstionCmd) bastion(workDir string) error {
 }
 
 func (c *strBstionCmd) dockerInstall() error {
-
 	var commandArgs = []string{}
-	commandArgs = []string{
-		"sh",
-		"-c",
-		"sudo",
-		"grep -ri 'ID=' /etc/os-release | awk 'NR==1 {print $0}' | cut -f2 -d= | sed 's/\"//g'",
-	}
-	os_release := runExecCommand(commandArgs)
 	if c.archiveFilePath != "" {
 		if !utils.CheckUserInput("> Do you want to install docker-ce? [y/n] ", "y") {
 			fmt.Println("nothing to changed. exit")
 			os.Exit(1)
 		}
-		if os_release == "ubuntu" {
+		if c.osRelease == "ubuntu" {
 			//docker install
 			commandArgs = []string{
 				"sudo",
@@ -190,7 +186,7 @@ func (c *strBstionCmd) dockerInstall() error {
 				"docker-ce",
 			}
 			runExecCommand(commandArgs)
-		} else if os_release == "centos" || os_release == "rhel" {
+		} else if c.osRelease == "centos" || c.osRelease == "rhel" {
 			commandArgs = []string{
 				"sudo",
 				"yum",
@@ -213,7 +209,7 @@ func (c *strBstionCmd) dockerInstall() error {
 			fmt.Println("nothing to changed. exit")
 			os.Exit(1)
 		}
-		if os_release == "ubuntu" {
+		if c.osRelease == "ubuntu" {
 			commandArgs = []string{
 				"sudo",
 				"mkdir",
@@ -243,7 +239,7 @@ func (c *strBstionCmd) dockerInstall() error {
 			}
 			runExecCommand(commandArgs)
 
-		} else if os_release == "centos" || os_release == "rhel" {
+		} else if c.osRelease == "centos" || c.osRelease == "rhel" {
 			commandArgs = []string{
 				"sudo",
 				"yum",
