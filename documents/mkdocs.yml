@@ -1,0 +1,16 @@
+site_name: Kore-on
+site_url: https://koreon.io/
+nav:
+  - Home: index.md
+  - section 1:
+    - index.md
+    - index.md
+  - Requirements:
+      - System requirements: '!include ./System_requirements/mkdocs.yml'
+  - Components: '*include ./components/*/mkdocs.yml'
+plugins:
+  - monorepo
+  - awesome-pages
+  - search
+theme:
+  name: material

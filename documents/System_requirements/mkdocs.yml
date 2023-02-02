@@ -1,0 +1,5 @@
+site_name: System requirements
+
+nav:
+  - Reference: "reference.md"
+  - Changelog: "changelog.md"
