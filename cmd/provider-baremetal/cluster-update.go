@@ -162,15 +162,16 @@ func (c *strClusterUpdateCmd) run() error {
 	// Make provision data
 	data := model.KoreonctlText{}
 	data.KoreOnTemp = koreonToml
-	data.Command = "cluster-update"
 
 	// Processing template
 	koreonctlText := template.New("ClusterUpdateText")
 	var tempText = ""
 	if c.command == "get-kubeconfig" {
+		data.Command = "Get Kubeconfig"
 		tempText = templates.ClusterGetKubeconfigText
 	}
 	if c.command == "update" {
+		data.Command = "cluster-update"
 		tempText = templates.ClusterUpdateText
 	}
 	temp, err := koreonctlText.Parse(tempText)
