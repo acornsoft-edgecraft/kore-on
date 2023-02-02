@@ -11,7 +11,9 @@ jobs:
     steps:
       - name: Checkout main
         uses: actions/checkout@v2
-
+      - run: pip install --upgrade pip
+      - run: pip3 install mkdocs-awesome-pages-plugin
+      - run: pip3 install mkdocs-monorepo-plugin
       - name: Deploy docs
         uses: mhausenblas/mkdocs-deploy-gh-pages@master
         # Or use mhausenblas/mkdocs-deploy-gh-pages@nomaterial to build without the mkdocs-material theme
