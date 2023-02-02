@@ -8,6 +8,7 @@ Node Name                      IP Address              Private IP Adderss
 ===========================================================================
 {{-  range $index, $data := $Master.IP}}
 master-{{$index}}                       {{$data}}                    {{if ne (len $Master.PrivateIP) 0}}{{index $Master.PrivateIP $index}}{{end -}}
+{{ break }}
 {{  end}}
 ===========================================================================
 Is this ok [y/n]: `
