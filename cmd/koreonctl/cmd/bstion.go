@@ -42,6 +42,7 @@ func bastionCmd() *cobra.Command {
 		},
 	}
 
+	// SubCommand add
 	cmd.AddCommand(emptyCmd())
 
 	// SubCommand validation
@@ -245,8 +246,8 @@ func (c *strBstionCmd) dockerInstall() error {
 			runExecCommand(commandArgs)
 			commandArgs = []string{
 				"sudo",
-				"echo",
-				"$(lsb_release -cs)",
+				"lsb_release",
+				"-cs",
 			}
 			lsb_release := runExecCommand(commandArgs)
 			commandArgs = []string{

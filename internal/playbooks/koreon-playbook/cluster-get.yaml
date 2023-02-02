@@ -20,7 +20,7 @@
     - name: Clear gathered facts
       meta: clear_facts
 
-# Pre-installation check network.
+# check network.
 - hosts: all
   become: false
   gather_facts: true
@@ -36,47 +36,23 @@
             - init-network
   any_errors_fatal: true
 
-# Remove node
+# Get
 - hosts: masters
-  become: true
+  become: false
   gather_facts: false
   vars_files:
     - "{{ playbook_dir }}/inventory/group_vars/basic.yaml"
     - "{{ playbook_dir }}/inventory/group_vars/expert.yaml"
   tasks:
-    - name: remove-node
+    - name: Get Kubeconfig file
       ansible.builtin.include_role:
-        name: node/remove-node
+        name: kubernetes
+        tasks_from: get-kubeconfig
         apply:
           tags:
-            - remove-node
+            - get-kubeconfig
       tags:
-        - remove-node
+        - get-kubeconfig
+      when:
+        - ansible_distribution is defined
   any_errors_fatal: true
-
-- hosts: all
-  become: true
-  gather_facts: false
-  vars_files:
-    - "{{ playbook_dir }}/inventory/group_vars/basic.yaml"
-    - "{{ playbook_dir }}/inventory/group_vars/expert.yaml"
-  tasks:
-    - name: remove-node
-      ansible.builtin.add_host:
-        hostname: '{{ target }}'
-        ansible_host: '{{ target }}'
-      tags:
-        - remove-node
-
-- hosts: "{{ target }}"
-  become: true
-  gather_facts: false
-  vars_files:
-    - "{{ playbook_dir }}/inventory/group_vars/basic.yaml"
-    - "{{ playbook_dir }}/inventory/group_vars/expert.yaml"
-  roles:
-    - name: remove-node
-      ansible.builtin.include_role:
-        name: reset
-      tags: 
-        - remove-node

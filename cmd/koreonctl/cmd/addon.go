@@ -38,6 +38,7 @@ func addonCmd() *cobra.Command {
 		},
 	}
 
+	// SubCommand add
 	cmd.AddCommand(addonInitCmd())
 
 	// SubCommand validation

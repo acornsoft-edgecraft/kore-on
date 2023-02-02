@@ -44,6 +44,7 @@ func GetKoreonTomlConfig(koreOnConfigFilePath string) (model.KoreOnToml, error) 
 	// default values
 	koreonToml.NodePool.Master.HaproxyInstall = true
 	koreonToml.Kubernetes.AuditLogEnable = true
+	koreonToml.Kubernetes.GetKubeConfig = true
 
 	err = toml.Unmarshal(c, &koreonToml)
 	if err != nil {

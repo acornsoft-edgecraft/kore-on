@@ -38,6 +38,7 @@ func destroyCmd() *cobra.Command {
 
 	destroy.command = "reset-all"
 
+	// SubCommand add
 	cmd.AddCommand(
 		destroyPrepareAirGapCmd(),
 		destroyClusterCmd(),
