@@ -25,6 +25,7 @@ type strBstionCmd struct {
 	verbose         bool
 	archiveFilePath string
 	osRelease       string
+	osArchitecture  string
 }
 
 var err error = nil
@@ -69,8 +70,8 @@ func (c *strBstionCmd) bastion(workDir string) error {
 	if err != nil {
 		logger.Fatal(err)
 	}
+	c.osArchitecture = host.Info().Architecture
 	c.osRelease = host.Info().OS.Platform
-	fmt.Println("osRelease == ", c.osRelease)
 	if runtime.GOOS != "linux" {
 		logger.Fatal("This command option is only supported on the Linux platform.")
 	}
@@ -126,14 +127,19 @@ func (c *strBstionCmd) bastion(workDir string) error {
 			//Backup apt repository
 			commandArgs = []string{
 				"sudo",
-				"cp",
+				"mv",
 				"/etc/apt/sources.list",
 				"/etc/apt/sources.list-" + theTime,
 			}
 			runExecCommand(commandArgs)
 
-			//Replace apt repository
-			exec.Command("bash", "-c", `sudo -i sed 's/^deb/#deb/g' /etc/apt/sources.list`)
+			//Create empty apt repository
+			commandArgs = []string{
+				"sudo",
+				"touch",
+				"/etc/apt/sources.list",
+			}
+			runExecCommand(commandArgs)
 
 			bastionTemp = templates.UbuntuBastionLocalRepoText
 			repoPath = "/etc/apt/sources.list.d/bastion-local-to-file.list"
@@ -243,23 +249,14 @@ func (c *strBstionCmd) dockerInstall() error {
 			runExecCommand(commandArgs)
 			commandArgs = []string{
 				"sudo",
-				"apt-add-repository",
-				"\"deb [arch=$(dpkg --print-architecture)] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable\"",
+				"echo",
+				"$(lsb_release -cs)",
 			}
-			runExecCommand(commandArgs)
-			// commandArgs = []string{
-			// 	"sudo",
-			// 	"apt-add-repository",
-			// 	"deb [arch=$(dpkg --print-architecture)] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable",
-			// }
-			// runExecCommand(commandArgs)
-			// exec.Command("sudo echo \"deb [arch=$(dpkg --print-architecture)] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable\" > /etc/apt/sources.list.d/docker.list")
-			// exec.Command("sudo apt-add-repository \"deb [arch=$(dpkg --print-architecture)] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable\"")
-
+			lsb_release := runExecCommand(commandArgs)
 			commandArgs = []string{
 				"sudo",
-				"apt-get",
-				"update",
+				"apt-add-repository",
+				"deb [arch=" + c.osArchitecture + "] https://download.docker.com/linux/ubuntu " + lsb_release + " stable",
 			}
 			runExecCommand(commandArgs)
 
@@ -304,7 +301,7 @@ func (c *strBstionCmd) dockerInstall() error {
 
 		// Calling Sleep method
 		time.Sleep(5 * time.Second)
-		dockerRestart()
+		// dockerRestart()
 	}
 
 	return nil
@@ -313,8 +310,11 @@ func (c *strBstionCmd) dockerInstall() error {
 func runExecCommand(commandArgs []string) string {
 	commandLen := len(commandArgs)
 	cmd := utils.ExecCommand(commandArgs[0], commandArgs[1:commandLen])
+	err = cmd.Wait()
+	if err != nil {
+		logger.Fatal(err)
+	}
 	out, err := cmd.Output()
-	fmt.Println(string(out))
 	if err != nil {
 		if ee, ok := err.(*exec.ExitError); ok {
 			logger.Fatal("ExitError:", string(ee.Stderr))
