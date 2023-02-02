@@ -170,8 +170,8 @@ func (c *strBstionCmd) bastion(workDir string) error {
 			logger.Fatal(err)
 		}
 	}
+	dockerReset()
 	c.dockerInstall()
-	dockerLoad()
 
 	return nil
 }
@@ -214,10 +214,6 @@ func (c *strBstionCmd) dockerInstall() error {
 		} else {
 			logger.Fatal("This command option is only supported on the Linux platform(CentOS, RedHat, Ubuntu).")
 		}
-
-		// Calling Sleep method
-		time.Sleep(5 * time.Second)
-		dockerRestart()
 	} else {
 		if !utils.CheckUserInput("> Is this bastion node online network status?\n Are you sure you want to install docker-ce on this node? [y/n] ", "y") {
 			fmt.Println("nothing to changed. exit")
@@ -310,10 +306,7 @@ func (c *strBstionCmd) dockerInstall() error {
 func runExecCommand(commandArgs []string) string {
 	commandLen := len(commandArgs)
 	cmd := utils.ExecCommand(commandArgs[0], commandArgs[1:commandLen])
-	err = cmd.Wait()
-	if err != nil {
-		logger.Fatal(err)
-	}
+
 	out, err := cmd.Output()
 	if err != nil {
 		if ee, ok := err.(*exec.ExitError); ok {
@@ -348,7 +341,7 @@ func dockerLoad() error {
 	return nil
 }
 
-func dockerRestart() {
+func dockerReset() {
 	var commandArgs = []string{}
 	commandArgs = []string{
 		"sudo",
@@ -356,28 +349,4 @@ func dockerRestart() {
 		"reset-failed",
 	}
 	runExecCommand(commandArgs)
-
-	commandArgs = []string{
-		"sudo",
-		"systemctl",
-		"daemon-reload",
-	}
-	runExecCommand(commandArgs)
-
-	commandArgs = []string{
-		"sudo",
-		"systemctl",
-		"enable",
-		"docker",
-	}
-	runExecCommand(commandArgs)
-
-	commandArgs = []string{
-		"sudo",
-		"systemctl",
-		"start",
-		"docker",
-	}
-	runExecCommand(commandArgs)
-
 }
