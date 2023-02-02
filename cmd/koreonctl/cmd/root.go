@@ -42,7 +42,7 @@ func init() {
 	KoreOnCtlCmd.AddCommand(
 		initCmd(),
 		createCmd(),
-		clusterNodeCmd(),
+		clusterUpdateCmd(),
 		destroyCmd(),
 		airGapCmd(),
 		bastionCmd(),

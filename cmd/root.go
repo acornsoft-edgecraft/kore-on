@@ -48,7 +48,7 @@ func init() {
 		baremetal.AddonCmd(),
 		baremetal.DestroyCmd(),
 		baremetal.AirGapCmd(),
-		baremetal.ClusterNodeCmd(),
+		baremetal.ClusterUpdateCmd(),
 		baremetal.TestCmd(),
 	)
 }

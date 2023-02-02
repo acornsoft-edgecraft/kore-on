@@ -15,79 +15,53 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type strClusterNodeCmd struct {
+type strClusterUpdateCmd struct {
 	dryRun     bool
 	verbose    bool
 	privateKey string
 	user       string
-	command    string
 }
 
-func clusterNodeCmd() *cobra.Command {
-	clusterNode := &strClusterNodeCmd{}
+func clusterUpdateCmd() *cobra.Command {
+	clusterUpdate := &strClusterUpdateCmd{}
 
 	cmd := &cobra.Command{
-		Use:          "node [flags]",
-		Short:        "Install kubernetes cluster, registry",
-		Long:         "This command installs the Kubernetes cluster and registry.",
+		Use:          "update [flags]",
+		Short:        "Update kubernetes cluster(node scale in/out)",
+		Long:         "This command update the Kubernetes cluster nodes (node scale in/out)",
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return clusterNode.run()
+			return clusterUpdate.run()
 		},
 	}
 
-	cmd.AddCommand(
-		nodeAdd(),
-	)
+	// SubCommand add
+	cmd.AddCommand(emptyCmd())
 
 	// SubCommand validation
 	utils.CheckCommand(cmd)
 
 	f := cmd.Flags()
-	f.BoolVar(&clusterNode.verbose, "vvv", false, "verbose")
-	f.BoolVarP(&clusterNode.dryRun, "dry-run", "d", false, "dryRun")
-	f.StringVarP(&clusterNode.privateKey, "private-key", "p", "", "Specify ssh key path")
-	f.StringVarP(&clusterNode.user, "user", "u", "", "login user")
+	f.BoolVar(&clusterUpdate.verbose, "vvv", false, "verbose")
+	f.BoolVarP(&clusterUpdate.dryRun, "dry-run", "d", false, "dryRun")
+	f.StringVarP(&clusterUpdate.privateKey, "private-key", "p", "", "Specify ssh key path")
+	f.StringVarP(&clusterUpdate.user, "user", "u", "", "login user")
 
 	return cmd
 }
 
-func nodeAdd() *cobra.Command {
-	nodeAdd := &strClusterNodeCmd{}
-
-	cmd := &cobra.Command{
-		Use:          "add [flags]",
-		Short:        "Kubernetes update for node sale in",
-		Long:         "",
-		SilenceUsage: true,
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return nodeAdd.run()
-		},
-	}
-
-	nodeAdd.command = "image-upload"
-
-	f := cmd.Flags()
-	f.BoolVarP(&nodeAdd.dryRun, "dry-run", "d", false, "dryRun")
-	f.StringVarP(&nodeAdd.privateKey, "private-key", "p", "", "Specify ssh key path")
-	f.StringVarP(&nodeAdd.user, "user", "u", "", "login user")
-
-	return cmd
-}
-
-func (c *strClusterNodeCmd) run() error {
-
+func (c *strClusterUpdateCmd) run() error {
 	workDir, _ := os.Getwd()
 	var err error = nil
 	logger.Infof("Start provisioning for cloud infrastructure")
 
-	if err = c.node(workDir); err != nil {
+	if err = c.clusterUpdate(workDir); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (c *strClusterNodeCmd) node(workDir string) error {
+func (c *strClusterUpdateCmd) clusterUpdate(workDir string) error {
 	// Doker check
 	utils.CheckDocker()
 

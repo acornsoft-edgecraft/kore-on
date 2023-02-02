@@ -36,6 +36,7 @@ func airGapCmd() *cobra.Command {
 		},
 	}
 
+	// SubCommand add
 	cmd.AddCommand(
 		downLoadArchiveCmd(),
 		imageUploadCmd(),

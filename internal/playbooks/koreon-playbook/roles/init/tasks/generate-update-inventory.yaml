@@ -1,0 +1,6 @@
+---
+- name: Generate inventory
+  template:
+    src: update-inventory.ini.j2
+    dest: "{{ playbook_dir }}/inventory/inventory.ini"
+    mode: 0644

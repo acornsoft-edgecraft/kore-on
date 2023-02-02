@@ -56,6 +56,8 @@ func AddonCmd() *cobra.Command {
 			return addon.run()
 		},
 	}
+
+	// SubCommand add
 	cmd.AddCommand(AddonDeleteCmd())
 
 	// SubCommand validation

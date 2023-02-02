@@ -31,6 +31,7 @@ type KoreOnToml struct {
 		NodePortRange    string   `toml:"node-port-range,omitempty"`
 		AuditLogEnable   bool     `toml:"audit-log-enable,omitempty"`
 		ApiSans          []string `toml:"api-sans,omitempty"`
+		GetKubeConfig    bool
 
 		Calico struct {
 			Version   string `toml:"version,omitempty"`

@@ -31,6 +31,7 @@ func initCmd() *cobra.Command {
 		},
 	}
 
+	// SubCommand add
 	cmd.AddCommand(emptyCmd())
 
 	// SubCommand validation

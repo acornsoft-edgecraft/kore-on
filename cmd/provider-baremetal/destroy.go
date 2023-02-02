@@ -45,6 +45,7 @@ func DestroyCmd() *cobra.Command {
 		},
 	}
 
+	// SubCommand add
 	cmd.AddCommand(
 		destroyPrepareAirGapCmd(),
 		destroyClusterCmd(),

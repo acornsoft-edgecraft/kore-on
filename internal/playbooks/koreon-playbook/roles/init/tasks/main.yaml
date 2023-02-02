@@ -1,5 +1,10 @@
 ---
-- import_tasks: generate-inventory.yaml
+- include_tasks: generate-inventory.yaml
+  when:
+    - not Kubernetes.GetKubeConfig
+- include_tasks: generate-update-inventory.yaml
+  when:
+    - Kubernetes.GetKubeConfig
 
 - import_tasks: generate-basic-vars.yaml
 
