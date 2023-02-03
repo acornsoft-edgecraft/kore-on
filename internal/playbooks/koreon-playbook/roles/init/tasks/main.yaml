@@ -2,9 +2,12 @@
 - include_tasks: generate-inventory.yaml
   when:
     - not Kubernetes.GetKubeConfig
-- include_tasks: generate-update-inventory.yaml
+- include_tasks: generate-get-kubeconfig-inventory.yaml
   when:
     - Kubernetes.GetKubeConfig
+- include_tasks: generate-update-inventory.yaml
+  when:
+    - Kubernetes.Update
 
 - import_tasks: generate-basic-vars.yaml
 

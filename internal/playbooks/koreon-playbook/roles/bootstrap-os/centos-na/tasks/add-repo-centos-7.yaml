@@ -49,7 +49,7 @@
     name: epel-release
     disablerepo: "*"
     enablerepo: "epel"
-    state: latest
+    state: present
 
 - name: Adding Extras repository
   yum_repository:

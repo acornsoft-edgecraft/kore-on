@@ -54,7 +54,7 @@
     name: nginx
     disablerepo: "*"
     enablerepo: "local-to-file"
-    state: latest
+    state: present
     disable_gpg_check: yes
 
 - name: Update nginx.conf

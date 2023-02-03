@@ -62,7 +62,7 @@
     name: epel-release
     disablerepo: "*"
     enablerepo: "epel"
-    state: latest
+    state: present
 
 - name: Adding Nginx|nginx-stable repository
   yum_repository:

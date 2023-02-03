@@ -58,7 +58,7 @@
 - name: Install nginx server for local repository
   ansible.builtin.apt:
     name: nginx
-    state: latest
+    state: present
     update_cache: yes
 
 - name: Update nginx.conf
