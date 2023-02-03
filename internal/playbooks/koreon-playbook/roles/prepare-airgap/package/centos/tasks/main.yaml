@@ -30,7 +30,7 @@
 - name: Package | Install dnf
   ansible.builtin.yum:
     name: dnf
-    state: latest
+    state: present
 
 - name: Copy local-repository scripts files
   template:
