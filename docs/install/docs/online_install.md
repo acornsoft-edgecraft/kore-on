@@ -33,10 +33,23 @@
 
 6. `cp koreonctl-linux-amd64 /usr/bin/korectl`
 
-7. `korectl init`
+7. `korectl init` 후 sample toml 파일을 수정한다.
 
 8. edit koreon.toml
-      - [example online toml file link](./example_online_koreon.toml)
+
+```toml
+[koreon]
+# 하단의 해당하는 부분만 변경
+cluster-name = "testing-cluster"
+
+[node-pool.node]
+# 하단의 해당하는 부분만 변경
+ip = ["x.x.x.x","x.x.x.x","x.x.x.x"]
+
+[node-pool.master]
+# 하단의 해당하는 부분만 변경
+ip = ["x.x.x.x"]
+```
 
 9. `korectl create -p [SSH KEY] -u [USERNAME]`
 
