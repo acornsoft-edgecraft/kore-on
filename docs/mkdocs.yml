@@ -1,15 +1,68 @@
 site_name: Kore-on
+site_url: https://acornsoft-edgecraft.github.io/kore-on/
+repo_name: acornsoft-edgecraft/kore-on
+repo_url: https://github.com/acornsoft-edgecraft/kore-on
+copyright: Copyright &copy; 2016 - 2020 Martin Donath
 nav:
-  - Home: index.md
   # - section 1:
   #   - index.md
   #   - index.md
-  - Requirements:
-      - System requirements: '!include ./System_requirements/mkdocs.yml'
+  - 설치: '!include ./install/mkdocs.yml'
+  - System requirements: '!include ./System_requirements/mkdocs.yml'
   # - Components: '*include ./components/*/mkdocs.yml'
 plugins:
   - monorepo
   - awesome-pages
   - search
+  # 깃허브 파일 작성날짜 연동
+  - git-revision-date-localized:
+      enable_creation_date: true
+      type: date
+      enable_creation_date: true
+      fallback_to_build_date: true
+
 theme:
   name: material
+  # icon:
+  #   edit: material/pencil
+  #   view: material/eye
+  features:
+    # SPA처럼 작동
+    - navigation.instant
+    # 하위 섹션 자동으로 열기
+    - navigation.expand
+    # Back-to-top 버튼
+    - navigation.top
+    # footer nav
+    # - navigation.footer
+    # 헤더 자동 숨기기
+    - header.autohide
+    # 읽은 것으로 표시
+    - announce.dismiss
+    # 검색 제안 활성화
+    - search.suggest
+    # 검색 공유
+    - search.share
+    # edit 버튼
+    # - content.action.edit
+    # view 버튼
+    # - content.action.view
+  # logo: assets/logo.png
+  # favicon: images/favicon.png
+  # language: en
+  # direction: ltr
+  palette:
+    # Palette toggle for dark mode
+    - scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+
+    # Palette toggle for dark mode
+    - scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+extra:
+  generator: false

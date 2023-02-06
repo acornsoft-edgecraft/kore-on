@@ -1,5 +1,9 @@
 # Kore-On
 
+## 구성도
+
+![online_install_archtecture](./online_install_architecture.jpeg)
+
 ## 요구사항
 
 - docker
@@ -7,6 +11,7 @@
 - SSH KEY
 
 ## 온라인 설치
+> 가능하면 관리자 유저에서 실행하고 Bastion Node에서 명령어를 실행한다.
 
 1. `apt-get update`
 
@@ -14,8 +19,8 @@
 
 3. docker install
    - `apt-get install -y docker.io`
-   - Error
-     1. Got permission denied while trying to connect to the Docker daemon socket
+   - IF Error
+     - Got permission denied while trying to connect to the Docker daemon socket
         - `sudo usermod -a -G docker $USER`
         - reconnect
         - `id`
@@ -31,7 +36,7 @@
 7. `korectl init`
 
 8. edit koreon.toml
-    - example online toml file link
+      - [example online toml file link](./example_online_koreon.toml)
 
 9. `korectl create -p [SSH KEY] -u [USERNAME]`
 
