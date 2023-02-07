@@ -4,3 +4,4 @@ nav:
   - 온라인 설치: online_install.md
   - 요구사항: requirements.md
   - 폐쇄망 설치: air_gap_install.md
+  - 예제 파일: online_sample_toml.md

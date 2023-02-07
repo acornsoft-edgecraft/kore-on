@@ -7,6 +7,7 @@ nav:
   - 소개: index.md
   - 설치: '!include ./install/mkdocs.yml'
   - 아키텍처: architecture.md
+  - toml 설명: toml_config.md
 
 plugins:
   - monorepo
@@ -21,6 +22,8 @@ plugins:
 
 theme:
   name: material
+  font:
+    code: Open Sans
   # icon:
   #   edit: material/pencil
   #   view: material/eye
@@ -51,9 +54,13 @@ theme:
     # breadcrums
     - navigation.path
     # 사이드바에 목차 렌더링
-    - toc.integrate
+    # - toc.integrate
     # ???
     - toc.follow
+    # 코드 복사 버튼
+    - content.code.copy
+    # 코드 주석
+    - content.code.annotate
     # 읽은 것으로 표시
     # - announce.dismiss
     # edit 버튼
@@ -81,3 +88,10 @@ theme:
 
 extra:
   generator: false
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
