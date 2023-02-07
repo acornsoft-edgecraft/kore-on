@@ -2,12 +2,13 @@
 - include_tasks: generate-inventory.yaml
   when:
     - not Kubernetes.GetKubeConfig
+    - not KoreOn.Update
 - include_tasks: generate-get-kubeconfig-inventory.yaml
   when:
     - Kubernetes.GetKubeConfig
 - include_tasks: generate-update-inventory.yaml
   when:
-    - Kubernetes.Update
+    - KoreOn.Update
 
 - import_tasks: generate-basic-vars.yaml
 

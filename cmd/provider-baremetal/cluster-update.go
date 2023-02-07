@@ -6,12 +6,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"kore-on/cmd/koreonctl/conf/templates"
+	"kore-on/pkg/cluster/kubemethod"
 	"kore-on/pkg/logger"
 	"kore-on/pkg/model"
+	"kore-on/pkg/model/k8s"
 	"kore-on/pkg/utils"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"text/template"
 
@@ -21,9 +22,6 @@ import (
 	"github.com/apenella/go-ansible/pkg/stdoutcallback/results"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	v12 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 )
 
@@ -146,22 +144,149 @@ func (c *strClusterUpdateCmd) run() error {
 		return fmt.Errorf("[ERROR]: %s", "To run this ansible-playbook an kubeconfig option must be specified.\n You can get kubeconfig with 'get-kubeconfig' command")
 	}
 
+	var master []k8s.Node
+	var node []k8s.Node
+	updateNodeIP := make(map[int]string)
+	updateNodePrivateIP := make(map[int]string)
+	updateNodeName := make(map[int]string)
+	updateType := ""
 	if c.command != "get-kubeconfig" {
 		// Get k8s clientset
 		kubeconfigPath, _ := filepath.Abs(c.kubeconfig)
-		client, err := createK8sClient(kubeconfigPath)
+		config, err := clientcmd.BuildConfigFromFlags("", kubeconfigPath)
+		if err != nil {
+			logger.Fatal(err)
+		}
+		chekServerAddress := checkKubeconfig(koreonToml.NodePool.Master.IP, config.Host)
+
+		if !chekServerAddress {
+			logger.Fatal("The cluster is unreachable. Check the kubeconfig server address.")
+		}
+
+		client, err := kubemethod.CreateK8sClient(config)
 		if err != nil {
 			logger.Fatal(err)
 		}
 
 		// Get K8s Cluster Nodes
-		kubeNodes := getNodes(client)
-		fmt.Println(kubeNodes)
+		kubeNodes, err := kubemethod.GetNodeList(client)
+		if err != nil {
+			logger.Fatal(err)
+		}
+
+		for _, v := range kubeNodes {
+			if strings.Contains(v.Role, "control-plane") {
+				master = append(master, v)
+			} else {
+				node = append(node, v)
+			}
+		}
+
+		updateNodePrivateIP = getNodeIP(koreonToml.NodePool.Node.PrivateIP)
+		updateNodeIP = getNodeIP(koreonToml.NodePool.Node.IP)
+		// koreon.toml PrivateIP 값이 있을때
+
+		if len(koreonToml.NodePool.Node.PrivateIP) == len(node) {
+			var cnt int
+			for _, v := range koreonToml.NodePool.Node.PrivateIP {
+				for _, j := range node {
+					if j.InternalIP == v {
+						cnt = cnt + 1
+					}
+				}
+			}
+			if cnt == len(node) {
+				logger.Fatal("Same as the current cluster node list. There are no node entries to update. Please check node pool input.")
+			}
+		}
+		if len(koreonToml.NodePool.Node.PrivateIP) > 0 {
+			// Node 추가
+			if len(koreonToml.NodePool.Node.PrivateIP) > len(node) {
+				updateType = "ADD"
+				for k, v := range koreonToml.NodePool.Node.PrivateIP {
+					for _, j := range node {
+						if strings.Contains(j.InternalIP, v) {
+							delete(updateNodePrivateIP, k)
+							delete(updateNodeIP, k)
+						}
+					}
+				}
+			}
+			// Node 삭제
+			if len(koreonToml.NodePool.Node.PrivateIP) < len(node) {
+				updateType = "DELETE"
+				c.playbookFiles = []string{
+					"./internal/playbooks/koreon-playbook/cluster-remove-node.yaml",
+				}
+				for k, v := range node {
+					updateNodePrivateIP[k] = v.InternalIP
+					updateNodeIP[k] = v.AnsibleSshHost
+					updateNodeName[k] = v.Name
+				}
+				for k, v := range node {
+					for _, j := range koreonToml.NodePool.Node.PrivateIP {
+						if strings.Contains(j, v.InternalIP) {
+							delete(updateNodePrivateIP, k)
+							delete(updateNodeIP, k)
+						}
+					}
+				}
+			}
+		}
+		// koreon.toml PrivateIP 값이 없을때
+		if len(koreonToml.NodePool.Node.PrivateIP) == 0 {
+			// Node 추가
+			if len(koreonToml.NodePool.Node.PrivateIP) > len(node) {
+				updateType = "ADD"
+				for k, v := range koreonToml.NodePool.Node.IP {
+					for _, j := range node {
+						if strings.Contains(j.InternalIP, v) {
+							delete(updateNodeIP, k)
+						}
+					}
+				}
+			}
+			//Node 삭제
+			if len(koreonToml.NodePool.Node.PrivateIP) < len(node) {
+				updateType = "DELETE"
+				c.playbookFiles = []string{
+					"./internal/playbooks/koreon-playbook/cluster-remove-node.yaml",
+				}
+				for k, v := range node {
+					updateNodePrivateIP[k] = v.InternalIP
+					updateNodeIP[k] = v.AnsibleSshHost
+					updateNodeName[k] = v.Name
+				}
+				for k, v := range node {
+					for _, j := range koreonToml.NodePool.Node.IP {
+						if strings.Contains(j, v.InternalIP) {
+							delete(updateNodeIP, k)
+						}
+					}
+				}
+			}
+		}
+		if len(updateNodeIP) == 0 {
+			logger.Fatal("There are no node entries to update. Please check node pool input.")
+		}
 	}
 
 	// Make provision data
 	data := model.KoreonctlText{}
 	data.KoreOnTemp = koreonToml
+	data.Master = master
+	data.Node = node
+	for k, v := range updateNodeIP {
+		data.UpdateNode.IP = append(data.UpdateNode.IP, v)
+		data.UpdateNode.PrivateIP = append(data.UpdateNode.PrivateIP, updateNodePrivateIP[k])
+		data.UpdateNode.Name = append(data.UpdateNode.Name, updateNodeName[k])
+	}
+	koreonToml.NodePool.Node.IP = data.UpdateNode.IP
+	koreonToml.NodePool.Node.PrivateIP = data.UpdateNode.PrivateIP
+	koreonToml.KoreOn.Update = true
+
+	// template func
+	// maxLength := func(str string)
 
 	// Processing template
 	koreonctlText := template.New("ClusterUpdateText")
@@ -171,7 +296,7 @@ func (c *strClusterUpdateCmd) run() error {
 		tempText = templates.ClusterGetKubeconfigText
 	}
 	if c.command == "update" {
-		data.Command = "cluster-update"
+		data.Command = updateType
 		tempText = templates.ClusterUpdateText
 	}
 	temp, err := koreonctlText.Parse(tempText)
@@ -235,80 +360,20 @@ func (c *strClusterUpdateCmd) run() error {
 	return nil
 }
 
-func getNodes(client *kubernetes.Clientset) map[string]string {
-	var m = make(map[string]string)
-	ctx := context.Background()
-
-	listOpts := metav1.ListOptions{
-		LabelSelector: "node-role.kubernetes.io/master!=",
-	}
-
-	nodes, err := client.CoreV1().Nodes().List(ctx, listOpts)
-	if err != nil {
-		fmt.Printf("[ERROR] fail to get nodes: %s", err.Error())
-		return nil
-	}
-
-	for i := 0; i < len((*nodes).Items); i++ {
-		node := (*nodes).Items[i]
-		ansibleIP := node.Labels["koreon.acornsoft.io/ansible_ssh_host"]
-		m[node.Name] = fmt.Sprintf("%s:%s:%s", findNodeInternalIP(node.Status), findNodeExternalIP(node.Status), ansibleIP)
-	}
-	return m
-}
-
-func getVersion(client *kubernetes.Clientset) (int, int, error) {
-
-	serverVersion, err := client.ServerVersion()
-	if err != nil {
-		fmt.Printf("[ERROR] fail to get nodes: %s", err.Error())
-		return -1, -1, err
-	}
-
-	spVersion := strings.Split(serverVersion.GitVersion, ".")
-
-	minor, err := strconv.Atoi(spVersion[1])
-	if err != nil {
-		fmt.Printf("[ERROR] fail to get nodes: %s", err.Error())
-		return -1, -1, err
-	}
-
-	patch, err := strconv.Atoi(spVersion[2])
-	if err != nil {
-		fmt.Printf("[ERROR] fail to get nodes: %s", err.Error())
-		return -1, -1, err
-	}
-
-	return minor, patch, nil
-
-}
-
-func createK8sClient(kubeconfig string) (*kubernetes.Clientset, error) {
-	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
-	clientset, err := kubernetes.NewForConfig(config)
-	if err != nil {
-		return nil, err
-	}
-
-	return clientset, nil
-}
-
-func findNodeInternalIP(status v12.NodeStatus) string {
-	for i := 0; i < len(status.Addresses); i++ {
-		if status.Addresses[i].Type == v12.NodeInternalIP {
-			return status.Addresses[i].Address
+func checkKubeconfig(ip []string, host string) bool {
+	for _, v := range ip {
+		if strings.Contains(host, v) {
+			return true
 		}
 	}
 
-	return "<none>"
+	return false
 }
 
-func findNodeExternalIP(status v12.NodeStatus) string {
-	for i := 0; i < len(status.Addresses); i++ {
-		if status.Addresses[i].Type == v12.NodeExternalIP {
-			return status.Addresses[i].Address
-		}
+func getNodeIP(ip []string) map[int]string {
+	nodeIPs := make(map[int]string)
+	for k, v := range ip {
+		nodeIPs[k] = v
 	}
-
-	return "<none>"
+	return nodeIPs
 }

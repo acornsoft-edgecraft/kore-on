@@ -11,6 +11,9 @@ type KoreOnToml struct {
 		HelmCubeRepoID   string
 		HelmCubeRepoPW   string
 		HelmChartProject string
+		Update           bool
+		Create           bool
+		Upgrade          bool
 
 		//#Airgap
 		ClosedNetwork              bool   `toml:"closed-network,omitempty"`
