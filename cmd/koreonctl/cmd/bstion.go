@@ -309,6 +309,7 @@ func runExecCommand(commandArgs []string) string {
 	cmd := utils.ExecCommand(commandArgs[0], commandArgs[1:commandLen])
 
 	out, err := cmd.Output()
+	fmt.Println(string(out))
 	if err != nil {
 		if ee, ok := err.(*exec.ExitError); ok {
 			logger.Fatal("ExitError:", string(ee.Stderr))

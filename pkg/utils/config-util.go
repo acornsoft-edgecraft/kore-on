@@ -357,6 +357,105 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 		}
 
 		koreonToml.PrepareAirgap = koreon_toml.PrepareAirgap
+	} else if cmd == "cluster-update" {
+		kubernetesPodCidr := koreonToml.Kubernetes.PodCidr
+		kubernetesServiceCidr := koreonToml.Kubernetes.ServiceCidr
+		k8sVersion := koreonToml.Kubernetes.Version
+		workerIP := koreonToml.NodePool.Node.IP
+		nodePoolDataDir := koreonToml.NodePool.DataDir
+
+		// privateRegistryInstall := koreonToml.PrivateRegistry.Install
+		// privateRegistryRegistryIP := koreonToml.PrivateRegistry.RegistryIP
+		// privateRegistryRegistryVersion := koreonToml.PrivateRegistry.RegistryVersion
+		// privateRegistryRegistryDomain := koreonToml.PrivateRegistry.RegistryDomain
+		// isPrivateRegistryPublicCert := koreonToml.PrivateRegistry.PublicCert
+		// privateRegistryCrt := koreonToml.PrivateRegistry.CertFile.SslCertificate
+		// privateRegistryKey := koreonToml.PrivateRegistry.CertFile.SslCertificateKey
+
+		supportK8sVersion := IsSupportVersion(k8sVersion, confK8sVersion)
+
+		// if koreonToml.KoreOn.InstallDir != "" && !strings.HasPrefix(koreonToml.KoreOn.InstallDir, "/") {
+		// 	logger.Fatal("koreon > install-dir is Only absolute paths are supported.")
+		// 	errorCnt++
+		// }
+
+		if k8sVersion == "" {
+			koreonToml.Kubernetes.Version = supportK8sVersion
+			logger.Warn("kubernetes > Kubernetes version is required. Last version", koreonToml.Kubernetes.Version, "applied automatically.")
+		} else {
+			koreonToml.Kubernetes.Version = supportK8sVersion
+		}
+
+		if len(workerIP) < 0 {
+			logger.Fatal("NodePool > K8s Worker node is required.")
+		}
+
+		if len(kubernetesPodCidr) > 0 {
+			//todo check cider
+		}
+
+		if len(kubernetesServiceCidr) > 0 {
+			//todo check cider
+		}
+
+		if len(nodePoolDataDir) > 0 {
+			// todo node pool data dir check
+		}
+
+		if koreonToml.KoreOn.ClosedNetwork {
+			if koreonToml.KoreOn.LocalRepositoryInstall {
+				if koreonToml.KoreOn.LocalRepositoryArchiveFile == "" {
+					logger.Fatal("koreon> When installing a local repository, the local-repository-archive-file entry is required.")
+				} else {
+					localRepositoryArchiveFile := filepath.Base(koreonToml.KoreOn.LocalRepositoryArchiveFile)
+					k8sVersionCheck := strings.Split(localRepositoryArchiveFile, "-")
+					if supportK8sVersion != k8sVersionCheck[2] {
+						logger.Fatalf("Check the kubernetes installation version.\nIs the version you are trying to install '%s' correct? If different, re-enter the kubernetes.version entry", k8sVersionCheck[2])
+					}
+					koreonToml.KoreOn.LocalRepositoryArchiveFile = localRepositoryArchiveFile
+				}
+			} else {
+				if koreonToml.KoreOn.LocalRepositoryUrl == "" {
+					logger.Fatal("koreon> If you are not installing a local repository, the local-repository-url entry is required.")
+				}
+				if koreonToml.KoreOn.LocalRepositoryArchiveFile != "" {
+					logger.Fatal("koreon> If you are not installing a local repository, the local-repository-archive-file entry should be empty.")
+				}
+			}
+		}
+
+		// Get image support version
+		supportK8sList := GetSupportVersion(supportK8sVersion, "k8s_support_image")
+		if supportK8sList == nil {
+			logger.Fatal("Prepare Air Gap > Support package and container image not found.:\n")
+			errorCnt++
+		}
+		// Get package support version
+		supportPackageList := GetSupportVersion(supportK8sVersion, "k8s_support_package")
+		if supportPackageList == nil {
+			logger.Fatal("Prepare Air Gap > Support package and container image not found.:\n")
+			errorCnt++
+		}
+
+		// Set image support version
+		k8sSupportImagesVersion, err := setField(&koreonToml.SupportVersion.ImageVersion, supportK8sList)
+		if err != nil {
+			logger.Fatal(err)
+			errorCnt++
+		} else if err := json.Unmarshal(k8sSupportImagesVersion, &koreon_toml.ListVersion); err != nil {
+			logger.Fatal(err)
+		}
+
+		// Set package support version
+		packageSupportVersion, err := setField(&koreonToml.SupportVersion.PackageVersion, supportPackageList)
+		if err != nil {
+			logger.Fatal(err)
+			errorCnt++
+		} else if err := json.Unmarshal(packageSupportVersion, &koreon_toml.ListVersion); err != nil {
+			logger.Fatal(err)
+		}
+
+		koreonToml.PrepareAirgap = koreon_toml.PrepareAirgap
 	} else if cmd == "reset-prepare-airgap" {
 		registryIP := koreonToml.PrepareAirgap.RegistryIP
 

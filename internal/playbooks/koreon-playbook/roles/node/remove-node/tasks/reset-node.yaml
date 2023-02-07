@@ -1,0 +1,4 @@
+---
+- name: Reset node
+  ansible.builtin.include_role:
+    name: reset
