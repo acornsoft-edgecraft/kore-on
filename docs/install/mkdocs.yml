@@ -1,5 +1,6 @@
-site_name: 설치
+site_name: install
 
 nav:
-  - 온라인 설치: "online_install.md"
-  - 요구사항: "requirements.md"
+  - 온라인 설치: online_install.md
+  - 요구사항: requirements.md
+  - 폐쇄망 설치: air_gap_install.md

@@ -4,12 +4,10 @@ repo_name: acornsoft-edgecraft/kore-on
 repo_url: https://github.com/acornsoft-edgecraft/kore-on
 copyright: Copyright &copy; 2016 - 2020 Martin Donath
 nav:
-  # - section 1:
-  #   - index.md
-  #   - index.md
+  - 소개: introduction.md
   - 설치: '!include ./install/mkdocs.yml'
-  - System requirements: '!include ./System_requirements/mkdocs.yml'
-  # - Components: '*include ./components/*/mkdocs.yml'
+  - 아키텍처: architecture.md
+
 plugins:
   - monorepo
   - awesome-pages
@@ -29,6 +27,11 @@ theme:
   features:
     # SPA처럼 작동
     - navigation.instant
+    # - navigation.tracking
+    # 섹션처럼 만들기
+    # - navigation.sections
+    # 메뉴 탭 만들기
+    # - navigation.tabs
     # 하위 섹션 자동으로 열기
     - navigation.expand
     # Back-to-top 버튼
@@ -39,30 +42,45 @@ theme:
     - header.autohide
     # 읽은 것으로 표시
     - announce.dismiss
+    # 검색 하이라이트
+    - search.highlight
     # 검색 제안 활성화
     - search.suggest
     # 검색 공유
     - search.share
+    # breadcrums
+    - navigation.path
+    # 사이드바에 목차 렌더링
+    - toc.integrate
+    # ???
+    - toc.follow
+    # 읽은 것으로 표시
+    # - announce.dismiss
     # edit 버튼
     # - content.action.edit
     # view 버튼
     # - content.action.view
-  # logo: assets/logo.png
+  logo: ./assets/edge.png
   # favicon: images/favicon.png
   # language: en
   # direction: ltr
   palette:
-    # Palette toggle for dark mode
-    - scheme: default
-      toggle:
-        icon: material/brightness-7
-        name: Switch to dark mode
-
-    # Palette toggle for dark mode
     - scheme: slate
+      accent: orange
+      primary: blue grey
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
 
+    - scheme: default
+      accent: orange
+      primary: teal
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+
 extra:
   generator: false
+  # 내부 개발 할 때는 로컬로하고 git push시에 바꿔준다.
+  # homepage: https://github.com/acornsoft-edgecraft/kore-on/introduction/
+  homepage: http://127.0.0.1:8000/kore-on/introduction/
