@@ -82,5 +82,5 @@ theme:
 extra:
   generator: false
   # 내부 개발 할 때는 로컬로하고 git push시에 바꿔준다.
-  # homepage: https://github.com/acornsoft-edgecraft/kore-on/introduction/
-  homepage: http://127.0.0.1:8000/kore-on/introduction/
+  homepage: https://github.com/acornsoft-edgecraft/kore-on/introduction/
+  # homepage: http://127.0.0.1:8000/kore-on/introduction/
