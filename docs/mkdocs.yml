@@ -4,7 +4,7 @@ repo_name: acornsoft-edgecraft/kore-on
 repo_url: https://github.com/acornsoft-edgecraft/kore-on
 copyright: Copyright &copy; 2016 - 2020 Martin Donath
 nav:
-  - 소개: introduction.md
+  - 소개: index.md
   - 설치: '!include ./install/mkdocs.yml'
   - 아키텍처: architecture.md
 
@@ -81,6 +81,3 @@ theme:
 
 extra:
   generator: false
-  # 내부 개발 할 때는 로컬로하고 git push시에 바꿔준다.
-  homepage: https://github.com/acornsoft-edgecraft/kore-on/introduction/
-  # homepage: http://127.0.0.1:8000/kore-on/introduction/
