@@ -56,7 +56,7 @@ theme:
     # 사이드바에 목차 렌더링
     # - toc.integrate
     # ???
-    - toc.follow
+    # - toc.follow
     # 코드 복사 버튼
     - content.code.copy
     # 코드 주석
@@ -67,20 +67,26 @@ theme:
     # - content.action.edit
     # view 버튼
     # - content.action.view
+  # 로고
   logo: ./assets/edge.png
+  # 파비콘
   # favicon: images/favicon.png
+  # 언어
   # language: en
+  # ??
   # direction: ltr
   palette:
+    # dark mode
     - scheme: slate
-      accent: orange
+      # header 색
       primary: blue grey
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
 
+    # light mode
     - scheme: default
-      accent: orange
+      # header 색
       primary: teal
       toggle:
         icon: material/brightness-7
@@ -89,6 +95,7 @@ theme:
 extra:
   generator: false
 
+# md에 문법 적용
 markdown_extensions:
   - pymdownx.highlight:
       anchor_linenums: true

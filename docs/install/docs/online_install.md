@@ -2,7 +2,7 @@
 
 ## **구성도**
 
-![online_install_archtecture](./assets/online_install_architecture.jpeg)
+![online_install_archtecture](./assets/online_install_architecture.png)
 
 ## **요구사항**
 
