@@ -25,4 +25,4 @@ Kore-on 설치를 위해 필요한 최소한의 하드웨어 권장 사항은 �
 
 ## **네트워크**
 
-중요: CLI client에서 controllplane node, worker node로 SSH 접속이 가능하여야 한다.
+중요: CLI client에서 controllplane node, worker node로 SSH 접속이 가능하여야 합니다.
