@@ -17,6 +17,7 @@ import (
 	"strconv"
 	"strings"
 	"text/template"
+	"time"
 
 	"github.com/apenella/go-ansible/pkg/execute"
 	"github.com/apenella/go-ansible/pkg/options"
@@ -154,6 +155,7 @@ func (c *strClusterUpdateCmd) run() error {
 		logger.Fatal(fmt.Errorf("%s", message))
 	}
 
+	koreonToml.KoreOn.FileName = koreOnConfigFileName
 	koreonToml.KoreOn.CommandMode = c.command
 	if c.command == "get-kubeconfig" {
 		koreonToml.Kubernetes.GetKubeConfig = true
@@ -335,7 +337,7 @@ func (c *strClusterUpdateCmd) run() error {
 		"format": func(cnts ...int) map[string]int {
 			lens := make(map[string]int)
 			for k, v := range cnts {
-				lens[strconv.Itoa(k)] = v + 4
+				lens[strconv.Itoa(k)] = v + 2
 			}
 			return lens
 		},
@@ -389,6 +391,18 @@ func (c *strClusterUpdateCmd) run() error {
 	if err := json.Unmarshal(b, &c.extravars); err != nil {
 		logger.Fatal(err.Error())
 		os.Exit(1)
+	}
+
+	if c.command == "update-init" {
+		currTime := time.Now()
+
+		if err == nil {
+			fmt.Println("Previous " + koreOnConfigFileName + " file exist and it will be backup")
+			e := os.Rename(koreOnConfigFilePath, koreOnConfigFilePath+"_"+currTime.Format("20060102150405"))
+			if e != nil {
+				logger.Fatal(e)
+			}
+		}
 	}
 
 	ansiblePlaybookConnectionOptions := &options.AnsibleConnectionOptions{
@@ -447,7 +461,6 @@ func maxLength(item interface{}) map[string]int {
 	blankCnt := 2
 	v := reflect.ValueOf(item)
 
-	fmt.Println(" ==== ", v.Kind())
 	switch v.Kind() {
 	case reflect.Invalid:
 		return maxlen
@@ -469,14 +482,11 @@ func maxLength(item interface{}) map[string]int {
 						}
 					}
 				}
+			case reflect.String:
+				fieldValue := r.Field(i)
+				value := fmt.Sprintf("%s", fieldValue.Interface())
+				maxlen[value] = len(value) + blankCnt
 			}
-		}
-	case reflect.Struct:
-		t := v.Type()
-		for i := 0; i < v.NumField(); i++ {
-			fieldValue := v.Field(i)
-			field := t.Field(i)
-			maxlen[field.Name] = len(fmt.Sprintf("%s", fieldValue.Interface())) + blankCnt
 		}
 	}
 	return maxlen
