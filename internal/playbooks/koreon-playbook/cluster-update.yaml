@@ -116,7 +116,7 @@
             - node
   any_errors_fatal: true
 
-- hosts: master
+- hosts: masters
   become: true
   gather_facts: false
   vars_files:

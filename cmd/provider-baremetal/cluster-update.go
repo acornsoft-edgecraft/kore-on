@@ -154,6 +154,7 @@ func (c *strClusterUpdateCmd) run() error {
 		logger.Fatal(fmt.Errorf("%s", message))
 	}
 
+	koreonToml.KoreOn.FileName = koreOnConfigFileName
 	koreonToml.KoreOn.CommandMode = c.command
 	if c.command == "get-kubeconfig" {
 		koreonToml.Kubernetes.GetKubeConfig = true
