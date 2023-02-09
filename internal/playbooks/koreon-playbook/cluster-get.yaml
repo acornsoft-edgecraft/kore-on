@@ -54,5 +54,16 @@
       tags:
         - get-kubeconfig
       when:
-        - ansible_distribution is defined
+        - KoreOn.CommandMode in ["get-kubeconfig"]
+    - name: Get installed config file
+      ansible.builtin.include_role:
+        name: kubernetes
+        tasks_from: update-init
+        apply:
+          tags:
+            - update-init
+      tags:
+        - update-init
+      when:
+        - KoreOn.CommandMode in ["update-init"]
   any_errors_fatal: true

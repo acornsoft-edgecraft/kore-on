@@ -13,6 +13,8 @@ import (
 	"kore-on/pkg/utils"
 	"os"
 	"path/filepath"
+	"reflect"
+	"strconv"
 	"strings"
 	"text/template"
 
@@ -57,6 +59,7 @@ func ClusterUpdateCmd() *cobra.Command {
 	// SubCommand add
 	cmd.AddCommand(
 		GetKubeConfigCmd(),
+		UpdateInitCmd(),
 	)
 
 	// SubCommand validation
@@ -104,10 +107,40 @@ func GetKubeConfigCmd() *cobra.Command {
 	f := cmd.Flags()
 	f.BoolVarP(&getKubeConfig.verbose, "verbose", "v", false, "verbose")
 	f.BoolVarP(&getKubeConfig.dryRun, "dry-run", "d", false, "dryRun")
-	f.StringVarP(&getKubeConfig.inventory, "inventory", "i", getKubeConfig.inventory, "Specify ansible playbook inventory")
 	f.StringVar(&getKubeConfig.tags, "tags", getKubeConfig.tags, "Ansible options tags")
 	f.StringVarP(&getKubeConfig.privateKey, "private-key", "p", "", "Specify ssh key path")
 	f.StringVarP(&getKubeConfig.user, "user", "u", "", "login user")
+
+	return cmd
+}
+
+func UpdateInitCmd() *cobra.Command {
+	updateInitCmd := &strClusterUpdateCmd{}
+
+	cmd := &cobra.Command{
+		Use:          "init [flags]",
+		Short:        "Get Installed Config file",
+		Long:         "This command get installed config file in k8s controlplane node.",
+		SilenceUsage: true,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return updateInitCmd.run()
+		},
+	}
+
+	updateInitCmd.command = "update-init"
+	updateInitCmd.tags = ""
+	updateInitCmd.inventory = "./internal/playbooks/koreon-playbook/inventory/inventory.ini"
+	updateInitCmd.playbookFiles = []string{
+		"./internal/playbooks/koreon-playbook/cluster-get.yaml",
+	}
+
+	f := cmd.Flags()
+	f.BoolVarP(&updateInitCmd.verbose, "verbose", "v", false, "verbose")
+	f.BoolVarP(&updateInitCmd.dryRun, "dry-run", "d", false, "dryRun")
+	f.StringVar(&updateInitCmd.tags, "tags", updateInitCmd.tags, "Ansible options tags")
+	f.StringVarP(&updateInitCmd.privateKey, "private-key", "p", "", "Specify ssh key path")
+	f.StringVarP(&updateInitCmd.user, "user", "u", "", "login user")
+	f.StringVar(&updateInitCmd.kubeconfig, "kubeconfig", "", "get kubeconfig")
 
 	return cmd
 }
@@ -120,6 +153,8 @@ func (c *strClusterUpdateCmd) run() error {
 		message := "Settings are incorrect. Please check the 'korean.toml' file!!"
 		logger.Fatal(fmt.Errorf("%s", message))
 	}
+
+	koreonToml.KoreOn.CommandMode = c.command
 	if c.command == "get-kubeconfig" {
 		koreonToml.Kubernetes.GetKubeConfig = true
 	}
@@ -140,7 +175,7 @@ func (c *strClusterUpdateCmd) run() error {
 		return fmt.Errorf("[ERROR]: %s", "To run ansible-playbook an ssh login user must be specified")
 	}
 
-	if c.command != "get-kubeconfig" && len(c.kubeconfig) < 1 {
+	if c.command != "update-init" && c.command != "get-kubeconfig" && len(c.kubeconfig) < 1 {
 		return fmt.Errorf("[ERROR]: %s", "To run this ansible-playbook an kubeconfig option must be specified.\n You can get kubeconfig with 'get-kubeconfig' command")
 	}
 
@@ -150,7 +185,7 @@ func (c *strClusterUpdateCmd) run() error {
 	updateNodePrivateIP := make(map[int]string)
 	updateNodeName := make(map[int]string)
 	updateType := ""
-	if c.command != "get-kubeconfig" {
+	if c.command == "update" {
 		// Get k8s clientset
 		kubeconfigPath, _ := filepath.Abs(c.kubeconfig)
 		config, err := clientcmd.BuildConfigFromFlags("", kubeconfigPath)
@@ -281,16 +316,45 @@ func (c *strClusterUpdateCmd) run() error {
 		data.UpdateNode.PrivateIP = append(data.UpdateNode.PrivateIP, updateNodePrivateIP[k])
 		data.UpdateNode.Name = append(data.UpdateNode.Name, updateNodeName[k])
 	}
+	koreonToml.NodePool.Node.Name = data.UpdateNode.Name
 	koreonToml.NodePool.Node.IP = data.UpdateNode.IP
 	koreonToml.NodePool.Node.PrivateIP = data.UpdateNode.PrivateIP
 	koreonToml.KoreOn.Update = true
 
-	// template func
-	// maxLength := func(str string)
-
 	// Processing template
 	koreonctlText := template.New("ClusterUpdateText")
+
+	// template func
+	koreonctlText.Funcs(template.FuncMap(map[string]interface{}{
+		"maxLength": func(item interface{}) map[string]int {
+			return maxLength(item)
+		},
+		"clusterLength": func(m ...map[string]int) map[string]int {
+			return clusterLength(m)
+		},
+		"format": func(cnts ...int) map[string]int {
+			lens := make(map[string]int)
+			for k, v := range cnts {
+				lens[strconv.Itoa(k)] = v + 4
+			}
+			return lens
+		},
+		"total": func(m ...int) int {
+			total := 8
+			for _, v := range m {
+				if v == 2 {
+					v = 10
+				}
+				total = total + v
+			}
+			return total
+		},
+	}))
 	var tempText = ""
+	if c.command == "update-init" {
+		data.Command = "Get installed configuration"
+		tempText = templates.ClusterGetKubeconfigText
+	}
 	if c.command == "get-kubeconfig" {
 		data.Command = "Get Kubeconfig"
 		tempText = templates.ClusterGetKubeconfigText
@@ -376,4 +440,63 @@ func getNodeIP(ip []string) map[int]string {
 		nodeIPs[k] = v
 	}
 	return nodeIPs
+}
+
+func maxLength(item interface{}) map[string]int {
+	maxlen := make(map[string]int)
+	blankCnt := 2
+	v := reflect.ValueOf(item)
+
+	fmt.Println(" ==== ", v.Kind())
+	switch v.Kind() {
+	case reflect.Invalid:
+		return maxlen
+	case reflect.Slice:
+		for i := 0; i < v.Len(); i++ {
+			r := v.Index(i)
+			switch r.Kind() {
+			case reflect.Struct:
+				checkEmpty := i
+				t := r.Type()
+				for i := 0; i < r.NumField(); i++ {
+					fieldValue := r.Field(i)
+					field := t.Field(i)
+					if checkEmpty == 0 {
+						maxlen[field.Name] = len(fmt.Sprintf("%s", fieldValue.Interface())) + blankCnt
+					} else {
+						if maxlen[field.Name] < len(fmt.Sprintf("%s", fieldValue.Interface()))+blankCnt {
+							maxlen[field.Name] = len(fmt.Sprintf("%s", fieldValue.Interface())) + blankCnt
+						}
+					}
+				}
+			}
+		}
+	case reflect.Struct:
+		t := v.Type()
+		for i := 0; i < v.NumField(); i++ {
+			fieldValue := v.Field(i)
+			field := t.Field(i)
+			maxlen[field.Name] = len(fmt.Sprintf("%s", fieldValue.Interface())) + blankCnt
+		}
+	}
+	return maxlen
+}
+
+func clusterLength(m []map[string]int) map[string]int {
+	maxlen := make(map[string]int)
+	for i := 0; i < len(m); i++ {
+		if i == 0 {
+			maxlen = m[i]
+		} else {
+			for k, v := range m[i] {
+				if maxlen[k] < v {
+					maxlen[k] = v
+				}
+			}
+		}
+	}
+	if maxlen["ExternalIP"] == 2 {
+		maxlen["ExternalIP"] = maxlen["InternalIP"]
+	}
+	return maxlen
 }

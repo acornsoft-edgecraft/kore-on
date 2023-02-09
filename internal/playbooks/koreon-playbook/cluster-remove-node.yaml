@@ -39,7 +39,6 @@
         - remove-node
   any_errors_fatal: true
 
-
 ## Remove node
 - hosts: masters
   become: true
@@ -51,6 +50,15 @@
     - name: Remove node
       ansible.builtin.include_role:
         name: node/remove-node
+        apply:
+          tags:
+            - remove-node
+      tags:
+        - remove-node
+    - name: Cluster installed configuration save
+      ansible.builtin.include_role:
+        name: post-install
+        tasks_from: update-config
         apply:
           tags:
             - remove-node

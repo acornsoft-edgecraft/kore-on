@@ -6,39 +6,38 @@ const ClusterUpdateText = `
 {{- $UpdateNode := .UpdateNode}}
 {{- $text := "DELETE"}}
 {{- $command := .Command}}
-{{- $name_len := 0}}
-{{- range $index, $data := $Master }}
-{{- if lt $name_len (len $data.Name) }}
-{{-   $name_len =  len $data.Name }}
-{{- end }}
-{{- end }}
-{{- range $index, $data := $Node }}
-{{-   $name_len =  len $data.Name }}
-{{- end }}
+{{- $master_len := .Master | maxLength}}
+{{- $node_len := .Node | maxLength}}
+{{- $update_node_len := .UpdateNode | maxLength}}
+{{- $cluster_len := clusterLength $master_len $node_len}}
+{{- $total := total $node_len.Name  $update_node_len.IP $update_node_len.PrivateIP}}
 
 Cluster Nodes
 --------------
-{{"NAME"|printf "%-20s"}}{{"STATUS"|printf "%-11s"}}{{"ROLES"|printf "%-23s"}}{{"AGE"|printf "%-8s"}}{{"VERSION"|printf "%-10s"}}{{"INTERNAL-IP"|printf "%-13s"}}{{"EXTERNAL-IP"|printf "%-13s"}}{{"OS-IMAGE"|printf "%-16s"}}{{"KERNEL-VERSION"|printf "%-28s"}}{{"CONTAINER-RUNTIME"|printf "%-20s"}}
+{{"NAME"|printf "%-*s" $cluster_len.Name}}{{"STATUS"|printf "%-*s" $cluster_len.Status}}{{"ROLES"|printf "%-*s" $cluster_len.Role}}{{"AGE"|printf "%-*s" $cluster_len.Age}}{{"VERSION"|printf "%-*s" $cluster_len.Version}}{{"INTERNAL-IP"|printf "%-*s" $cluster_len.InternalIP}}{{"EXTERNAL-IP"|printf "%-*s" $cluster_len.ExternalIP}}{{"OS-IMAGE"|printf "%-*s" $cluster_len.OSImage}}{{"KERNEL-VERSION"|printf "%-*s" $cluster_len.KernelVersion}}{{"CONTAINER-RUNTIME"|printf "%-*s" $cluster_len.ContainerRuntime}}
 {{- range $index, $data := $Master }}
-{{$data.Name|printf "%-20s"}}{{$data.Status|printf "%-11s"}}{{$data.Role|printf "%-23s"}}{{$data.Age|printf "%-8s"}}{{$data.Version|printf "%-10s"}}{{$data.InternalIP|printf "%-13s"}}{{$data.ExternalIP|printf "%-13s"}}{{$data.OSImage|printf "%-16s"}}{{$data.KernelVersion|printf "%-28s"}}{{$data.ContainerRuntime|printf "%-20s"}}
+{{$data.Name|printf "%-*s" $cluster_len.Name}}{{$data.Status|printf "%-*s" $cluster_len.Status}}{{$data.Role|printf "%-*s" $cluster_len.Role}}{{$data.Age|printf "%-*s" $cluster_len.Age}}{{$data.Version|printf "%-*s" $cluster_len.Version}}{{$data.InternalIP|printf "%-*s" $cluster_len.InternalIP}}{{$data.ExternalIP|printf "%-*s" $cluster_len.ExternalIP}}{{$data.OSImage|printf "%-*s" $cluster_len.OSImage}}{{$data.KernelVersion|printf "%-*s" $cluster_len.KernelVersion}}{{$data.ContainerRuntime|printf "%-*s" $cluster_len.ContainerRuntime}}
 {{- end}}
 {{- range $index, $data := $Node }}
-{{$data.Name|printf "%-20s"}}{{$data.Status|printf "%-11s"}}{{$data.Role|printf "%-23s"}}{{$data.Age|printf "%-8s"}}{{$data.Version|printf "%-10s"}}{{$data.InternalIP|printf "%-13s"}}{{$data.ExternalIP|printf "%-13s"}}{{$data.OSImage|printf "%-16s"}}{{$data.KernelVersion|printf "%-28s"}}{{$data.ContainerRuntime|printf "%-20s"}}
+{{$data.Name|printf "%-*s" $cluster_len.Name}}{{$data.Status|printf "%-*s" $cluster_len.Status}}{{$data.Role|printf "%-*s" $cluster_len.Role}}{{$data.Age|printf "%-*s" $cluster_len.Age}}{{$data.Version|printf "%-*s" $cluster_len.Version}}{{$data.InternalIP|printf "%-*s" $cluster_len.InternalIP}}{{$data.ExternalIP|printf "%-*s" $cluster_len.ExternalIP}}{{$data.OSImage|printf "%-*s" $cluster_len.OSImage}}{{$data.KernelVersion|printf "%-*s" $cluster_len.KernelVersion}}{{$data.ContainerRuntime|printf "%-*s" $cluster_len.ContainerRuntime}}
 {{- end}}
 
 
 Update Nodes ({{ $command }})
 ----------------------
-{{ printf "%.*s" 20 "======================================================================================================================================================" }}
-===========================================================================
-Node Name                      IP Address              Private IP Adderss
-===========================================================================
+{{ printf "%.*s" $total "======================================================================================================================================================" }}
+{{- if eq $command $text }}
+{{"Node Name"|printf "%-*s" $update_node_len.Name}}{{"IP"|printf "%-*s" $update_node_len.IP}}{{"Private IP"|printf "%-*s" $update_node_len.PrivateIP}}
+{{- else }}
+{{"Node Name"}}{{printf "%-*s" 6 ""}}{{"IP"|printf "%-*s" $update_node_len.IP}}{{"Private IP"|printf "%-*s" $update_node_len.PrivateIP}}
+{{- end}}
+{{ printf "%.*s" $total "======================================================================================================================================================" }}
 {{- range $index, $data := $UpdateNode.IP }}
 {{-   if eq $command $text }}
-{{(index $UpdateNode.Name $index)}}      { $name_len }                 {{$data}}             {{(index $UpdateNode.PrivateIP $index)}}
+{{(index $UpdateNode.Name $index)|printf "%-*s" $update_node_len.Name}}{{$data|printf "%-*s" $update_node_len.IP}}{{(index $UpdateNode.PrivateIP $index)|printf "%-*s" $update_node_len.PrivateIP}}
 {{-   else }}
-node-{{$index}}                       {{$data}}             {{(index $UpdateNode.PrivateIP $index)}}
+node-{{$index|printf "%-*v" 10 }}{{$data|printf "%-*s" $update_node_len.IP}}{{(index $UpdateNode.PrivateIP $index)|printf "%-*s" $update_node_len.PrivateIP}}
 {{-   end }}
 {{- end}}
-===========================================================================
+{{ printf "%.*s" $total "======================================================================================================================================================" }}
 Is this ok [y/n]: `
