@@ -183,35 +183,44 @@
 # -----------------------------------------------------------------------------------------
 
 # Create koreon-config configmap -------------------------------------------------------------
-#- name: Check cluster is running
-#  shell: "kubectl --kubeconfig={{ kubeadminconfig }} cluster-info"
-#  register: check_cluster_health
-#  failed_when: false
-#  delegate_to: "{{ groups['masters'][0] }}"
-#  run_once: true
-#
-#- name: Set fact koreon.toml
-#  when: check_cluster_health.rc == 0
-#  set_fact:
-#    koreon_toml: "{{ lookup('file', 'files/koreon.toml') | b64encode }}"
-#  delegate_to: "{{ groups['masters'][0] }}"
-#  run_once: true
-#
-#- name: Copy koreon-config config file
-#  when: check_cluster_health.rc == 0
-#  template:
-#    src: "{{ item.src }}"
-#    dest: "{{ kube_config_dir }}/{{ item.dest }}"
-#  with_items:
-#    - { src: "koreon-config-cm.yaml.j2", dest: "koreon-config-cm.yaml" }
-#  delegate_to: "{{ groups['masters'][0] }}"
-#  run_once: true
-#
-#- name: Create koreon-config configmap
-#  when: check_cluster_health.rc == 0
-#  shell: "kubectl apply --kubeconfig={{ kubeadminconfig }} -f {{ kube_config_dir }}/{{ item }}"
-#  with_items:
-#    - "koreon-config-cm.yaml"
-#  delegate_to: "{{ groups['masters'][0] }}"
-#  run_once: true
+- name: Copy koreon.toml file
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/download/{{ KoreOn.FileName }}"
+    dest: "{{ install_dir }}/{{ KoreOn.FileName }}"
+    owner: root
+    group: root
+    mode: '0644'
+    backup: yes
+  when:
+    - is_kube_master
+
+- name: Check cluster is running
+  ansible.builtin.command: |
+   kubectl --kubeconfig={{ kubeadminconfig }} cluster-info
+  register: check_cluster_health
+  failed_when: false
+  delegate_to: "{{ groups['masters'][0] }}"
+  run_once: true
+
+- name: Copy koreon-config config file
+  vars:
+    koreon_toml: "{{ lookup('ansible.builtin.file', '{{ playbook_dir }}/download/koreon.toml') | b64encode }}"
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ kube_config_dir }}/{{ item.dest }}"
+  with_items:
+    - { src: "koreon-config-cm.yaml.j2", dest: "koreon-config-cm.yaml" }
+  delegate_to: "{{ groups['masters'][0] }}"
+  run_once: true
+  when:
+    - check_cluster_health.rc == 0
+
+- name: Create koreon-config configmap
+  when: check_cluster_health.rc == 0
+  ansible.builtin.command: |
+    kubectl apply --kubeconfig={{ kubeadminconfig }} -f {{ kube_config_dir }}/{{ item }}
+  with_items:
+    - "koreon-config-cm.yaml"
+  delegate_to: "{{ groups['masters'][0] }}"
+  run_once: true
 # --------------------------------------------------------------------------------------------

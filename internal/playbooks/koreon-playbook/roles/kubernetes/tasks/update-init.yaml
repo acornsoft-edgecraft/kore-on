@@ -1,0 +1,6 @@
+---
+- name : Get installed config file
+  ansible.builtin.fetch:
+    src: "{{ install_dir }}/{{ KoreOn.FileName }}"
+    desc: "download/"
+    flat: true

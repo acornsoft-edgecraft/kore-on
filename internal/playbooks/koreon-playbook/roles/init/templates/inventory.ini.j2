@@ -61,7 +61,7 @@ master-{{ loop.index }}
 {% endif %}
 
 [node]
-{% if NodePool.Master.IP %}
+{% if NodePool.Node.IP %}
 {%   for IP in NodePool.Node.IP %}
 node-{{ loop.index }}
 {%   endfor %}

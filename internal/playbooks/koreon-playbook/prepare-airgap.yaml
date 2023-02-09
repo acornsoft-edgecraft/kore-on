@@ -37,7 +37,7 @@
         name: init/network
         apply:
           tags:
-            - init-network
+            - bootstrap-os
       tags:
         - bootstrap-os
   any_errors_fatal: true

@@ -1,0 +1,26 @@
+---
+- name: node | drain node
+  command: |
+    kubectl drain {{ item }} 
+    --kubeconfig={{ kubeadminconfig }} 
+    --force 
+    --delete-local-data 
+    --ignore-daemonsets
+  delegate_to: "{{ groups['masters'][0] }}"
+  run_once: true
+  register: drain_node
+  with_items:
+    - "{{ NodePool.Node.Name }}"
+  failed_when: false
+
+- name: node | remove node
+  command: |
+    kubectl delete node {{ item }} --kubeconfig={{ kubeadminconfig }}
+  delegate_to: "{{ groups['masters'][0] }}"
+  run_once: true
+  register: remove_node
+  with_items:
+    - "{{ NodePool.Node.Name }}"
+  when: 
+    - drain_node
+  failed_when: false

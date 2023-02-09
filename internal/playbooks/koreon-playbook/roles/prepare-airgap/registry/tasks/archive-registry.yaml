@@ -41,6 +41,7 @@
   community.docker.docker_image:
     name: "{{ item }}"
     archive_path: "{{ harbor_archive_dir }}/{{ koreon_image_archive }}"
-    source: local
+    source: pull
+    timeout: 180
   with_items: 
     - "{{ bastion_images }}"

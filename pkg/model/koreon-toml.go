@@ -6,6 +6,7 @@ type KoreOnToml struct {
 		ClusterID        string `toml:"cluster-id,omitempty"`
 		InstallDir       string `toml:"install-dir,omitempty"`
 		CertValidityDays int    `toml:"cert-validity-days,omitempty"`
+		FileName         string
 		ImageArchive     string
 		HelmCubeRepoUrl  string
 		HelmCubeRepoID   string
@@ -14,6 +15,7 @@ type KoreOnToml struct {
 		Update           bool
 		Create           bool
 		Upgrade          bool
+		CommandMode      string
 
 		//#Airgap
 		ClosedNetwork              bool   `toml:"closed-network,omitempty"`
@@ -117,6 +119,7 @@ type KoreOnToml struct {
 }
 
 type StrNode struct {
+	Name      []string
 	IP        []string `toml:"ip"`
 	PrivateIP []string `toml:"private-ip"`
 }

@@ -18,6 +18,11 @@ func CheckKoreonToml(value *model.KoreOnToml) error {
 func CheckCommand(cmd *cobra.Command) error {
 	cmdCheck := cmd.Commands()
 
+	if len(os.Args[1:]) == 0 {
+		fmt.Println("Error: unknown command, Run 'koreonctl --help' for usage.")
+		os.Exit(1)
+	}
+
 	if os.Args[1] == cmd.Name() {
 		if len(os.Args[1:]) < 2 {
 			if cmd.Name() == "init" {
