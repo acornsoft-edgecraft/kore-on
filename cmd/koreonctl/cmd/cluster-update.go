@@ -68,7 +68,7 @@ func (c *strClusterUpdateCmd) run() error {
 }
 
 func getKubeConfigCmd() *cobra.Command {
-	getKubeConfigCmd := &strClusterUpdateCmd{}
+	getKubeConfig := &strClusterUpdateCmd{}
 
 	cmd := &cobra.Command{
 		Use:          "get-kubeconfig [flags]",
@@ -76,23 +76,23 @@ func getKubeConfigCmd() *cobra.Command {
 		Long:         "This command get kubeconfig file in k8s controlplane node.",
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return getKubeConfigCmd.run()
+			return getKubeConfig.run()
 		},
 	}
 
-	getKubeConfigCmd.command = "get-kubeconfig"
+	getKubeConfig.command = "get-kubeconfig"
 
 	f := cmd.Flags()
-	f.BoolVarP(&getKubeConfigCmd.verbose, "verbose", "v", false, "verbose")
-	f.BoolVarP(&getKubeConfigCmd.dryRun, "dry-run", "d", false, "dryRun")
-	f.StringVarP(&getKubeConfigCmd.privateKey, "private-key", "p", "", "Specify ssh key path")
-	f.StringVarP(&getKubeConfigCmd.user, "user", "u", "", "login user")
+	f.BoolVarP(&getKubeConfig.verbose, "verbose", "v", false, "verbose")
+	f.BoolVarP(&getKubeConfig.dryRun, "dry-run", "d", false, "dryRun")
+	f.StringVarP(&getKubeConfig.privateKey, "private-key", "p", "", "Specify ssh key path")
+	f.StringVarP(&getKubeConfig.user, "user", "u", "", "login user")
 
 	return cmd
 }
 
 func updateInitCmd() *cobra.Command {
-	updateInitCmd := &strClusterUpdateCmd{}
+	updateInit := &strClusterUpdateCmd{}
 
 	cmd := &cobra.Command{
 		Use:          "init [flags]",
@@ -100,18 +100,18 @@ func updateInitCmd() *cobra.Command {
 		Long:         "This command get installed config file in k8s controlplane node.",
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return updateInitCmd.run()
+			return updateInit.run()
 		},
 	}
 
-	updateInitCmd.command = "update-init"
+	updateInit.command = "update-init"
 
 	f := cmd.Flags()
-	f.BoolVarP(&updateInitCmd.verbose, "verbose", "v", false, "verbose")
-	f.BoolVarP(&updateInitCmd.dryRun, "dry-run", "d", false, "dryRun")
-	f.StringVarP(&updateInitCmd.privateKey, "private-key", "p", "", "Specify ssh key path")
-	f.StringVarP(&updateInitCmd.user, "user", "u", "", "login user")
-	f.StringVar(&updateInitCmd.kubeconfig, "kubeconfig", "", "get kubeconfig")
+	f.BoolVarP(&updateInit.verbose, "verbose", "v", false, "verbose")
+	f.BoolVarP(&updateInit.dryRun, "dry-run", "d", false, "dryRun")
+	f.StringVarP(&updateInit.privateKey, "private-key", "p", "", "Specify ssh key path")
+	f.StringVarP(&updateInit.user, "user", "u", "", "login user")
+	f.StringVar(&updateInit.kubeconfig, "kubeconfig", "", "get kubeconfig")
 
 	return cmd
 }
@@ -157,18 +157,19 @@ func (c *strClusterUpdateCmd) clusterUpdate(workDir string) error {
 
 	// sub command
 	if c.command != "" {
+		if c.command == "update-init" {
+			c.command = "init"
+		}
 		commandArgsKoreonctl = append(commandArgsKoreonctl, c.command)
 	}
 
-	if c.kubeconfig != "" {
+	if c.command != "update-init" && c.command != "get-kubeconfig" && c.kubeconfig != "" {
 		key := filepath.Base(c.kubeconfig)
 		keyPath, _ := filepath.Abs(c.kubeconfig)
 		commandArgsVol = append(commandArgsVol, "--mount")
 		commandArgsVol = append(commandArgsVol, fmt.Sprintf("type=bind,source=%s,target=/home/%s,readonly", keyPath, key))
 		commandArgsKoreonctl = append(commandArgsKoreonctl, "--kubeconfig")
 		commandArgsKoreonctl = append(commandArgsKoreonctl, "/home/"+key)
-	} else {
-		logger.Fatal(fmt.Errorf("[ERROR]: %s", "To run ansible-playbook an privateKey must be specified"))
 	}
 
 	if c.privateKey != "" {
@@ -176,8 +177,8 @@ func (c *strClusterUpdateCmd) clusterUpdate(workDir string) error {
 		keyPath, _ := filepath.Abs(c.privateKey)
 		commandArgsVol = append(commandArgsVol, "--mount")
 		commandArgsVol = append(commandArgsVol, fmt.Sprintf("type=bind,source=%s,target=/home/%s,readonly", keyPath, key))
-		commandArgsKoreonctl = append(commandArgsKoreonctl, "/home/"+key)
 		commandArgsKoreonctl = append(commandArgsKoreonctl, "--private-key")
+		commandArgsKoreonctl = append(commandArgsKoreonctl, "/home/"+key)
 	} else {
 		logger.Fatal(fmt.Errorf("[ERROR]: %s", "To run this ansible-playbook an kubeconfig option must be specified.\n You can get kubeconfig with 'get-kubeconfig' command"))
 	}

@@ -14,6 +14,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"strconv"
 	"strings"
 	"text/template"
 	"time"
@@ -328,67 +329,15 @@ func (c *strClusterUpdateCmd) run() error {
 	// template func
 	koreonctlText.Funcs(template.FuncMap(map[string]interface{}{
 		"maxLength": func(item interface{}) map[string]int {
-			maxlen := make(map[string]int)
-			blankCnt := 2
-			v := reflect.ValueOf(item)
-
-			fmt.Println(" ==== ", v.Kind())
-			switch v.Kind() {
-			case reflect.Invalid:
-				return maxlen
-			case reflect.Slice:
-				for i := 0; i < v.Len(); i++ {
-					r := v.Index(i)
-					switch r.Kind() {
-					case reflect.Struct:
-						checkEmpty := i
-						t := r.Type()
-						for i := 0; i < r.NumField(); i++ {
-							fieldValue := r.Field(i)
-							field := t.Field(i)
-							if checkEmpty == 0 {
-								maxlen[field.Name] = len(fmt.Sprintf("%s", fieldValue.Interface())) + blankCnt
-							} else {
-								if maxlen[field.Name] < len(fmt.Sprintf("%s", fieldValue.Interface()))+blankCnt {
-									maxlen[field.Name] = len(fmt.Sprintf("%s", fieldValue.Interface())) + blankCnt
-								}
-							}
-						}
-					}
-				}
-			case reflect.Struct:
-				t := v.Type()
-				for i := 0; i < v.NumField(); i++ {
-					fieldValue := v.Field(i)
-					field := t.Field(i)
-					maxlen[field.Name] = len(fmt.Sprintf("%s", fieldValue.Interface())) + blankCnt
-				}
-			}
-			return maxlen
-
+			return maxLength(item)
 		},
 		"clusterLength": func(m ...map[string]int) map[string]int {
-			maxlen := make(map[string]int)
-			for i := 0; i < len(m); i++ {
-				if i == 0 {
-					maxlen = m[i]
-				} else {
-					for k, v := range m[i] {
-						if maxlen[k] < v {
-							maxlen[k] = v
-						}
-					}
-				}
-			}
-			if maxlen["ExternalIP"] == 2 {
-				maxlen["ExternalIP"] = maxlen["InternalIP"]
-			}
-			return maxlen
+			return clusterLength(m)
 		},
-		"format": func(cnts ...int) map[int]int {
-			lens := make(map[int]int)
+		"format": func(cnts ...int) map[string]int {
+			lens := make(map[string]int)
 			for k, v := range cnts {
-				lens[k] = v + 10
+				lens[strconv.Itoa(k)] = v + 2
 			}
 			return lens
 		},
@@ -505,4 +454,59 @@ func getNodeIP(ip []string) map[int]string {
 		nodeIPs[k] = v
 	}
 	return nodeIPs
+}
+
+func maxLength(item interface{}) map[string]int {
+	maxlen := make(map[string]int)
+	blankCnt := 2
+	v := reflect.ValueOf(item)
+
+	switch v.Kind() {
+	case reflect.Invalid:
+		return maxlen
+	case reflect.Slice:
+		for i := 0; i < v.Len(); i++ {
+			r := v.Index(i)
+			switch r.Kind() {
+			case reflect.Struct:
+				checkEmpty := i
+				t := r.Type()
+				for i := 0; i < r.NumField(); i++ {
+					fieldValue := r.Field(i)
+					field := t.Field(i)
+					if checkEmpty == 0 {
+						maxlen[field.Name] = len(fmt.Sprintf("%s", fieldValue.Interface())) + blankCnt
+					} else {
+						if maxlen[field.Name] < len(fmt.Sprintf("%s", fieldValue.Interface()))+blankCnt {
+							maxlen[field.Name] = len(fmt.Sprintf("%s", fieldValue.Interface())) + blankCnt
+						}
+					}
+				}
+			case reflect.String:
+				fieldValue := r.Field(i)
+				value := fmt.Sprintf("%s", fieldValue.Interface())
+				maxlen[value] = len(value) + blankCnt
+			}
+		}
+	}
+	return maxlen
+}
+
+func clusterLength(m []map[string]int) map[string]int {
+	maxlen := make(map[string]int)
+	for i := 0; i < len(m); i++ {
+		if i == 0 {
+			maxlen = m[i]
+		} else {
+			for k, v := range m[i] {
+				if maxlen[k] < v {
+					maxlen[k] = v
+				}
+			}
+		}
+	}
+	if maxlen["ExternalIP"] == 2 {
+		maxlen["ExternalIP"] = maxlen["InternalIP"]
+	}
+	return maxlen
 }
