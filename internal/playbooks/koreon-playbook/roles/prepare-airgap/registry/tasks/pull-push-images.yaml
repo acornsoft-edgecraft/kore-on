@@ -43,5 +43,6 @@
     ca_cert: "{{ harbor_data_dir }}/cert/ca.crt"
     push: true
     source: local
+    timeout: 240
   loop: "{{ prepare_airgap_images }}"
   delegate_to: "{{ groups['prepare_airgap'][0] }}"

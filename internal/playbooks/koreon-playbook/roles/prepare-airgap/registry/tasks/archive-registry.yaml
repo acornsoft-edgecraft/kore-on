@@ -42,6 +42,6 @@
     name: "{{ item }}"
     archive_path: "{{ harbor_archive_dir }}/{{ koreon_image_archive }}"
     source: pull
-    timeout: 180
+    timeout: 240
   with_items: 
     - "{{ bastion_images }}"
