@@ -88,6 +88,7 @@ func (c *strCreateCmd) run() error {
 	koreOnConfigFileName := viper.GetString("KoreOn.KoreOnConfigFile")
 	koreOnConfigFilePath := utils.IskoreOnConfigFilePath(koreOnConfigFileName)
 	koreonToml, value := utils.ValidateKoreonTomlConfig(koreOnConfigFilePath, "create")
+	koreonToml.KoreOn.FileName = koreOnConfigFileName
 	if value {
 		b, err := json.Marshal(koreonToml)
 		if err != nil {
@@ -99,8 +100,6 @@ func (c *strCreateCmd) run() error {
 			os.Exit(1)
 		}
 	}
-
-	koreonToml.KoreOn.FileName = koreOnConfigFileName
 
 	// Make provision data
 	data := model.KoreonctlText{}
