@@ -16,7 +16,6 @@ import (
 	"reflect"
 	"strings"
 	"text/template"
-	"time"
 
 	"github.com/apenella/go-ansible/pkg/execute"
 	"github.com/apenella/go-ansible/pkg/options"
@@ -115,7 +114,7 @@ func GetKubeConfigCmd() *cobra.Command {
 }
 
 func UpdateInitCmd() *cobra.Command {
-	updateInit := &strClusterUpdateCmd{}
+	updateInitCmd := &strClusterUpdateCmd{}
 
 	cmd := &cobra.Command{
 		Use:          "init [flags]",
@@ -123,24 +122,24 @@ func UpdateInitCmd() *cobra.Command {
 		Long:         "This command get installed config file in k8s controlplane node.",
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return updateInit.run()
+			return updateInitCmd.run()
 		},
 	}
 
-	updateInit.command = "update-init"
-	updateInit.tags = ""
-	updateInit.inventory = "./internal/playbooks/koreon-playbook/inventory/inventory.ini"
-	updateInit.playbookFiles = []string{
+	updateInitCmd.command = "update-init"
+	updateInitCmd.tags = ""
+	updateInitCmd.inventory = "./internal/playbooks/koreon-playbook/inventory/inventory.ini"
+	updateInitCmd.playbookFiles = []string{
 		"./internal/playbooks/koreon-playbook/cluster-get.yaml",
 	}
 
 	f := cmd.Flags()
-	f.BoolVarP(&updateInit.verbose, "verbose", "v", false, "verbose")
-	f.BoolVarP(&updateInit.dryRun, "dry-run", "d", false, "dryRun")
-	f.StringVar(&updateInit.tags, "tags", updateInit.tags, "Ansible options tags")
-	f.StringVarP(&updateInit.privateKey, "private-key", "p", "", "Specify ssh key path")
-	f.StringVarP(&updateInit.user, "user", "u", "", "login user")
-	f.StringVar(&updateInit.kubeconfig, "kubeconfig", "", "get kubeconfig")
+	f.BoolVarP(&updateInitCmd.verbose, "verbose", "v", false, "verbose")
+	f.BoolVarP(&updateInitCmd.dryRun, "dry-run", "d", false, "dryRun")
+	f.StringVar(&updateInitCmd.tags, "tags", updateInitCmd.tags, "Ansible options tags")
+	f.StringVarP(&updateInitCmd.privateKey, "private-key", "p", "", "Specify ssh key path")
+	f.StringVarP(&updateInitCmd.user, "user", "u", "", "login user")
+	f.StringVar(&updateInitCmd.kubeconfig, "kubeconfig", "", "get kubeconfig")
 
 	return cmd
 }
@@ -154,7 +153,6 @@ func (c *strClusterUpdateCmd) run() error {
 		logger.Fatal(fmt.Errorf("%s", message))
 	}
 
-	koreonToml.KoreOn.FileName = koreOnConfigFileName
 	koreonToml.KoreOn.CommandMode = c.command
 	if c.command == "get-kubeconfig" {
 		koreonToml.Kubernetes.GetKubeConfig = true
@@ -186,6 +184,23 @@ func (c *strClusterUpdateCmd) run() error {
 	updateNodePrivateIP := make(map[int]string)
 	updateNodeName := make(map[int]string)
 	updateType := ""
+	// if c.command == "update-init" {
+	// 	currTime := time.Now()
+	// 	workDir, _ := os.Getwd()
+
+	// 	SUCCESS_FORMAT := "\033[1;32m%s\033[0m\n"
+	// 	koreOnConfigFile := conf.KoreOnConfigFile
+	// 	localKoreonConfigFilePath, err := filepath.Abs(koreOnConfigFileName)
+	// 	if err != nil {
+	// 		ioutil.WriteFile(workDir+"/"+koreOnConfigFile, []byte(config.Template), 0600)
+	// 		fmt.Printf(SUCCESS_FORMAT, fmt.Sprintf("Completed download of cluster installed configuration information, Edit %s file according to your environment and run `koreonctl update`", koreOnConfigFile))
+	// 	} else {
+	// 		fmt.Println("Previous " + koreOnConfigFile + " file exist and it will be backup")
+	// 		os.Rename(localKoreonConfigFilePath, localKoreonConfigFilePath+"_"+currTime.Format("20060102150405"))
+	// 		ioutil.WriteFile(workDir+"/"+koreOnConfigFile, []byte(config.Template), 0600)
+	// 		fmt.Printf(SUCCESS_FORMAT, fmt.Sprintf("Completed download of cluster installed configuration information, Edit %s file according to your environment and run `koreonctl update`", koreOnConfigFile))
+	// 	}
+	// }
 	if c.command == "update" {
 		// Get k8s clientset
 		kubeconfigPath, _ := filepath.Abs(c.kubeconfig)
@@ -442,18 +457,6 @@ func (c *strClusterUpdateCmd) run() error {
 	if err := json.Unmarshal(b, &c.extravars); err != nil {
 		logger.Fatal(err.Error())
 		os.Exit(1)
-	}
-
-	if c.command == "update-init" {
-		currTime := time.Now()
-
-		if err == nil {
-			fmt.Println("Previous " + koreOnConfigFileName + " file exist and it will be backup")
-			e := os.Rename(koreOnConfigFilePath, koreOnConfigFilePath+"_"+currTime.Format("20060102150405"))
-			if e != nil {
-				logger.Fatal(e)
-			}
-		}
 	}
 
 	ansiblePlaybookConnectionOptions := &options.AnsibleConnectionOptions{
