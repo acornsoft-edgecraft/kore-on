@@ -76,6 +76,12 @@ theme:
   # ??
   # direction: ltr
   palette:
+    # automatic mode
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+
     # dark mode
     - scheme: slate
       # header 색
