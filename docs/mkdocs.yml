@@ -61,6 +61,8 @@ theme:
     - content.code.copy
     # 코드 주석
     - content.code.annotate
+    # 콘텐츠 탭 일괄 변경
+    - content.tabs.link
     # 읽은 것으로 표시
     # - announce.dismiss
     # edit 버튼
@@ -103,8 +105,18 @@ extra:
 
 # md에 문법 적용
 markdown_extensions:
+  - tables
   - pymdownx.highlight:
       anchor_linenums: true
   - pymdownx.inlinehilite
   - pymdownx.snippets
   - pymdownx.superfences
+  - attr_list
+  - md_in_html
+  - def_list
+  - admonition
+  - pymdownx.details
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tabbed:
+      alternate_style: true

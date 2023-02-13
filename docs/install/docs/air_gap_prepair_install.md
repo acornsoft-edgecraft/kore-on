@@ -1,8 +1,8 @@
-# **Kore-On**
+# Kore-on
 
-## **구성도**
+## **Prepare-airgap**
 
-![online_install_archtecture](./assets/online_install_architecture.png)
+![prepare-airgap](./assets/prepare-airgap.png)
 
 ## **요구사항**
 
@@ -14,19 +14,21 @@
 ### **CLI client**
 
 - CLI client에는 Docker가 설치되어있어야 합니다.
-- CLI client에서 target node에 ssh 접근이 가능해야 합니다.
+- CLI client에서 Virtual machine에 ssh 접근이 가능해야 합니다.
 - CLI client의 root 계정에서 koreonctl 실행을 권장합니다.
 
-### **target node**
+## **Public network CLI client**
 
-- controlplane node의 제한은 1 ~ 7대이며 홀수로 구성해야 합니다.
-
-## **온라인 설치**
-
-???+ quote
-    koreonctl을 통해 클러스터 구성을 진행합니다.
-
-    아래 샘플에서는 설치 될 타켓 노드를 master 노드 1대 와 worker 노드 2대의 설정으로 진행합니다.
+???+ tip
+    - [SSH KEY PATH]
+        - 설치 될 클러스터의 SSH 접근 key값을 설정합니다
+        - 이 때 PATH 값은 절대 경로여야합니다.
+    - [USERNAME]
+        - 설치 될 클러스터 노드의 SSH 노드의 접속 user를 설정합니다
+        - 모든 노드의 user명이 같아야합니다.
+    - 사설 레지스트리
+        - 유저 : admin
+        - 암호 : Ent!Admin432!
 
 ???+ note annotate "docker install"
 
@@ -63,7 +65,7 @@
     koreonctl init
     ```
 
-5. koreon.toml 파일을 클러스터 구성에 맞게 수정 합니다
+5. koreon.toml 파일을 수정 합니다.
 
     ??? example annotate "예제 파일 입니다."
         ```toml
@@ -154,13 +156,7 @@
         ## - haproxy-install: used internal load-balancer (default: true)
         ## - lb-ip: Enter the IP address when using a load balancer (default: master[0] ip address)
         ## - lb-port: Enter the port when using a load balancer (default: "6443")
-
-        #############################
-        ########### change ############
-        ip = ["x.x.x.x","x.x.x.x"]
-        ########### change ############
-        #############################
-
+        # ip = ["x.x.x.x","x.x.x.x"]
         #private-ip = ["x.x.x.x","x.x.x.x","x.x.x.x"]
         #isolated = true
         #haproxy-install = true
@@ -173,13 +169,7 @@
         ## - private-ip: K8s work nodes private ip address.
         ##               If you use the same IP address, you can skip it.
         ## Optional
-
-        #############################
-        ########### change ############
-        ip = ["x.x.x.x","x.x.x.x","x.x.x.x"]
-        ########### change ############
-        #############################
-
+        #ip = ["x.x.x.x","x.x.x.x","x.x.x.x"]
         #private-ip = ["x.x.x.x", "x.x.x.x"]
 
         [private-registry]
@@ -251,41 +241,31 @@
         ## -
         #k8s-version = "v1.21"
         #registry-version = "v2.6"
-        #registry-ip = "x.x.x.x"
+
+        #############################
+        ########### change ############
+        registry-ip = "[virtual machine ip]"
+        ########### change ############
+        #############################
         ```
 
     ```toml
-    [node-pool.node]
-    # 하단의 해당하는 부분만 변경
-    ip = ["x.x.x.x","x.x.x.x"]
-
-    [node-pool.master]
-    # 하단의 해당하는 부분만 변경
-    ip = ["x.x.x.x"]
+    [prepare-airgap]
+    registry-ip = "[virtual machine ip]"
     ```
 
-6. 클러스터 설치 시작
+6. 사전준비 파일들을 VM에 다운로드 합니다.
 
-    ??? tip
-        - [SSH KEY PATH]
-            - 설치 될 클러스터의 SSH 접근 key값을 설정합니다
-            - 이 때 PATH 값은 절대 경로여야합니다.
-        - [USERNAME]
-            - 설치 될 클러스터 노드의 SSH 노드의 접속 user를 설정합니다
-            - 모든 노드의 user명이 같아야합니다.
+    !!! info annotate "사설 레지스트리 유저와 암호가 필요합니다."
 
     ```bash
-    korectl create -p [SSH KEY PATH] -u [USERNAME]
+    koreonctl prepare-airgap -p [SSH KEY PATH] -u [USERNAME]
     ```
 
-## **검증**
+7. VM에 있는 사전준비 파일들을 public network CLI client로 다운로드 합니다.
 
-> control plane node의 root 계정에서 kubetnetes CLI를 실행해야 합니다.
+    !!! info annotate "사전준비 파일들은 VM의 /data/archive에 저장되어 있습니다."
 
-controlplane node에서 관리자 계정이 아닌 일반 사용자가 Kubernetes CLI를 사용하기를 원하면 아래 명령어를 사용해야 합니다.
-
-```bash
-mkdir -p $HOME/.kube
-sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-sudo chown $(id -u):$(id -g) $HOME/.kube/config
-```
+    ```bash
+    koreonctl prepare-airgap download-archive -p [SSH KEY PATH] -u [USERNAME]
+    ```
