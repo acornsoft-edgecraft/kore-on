@@ -54,7 +54,7 @@
 3. 실행 파일명 변경 및 위치 이동
 
     ```bash
-    cp koreonctl-linux-amd64 /usr/bin/koreonctl
+    cp koreonctl-linux-amd64 /usr/local/bin/koreonctl
     ```
 
 4. 설치 설정파일 koreon.toml 을 기본값으로 생성 합니다.
@@ -63,7 +63,7 @@
     koreonctl init
     ```
 
-5. koreon.toml 파일을 클러스터 구성에 맞게 수정 합니다
+5. koreon.toml 파일을 클러스터 구성에 맞게 수정 합니다.
 
     ??? example annotate "예제 파일 입니다."
         ```toml

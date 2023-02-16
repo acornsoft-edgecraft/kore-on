@@ -56,7 +56,7 @@
 3. 실행 파일명 변경 및 위치 이동
 
     ```bash
-    cp koreonctl-linux-amd64 /usr/bin/koreonctl
+    cp koreonctl-linux-amd64 /usr/local/bin/koreonctl
     ```
 
 4. 설치 설정파일 koreon.toml 을 기본값으로 생성 합니다.
@@ -268,4 +268,15 @@
 
     ```bash
     koreonctl prepare-airgap download-archive -p [SSH KEY PATH] -u [USERNAME]
+    ```
+
+8.  public network CLI client에 있는 파일들을 private network CLI client로 upload 합니다.
+
+    !!! info
+
+        public network CLI client에 다운받은 tar 파일, docker, koreonctl을
+        private network CLI client로 upload 합니다.
+
+    ```bash
+    scp -i [SSH-KEY] [옮길 파일] [USERNAME]@[IP]:[파일 경로]
     ```
