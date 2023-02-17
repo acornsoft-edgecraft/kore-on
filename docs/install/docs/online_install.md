@@ -23,12 +23,19 @@
 
 ## **온라인 설치**
 
-???+ quote
+??? tip
     koreonctl을 통해 클러스터 구성을 진행합니다.
 
     아래 샘플에서는 설치 될 타켓 노드를 master 노드 1대 와 worker 노드 2대의 설정으로 진행합니다.
 
-???+ note annotate "docker install"
+    - [SSH KEY PATH]
+        - 설치 될 클러스터의 SSH 접근 key값을 설정합니다
+        - 이 때 PATH 값은 절대 경로여야합니다.
+    - [USERNAME]
+        - 설치 될 클러스터 노드의 SSH 노드의 접속 user를 설정합니다
+        - 모든 노드의 user명이 같아야합니다.
+
+??? note annotate "docker install"
 
     koreonctl의 실행을 위해 실행 할 Client에 Docker 설치가 필요합니다.
 
@@ -65,7 +72,7 @@
 
 5. koreon.toml 파일을 클러스터 구성에 맞게 수정 합니다.
 
-    ??? example annotate "예제 파일 입니다."
+    ??? example annotate "koreon.toml"
         ```toml
         [koreon]
         ## Required
@@ -254,7 +261,7 @@
         #registry-ip = "x.x.x.x"
         ```
 
-    ```toml
+    ```toml title="koreon.toml"
     [node-pool.node]
     # 하단의 해당하는 부분만 변경
     ip = ["x.x.x.x","x.x.x.x"]
@@ -266,26 +273,28 @@
 
 6. 클러스터 설치 시작
 
-    ??? tip
-        - [SSH KEY PATH]
-            - 설치 될 클러스터의 SSH 접근 key값을 설정합니다
-            - 이 때 PATH 값은 절대 경로여야합니다.
-        - [USERNAME]
-            - 설치 될 클러스터 노드의 SSH 노드의 접속 user를 설정합니다
-            - 모든 노드의 user명이 같아야합니다.
-
     ```bash
     korectl create -p [SSH KEY PATH] -u [USERNAME]
     ```
 
 ## **검증**
 
-> control plane node의 root 계정에서 kubetnetes CLI를 실행해야 합니다.
+### **controlplane node에서 확인하는 방법**
 
-controlplane node에서 관리자 계정이 아닌 일반 사용자가 Kubernetes CLI를 사용하기를 원하면 아래 명령어를 사용해야 합니다.
+!!! info annotate "controlplane node 관리자 계정이 아닌 일반 사용자가 Kubernetes CLI를 사용을 원하다면 아래 명령어를 사용해야 합니다."
 
 ```bash
 mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+```
+
+### **CLI client에서 확인하는 방법**
+
+!!! info annotate "CLI client에서 바로 확인하고 싶다면 해당 명령어를 실행합니다."
+
+```bash
+mkdir -p $HOME/.kube
+sudo cp -i acloud-client-kubeconfig $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
 ```

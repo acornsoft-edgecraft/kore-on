@@ -105,16 +105,16 @@ extra:
 
 # md에 문법 적용
 markdown_extensions:
+  - md_in_html
+  - attr_list
   - tables
+  - def_list
+  - admonition
   - pymdownx.highlight:
       anchor_linenums: true
   - pymdownx.inlinehilite
   - pymdownx.snippets
   - pymdownx.superfences
-  - attr_list
-  - md_in_html
-  - def_list
-  - admonition
   - pymdownx.details
   - pymdownx.tasklist:
       custom_checkbox: true

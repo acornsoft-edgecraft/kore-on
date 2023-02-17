@@ -19,7 +19,7 @@
 
 ## **Public network CLI client**
 
-???+ tip
+??? tip
     - [SSH KEY PATH]
         - 설치 될 클러스터의 SSH 접근 key값을 설정합니다
         - 이 때 PATH 값은 절대 경로여야합니다.
@@ -30,7 +30,7 @@
         - 유저 : admin
         - 암호 : Ent!Admin432!
 
-???+ note annotate "docker install"
+??? note annotate "docker install"
 
     koreonctl의 실행을 위해 실행 할 Client에 Docker 설치가 필요합니다.
 
@@ -67,7 +67,7 @@
 
 5. koreon.toml 파일을 수정 합니다.
 
-    ??? example annotate "예제 파일 입니다."
+    ??? example annotate "koreon.toml"
         ```toml
         [koreon]
         ## Required
@@ -249,7 +249,7 @@
         #############################
         ```
 
-    ```toml
+    ```toml title="koreon.toml"
     [prepare-airgap]
     registry-ip = "[virtual machine ip]"
     ```
@@ -270,7 +270,7 @@
     koreonctl prepare-airgap download-archive -p [SSH KEY PATH] -u [USERNAME]
     ```
 
-8.  public network CLI client에 있는 파일들을 private network CLI client로 upload 합니다.
+8. public network CLI client에 있는 파일들을 private network CLI client로 upload 합니다.
 
     !!! info
 
