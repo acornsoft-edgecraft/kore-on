@@ -186,6 +186,11 @@ func (c *strClusterUpdateCmd) run() error {
 	updateNodePrivateIP := make(map[int]string)
 	updateNodeName := make(map[int]string)
 	updateType := ""
+
+	if len(koreonToml.NodePool.Node.PrivateIP) == 0 {
+		koreonToml.NodePool.Node.PrivateIP = koreonToml.NodePool.Node.IP
+	}
+
 	if c.command == "update" {
 		// Get k8s clientset
 		kubeconfigPath, _ := filepath.Abs(c.kubeconfig)
