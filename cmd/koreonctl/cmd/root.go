@@ -6,7 +6,6 @@ package cmd
 import (
 	"os"
 
-	"kore-on/cmd/koreonctl/pkg/config"
 	"kore-on/pkg/logger"
 
 	"github.com/spf13/cobra"
@@ -59,10 +58,10 @@ func initConfig() {
 		logger.Fatalf("Could not instantiate log %ss", err.Error())
 	}
 
-	// load config file
-	err = config.Load()
-	if err != nil {
-		logger.Fatalf("Could not load configuration: %s", err.Error())
-		os.Exit(1)
-	}
+	// // load config file
+	// err = config.Load()
+	// if err != nil {
+	// 	logger.Fatalf("Could not load configuration: %s", err.Error())
+	// 	os.Exit(1)
+	// }
 }
