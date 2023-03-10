@@ -55,9 +55,9 @@ oom_score = 0
     enable_selinux = false
     selinux_category_range = 1024
 {% if closed_network %}
-    sandbox_image = "{{ registry_domain }}/k8s.gcr.io/pause:{{ image_pause_version | regex_replace('^v', '') }}"
+    sandbox_image = "{{ registry_domain }}/registry.k8s.io/pause:{{ image_pause_version | regex_replace('^v', '') }}"
 {% else %}
-    sandbox_image = "k8s.gcr.io/pause:{{ image_pause_version | regex_replace('^v', '') }}"
+    sandbox_image = "registry.k8s.io/pause:{{ image_pause_version | regex_replace('^v', '') }}"
 {% endif %}
     stats_collect_period = 10
     systemd_cgroup = true

@@ -160,7 +160,7 @@ spec:
         - --kubelet-certificate-authority=/etc/kubernetes/pki/ca.crt
         - --tls-cert-file=/etc/kubernetes/pki/metrics-server.crt
         - --tls-private-key-file=/etc/kubernetes/pki/metrics-server.key
-        image: k8s.gcr.io/metrics-server/metrics-server:v0.6.1
+        image: registry.k8s.io/metrics-server/metrics-server:v0.6.1
         imagePullPolicy: IfNotPresent
         livenessProbe:
           failureThreshold: 3
