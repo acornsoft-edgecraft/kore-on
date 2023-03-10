@@ -10,8 +10,9 @@ import (
 	"path/filepath"
 	"syscall"
 
+	"kore-on/cmd/koreonctl/conf"
+
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 type strCreateCmd struct {
@@ -65,10 +66,10 @@ func (c *strCreateCmd) create(workDir string) error {
 	// Doker check
 	utils.CheckDocker()
 
-	koreonImageName := viper.GetString("KoreOn.KoreOnImageName")
-	koreOnImage := viper.GetString("KoreOn.KoreOnImage")
-	koreOnConfigFileName := viper.GetString("KoreOn.KoreOnConfigFile")
-	koreOnConfigFilePath := viper.GetString("KoreOn.KoreOnConfigFileSubDir")
+	koreonImageName := conf.KoreOnImageName
+	koreOnImage := conf.KoreOnImage
+	koreOnConfigFileName := conf.KoreOnConfigFile
+	koreOnConfigFilePath := conf.KoreOnConfigFileSubDir
 
 	koreonToml, err := utils.GetKoreonTomlConfig(workDir + "/" + koreOnConfigFileName)
 	if err != nil {

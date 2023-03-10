@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"html/template"
 	"io/ioutil"
+	"kore-on/cmd/koreonctl/conf"
 	"kore-on/cmd/koreonctl/conf/templates"
 	"kore-on/pkg/logger"
 	"kore-on/pkg/utils"
@@ -18,7 +19,6 @@ import (
 	"github.com/elastic/go-sysinfo"
 	"github.com/mholt/archiver"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 type strBstionCmd struct {
@@ -327,7 +327,7 @@ func dockerLoad() error {
 		"docker",
 		"load",
 		"--input",
-		viper.GetString("KoreOn.KoreOnImageArchive"),
+		conf.KoreOnImageArchive,
 	}
 	commandLen := len(commandArgs)
 	cmd := utils.ExecCommand(commandArgs[0], commandArgs[1:commandLen])

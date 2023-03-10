@@ -29,7 +29,7 @@ func Load() error {
 	// }
 
 	// dir := strings.Split(workingdir, "/")
-	path := "./cmd/koreonctl/conf"
+	path := "./conf"
 	// if dir[len(dir)-1] == "koreonctl" {
 	// 	path = "../../conf"
 	// }
