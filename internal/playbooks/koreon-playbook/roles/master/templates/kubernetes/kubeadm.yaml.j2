@@ -33,7 +33,7 @@ dns:
   imageRepository: docker.io/coredns
   imageTag: {{ image_coredns_version | regex_replace('^v', '') }}
 {% else %%}
-  imageRepository: registry.k8s.io/coredns
+  imageRepository: registry.k8s.io/coredns/coredns
   imageTag: {{ image_coredns_version | regex_replace('^v', '') }}
 {% endif %}
 networking:
