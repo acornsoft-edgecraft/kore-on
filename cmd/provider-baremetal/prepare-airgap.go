@@ -6,7 +6,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"kore-on/cmd/koreonctl/conf"
 	"kore-on/cmd/koreonctl/conf/templates"
 	"kore-on/pkg/logger"
 	"kore-on/pkg/model"
@@ -176,7 +175,7 @@ func (c *strAirGapCmd) run() error {
 		// Prompt login
 		id := utils.InputPrompt("\n## To helm chart pull csi-driver-nfs, you need to login as a private repository (Helm Chart) user.\nusername:")
 		pw := utils.SensitivePrompt("password:")
-		koreonToml.KoreOn.HelmChartProject = conf.HelmChartProject
+		koreonToml.KoreOn.HelmChartProject = viper.GetString("KoreOn.HelmChartProject")
 		koreonToml.KoreOn.HelmCubeRepoID = base64.StdEncoding.EncodeToString([]byte(id))
 		koreonToml.KoreOn.HelmCubeRepoPW = base64.StdEncoding.EncodeToString([]byte(pw))
 

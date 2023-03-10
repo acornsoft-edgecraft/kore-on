@@ -2,14 +2,15 @@
 KoreOn:
   KoreOnImageName: "kore-on"
   KoreOnImage: "ghcr.io/acornsoft-edgecraft/kore-on:latest"
+  KoreOnImageArchive: "koreon-image.tgz"
   KoreOnKubeConfig: "acloud-client-kubeconfig"
   KoreOnConfigFile: "koreon.toml"
   KoreOnConfigFileSubDir: "internal/playbooks/koreon-playbook/download"
-  # HelmCubeRepoUrl: "https://hcapital-harbor.acloud.run/chartrepo/cube"
+  HelmCubeRepoUrl: "https://hcapital-harbor.acloud.run/chartrepo/cube"
   HelmChartProject: "helm-charts"
 
 Addon:
-  KubeConfigDir: /etc/kubernetes/acloud
+  KubeConfigDir: "/etc/kubernetes/acloud"
   AddonConfigFile: "addon.toml"
   HelmCubeRepoUrl: "https://hcapital-harbor.acloud.run/chartrepo/cube"
 
