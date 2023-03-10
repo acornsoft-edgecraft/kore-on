@@ -88,9 +88,9 @@ scheduler:
     address: "0.0.0.0"
     feature-gates: {{ kube_feature_gates|join(',') }}
 {% if closed_network %}
-imageRepository: {{ registry_domain }}/k8s.gcr.io
+imageRepository: {{ registry_domain }}/registry.k8s.io
 {% else %}
-imageRepository: k8s.gcr.io
+imageRepository: registry.k8s.io
 {% endif %}
 
 ---

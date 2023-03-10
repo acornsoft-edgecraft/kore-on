@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"kore-on/cmd/koreonctl/conf"
 	"kore-on/cmd/koreonctl/conf/templates"
 	"kore-on/pkg/logger"
 	"kore-on/pkg/model"
@@ -198,7 +197,7 @@ func (c *strAddonCmd) run() error {
 			addonToml.Addon.AddonDataDir = "/data/addon"
 		}
 
-		addonToml.Addon.KubeConfig = conf.Addon["KubeConfigDir"] + "/" + conf.KoreOnKubeConfig
+		addonToml.Addon.KubeConfig = viper.GetString("Addon.KubeConfigDir") + "/" + viper.GetString("KoreOn.KoreOnKubeConfig")
 
 		b, err := json.Marshal(addonToml)
 		if err != nil {

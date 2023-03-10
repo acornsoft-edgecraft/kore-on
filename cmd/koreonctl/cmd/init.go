@@ -10,9 +10,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"kore-on/cmd/koreonctl/conf"
-
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 type strInitCmd struct {
@@ -59,7 +58,7 @@ func (c *strInitCmd) init(workDir string) error {
 	currTime := time.Now()
 
 	SUCCESS_FORMAT := "\033[1;32m%s\033[0m\n"
-	koreOnConfigFile := conf.KoreOnConfigFile
+	koreOnConfigFile := viper.GetString("KoreOn.KoreOnConfigFile")
 
 	if !utils.CheckUserInput("Do you really want to init? \nIs this ok [y/n]: ", "y") {
 		fmt.Println("nothing to changed. exit")

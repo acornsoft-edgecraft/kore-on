@@ -49,7 +49,6 @@ apiServer:
     bind-address: "0.0.0.0"
     apiserver-count: "{{ groups['masters']|length }}"
     secure-port: "{{ api_secure_port }}"
-    feature-gates: {{ kube_feature_gates|join(',') }}
     default-not-ready-toleration-seconds: "30"
     default-unreachable-toleration-seconds: "30"
     service-node-port-range: {{ node_port_range }} 
@@ -80,24 +79,21 @@ apiServer:
   - 127.0.0.1
 controllerManager:
   extraArgs:
-    address: "0.0.0.0"
+    bind-address: "0.0.0.0"
     node-monitor-period: 2s
     node-monitor-grace-period: 16s
-    feature-gates: {{ kube_feature_gates|join(',') }}
 scheduler:
   extraArgs:
-    address: "0.0.0.0"
-    feature-gates: {{ kube_feature_gates|join(',') }}
+    bind-address: "0.0.0.0"
 {% if closed_network %}
-imageRepository: {{ registry_domain }}/k8s.gcr.io
+imageRepository: {{ registry_domain }}/registry.k8s.io
 {% else %}
-imageRepository: k8s.gcr.io
+imageRepository: registry.k8s.io
 {% endif %}
 
 ---
 apiVersion: kubeproxy.config.k8s.io/v1alpha1
 kind: KubeProxyConfiguration
-featureGates: { {{ kubeproxy_feature_gates|join(',') }} }
 mode: {{ kube_proxy_mode }}
 ---
 apiVersion: kubelet.config.k8s.io/v1beta1

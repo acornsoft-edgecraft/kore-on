@@ -55,9 +55,9 @@ oom_score = 0
     enable_selinux = false
     selinux_category_range = 1024
 {% if closed_network %}
-    sandbox_image = "{{ registry_domain }}/k8s.gcr.io/pause:{{ image_pause_version | regex_replace('^v', '') }}"
+    sandbox_image = "{{ registry_domain }}/registry.k8s.io/pause:{{ image_pause_version | regex_replace('^v', '') }}"
 {% else %}
-    sandbox_image = "k8s.gcr.io/pause:{{ image_pause_version | regex_replace('^v', '') }}"
+    sandbox_image = "registry.k8s.io/pause:{{ image_pause_version | regex_replace('^v', '') }}"
 {% endif %}
     stats_collect_period = 10
     systemd_cgroup = true
@@ -110,8 +110,8 @@ oom_score = 0
           endpoint = ["https://{{ registry_domain }}{{ harbor_version is version('v2.0', '>=') | ternary('/v2', '') }}/docker.io"]
         [plugins."io.containerd.grpc.v1.cri".registry.mirrors."quay.io"]
           endpoint = ["https://{{ registry_domain }}{{ harbor_version is version('v2.0', '>=') | ternary('/v2', '') }}/quay.io"]
-        [plugins."io.containerd.grpc.v1.cri".registry.mirrors."k8s.gcr.io"]
-          endpoint = ["https://{{ registry_domain }}{{ harbor_version is version('v2.0', '>=') | ternary('/v2', '') }}/k8s.gcr.io"]
+        [plugins."io.containerd.grpc.v1.cri".registry.mirrors."registry.k8s.io"]
+          endpoint = ["https://{{ registry_domain }}{{ harbor_version is version('v2.0', '>=') | ternary('/v2', '') }}/registry.k8s.io"]
         [plugins."io.containerd.grpc.v1.cri".registry.mirrors."registry.gitlab.com"]
           endpoint = ["https://{{ registry_domain }}{{ harbor_version is version('v2.0', '>=') | ternary('/v2', '') }}/registry.gitlab.com"]
         [plugins."io.containerd.grpc.v1.cri".registry.mirrors."ghcr.io"]
