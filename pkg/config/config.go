@@ -23,16 +23,9 @@ import (
 // Load - Load the configuration from file
 func Load() error {
 	var err error
-	// workingdir, err := os.Getwd()
-	// if err != nil {
-	// 	logger.Error(err)
-	// }
 
 	// dir := strings.Split(workingdir, "/")
 	path := "./conf"
-	// if dir[len(dir)-1] == "koreonctl" {
-	// 	path = "../../conf"
-	// }
 	// Search config files in config directory with name "config.yaml" (without extension).
 	viper.AddConfigPath(path)
 	viper.SetConfigName("config")
