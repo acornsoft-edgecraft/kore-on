@@ -51,14 +51,14 @@
         url: "{{ etcd_get_url }}"
         dest: "/tmp"
       any_errors_fatal: true
-    - name: Get crictl tgz file and uncompress it
+    - name: Get etcd tgz file and uncompress it
       unarchive:
         src: "/tmp/{{ etcd_archive_name }}"
         dest: "{{ etcd_download_dir }}/"
         owner: "root"
         group: "root"
         creates: "{{ etcd_download_dir }}/etcd-{{ etcd_version }}-linux-amd64/etcd"
-        remote_src: True
+        remote_src: true
   when:
     - not closed_network
 

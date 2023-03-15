@@ -41,7 +41,6 @@
     name: ['nfs-common', 'nfs-kernel-server']
     state: absent
     purge: yes
-    force: yes
   register: packages_removed
   tags: ['services']
 
