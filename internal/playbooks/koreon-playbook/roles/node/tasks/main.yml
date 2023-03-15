@@ -74,7 +74,7 @@
 
 - name: Create kubeadm token for joining nodes with 24h expiration (default)
   when: not kubelet_conf.stat.exists
-  command: "kubeadm token create"
+  command: "kubeadm token create --kubeconfig={{ kubeadminconfig }}"
   run_once: true
   register: temp_token
   delegate_to: "{{ groups['masters'][0] }}"
