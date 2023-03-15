@@ -14,7 +14,6 @@
   apt:
     name: ['docker-ce', 'docker-ce-cli', 'containerd.io', 'nginx']
     state: absent
-    force: true
     purge: true
   register: packages_removed
   tags: ['services']

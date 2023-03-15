@@ -34,7 +34,7 @@ dns:
   imageTag: {{ image_coredns_version | regex_replace('^v', '') }}
 {% else %%}
   imageRepository: registry.k8s.io/coredns/coredns
-  imageTag: {{ image_coredns_version | regex_replace('^v', '') }}
+  imageTag: {{ image_coredns_version }}
 {% endif %}
 networking:
   dnsDomain: cluster.local

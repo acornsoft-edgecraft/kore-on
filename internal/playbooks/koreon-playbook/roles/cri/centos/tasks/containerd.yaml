@@ -1,18 +1,4 @@
 ---
-# For ubuntu
-- name: Install containerd (Ubuntu, Debian)
-  when:
-    - ansible_distribution in ["Ubuntu", "Debian"]
-  apt:
-    name: "{{ containerd_pkg }}"
-    state: present
-
-- name: Hold containerd version
-  when: ansible_distribution in ["Ubuntu", "Debian"]
-  dpkg_selections:
-    name: containerd.io
-    selection: hold
-
 - name: Install containerd (Centos, RedHat)
   when:
     - ansible_distribution in ["CentOS", "RedHat"]
@@ -35,32 +21,33 @@
     enablerepo: "local-repo"
     disable_gpg_check: yes
 
+## cri-tools(kubeadm에 종속되어 있는 패키지 임) 패키지에 있어서 주석 처리함
 # https://github.com/kubernetes-sigs/cri-tools/releases/download/v1.21.0/crictl-v1.21.0-linux-amd64.tar.gz
-- name: Get crictl tgz file and uncompress it
-  unarchive:
-    src: "{{ playbook_dir }}/download/crictl-{{ package_crictl_version }}-{{ ansible_system | lower }}-amd64.tar.gz"
-    dest: /usr/bin
-    owner: "root"
-    group: "root"
-  when:
-    - closed_network
+# - name: Get crictl tgz file and uncompress it
+#   unarchive:
+#     src: "{{ playbook_dir }}/download/crictl-{{ package_crictl_version }}-{{ ansible_system | lower }}-amd64.tar.gz"
+#     dest: /usr/bin
+#     owner: "root"
+#     group: "root"
+#   when:
+#     - closed_network
   
-- name: Get crictl tgz file  on online and uncompress it
-  block:
-    - name: Download crictl binary
-      ansible.builtin.get_url:
-        url: "{{ crictl_get_url }}"
-        dest: "/tmp"
-      any_errors_fatal: true
-    - name: Get crictl tgz file and uncompress it
-      unarchive:
-        src: "/tmp/crictl-{{ package_crictl_version }}-{{ ansible_system | lower }}-amd64.tar.gz"
-        dest: /usr/bin
-        owner: "root"
-        group: "root"
-        remote_src: True
-  when:
-    - not closed_network
+# - name: Get crictl tgz file  on online and uncompress it
+#   block:
+#     - name: Download crictl binary
+#       ansible.builtin.get_url:
+#         url: "{{ crictl_get_url }}"
+#         dest: "/tmp"
+#       any_errors_fatal: true
+#     - name: Get crictl tgz file and uncompress it
+#       unarchive:
+#         src: "/tmp/crictl-{{ package_crictl_version }}-{{ ansible_system | lower }}-amd64.tar.gz"
+#         dest: /usr/bin
+#         owner: "root"
+#         group: "root"
+#         remote_src: True
+#   when:
+#     - not closed_network
 
 - name: Create containerd directory
   file:

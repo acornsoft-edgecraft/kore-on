@@ -43,53 +43,12 @@
 
 - name: Create containerd directory
   file:
-    path: /etc/containerd/certs.d/{{ item }}
+    path: /etc/containerd
     state: directory
-  with_items:
-    - "{{ registry_domain }}"
-  when:
-    - closed_network
-    
-- name: Create containerd directory
-  file:
-    path: /etc/containerd/certs.d/{{ item | split('/') | first }}
-    state: directory
-  with_items:
-    - "{{ prepare_airgap_images }}"
-  when:
-    - closed_network
-
-- name: Add containerd config for mirrors
-  ansible.builtin.copy:
-    dest: /etc/containerd/certs.d/{{ item }}/hosts.toml
-    content: |
-      server = "https://{{ item }}"
-
-      [host."https://{{ item }}"]
-        ca = "/etc/docker/certs.d/{{ item }}/ca.crt"
-  with_items:
-    - "{{ registry_domain }}"
-  when:
-    - closed_network
-
-- name: Add containerd config for mirrors
-  ansible.builtin.copy:
-    dest: /etc/containerd/certs.d/{{ item | split('/') | first }}/hosts.toml
-    content: |
-      server = "https://{{ item | split('/') | first }}"
-
-      [host."https://{{ registry_domain }}/v2/{{ item | split('/') | first }}/"]
-        capabilities = ["pull", "resolve"]
-        ca = "/etc/docker/certs.d/{{ registry_domain }}/ca.crt"
-        override_path = true
-  with_items:
-    - "{{ prepare_airgap_images }}"
-  when:
-    - closed_network
 
 - name: Copy containerd config file
   template:
-    src: config-1.7.toml.j2
+    src: config-1.4.toml.j2
     dest: "/etc/containerd/config.toml"
     owner: "root"
     mode: 0644

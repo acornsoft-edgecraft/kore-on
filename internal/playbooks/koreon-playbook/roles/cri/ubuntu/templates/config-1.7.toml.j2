@@ -103,10 +103,8 @@ oom_score = 0
       conf_dir = "/etc/cni/net.d"
       max_conf_num = 1
       conf_template = ""
-{% if closed_network %}
     [plugins."io.containerd.grpc.v1.cri".registry]
       config_path = "/etc/containerd/certs.d"
-{% endif %}
     [plugins."io.containerd.grpc.v1.cri".image_decryption]
       key_model = ""
     [plugins."io.containerd.grpc.v1.cri".x509_key_pair_streaming]
