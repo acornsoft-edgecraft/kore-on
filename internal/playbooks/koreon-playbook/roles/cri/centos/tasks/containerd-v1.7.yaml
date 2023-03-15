@@ -1,18 +1,4 @@
 ---
-# For ubuntu
-- name: Install containerd (Ubuntu, Debian)
-  when:
-    - ansible_distribution in ["Ubuntu", "Debian"]
-  apt:
-    name: "{{ containerd_pkg }}"
-    state: present
-
-- name: Hold containerd version
-  when: ansible_distribution in ["Ubuntu", "Debian"]
-  dpkg_selections:
-    name: containerd.io
-    selection: hold
-
 - name: Install containerd (Centos, RedHat)
   when:
     - ansible_distribution in ["CentOS", "RedHat"]

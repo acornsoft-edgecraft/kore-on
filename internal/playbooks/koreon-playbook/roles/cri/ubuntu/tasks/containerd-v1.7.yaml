@@ -4,7 +4,7 @@
   when:
     - ansible_distribution in ["Ubuntu", "Debian"]
   apt:
-    name: "{{ containerd_pkg }}"
+    name: "{{ containerd_io }}"
     state: present
 
 - name: Hold containerd version
@@ -12,28 +12,6 @@
   dpkg_selections:
     name: containerd.io
     selection: hold
-
-- name: Install containerd (Centos, RedHat)
-  when:
-    - ansible_distribution in ["CentOS", "RedHat"]
-    - not closed_network
-  yum:
-    name: "{{ containerd_io }}"
-    state: present
-    update_cache: yes
-    enablerepo: Docker-CE-Stable
-    disable_gpg_check: yes
-
-- name: Install containerd (Centos, RedHat)
-  when:
-    - ansible_distribution in ["CentOS", "RedHat"]
-    - closed_network
-  yum:
-    name: "{{ containerd_io }}"
-    state: present
-    disablerepo: "*"
-    enablerepo: "local-repo"
-    disable_gpg_check: yes
 
 # https://github.com/kubernetes-sigs/cri-tools/releases/download/v1.21.0/crictl-v1.21.0-linux-amd64.tar.gz
 - name: Get crictl tgz file and uncompress it
