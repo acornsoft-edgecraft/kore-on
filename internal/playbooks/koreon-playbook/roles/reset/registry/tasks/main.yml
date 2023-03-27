@@ -9,6 +9,14 @@
   shell: "/usr/bin/docker ps -aq | xargs -r docker rm -fv"
   tags: ['docker']
 
+- name: Stop docker.socket if it is active
+  command: systemctl stop docker.socket
+  with_items:
+    - docker.socket
+    - docker.service
+    - containerd.service
+  ignore_errors: true
+
 - name: Remove docker package in ["Ubuntu", "Debian"]
   when: ansible_distribution in ["Ubuntu", "Debian"]
   apt:
@@ -48,6 +56,9 @@
     - /etc/docker/key.json
     - /var/log/harbor
     - /var/lib/docker
+    - /var/run/docker.sock
+    - /var/run/docker.pid
+    - /var/run/docker
     - /var/lib/containerd
     - /tmp/harbor-backup.tgz
     - /tmp/harbor
