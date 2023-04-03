@@ -205,8 +205,8 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 		privateRegistryRegistryVersion := koreonToml.PrivateRegistry.RegistryVersion
 		privateRegistryRegistryDomain := koreonToml.PrivateRegistry.RegistryDomain
 		isPrivateRegistryPublicCert := koreonToml.PrivateRegistry.PublicCert
-		privateRegistryCrt := koreonToml.PrivateRegistry.CertFile.SslCertificate
-		privateRegistryKey := koreonToml.PrivateRegistry.CertFile.SslCertificateKey
+		privateRegistryCrt := koreonToml.PrivateRegistry.CertFile.CaCert
+		// privateRegistryKey := koreonToml.PrivateRegistry.CertFile.CaCertKey
 
 		supportK8sVersion := IsSupportVersion(k8sVersion, confK8sVersion)
 
@@ -240,6 +240,9 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 		}
 
 		if koreonToml.Kubernetes.Etcd.ExternalEtcd {
+			if etcdPrivateIpCnt == 0 {
+				koreonToml.Kubernetes.Etcd.PrivateIP = koreonToml.Kubernetes.Etcd.IP
+			}
 			if etcdCnt != etcdPrivateIpCnt && etcdCnt > 0 && etcdPrivateIpCnt > 0 {
 				logger.Fatal("etcd nodes IP address and private ip address needs")
 				errorCnt++
@@ -282,12 +285,12 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 
 		if isPrivateRegistryPublicCert {
 			if privateRegistryCrt == "" {
-				logger.Fatal("private-registry.cert-file > ssl-certificate is required.")
+				logger.Fatal("private-registry.cert-file > ca-cert is required.")
 			}
 
-			if privateRegistryKey == "" {
-				logger.Fatal("private-registry.cert-file > ssl-certificate-key is required.")
-			}
+			// if privateRegistryKey == "" {
+			// 	logger.Fatal("private-registry.cert-file > ssl-certificate-key is required.")
+			// }
 		}
 
 		if koreonToml.KoreOn.ClosedNetwork {
@@ -369,8 +372,8 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 		// privateRegistryRegistryVersion := koreonToml.PrivateRegistry.RegistryVersion
 		// privateRegistryRegistryDomain := koreonToml.PrivateRegistry.RegistryDomain
 		// isPrivateRegistryPublicCert := koreonToml.PrivateRegistry.PublicCert
-		// privateRegistryCrt := koreonToml.PrivateRegistry.CertFile.SslCertificate
-		// privateRegistryKey := koreonToml.PrivateRegistry.CertFile.SslCertificateKey
+		// privateRegistryCrt := koreonToml.PrivateRegistry.CertFile.CaCert
+		// privateRegistryKey := koreonToml.PrivateRegistry.CertFile.CaCertKey
 
 		supportK8sVersion := IsSupportVersion(k8sVersion, confK8sVersion)
 

@@ -29,6 +29,8 @@ node-regi                      {{$PrivateRegistry.RegistryIP}}                  
 {{    end -}}
 {{  else if eq true $SharedStorage.Install}}
 node-storage                   {{$SharedStorage.StorageIP}}                    {{if ne "" $SharedStorage.PrivateIP}}{{$SharedStorage.PrivateIP}}{{end -}}
+{{ else if and (ne "" $PrivateRegistry.RegistryIP)  (eq true $PrivateRegistry.PublicCert) }}
+node-regi                      {{$PrivateRegistry.RegistryIP}}                    {{if ne "" $PrivateRegistry.PrivateIP}}{{$PrivateRegistry.PrivateIP}}{{end -}}
 {{  end}}
 ===========================================================================
 Is this ok [y/n]: `

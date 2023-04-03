@@ -35,10 +35,28 @@
   no_log: true
 
 - name: Write registry certificate to disk
-  when: not registry_public_cert and registry_install
   get_url:
     url: https://{{ registry_domain }}/ca.crt
     dest: /etc/docker/certs.d/{{ registry_domain }}/ca.crt
     mode: 0600
     validate_certs: no
+  when: not registry_public_cert and registry_install
   no_log: false
+
+- name: Write registry certificate to disk
+  get_url:
+    url: https://{{ registry_domain }}/ca.crt
+    dest: /etc/docker/certs.d/{{ registry_domain }}/ca.crt
+    mode: 0600
+    validate_certs: no
+  when: not registry_public_cert and not registry_install
+  no_log: false
+
+- name: Write registry certificate to disk
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/download/{{registry_ssl_ca }}"
+    dest: /etc/docker/certs.d/{{ registry_domain }}/ca.crt
+    owner: "root"
+    group: "root"
+    mode: "0600"
+  when: registry_public_cert and not registry_install

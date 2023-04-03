@@ -24,13 +24,17 @@ node-regi-storage        ansible_ssh_host={{ PrivateRegistry.RegistryIP }}    an
 node-regi                ansible_ssh_host={{ PrivateRegistry.RegistryIP }}    ansible_ssh_port={{ NodePool.SSHPort }}  ip={{ ((PrivateRegistry.PrivateIP != None) and (PrivateRegistry.PrivateIP | length > 0)) | ternary(PrivateRegistry.PrivateIP, PrivateRegistry.RegistryIP) }}
 node-storage             ansible_ssh_host={{ SharedStorage.StorageIP }}    ansible_ssh_port={{ NodePool.SSHPort }}  ip={{ ((SharedStorage.PrivateIP != None) and (SharedStorage.PrivateIP | length > 0)) | ternary(SharedStorage.PrivateIP, SharedStorage.StorageIP) }}
 {%   endif %}
-{% elif (PrivateRegistry.Install | default(false)) %}
+{% elif ((PrivateRegistry.Install) or (PrivateRegistry.Install == false)) and (PrivateRegistry.RegistryIP != None) and (KoreOn.CommandMode != "destroy") %}
 node-regi                ansible_ssh_host={{ PrivateRegistry.RegistryIP }}    ansible_ssh_port={{ NodePool.SSHPort }}  ip={{ ((PrivateRegistry.PrivateIP != None) and (PrivateRegistry.PrivateIP | length > 0)) | ternary(PrivateRegistry.PrivateIP, PrivateRegistry.RegistryIP) }}
 {% elif (SharedStorage.Install | default(false)) %}
 node-storage             ansible_ssh_host={{ SharedStorage.StorageIP }}    ansible_ssh_port={{ NodePool.SSHPort }}  ip={{ ((SharedStorage.PrivateIP != None) and (SharedStorage.PrivateIP | length > 0)) | ternary(SharedStorage.PrivateIP, SharedStorage.StorageIP) }}
 {%- endif %}
 {% else %}
 prepare-airgap-node      ansible_ssh_host={{ PrepareAirgap.RegistryIP }}
+{% endif %}
+
+{% if (PrivateRegistry.Install == false) and (PrivateRegistry.PublicCert == true) and (PrivateRegistry.RegistryIP != "")%}
+node-regi                ansible_ssh_host={{ PrivateRegistry.RegistryIP }}    ansible_ssh_port={{ NodePool.SSHPort }}  ip={{ ((PrivateRegistry.PrivateIP != None) and (PrivateRegistry.PrivateIP | length > 0)) | ternary(PrivateRegistry.PrivateIP, PrivateRegistry.RegistryIP) }}
 {% endif %}
 
 {% if (PrepareAirgap.RegistryIP == "") %}
@@ -70,8 +74,10 @@ node-{{ loop.index }}
 [registry]
 {% if PrivateRegistry.Install and SharedStorage.Install and PrivateRegistry.RegistryIP == SharedStorage.StorageIP %}
 node-regi-storage
-{% else %}
-{{'node-regi' if PrivateRegistry.Install}}
+{% elif PrivateRegistry.Install %}
+node-regi
+{% elif PrivateRegistry.RegistryIP != "" and PrivateRegistry.PublicCert %}
+node-regi
 {% endif %}
 
 [storage]

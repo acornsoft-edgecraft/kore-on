@@ -94,8 +94,8 @@ type KoreOnToml struct {
 		RegistryArchiveFile string `toml:"registry-archive-file,omitempty"`
 		PublicCert          bool   `toml:"public-cert,omitempty"`
 		CertFile            struct {
-			SslCertificate    string `toml:"ssl-certificate,omitempty"`
-			SslCertificateKey string `toml:"ssl-certificate-key,omitempty"`
+			CaCert string `toml:"ca-cert,omitempty"`
+			// CaCertKey string `toml:"ca-cert-key,omitempty"`
 		} `toml:"cert-file,omitempty"`
 	} `toml:"private-registry,omitempty"`
 
