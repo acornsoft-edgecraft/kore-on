@@ -215,6 +215,7 @@ func (c *strDestroyCmd) run() error {
 	data := model.KoreonctlText{}
 	data.KoreOnTemp = koreonToml
 	data.Command = c.tags
+	koreonToml.KoreOn.CommandMode = "destroy"
 
 	// Processing template
 	var textVar string
@@ -231,6 +232,7 @@ func (c *strDestroyCmd) run() error {
 		textVar = templates.DestroyPrepareAirgapText
 		koreonToml.KoreOn.ClosedNetwork = false
 	}
+
 	koreonctlText := template.New("DestroyText")
 	temp, err := koreonctlText.Parse(textVar)
 	if err != nil {

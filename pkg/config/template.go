@@ -132,13 +132,10 @@ const Template = `
 
 [private-registry.cert-file]
 ## Required
-## - ssl-certificate: The certificate path used when using public-cert.
-##                    This is a required field used when using a public certificate.
-## - ssl-certificate-key: The certificate-key used when using public-cert.
-##                        This is a required field used when using a public certificate.
+## - ca-cert: The certificate path used when using public-cert.
+##            This is a required field used when using a public certificate.
 ## Optional
-#ssl-certificate = ""
-#ssl-certificate-key = ""
+#ca-cert = ""
 
 [shared-storage]
 ## Required

@@ -118,8 +118,8 @@ registry_public_cert: {{ PrivateRegistry.PublicCert }}
 ## Optional
 ## - registry_ssl_ca: The certificate path used when using public-cert. (default: "")
 ## - registry_ssl_ca_key: The certificate-key used when using public-cert. (default: "")
-registry_ssl_ca: {{ PrivateRegistry.CertFile.SslCertificate }}
-registry_ssl_ca_key: {{ PrivateRegistry.CertFile.SslCertificateKey }}
+registry_ssl_ca: {{ PrivateRegistry.CertFile.CaCert | basename }}
+{# registry_ssl_ca_key: {{ PrivateRegistry.CertFile.CaCertKey | basename }} #}
 #-end [private-registry.cert-file]
 
 
