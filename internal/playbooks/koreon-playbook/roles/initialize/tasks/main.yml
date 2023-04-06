@@ -20,9 +20,9 @@
   #no_log: true
 
 - name: Kernel configuration
+  include_tasks: cluster.yml
   when:
     - inventory_hostname in groups['cluster']
-  import_tasks: cluster.yml
 
 - name: Install nfs client
   when: ansible_distribution in ["Ubuntu", "Debian"]
@@ -44,3 +44,10 @@
     - ansible_distribution_major_version is defined
     - ansible_distribution in ["CentOS", "RedHat"]
     - ansible_distribution_major_version == "7"
+
+- include_tasks: registry-mirror.yaml
+  when:
+    - registry_mirror
+    - not registry_public_cert 
+    - not registry_install
+    - registry_domain != ""

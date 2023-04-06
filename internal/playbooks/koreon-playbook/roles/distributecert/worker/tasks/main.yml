@@ -40,7 +40,9 @@
     dest: /etc/docker/certs.d/{{ registry_domain }}/ca.crt
     mode: 0600
     validate_certs: no
-  when: not registry_public_cert and registry_install
+  when: 
+    - not registry_public_cert 
+    - registry_install
   no_log: false
 
 - name: Write registry certificate to disk
@@ -49,7 +51,10 @@
     dest: /etc/docker/certs.d/{{ registry_domain }}/ca.crt
     mode: 0600
     validate_certs: no
-  when: not registry_public_cert and not registry_install
+  when:
+    - not registry_public_cert 
+    - not registry_install
+    - registry_domain != ""
   no_log: false
 
 - name: Write registry certificate to disk
@@ -59,4 +64,6 @@
     owner: "root"
     group: "root"
     mode: "0600"
-  when: registry_public_cert and not registry_install
+  when:
+    - registry_public_cert 
+    - not registry_install
