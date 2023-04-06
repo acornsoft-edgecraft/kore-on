@@ -1,0 +1,31 @@
+- name: Create containerd directory
+  file:
+    path: /etc/containerd/certs.d/{{ item }}
+    state: directory
+  with_items:
+    - "{{ registry_domain }}"
+    - "docker.io"
+
+- name: Add containerd config for mirrors
+  ansible.builtin.copy:
+    dest: /etc/containerd/certs.d/{{ item }}/hosts.toml
+    content: |
+      server = "https://{{ item }}"
+
+      [host."https://{{ item }}"]
+        ca = "/etc/docker/certs.d/{{ item }}/ca.crt"
+  with_items:
+    - "{{ registry_domain }}"
+
+- name: Add containerd config for mirrors
+  ansible.builtin.copy:
+    dest: /etc/containerd/certs.d/{{ item }}/hosts.toml
+    content: |
+      server = "https://{{ item }}"
+
+      [host."https://{{ registry_domain }}/v2/{{ item }}/"]
+        capabilities = ["pull", "resolve"]
+        ca = "/etc/docker/certs.d/{{ registry_domain }}/ca.crt"
+        override_path = true
+  with_items:
+    - "docker.io"
