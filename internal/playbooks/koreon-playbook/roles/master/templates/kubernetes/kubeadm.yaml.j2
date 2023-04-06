@@ -32,7 +32,7 @@ dns:
 {% if closed_network and k8s_version is version('v1.21.0','>=') %}
   imageRepository: docker.io/coredns
   imageTag: {{ image_coredns_version | regex_replace('^v', '') }}
-{% else %%}
+{% else %}
   imageRepository: registry.k8s.io/coredns/coredns
   imageTag: {{ image_coredns_version }}
 {% endif %}
