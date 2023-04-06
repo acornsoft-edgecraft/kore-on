@@ -57,7 +57,7 @@
     - registry_domain != ""
   no_log: false
 
-- name: Write registry certificate to disk
+- name: Write registry certificate to disk from PublicCert
   ansible.builtin.copy:
     src: "{{ playbook_dir }}/download/{{registry_ssl_ca }}"
     dest: /etc/docker/certs.d/{{ registry_domain }}/ca.crt
