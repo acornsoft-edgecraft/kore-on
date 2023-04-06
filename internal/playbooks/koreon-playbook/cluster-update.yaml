@@ -94,8 +94,6 @@
         apply:
           tags:
             - initialize
-      vars:
-        registry_mirror: true
     - name: CRI | Install Container Runtime Interface
       ansible.builtin.include_role:
         name: cri/{{ ansible_distribution | lower }}
