@@ -121,6 +121,7 @@ const Template = `
 ## - data-dir: private registry data directory (default: "/data/harbor")
 ## - registry-archive-file: registry archive file path (default: "")
 ## - public-cert: public cert activate (default: false)
+## - mirror-use: Choose to use a private registry mirror  (default: false)
 #install = true
 #registry-version = "v2.6.0"
 #registry-ip = "x.x.x.x"
@@ -129,6 +130,7 @@ const Template = `
 #data-dir = "/data/harbor"
 #registry-archive-file = ""
 #public-cert = false
+#mirror-use = false
 
 [private-registry.cert-file]
 ## Required

@@ -106,7 +106,7 @@ registry_install: {{ PrivateRegistry.Install }}
 registry_version: {{ PrivateRegistry.RegistryVersion }}
 registry_data_dir: {{ (PrivateRegistry.DataDir == "" ) | ternary("/data/harbor", PrivateRegistry.DataDir) }}
 registry_ip: {{ (PrivateRegistry.RegistryIP == "") | ternary("''", PrivateRegistry.RegistryIP) }}
-registry_domain: {{ (PrivateRegistry.RegistryDomain == "") | ternary(PrivateRegistry.RegistryIP, PrivateRegistry.RegistryDomain) }}
+registry_domain: {{ (PrivateRegistry.RegistryDomain == "") | ternary((PrivateRegistry.RegistryIP == "") | ternary("''", PrivateRegistry.RegistryIP), PrivateRegistry.RegistryDomain) }}
 registry_archive_file: {{ (PrivateRegistry.RegistryArchiveFile == "") | ternary("''", PrivateRegistry.RegistryArchiveFile) }}
 registry_public_cert: {{ PrivateRegistry.PublicCert }}
 #-end [private-registry]

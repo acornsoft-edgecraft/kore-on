@@ -1,5 +1,8 @@
 KUBELET_EXTRA_ARGS="--root-dir={{ data_root_dir }}/kubelet \
+{% if k8s_major_version is version('v1.26', '<') %}
 --log-dir={{ data_root_dir }}/log \
 --logtostderr=false \
+{% endif %}
 --v=2 \
+--node-ip={{ hostvars[inventory_hostname]['ip'] }} \
 --node-labels=koreon.acornsoft.io/clusterid={{ cluster_id }}"

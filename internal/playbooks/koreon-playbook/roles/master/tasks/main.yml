@@ -129,7 +129,7 @@
 
 - name: Copy kubeadm conf file
   template:
-    src: "{{ 'kubernetes/kubeadm.yaml.j2' if (k8s_version is version('v1.24.0', '<')) else 'kubernetes/kubeadm-'+(k8s_major_version)+'.yaml.j2' }}"
+    src: "{{ 'kubernetes/kubeadm.yaml.j2' if (k8s_version is version('v1.24.0', '<')) else 'kubernetes/kubeadm-v1.24_v1.26.yaml.j2' }}"
     dest: "{{ kube_config_dir }}/kubeadm.yaml"
   notify:
    - Master | wait for kube-scheduler

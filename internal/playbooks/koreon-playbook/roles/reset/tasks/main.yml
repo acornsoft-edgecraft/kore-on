@@ -192,6 +192,8 @@
   apt:
     name: ['kubelet', 'kubectl', 'kubeadm', 'kubernetes-cni', 'docker-ce', 'docker-ce-cli', 'docker-ce-selinux', 'lksctp-tools', 'containerd.io', 'container-selinux']
     state: absent
+    autoremove: true
+    force: true
     purge: yes
   register: packages_removed
   tags: ['services']

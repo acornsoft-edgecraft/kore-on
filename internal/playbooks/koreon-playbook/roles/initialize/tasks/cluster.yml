@@ -53,36 +53,40 @@
 # https://docs.projectcalico.org/v3.11/maintenance/troubleshooting#configure-networkmanager
 # To prevent NetworkManager from interfering with Calico interfaces
 - name: Check if host has NetworkManager
-  command: systemctl show NetworkManager
+  command: systemctl status NetworkManager
   register: nm_check
   failed_when: false
   changed_when: false
 
 - name: Ensure NetworkManager conf.d dir
-  when: nm_check.rc == 0
   file:
     path: "/etc/NetworkManager/conf.d"
     state: directory
     recurse: yes
+  when: 
+    - nm_check.rc == 0
 
 - name: Prevent NetworkManager from managing Calico interfaces
-  when: nm_check.rc == 0
   copy:
     content: |
       [keyfile]
       unmanaged-devices=interface-name:cali*;interface-name:tunl*;interface-name:vxlan.calico
     dest: /etc/NetworkManager/conf.d/calico.conf
   notify: Reload NetworkManager
+  when:
+    - nm_check.rc == 0
 
 # Disable NetworkManager DNS processing when RHEL 8
 - name: Disable NetworkManager DNS processing
-  when: nm_check.rc == 0 and ansible_distribution_major_version|int == 8
   copy:
     content: |
       [main]
       dns=none
     dest: /etc/NetworkManager/conf.d/90-dns-none.conf
   notify: Reload NetworkManager
+  when:
+    - nm_check.rc == 0
+    - ansible_distribution_major_version|int == 8
 
 # --------------------------------------------------------------------------------------------------------
 

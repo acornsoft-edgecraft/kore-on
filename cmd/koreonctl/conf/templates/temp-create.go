@@ -32,6 +32,9 @@ node-storage                   {{$SharedStorage.StorageIP}}                    {
 {{ else if and (ne "" $PrivateRegistry.RegistryIP)  (eq true $PrivateRegistry.PublicCert) }}
 ## Private repositories are not installed 
 node-regi                      {{$PrivateRegistry.RegistryIP}}                    {{if ne "" $PrivateRegistry.PrivateIP}}{{$PrivateRegistry.PrivateIP}}{{end -}}
+{{ else if and (ne "" $PrivateRegistry.RegistryDomain)  (ne true $PrivateRegistry.PublicCert) }}
+## Private repositories are not installed. used domain name
+node-regi                      {{$PrivateRegistry.RegistryDomain}}
 {{  end}}
 ===========================================================================
 Is this ok [y/n]: `
