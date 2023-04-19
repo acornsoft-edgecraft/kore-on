@@ -1,0 +1,18 @@
+- name: Create containerd directory
+  file:
+    path: /etc/containerd/certs.d/{{ item }}
+    state: directory
+  with_items:
+    - "{{ registry_domain }}"
+
+- name: Add containerd config for mirrors
+  ansible.builtin.copy:
+    dest: /etc/containerd/certs.d/{{ item }}/hosts.toml
+    content: |
+      server = "https://{{ item }}"
+
+      [host."https://{{ item }}"]
+        capabilities = ["pull", "resolve"]
+        {{ PrivateRegistry.PublicCert == true | ternary("","#")  }}ca = "/etc/docker/certs.d/{{ registry_domain }}/ca.crt"
+  with_items:
+    - "{{ registry_domain }}"

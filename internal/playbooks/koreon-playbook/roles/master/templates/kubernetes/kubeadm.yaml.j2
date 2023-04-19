@@ -28,12 +28,11 @@ etcd:
     certFile: {{ cert_dir }}/etcd/server.crt
     keyFile: {{ cert_dir }}/etcd/server.key
 dns:
-  type: CoreDNS
 {% if closed_network and k8s_version is version('v1.21.0','>=') %}
   imageRepository: docker.io/coredns
   imageTag: {{ image_coredns_version | regex_replace('^v', '') }}
-{% else %%}
-  imageRepository: registry.k8s.io/coredns/coredns
+{% else %}
+  imageRepository: registry.k8s.io/coredns
   imageTag: {{ image_coredns_version }}
 {% endif %}
 networking:

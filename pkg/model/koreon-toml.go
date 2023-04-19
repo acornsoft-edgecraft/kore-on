@@ -2,6 +2,7 @@ package model
 
 type KoreOnToml struct {
 	KoreOn struct {
+		ClusterInstall   bool   `toml:"cluster-install,omitempty"`
 		ClusterName      string `toml:"cluster-name,omitempty"`
 		ClusterID        string `toml:"cluster-id,omitempty"`
 		InstallDir       string `toml:"install-dir,omitempty"`
@@ -93,6 +94,7 @@ type KoreOnToml struct {
 		DataDir             string `toml:"data-dir,omitempty"`
 		RegistryArchiveFile string `toml:"registry-archive-file,omitempty"`
 		PublicCert          bool   `toml:"public-cert,omitempty"`
+		MirrorUse           bool   `toml:"mirror-use,omitempty"`
 		CertFile            struct {
 			CaCert string `toml:"ca-cert,omitempty"`
 			// CaCertKey string `toml:"ca-cert-key,omitempty"`

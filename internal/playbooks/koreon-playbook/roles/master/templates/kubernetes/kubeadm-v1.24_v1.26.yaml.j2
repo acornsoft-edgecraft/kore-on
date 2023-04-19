@@ -5,7 +5,7 @@ localAPIEndpoint:
   bindPort: {{ api_secure_port }}
 {% if container_runtime == "containerd" %}
 nodeRegistration:
-  criSocket: /run/containerd/containerd.sock
+  criSocket: unix:///run/containerd/containerd.sock
 {% endif %}
 ---
 apiVersion: kubeadm.k8s.io/v1beta3
@@ -31,8 +31,8 @@ dns:
 {% if closed_network and k8s_version is version('v1.21.0','>=') %}
   imageRepository: docker.io/coredns
   imageTag: {{ image_coredns_version | regex_replace('^v', '') }}
-{% else %%}
-  imageRepository: registry.k8s.io/coredns/coredns
+{% else %}
+  imageRepository: registry.k8s.io/coredns
   imageTag: {{ image_coredns_version }}
 {% endif %}
 networking:

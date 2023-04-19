@@ -166,11 +166,10 @@ spec:
         - --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname
         - --kubelet-use-node-status-port
         - --metric-resolution=15s
-        - --profiling=false
         - --kubelet-certificate-authority=/etc/kubernetes/pki/ca.crt
         - --tls-cert-file=/etc/kubernetes/pki/metrics-server.crt
         - --tls-private-key-file=/etc/kubernetes/pki/metrics-server.key
-        image: registry.k8s.io/metrics-server/metrics-server:v0.6.1
+        image: registry.k8s.io/metrics-server/metrics-server:v0.6.3
         imagePullPolicy: IfNotPresent
         livenessProbe:
           failureThreshold: 3
@@ -215,21 +214,6 @@ spec:
       - name: k8s-certs
         secret:
           secretName: metrics-server-certs
----
-{% if k8s_version is version('v1.25.0','>=') %}
-apiVersion: policy/v1
-{% else %}
-apiVersion: policy/v1beta1
-{% endif %}
-kind: PodDisruptionBudget
-metadata:
-  name: metrics-server
-  namespace: kube-system
-spec:
-  minAvailable: 1
-  selector:
-    matchLabels:
-      k8s-app: metrics-server
 ---
 apiVersion: apiregistration.k8s.io/v1
 kind: APIService
