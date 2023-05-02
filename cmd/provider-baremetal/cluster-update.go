@@ -198,7 +198,15 @@ func (c *strClusterUpdateCmd) run() error {
 		if err != nil {
 			logger.Fatal(err)
 		}
-		chekServerAddress := checkKubeconfig(koreonToml.NodePool.Master.IP, config.Host)
+		var lbIP []string
+
+		if koreonToml.NodePool.Master.LbIP != "" {
+			lbIP[0] = koreonToml.NodePool.Master.LbIP
+		} else {
+			lbIP = koreonToml.NodePool.Master.IP
+		}
+
+		chekServerAddress := checkKubeconfig(lbIP, config.Host)
 
 		if !chekServerAddress {
 			logger.Fatal("The cluster is unreachable. Check the kubeconfig server address.")
