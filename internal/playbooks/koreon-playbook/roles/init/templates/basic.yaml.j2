@@ -116,10 +116,10 @@ registry_public_cert: {{ PrivateRegistry.PublicCert }}
 ## Required
 ## -
 ## Optional
-## - registry_ssl_ca: The certificate path used when using public-cert. (default: "")
-## - registry_ssl_ca_key: The certificate-key used when using public-cert. (default: "")
-registry_ssl_ca: {{ PrivateRegistry.CertFile.CaCert | basename }}
-{# registry_ssl_ca_key: {{ PrivateRegistry.CertFile.CaCertKey | basename }} #}
+## - registry_ssl_cert: The certificate path used when using public-cert. (default: "")
+## - registry_ssl_cert_key: The certificate-key used when using public-cert-key. (default: "")
+registry_ssl_cert: {{ PrivateRegistry.CertFile.SslCert | basename }}
+registry_ssl_cert_key: {{ PrivateRegistry.CertFile.SslCertKey | basename }}
 #-end [private-registry.cert-file]
 
 

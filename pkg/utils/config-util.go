@@ -205,8 +205,8 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 		privateRegistryRegistryVersion := koreonToml.PrivateRegistry.RegistryVersion
 		privateRegistryRegistryDomain := koreonToml.PrivateRegistry.RegistryDomain
 		isPrivateRegistryPublicCert := koreonToml.PrivateRegistry.PublicCert
-		privateRegistryCrt := koreonToml.PrivateRegistry.CertFile.CaCert
-		// privateRegistryKey := koreonToml.PrivateRegistry.CertFile.CaCertKey
+		privateRegistryCrt := koreonToml.PrivateRegistry.CertFile.SslCert
+		privateRegistryKey := koreonToml.PrivateRegistry.CertFile.SslCertKey
 
 		supportK8sVersion := IsSupportVersion(k8sVersion, confK8sVersion)
 
@@ -288,9 +288,9 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 				logger.Fatal("private-registry.cert-file > ca-cert is required.")
 			}
 
-			// if privateRegistryKey == "" {
-			// 	logger.Fatal("private-registry.cert-file > ssl-certificate-key is required.")
-			// }
+			if privateRegistryKey == "" {
+				logger.Fatal("private-registry.cert-file > ssl-certificate-key is required.")
+			}
 		}
 
 		if koreonToml.KoreOn.ClosedNetwork {

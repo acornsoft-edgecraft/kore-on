@@ -55,11 +55,11 @@
 - name: Check registry private ca file existence
   stat:
     path: "{{ harbor_cert_dir }}/ca.crt"
-  when: not registry_public_cert
+  when: 
+    - not registry_public_cert
   register: registry_ca_stat
 
 - name: Create registry private certificate
-  when: not registry_public_cert and not registry_ca_stat.stat.exists
   shell: "{{ item }}"
   no_log: true
   with_items:
@@ -69,15 +69,18 @@
     - "openssl req -new -key {{ harbor_cert_dir }}/harbor.key -subj '/CN=harbor' |
       openssl x509 -req -CA {{ harbor_cert_dir }}/ca.crt -CAkey {{ harbor_cert_work_dir }}/ca.key -CAcreateserial -out {{ harbor_cert_dir }}/harbor.crt -days {{ cert_validity_days }} -extensions v3_req_server -extfile {{ harbor_cert_work_dir }}/openssl.conf"
   register: registry_cert
+  when: 
+   - not registry_public_cert and not registry_ca_stat.stat.exists
 
 - name: Copy registry public certificate file
-  when: registry_public_cert
   copy:
     src: "{{ playbook_dir }}/{{ item.src }}"
     dest: "{{ harbor_cert_dir }}/{{ item.dest }}"
   with_items:
-    - { src: "files/harbor.crt", dest: "harbor.crt" }
-    - { src: "files/harbor.key", dest: "harbor.key" }
+    - { src: "{{ playbook_dir }}/download/{{ registry_ssl_cert }}", dest: "harbor.crt" }
+    - { src: "{{ playbook_dir }}/download/{{ registry_ssl_cert_key }}", dest: "harbor.key" }
+  when: 
+    - registry_public_cert
 
 - name: Copy harbor.yml file
   template:
