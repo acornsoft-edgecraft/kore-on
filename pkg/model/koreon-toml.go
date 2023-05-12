@@ -96,8 +96,8 @@ type KoreOnToml struct {
 		PublicCert          bool   `toml:"public-cert,omitempty"`
 		MirrorUse           bool   `toml:"mirror-use,omitempty"`
 		CertFile            struct {
-			CaCert string `toml:"ca-cert,omitempty"`
-			// CaCertKey string `toml:"ca-cert-key,omitempty"`
+			SslCert    string `toml:"ssl-cert,omitempty"`
+			SslCertKey string `toml:"ssl-cert-key,omitempty"`
 		} `toml:"cert-file,omitempty"`
 	} `toml:"private-registry,omitempty"`
 
