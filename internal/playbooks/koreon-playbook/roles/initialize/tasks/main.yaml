@@ -27,9 +27,12 @@
 - name: Install nfs client
   when: ansible_distribution in ["Ubuntu", "Debian"]
   apt:
-    name: "nfs-common"
+    name: "{{ item }}"
     state: present
     update_cache: yes
+  with_items:
+    - nfs-common
+    - parted
 
 - name: Install nfs-utils
   when: ansible_distribution in ["CentOS", "RedHat"]

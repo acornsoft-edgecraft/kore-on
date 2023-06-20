@@ -1,0 +1,154 @@
+---
+# This playbook deploys a kubernetes cluster with platform applications
+# Init generate inventory and vars
+- hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Init | Configuration
+      ansible.builtin.include_role:
+        name: init
+        apply:
+          tags:
+            - init
+      tags:
+        - init
+
+# Clear gathered facts from all currently targeted hosts 
+- hosts: all
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Clear gathered facts
+      meta: clear_facts
+
+# Pre-installation check network.
+- hosts: all
+  become: false
+  gather_facts: true
+  vars_files:
+    - "{{ playbook_dir }}/inventory/group_vars/basic.yaml"
+    - "{{ playbook_dir }}/inventory/group_vars/expert.yaml"
+  tasks:
+    - name: Init | Network check
+      ansible.builtin.include_role:
+        name: init/network
+        apply:
+          tags:
+            - init-network
+  any_errors_fatal: true
+
+# Configure local-repository for air-gap env
+- hosts: registry
+  become: true
+  gather_facts: false
+  vars_files:
+    - "{{ playbook_dir }}/inventory/group_vars/basic.yaml"
+    - "{{ playbook_dir }}/inventory/group_vars/expert.yaml"
+  tasks:
+    - name: Create Local Repository
+      ansible.builtin.include_role:
+        name: local-repo/{{ ansible_distribution | lower }}
+        apply:
+          tags:
+            - create-local-repo
+      when:
+        - closed_network
+        - local_repository_install
+  any_errors_fatal: true
+
+## Configure system package repository
+- hosts: all
+  become: true
+  gather_facts: false
+  vars_files:
+    - "{{ playbook_dir }}/inventory/group_vars/basic.yaml"
+    - "{{ playbook_dir }}/inventory/group_vars/expert.yaml"
+  tasks:
+    - name: Bootstrap OS
+      ansible.builtin.include_role:
+        name: bootstrap-os/{{ ansible_distribution | lower }}
+        apply:
+          tags:
+            - bootstrap-os
+      tags:
+        - bootstrap-os
+      when:
+        - ansible_distribution is defined
+        - not ansible_distribution in ["CentOS"]
+  any_errors_fatal: true
+
+## Configure system package repository
+- hosts: all
+  become: true
+  gather_facts: false
+  vars_files:
+    - "{{ playbook_dir }}/inventory/group_vars/basic.yaml"
+    - "{{ playbook_dir }}/inventory/group_vars/expert.yaml"
+  tasks:
+    - name: Bootstrap OS
+      ansible.builtin.include_role:
+        name: bootstrap-os/{{ ansible_distribution | lower }}-{{ ansible_distribution_release | lower }}
+        apply:
+          tags:
+            - bootstrap-os
+      tags:
+        - bootstrap-os
+      when:
+        - ansible_distribution is defined
+        - ansible_distribution in ["CentOS"]
+  any_errors_fatal: true
+
+
+# Cluster Initialize
+- hosts: cluster
+  become: true
+  gather_facts: false
+  vars_files:
+    - "{{ playbook_dir }}/inventory/group_vars/basic.yaml"
+    - "{{ playbook_dir }}/inventory/group_vars/expert.yaml"
+  tasks:
+    - name: Cluster Initialize
+      ansible.builtin.include_role:
+        name: initialize
+        apply:
+          tags:
+            - initialize
+  any_errors_fatal: true
+
+# Install container runtime interface
+- hosts: cluster
+  become: true
+  gather_facts: false
+  vars_files:
+    - "{{ playbook_dir }}/inventory/group_vars/basic.yaml"
+    - "{{ playbook_dir }}/inventory/group_vars/expert.yaml"
+    - "{{ playbook_dir }}/inventory/group_vars/images.yaml"
+  tasks:
+    - name: CRI | Install Container Runtime Interface
+      ansible.builtin.include_role:
+        name: cri/{{ ansible_distribution | lower }}
+        apply:
+          tags:
+            - cri
+      vars:
+        param: "cluster"
+        registry_mirror: "{{ PrivateRegistry.MirrorUse }}"
+  any_errors_fatal: true
+
+# install kubernetes master services
+- hosts: masters
+  become: true
+  gather_facts: false
+  vars_files:
+    - "{{ playbook_dir }}/inventory/group_vars/basic.yaml"
+    - "{{ playbook_dir }}/inventory/group_vars/expert.yaml"
+  tasks:
+    - name: K8s Controll Plane Installation
+      ansible.builtin.include_role:
+        name: test__
+        tasks_from: package
+        apply:
+          tags:
+            - create-os-image
+      tags:
+        - create-os-image

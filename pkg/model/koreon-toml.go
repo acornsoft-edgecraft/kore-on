@@ -25,6 +25,7 @@ type KoreOnToml struct {
 		LocalRepositoryUrl         string `toml:"local-repository-url,omitempty"`
 		LocalRepositoryArchiveFile string `toml:"local-repository-archive-file"`
 		DebugMode                  bool   `toml:"debug-mode,omitempty"`
+		ClusterApi                 bool   `toml:"cluster-api,omitempty"`
 	} `toml:"koreon,omitempty"`
 
 	Kubernetes struct {

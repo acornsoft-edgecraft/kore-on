@@ -87,6 +87,9 @@ SupportEtcdVersion: {
 SupportDnsUtilsVersion: {
   "v1.3": [""]
 }
+SupportClusterctlVersion: {
+  "v1.4": ["3"]
+}
 
 ## Harbor
 SupportHarborVersion: {

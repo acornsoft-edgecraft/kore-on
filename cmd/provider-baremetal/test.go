@@ -1,12 +1,16 @@
 package cmd
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"kore-on/cmd/koreonctl/conf/templates"
 	"kore-on/pkg/logger"
+	"kore-on/pkg/model"
 	"kore-on/pkg/utils"
 	"os"
+	"text/template"
 
 	"github.com/apenella/go-ansible/pkg/execute"
 	"github.com/apenella/go-ansible/pkg/execute/measure"
@@ -45,10 +49,16 @@ func TestCmd() *cobra.Command {
 		},
 	}
 
+	// SubCommand add
+	cmd.AddCommand(emptyCmd())
+
+	// SubCommand validation
+	utils.CheckCommand(cmd)
+
 	test.tags = ""
 	test.inventory = "./internal/playbooks/koreon-playbook/inventory/inventory.ini"
 	test.playbookFiles = []string{
-		"./internal/playbooks/koreon-playbook/z-test-reset-node.yaml",
+		"./internal/playbooks/koreon-playbook/z-test-create-os-image.yaml",
 	}
 
 	f := cmd.Flags()
@@ -67,15 +77,8 @@ func (c *strTestCmd) run() error {
 	koreOnConfigFileName := viper.GetString("KoreOn.KoreOnConfigFile")
 	koreOnConfigFilePath := utils.IskoreOnConfigFilePath(koreOnConfigFileName)
 	koreonToml, value := utils.ValidateKoreonTomlConfig(koreOnConfigFilePath, "create")
-
+	koreonToml.KoreOn.FileName = koreOnConfigFileName
 	if value {
-		// Prompt user for more input
-		// id := utils.InputPrompt("# Enter the username for the private registry.\nusername:")
-		// koreonToml.KoreOn.HelmCubeRepoID = base64.StdEncoding.EncodeToString([]byte(id))
-
-		// pw := utils.SensitivePrompt("# Enter the password for the private registry.\npassword:")
-		// koreonToml.KoreOn.HelmCubeRepoPW = base64.StdEncoding.EncodeToString([]byte(pw))
-
 		b, err := json.Marshal(koreonToml)
 		if err != nil {
 			logger.Fatal(err)
@@ -87,45 +90,30 @@ func (c *strTestCmd) run() error {
 		}
 	}
 
-	addonConfigFileName := viper.GetString("Addon.AddonConfigFile")
-	addonPath := utils.IskoreOnConfigFilePath(addonConfigFileName)
-	addonToml, err := utils.GetAddonTomlConfig(addonPath)
+	// Make provision data
+	data := model.KoreonctlText{}
+	data.KoreOnTemp = koreonToml
+	data.Command = "create"
+
+	// Processing template
+	koreonctlText := template.New("CreateText")
+	temp, err := koreonctlText.Parse(templates.CreateText)
 	if err != nil {
-		logger.Fatal(err)
-	} else {
-		// Prompt user for more input
-		// if addonToml.Apps.CsiDriverNfs.Install {
-		// 	id := utils.InputPrompt("# Enter the username for the private registry.\nusername:")
-		// 	addonToml.Apps.CsiDriverNfs.ChartRefID = base64.StdEncoding.EncodeToString([]byte(id))
+		logger.Errorf("Template has errors. cause(%s)", err.Error())
+		return err
+	}
 
-		// 	pw := utils.SensitivePrompt("# Enter the password for the private registry.\npassword:")
-		// 	addonToml.Apps.CsiDriverNfs.ChartRefPW = base64.StdEncoding.EncodeToString([]byte(pw))
-		// }
+	// TODO: 진행상황을 어떻게 클라이언트에 보여줄 것인가?
+	var buff bytes.Buffer
+	err = temp.Execute(&buff, data)
+	if err != nil {
+		logger.Errorf("Template execution failed. cause(%s)", err.Error())
+		return err
+	}
 
-		if addonToml.Addon.AddonDataDir == "" {
-			addonToml.Addon.AddonDataDir = "/data/addon"
-		}
-
-		b, err := json.Marshal(addonToml)
-		if err != nil {
-			logger.Fatal(err)
-		}
-		if err := json.Unmarshal(b, &c.addonExtravars); err != nil {
-			logger.Fatal(err.Error())
-		}
-
-		result := make(map[string]interface{})
-		for k, v := range c.extravars {
-			if _, ok := c.extravars[k]; ok {
-				result[k] = v
-			}
-		}
-		for k, v := range c.addonExtravars {
-			if _, ok := c.addonExtravars[k]; ok {
-				result[k] = v
-			}
-		}
-		c.result = result
+	if !utils.CheckUserInput(buff.String(), "y") {
+		fmt.Println("nothing to changed. exit")
+		os.Exit(1)
 	}
 
 	if len(c.playbookFiles) < 1 {
@@ -136,21 +124,13 @@ func (c *strTestCmd) run() error {
 		return fmt.Errorf("[ERROR]: %s", "To run ansible-playbook an inventory must be specified")
 	}
 
-	// if len(c.privateKey) < 1 {
-	// 	if len(koreonToml.NodePool.Security.PrivateKeyPath) > 0 {
-	// 		c.privateKey = koreonToml.NodePool.Security.PrivateKeyPath
-	// 	} else {
-	// 		return fmt.Errorf("[ERROR]: %s", "To run ansible-playbook an privateKey must be specified")
-	// 	}
-	// }
+	if len(c.privateKey) < 1 {
+		return fmt.Errorf("[ERROR]: %s", "To run ansible-playbook an privateKey must be specified")
+	}
 
-	// if len(c.user) < 1 {
-	// 	if len(koreonToml.NodePool.Security.SSHUserID) > 0 {
-	// 		c.user = koreonToml.NodePool.Security.SSHUserID
-	// 	} else {
-	// 		return fmt.Errorf("[ERROR]: %s", "To run ansible-playbook an ssh login user must be specified")
-	// 	}
-	// }
+	if len(c.user) < 1 {
+		return fmt.Errorf("[ERROR]: %s", "To run ansible-playbook an ssh login user must be specified")
+	}
 
 	ansiblePlaybookConnectionOptions := &options.AnsibleConnectionOptions{
 		PrivateKey: c.privateKey,
@@ -161,7 +141,8 @@ func (c *strTestCmd) run() error {
 		Inventory: c.inventory,
 		Verbose:   c.verbose,
 		Tags:      c.tags,
-		ExtraVars: c.result,
+		ExtraVars: c.extravars,
+		// ExtraVars: c.result,
 	}
 
 	executorTimeMeasurement := measure.NewExecutorTimeMeasurement(
