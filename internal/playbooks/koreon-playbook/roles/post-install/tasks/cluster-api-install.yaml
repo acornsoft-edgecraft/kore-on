@@ -1,0 +1,42 @@
+---
+# Installation Cluster API --------------------------------------------------------------------
+- name: Install clusterctl
+  ansible.builtin.get_url:
+    url: https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.4.3/clusterctl-linux-amd64
+    dest: "/usr/local/bin/clusterctl"
+    owner: "root"
+    group: "root"
+    mode: "0755"
+
+- name: Check cluster is running
+  ansible.builtin.command: |
+   kubectl --kubeconfig={{ kubeadminconfig }} cluster-info
+  register: check_cluster_health
+  failed_when: false
+  delegate_to: "{{ groups['masters'][0] }}"
+  run_once: true
+
+- name: Copy clusterctl microk8s config file
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  with_items:
+    - { src: "clusterctl.yaml.j2", dest: "/tmp/clusterctl.yaml" }
+  delegate_to: "{{ groups['masters'][0] }}"
+
+- name: Initialize the management cluster
+  command: |
+    clusterctl init --kubeconfig={{ kubeadminconfig }} --bootstrap microk8s --control-plane microk8s --infrastructure openstack --config /tmp/clusterctl.yaml 
+  delegate_to: "{{ groups['masters'][0] }}"
+  run_once: true
+  when:
+    - check_cluster_health.rc == 0
+
+- name: Initialize the management cluster
+  command: |
+    clusterctl init --kubeconfig={{ kubeadminconfig }} --bootstrap kubeadm --control-plane kubeadm
+  delegate_to: "{{ groups['masters'][0] }}"
+  run_once: true
+  when:
+    - check_cluster_health.rc == 0
+# --------------------------------------------------------------------------------------------

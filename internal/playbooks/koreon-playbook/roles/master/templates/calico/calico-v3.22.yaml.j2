@@ -10,7 +10,11 @@ data:
   # Typha is disabled.
   typha_service_name: "none"
   # Configure the backend to use.
+{% if vxlan_mode %}
+  calico_backend: "vxlan"
+{% else %}
   calico_backend: "bird"
+{% endif %}
 
   # Configure the MTU to use for workload interfaces and tunnels.
   # By default, MTU is auto-detected, and explicitly setting this field should not be required.
@@ -4376,7 +4380,9 @@ spec:
               command:
               - /bin/calico-node
               - -felix-live
-              - -bird-live
+{% if not vxlan_mode %}
+              - -bird-ready
+{% endif %}
             periodSeconds: 10
             initialDelaySeconds: 10
             failureThreshold: 6
@@ -4386,7 +4392,9 @@ spec:
               command:
               - /bin/calico-node
               - -felix-ready
+{% if not vxlan_mode %}
               - -bird-ready
+{% endif %}
             periodSeconds: 10
             timeoutSeconds: 10
           volumeMounts:

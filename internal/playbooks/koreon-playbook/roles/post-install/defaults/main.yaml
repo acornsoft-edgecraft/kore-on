@@ -1,6 +1,7 @@
 ---
 is_kube_master: "{{ inventory_hostname in groups['masters'] }}"
 is_registry: "{{ inventory_hostname in groups['registry'] }}"
+install_cluster_api: "{{ KoreOn.ClusterApi }}"
 
 #etcd_access_addresses: |-
 #  {% for node in groups['etcd'] -%}

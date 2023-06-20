@@ -189,12 +189,12 @@
 
 - name: Remove kubernetes, etcd, docker package
   when: ansible_distribution in ["Ubuntu", "Debian"]
-  apt:
+  ansible.builtin.apt:
     name: ['kubelet', 'kubectl', 'kubeadm', 'kubernetes-cni', 'docker-ce', 'docker-ce-cli', 'docker-ce-selinux', 'lksctp-tools', 'containerd.io', 'container-selinux']
     state: absent
     autoremove: true
     force: true
-    purge: yes
+    purge: true
   register: packages_removed
   tags: ['services']
 

@@ -4515,7 +4515,9 @@ spec:
               command:
               - /bin/calico-node
               - -felix-live
-              - -bird-live
+{% if not vxlan_mode %}
+              - -bird-ready
+{% endif %}
             periodSeconds: 10
             initialDelaySeconds: 10
             failureThreshold: 6

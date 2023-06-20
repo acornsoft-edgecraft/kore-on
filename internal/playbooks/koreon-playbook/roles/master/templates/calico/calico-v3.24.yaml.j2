@@ -4609,7 +4609,9 @@ spec:
               command:
               - /bin/calico-node
               - -felix-ready
+{% if not vxlan_mode %}
               - -bird-ready
+{% endif %}
             periodSeconds: 10
             timeoutSeconds: 10
           volumeMounts:
