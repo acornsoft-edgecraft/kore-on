@@ -40,7 +40,9 @@ SupportCalicoCtlVersion: {
   "v3.20": ["0", "1", "2", "3", "4", "5", "6"],
   "v3.21": ["0", "1", "2", "3", "4", "5", "6"],
   "v3.22": ["0", "1", "2", "3", "4", "5"],
-  "v3.23": ["0", "1", "2", "3", "4", "5"]
+  "v3.23": ["0", "1", "2", "3", "4", "5"],
+  "v3.24": ["0", "1", "2", "3", "4", "5"],
+  "v3.25": ["0"]
 }
 SupportCorednsVersion: {
   "v1.7": ["0", "1"],
@@ -87,7 +89,7 @@ SupportEtcdVersion: {
 SupportDnsUtilsVersion: {
   "v1.3": [""]
 }
-SupportClusterctlVersion: {
+SupportClusterCtlVersion: {
   "v1.4": ["3"]
 }
 
@@ -201,6 +203,7 @@ SupportVersion: {
       "crictl": "v1.19",
       "etcd": "v3.4",
       "helm": "v3.10",
+      "calicoctl": "v3.19",
     },
     "v1.20": {
       "containerd": "v1.5",
@@ -208,6 +211,7 @@ SupportVersion: {
       "crictl": "v1.20",
       "etcd": "v3.4",
       "helm": "v3.10",
+      "calicoctl": "v3.20",
     },
     "v1.21": {
       "containerd": "v1.5",
@@ -215,6 +219,7 @@ SupportVersion: {
       "crictl": "v1.21",
       "etcd": "v3.4",
       "helm": "v3.10",
+      "calicoctl": "v3.21",
     },
     "v1.22": {
       "containerd": "v1.5",
@@ -222,6 +227,7 @@ SupportVersion: {
       "crictl": "v1.22",
       "etcd": "v3.4",
       "helm": "v3.10",
+      "calicoctl": "v3.22",
     },
     "v1.23": {
       "containerd": "v1.6",
@@ -229,6 +235,8 @@ SupportVersion: {
       "crictl": "v1.23",
       "etcd": "v3.4",
       "helm": "v3.10",
+      "calicoctl": "v3.23",
+      "clusterctl": "v1.4",
     },
     "v1.24": {
       "containerd": "v1.6",
@@ -236,6 +244,8 @@ SupportVersion: {
       "crictl": "v1.24",
       "etcd": "v3.5",
       "helm": "v3.10",
+      "calicoctl": "v3.24",
+      "clusterctl": "v1.4",
     },
     "v1.25": {
       "containerd": "v1.6",
@@ -243,6 +253,8 @@ SupportVersion: {
       "crictl": "v1.25",
       "etcd": "v3.5",
       "helm": "v3.10",
+      "calicoctl": "v3.25",
+      "clusterctl": "v1.4",
     },
     "v1.26": {
       "containerd": "v1.6",
@@ -250,6 +262,8 @@ SupportVersion: {
       "crictl": "v1.26",
       "etcd": "v3.5",
       "helm": "v3.10",
+      "calicoctl": "v3.25",
+      "clusterctl": "v1.4",
     },
   },
   "helm_chart_package": {

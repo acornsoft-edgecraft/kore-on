@@ -24,7 +24,6 @@ const Template = `
 #closed-network = true
 #local-repository-install = true
 #local-repository-port = 8080
-#local-repository-archive-file = ""
 #local-repository-url = "http://x.x.x.x"
 
 [kubernetes]
@@ -128,7 +127,6 @@ const Template = `
 #private-ip = "x.x.x.x"
 #registry-domain = "x.x.x.x"
 #data-dir = "/data/harbor"
-#registry-archive-file = ""
 #public-cert = false
 #mirror-use = false
 

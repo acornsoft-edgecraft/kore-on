@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"regexp"
 	"strings"
 
 	"github.com/pelletier/go-toml"
@@ -41,6 +42,7 @@ func GetKoreonTomlConfig(koreOnConfigFilePath string) (model.KoreOnToml, error) 
 	c = []byte(str)
 
 	var koreonToml = model.KoreOnToml{}
+
 	// default values
 	koreonToml.NodePool.Master.HaproxyInstall = true
 	koreonToml.Kubernetes.AuditLogEnable = true
@@ -91,6 +93,7 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 	var koreon_toml model.KoreOnToml
 	errorCnt = 0
 	koreonToml, _ := GetKoreonTomlConfig(koreOnConfigFilePath)
+	subDir := viper.GetString("KoreOn.KoreOnConfigFileSubDir")
 
 	confK8sVersion := "SupportK8sVersion"
 	confHarborVersion := "SupportHarborVersion"
@@ -99,7 +102,7 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 	// confCorednsVersion := "Support.SupportCorednsVersion"
 	// confDockerVersion := "Support.SupportDockerVersion"
 	// confDockerComposeVersion := "Support.SupportDockerComposeVersion"
-	koreonToml.KoreOn.ImageArchive = viper.GetString("KoreOn.KoreOnImageArchive")
+	koreonToml.KoreOn.ImageArchivePath = subDir
 	koreonToml.KoreOn.HelmCubeRepoUrl = viper.GetString("KoreOn.HelmCubeRepoUrl")
 
 	if nodePoolSSHPort == 0 {
@@ -183,7 +186,7 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 		}
 
 		koreonToml = koreon_toml
-		koreonToml.KoreOn.ImageArchive = viper.GetString("KoreOn.KoreOnImageArchive")
+		koreonToml.KoreOn.ImageArchivePath = subDir
 		// koreonToml.SupportVersion.ImageVersion.Calico = IsSupportVersion(fmt.Sprintf("%v", supportK8sList["calico"]), confCalicoVersion)
 		// koreonToml.SupportVersion.ImageVersion.Coredns = IsSupportVersion(fmt.Sprintf("%v", supportK8sList["coredns"]), confCorednsVersion)
 
@@ -295,16 +298,13 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 
 		if koreonToml.KoreOn.ClosedNetwork {
 			if koreonToml.KoreOn.LocalRepositoryInstall {
-				if koreonToml.KoreOn.LocalRepositoryArchiveFile == "" {
-					logger.Fatal("koreon> When installing a local repository, the local-repository-archive-file entry is required.")
-				} else {
-					localRepositoryArchiveFile := filepath.Base(koreonToml.KoreOn.LocalRepositoryArchiveFile)
-					k8sVersionCheck := strings.Split(localRepositoryArchiveFile, "-")
-					if supportK8sVersion != k8sVersionCheck[2] {
-						logger.Fatalf("Check the kubernetes installation version.\nIs the version you are trying to install '%s' correct? If different, re-enter the kubernetes.version entry", k8sVersionCheck[2])
-					}
-					koreonToml.KoreOn.LocalRepositoryArchiveFile = localRepositoryArchiveFile
+				localRepositoryArchiveFile, err := searchOfDirectory(regexp.MustCompile("local"), subDir)
+
+				if err != nil {
+					logger.Fatal(err)
 				}
+
+				koreonToml.KoreOn.LocalRepositoryArchiveFile = localRepositoryArchiveFile
 			} else {
 				if koreonToml.KoreOn.LocalRepositoryUrl == "" {
 					logger.Fatal("koreon> If you are not installing a local repository, the local-repository-url entry is required.")
@@ -315,16 +315,13 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 			}
 
 			if privateRegistryInstall {
-				if koreonToml.PrivateRegistry.RegistryArchiveFile == "" {
-					logger.Fatal("private-registry >  registry-archive-file is required.")
-				} else {
-					registryArchiveFile := filepath.Base(koreonToml.PrivateRegistry.RegistryArchiveFile)
-					harborVersionCheck := strings.Split(registryArchiveFile, "-")
-					if supportHarborVersion != harborVersionCheck[1] {
-						logger.Fatalf("Check the private registry installation version.\nIs the version you are trying to install '%s' correct? If different, re-enter the registry-archive-file entry", harborVersionCheck[1])
-					}
-					koreonToml.PrivateRegistry.RegistryArchiveFile = registryArchiveFile
+				registryArchiveFile, err := searchOfDirectory(regexp.MustCompile("harbor"), subDir)
+
+				if err != nil {
+					logger.Fatal(err)
 				}
+
+				koreonToml.PrivateRegistry.RegistryArchiveFile = registryArchiveFile
 			}
 		}
 
@@ -407,16 +404,13 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 
 		if koreonToml.KoreOn.ClosedNetwork {
 			if koreonToml.KoreOn.LocalRepositoryInstall {
-				if koreonToml.KoreOn.LocalRepositoryArchiveFile == "" {
-					logger.Fatal("koreon> When installing a local repository, the local-repository-archive-file entry is required.")
-				} else {
-					localRepositoryArchiveFile := filepath.Base(koreonToml.KoreOn.LocalRepositoryArchiveFile)
-					k8sVersionCheck := strings.Split(localRepositoryArchiveFile, "-")
-					if supportK8sVersion != k8sVersionCheck[2] {
-						logger.Fatalf("Check the kubernetes installation version.\nIs the version you are trying to install '%s' correct? If different, re-enter the kubernetes.version entry", k8sVersionCheck[2])
-					}
-					koreonToml.KoreOn.LocalRepositoryArchiveFile = localRepositoryArchiveFile
+				localRepositoryArchiveFile, err := searchOfDirectory(regexp.MustCompile("local"), subDir)
+
+				if err != nil {
+					logger.Fatal(err)
 				}
+
+				koreonToml.KoreOn.LocalRepositoryArchiveFile = localRepositoryArchiveFile
 			} else {
 				if koreonToml.KoreOn.LocalRepositoryUrl == "" {
 					logger.Fatal("koreon> If you are not installing a local repository, the local-repository-url entry is required.")
@@ -526,7 +520,7 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 func checkSharedStorage(koreonToml model.KoreOnToml) int {
 	errorCnt = 0
 
-	if koreonToml.SharedStorage.Install == true {
+	if koreonToml.SharedStorage.Install {
 		if koreonToml.SharedStorage.StorageIP == "" {
 			logger.Fatal("shared-storage > storage-ip is required.")
 			errorCnt++
@@ -565,4 +559,20 @@ func setField(item interface{}, supportList map[string]interface{}) ([]byte, err
 		return nil, err
 	}
 	return data, nil
+}
+
+func searchOfDirectory(re *regexp.Regexp, dir string) (string, error) {
+	file_name := ""
+	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if re.MatchString(info.Name()) {
+			file_name = path
+		}
+
+		return nil
+	})
+	return file_name, err
 }

@@ -20,7 +20,6 @@ prepare_airgap_images: [
   ## Addon images
   "registry.k8s.io/sig-storage/livenessprobe:v2.7.0",
   "registry.k8s.io/sig-storage/nfsplugin:v4.1.0",
-  "regi.acloud.run/library/csi-nfs-diskusage-exporter:1.0.4.2",
   "registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.5.1",
   "registry.k8s.io/sig-storage/csi-provisioner:v3.2.0",
   "ghcr.io/kore3lab/kore-board.backend:v0.5.5",
@@ -29,18 +28,9 @@ prepare_airgap_images: [
   "ghcr.io/kore3lab/kore-board.terminal:v0.5.5"
 ]
 
-bastion_images: [
-  "ghcr.io/acornsoft-edgecraft/kore-on:latest"
-]
+bastion_image: "ghcr.io/acornsoft-edgecraft/kore-on:latest"
 
 prepare_airgap_helm_charts: [
-{% if ListVersion.ListHelmChartVersion.CsiDriverNfs != None %}
-{% for item in (ListVersion.ListHelmChartVersion.CsiDriverNfs | dict2items) %}
-{%   for data in item.value %}
-  "https://hcapital-harbor.acloud.run/chartrepo/cube/charts/csi-driver-nfs-{{ data }}.tgz",
-{%   endfor %}
-{% endfor %}
-{% endif %}
 {% if ListVersion.ListHelmChartVersion.Koreboard != None %}
 {% for item in (ListVersion.ListHelmChartVersion.Koreboard | dict2items) %}
 {%   for data in item.value %}

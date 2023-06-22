@@ -13,6 +13,7 @@
   ansible.builtin.apt:
     name: ['docker-ce', 'docker-ce-cli', 'containerd.io', 'nginx']
     state: absent
+    force: true
     purge: true
   register: packages_removed
   tags: ['services']
@@ -64,6 +65,8 @@
     - "{{ data_root_dir }}/harbor"
     - "{{ data_root_dir }}/docker"
     - "{{ data_root_dir }}/packages"
+    - "{{ data_root_dir }}/Dockerfile"
+    - "{{ data_root_dir }}/{{ bastion_image }}"
     - "{{ install_dir }}"
   tags: ['files']
 
@@ -94,7 +97,5 @@
   systemd:
     daemon_reload: yes
 
-- name: systemctl daemon-reload
+- name: systemctl reset-failed
   ansible.builtin.command: systemctl reset-failed
-  when: 
-    - packages_removed.changed

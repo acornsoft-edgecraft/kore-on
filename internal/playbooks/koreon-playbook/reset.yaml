@@ -44,6 +44,7 @@
   vars_files:
     - "{{ playbook_dir }}/inventory/group_vars/basic.yaml"
     - "{{ playbook_dir }}/inventory/group_vars/expert.yaml"
+    - "{{ playbook_dir }}/inventory/group_vars/images.yaml"
   tasks:
     - name: Init | Network check
       ansible.builtin.include_role:
@@ -72,6 +73,7 @@
   vars_files:
     - "{{ playbook_dir }}/inventory/group_vars/basic.yaml"
     - "{{ playbook_dir }}/inventory/group_vars/expert.yaml"
+    - "{{ playbook_dir }}/inventory/group_vars/images.yaml"
   tasks:
     - name: Reset | Cluster
       ansible.builtin.include_role:
@@ -91,6 +93,7 @@
   vars_files:
     - "{{ playbook_dir }}/inventory/group_vars/basic.yaml"
     - "{{ playbook_dir }}/inventory/group_vars/expert.yaml"
+    - "{{ playbook_dir }}/inventory/group_vars/images.yaml"
   tasks:
     - name: Reset | Registry
       ansible.builtin.include_role:
@@ -110,6 +113,7 @@
   vars_files:
     - "{{ playbook_dir }}/inventory/group_vars/basic.yaml"
     - "{{ playbook_dir }}/inventory/group_vars/expert.yaml"
+    - "{{ playbook_dir }}/inventory/group_vars/images.yaml"
   tasks:
     - name: Reset | Storage
       ansible.builtin.include_role:
@@ -129,6 +133,7 @@
   vars_files:
     - "{{ playbook_dir }}/inventory/group_vars/basic.yaml"
     - "{{ playbook_dir }}/inventory/group_vars/expert.yaml"
+    - "{{ playbook_dir }}/inventory/group_vars/images.yaml"
   tasks:
     - name: Reset | prepare_airgap
       ansible.builtin.include_role:

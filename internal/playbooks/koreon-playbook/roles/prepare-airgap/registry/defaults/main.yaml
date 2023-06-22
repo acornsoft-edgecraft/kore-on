@@ -4,7 +4,6 @@ harbor_domain: "{{ prepare_airgap_registry_ip }}"
 harbor_data_dir: "{{ prepare_airgap_registry_data_dir }}/harbor"
 harbor_archive_dir: "{{ prepare_airgap_registry_data_dir }}/archive"
 
-
 harbor_cert_work_dir: "{{ prepare_airgap_registry_install_dir }}/cert"
 harbor_cert_dir: "{{ harbor_data_dir }}/cert"
 harbor_install_dir: "{{ prepare_airgap_registry_install_dir }}/harbor"
@@ -14,3 +13,5 @@ harbor_offline_file: harbor-offline-installer-{{ harbor_version }}.tar.gz
 harbor_download_url: https://github.com/goharbor/harbor/releases/download/{{ harbor_version }}/{{ harbor_offline_installer_file }}
 
 helm_get_url: "https://get.helm.sh/helm-{{ package_helm_version }}-{{ ansible_system | lower }}-amd64.tar.gz"
+
+prepare_image: "kore-on-k8s:{{ prepare_airgap_k8s_version }}"

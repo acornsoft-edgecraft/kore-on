@@ -46,9 +46,8 @@
     - name: Download archive file from prepare-airgap host
       ansible.builtin.include_role:
         name: prepare-airgap/registry
+        tasks_from: archive-copy-to-local.yaml
         apply:
           tags:
             - download-archive
-      vars:
-        param: "download"
   any_errors_fatal: true
