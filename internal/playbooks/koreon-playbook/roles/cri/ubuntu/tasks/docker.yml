@@ -17,6 +17,9 @@
 
 # Install docker package  --------------------------------------------------
 # For ubuntu
+- name: systemctl reset-failed
+  ansible.builtin.command: systemctl reset-failed
+  
 - name: Install Docker
   ansible.builtin.apt:
     name:

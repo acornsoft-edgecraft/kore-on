@@ -8,6 +8,8 @@ type PackageVersion struct {
 	Crictl        string `validate:"crictl,SupportCrictlVersion"`
 	Etcd          string `validate:"etcd,SupportEtcdVersion"`
 	Helm          string `validate:"helm,SupportHelmVersion"`
+	CalicoCtl     string `validate:"calicoctl,SupportCalicoCtlVersion"`
+	ClusterCtl    string `validate:"clusterctl,SupportClusterCtlVersion"`
 }
 
 type ImageVersion struct {
@@ -30,6 +32,8 @@ type ListPackageVersion struct {
 	Crictl        map[string][]string `validate:"crictl,SupportCrictlVersion"`
 	Etcd          map[string][]string `validate:"etcd,SupportEtcdVersion"`
 	Helm          map[string][]string `validate:"helm,SupportHelmVersion"`
+	CalicoCtl     map[string][]string `validate:"calicoctl,SupportCalicoCtlVersion"`
+	ClusterCtl    map[string][]string `validate:"clusterctl,SupportClusterCtlVersion"`
 }
 
 type ListImageVersion struct {

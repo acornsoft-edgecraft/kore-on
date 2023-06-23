@@ -116,4 +116,13 @@
             - package-download
       tags:
         - package-download
+    - name: Create Installer Image
+      ansible.builtin.include_role:
+        name: prepare-airgap/registry
+        tasks_from: create-installer-image.yaml
+        apply:
+          tags:
+            - create-installer-image
+      tags:
+        - create-installer-image
   any_errors_fatal: true

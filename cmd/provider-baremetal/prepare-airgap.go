@@ -3,7 +3,6 @@ package cmd
 import (
 	"bytes"
 	"context"
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"kore-on/cmd/koreonctl/conf/templates"
@@ -11,7 +10,6 @@ import (
 	"kore-on/pkg/model"
 	"kore-on/pkg/utils"
 	"os"
-	"strings"
 	"text/template"
 
 	"github.com/apenella/go-ansible/pkg/execute"
@@ -171,29 +169,29 @@ func (c *strAirGapCmd) run() error {
 		os.Exit(1)
 	}
 
-	if c.command == "" {
-		// Prompt login
-		id := utils.InputPrompt("\n## To helm chart pull csi-driver-nfs, you need to login as a private repository (Helm Chart) user.\nusername:")
-		pw := utils.SensitivePrompt("password:")
-		koreonToml.KoreOn.HelmChartProject = viper.GetString("KoreOn.HelmChartProject")
-		koreonToml.KoreOn.HelmCubeRepoID = base64.StdEncoding.EncodeToString([]byte(id))
-		koreonToml.KoreOn.HelmCubeRepoPW = base64.StdEncoding.EncodeToString([]byte(pw))
+	// if c.command == "" {
+	// 	// Prompt login
+	// 	id := utils.InputPrompt("\n## To helm chart pull csi-driver-nfs, you need to login as a private repository (Helm Chart) user.\nusername:")
+	// 	pw := utils.SensitivePrompt("password:")
+	// 	koreonToml.KoreOn.HelmChartProject = viper.GetString("KoreOn.HelmChartProject")
+	// 	koreonToml.KoreOn.HelmCubeRepoID = base64.StdEncoding.EncodeToString([]byte(id))
+	// 	koreonToml.KoreOn.HelmCubeRepoPW = base64.StdEncoding.EncodeToString([]byte(pw))
 
-		commandArgs := "helm registry login " + koreonToml.KoreOn.HelmCubeRepoUrl +
-			" --username " + id +
-			" --password " + pw
+	// 	commandArgs := "helm registry login " + koreonToml.KoreOn.HelmCubeRepoUrl +
+	// 		" --username " + id +
+	// 		" --password " + pw
 
-		err = checkHelmRepoLogin(id, pw, commandArgs)
-		if err != nil {
-			str := fmt.Sprintf("%s", err)
-			fi := strings.Index(str, "Error")
-			li := strings.LastIndex(str, "\"")
-			err = fmt.Errorf(str[fi : li+1])
-			logger.Fatal(err)
-		} else {
-			fmt.Println("Login Succeeded!!")
-		}
-	}
+	// 	err = checkHelmRepoLogin(id, pw, commandArgs)
+	// 	if err != nil {
+	// 		str := fmt.Sprintf("%s", err)
+	// 		fi := strings.Index(str, "Error")
+	// 		li := strings.LastIndex(str, "\"")
+	// 		err = fmt.Errorf(str[fi : li+1])
+	// 		logger.Fatal(err)
+	// 	} else {
+	// 		fmt.Println("Login Succeeded!!")
+	// 	}
+	// }
 
 	if len(c.playbookFiles) < 1 {
 		return fmt.Errorf("[ERROR]: %s", "To run ansible-playbook playbook file path must be specified")

@@ -9,22 +9,15 @@
     - "{{ package_archive_dir }}"
     - "{{ package_bastion_dir }}"
 
-- name: Download crictl binary
+- name: Download binarys
   ansible.builtin.get_url:
-    url: "{{ crictl_get_url }}"
+    url: "{{ item }}"
     dest: "{{ package_archive_dir }}"
-  any_errors_fatal: true
-
-- name: Download ETCD binary
-  ansible.builtin.get_url:
-    url: "{{ etcd_get_url }}"
-    dest: "{{ package_archive_dir }}"
-  any_errors_fatal: true
-
-- name: Download helm binary
-  ansible.builtin.get_url:
-    url: "{{ helm_get_url }}"
-    dest: "{{ package_archive_dir }}"
+  with_items:
+    - "{{ etcd_get_url }}"
+    - "{{ helm_get_url }}"
+    - "{{ calicoctl_get_url }}"
+    - "{{ clusterctl_get_url }}"
   any_errors_fatal: true
 
 - name: Package | Install dnf

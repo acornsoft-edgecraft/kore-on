@@ -5,7 +5,6 @@
     source: pull
   with_items: 
     - "{{ prepare_airgap_images }}"
-    - "{{ bastion_images }}"
 
 - name: Create project
   ansible.builtin.uri:
