@@ -94,28 +94,28 @@
     - "{{ playbook_dir }}/inventory/group_vars/images.yaml"
     - "{{ playbook_dir }}/inventory/group_vars/packages.yaml"
   tasks:
-    # - name: Install docker for registry
-    #   ansible.builtin.include_role:
-    #     name: cri/{{ ansible_distribution | lower }}
-    #     apply:
-    #       tags:
-    #         - cri
-    #   vars:
-    #     param: "registry"
-    # - name: Registry | Installation \ Local Repository
-    #   ansible.builtin.include_role:
-    #     name: prepare-airgap/registry
-    #     apply:
-    #       tags:
-    #         - prepare-airgap  
-    # - name: Package download
-    #   ansible.builtin.include_role:
-    #     name: prepare-airgap/package/{{ ansible_distribution | lower }}
-    #     apply:
-    #       tags:
-    #         - package-download
-    #   tags:
-    #     - package-download
+    - name: Install docker for registry
+      ansible.builtin.include_role:
+        name: cri/{{ ansible_distribution | lower }}
+        apply:
+          tags:
+            - cri
+      vars:
+        param: "registry"
+    - name: Registry | Installation \ Local Repository
+      ansible.builtin.include_role:
+        name: prepare-airgap/registry
+        apply:
+          tags:
+            - prepare-airgap  
+    - name: Package download
+      ansible.builtin.include_role:
+        name: prepare-airgap/package/{{ ansible_distribution | lower }}
+        apply:
+          tags:
+            - package-download
+      tags:
+        - package-download
     - name: Create Installer Image
       ansible.builtin.include_role:
         name: prepare-airgap/registry
