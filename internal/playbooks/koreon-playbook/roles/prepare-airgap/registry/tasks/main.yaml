@@ -3,6 +3,10 @@
   when:
     - param is not defined
 
+- import_tasks: registry-service.yaml
+  when: 
+    - param is not defined
+
 - include_tasks: install-helm.yaml
   when:
     - param is not defined

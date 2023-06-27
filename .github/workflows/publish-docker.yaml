@@ -65,6 +65,16 @@ jobs:
           GOOS=windows GOARCH=amd64 go build -o bin/windows/amd64/koreonctl -ldflags="-X 'main.Version=${{ steps.variables.outputs.version }}' -X 'main.CommitId=$(git rev-parse HEAD)' -X 'main.BuildDate=$(date -u +%FT%T%Z)'" cmd/koreonctl/main.go
           chmod +x bin/linux/amd64/koreonctl
           chmod +x bin/darwin/amd64/koreonctl
+          for i in {"linux-amd64", "darwin", "windows"}
+          do
+            mkdir -p "koreonctl-${{ i }}/bin"
+            mkdir -p "koreonctl-${{ i }}/config"
+            mkdir -p "koreonctl-${{ i }}/archive"
+            mkdir -p "koreonctl-${{ i }}/log"
+            cp bin/linux/amd64/koreonctl "koreonctl-${{ i }}/bin"
+            tar -cxvf "koreonctl-${{ i }}.tar.gz" "koreonctl-${{ i }}""
+          done
+          
       - name: Release
         uses: actions/create-release@v1
         id: create_release
@@ -81,8 +91,8 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: bin/linux/amd64/koreonctl
-          asset_name: koreonctl-linux-amd64
+          asset_path: koreonctl-linux-amd64.tar.gz
+          asset_name: koreonctl-linux-amd64.tar.gz
           asset_content_type: application/octet-stream
       - name: Upload darwin artifact
         uses: actions/upload-release-asset@v1
@@ -90,8 +100,8 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: bin/darwin/amd64/koreonctl
-          asset_name: koreonctl-darwin-amd64
+          asset_path: koreonctl-darwin.tar.gz
+          asset_name: koreonctl-darwin.tar.gz
           asset_content_type: application/octet-stream
       - name: Upload windows artifact
         uses: actions/upload-release-asset@v1
@@ -99,7 +109,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: bin/windows/amd64/koreonctl
-          asset_name: koreonctl-windows-amd64
+          asset_path: koreonctl-windows.tar.gz
+          asset_name: koreonctl-windows.tar.gz
           asset_content_type: application/octet-stream
 

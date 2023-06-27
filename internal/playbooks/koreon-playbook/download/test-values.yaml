@@ -1,9 +1,0 @@
-koreboard_values:
-  backend:
-    service:
-      type: NodePort
-      nodePort: 30081
-  frontend:
-    service:
-      type: NodePort
-      nodePort: 30080

@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"html/template"
 	"io/ioutil"
-	"kore-on/cmd/koreonctl/conf"
 	"kore-on/cmd/koreonctl/conf/templates"
 	"kore-on/pkg/logger"
 	"kore-on/pkg/utils"
@@ -77,10 +76,10 @@ func (c *strBstionCmd) bastion(workDir string) error {
 		logger.Fatal("This command option is only supported on the Linux platform.")
 	}
 
-	// Doker check
-	_, dockerCheck := exec.LookPath("docker")
-	if dockerCheck == nil {
-		logger.Info("Docker already.")
+	// containerd check
+	_, podmanCheck := exec.LookPath("podman")
+	if podmanCheck == nil {
+		logger.Info("podman already.")
 		dockerLoad()
 		os.Exit(1)
 	}
@@ -171,7 +170,6 @@ func (c *strBstionCmd) bastion(workDir string) error {
 			logger.Fatal(err)
 		}
 	}
-	dockerReset()
 	c.dockerInstall()
 
 	return nil
@@ -324,10 +322,12 @@ func runExecCommand(commandArgs []string) string {
 
 func dockerLoad() error {
 	commandArgs := []string{
-		"docker",
-		"load",
-		"--input",
-		conf.KoreOnImageArchive,
+		"ctr",
+		"image",
+		"import",
+		"kore-on-k8s_v1.26.1.tar",
+		"--base-name",
+		"kore-on-k8s:v1.26.1",
 	}
 	commandLen := len(commandArgs)
 	cmd := utils.ExecCommand(commandArgs[0], commandArgs[1:commandLen])
@@ -341,14 +341,4 @@ func dockerLoad() error {
 		}
 	}
 	return nil
-}
-
-func dockerReset() {
-	var commandArgs = []string{}
-	commandArgs = []string{
-		"sudo",
-		"systemctl",
-		"reset-failed",
-	}
-	runExecCommand(commandArgs)
 }
