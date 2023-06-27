@@ -67,12 +67,12 @@ jobs:
           chmod +x bin/darwin/amd64/koreonctl
           for i in {"linux-amd64", "darwin", "windows"}
           do
-            mkdir -p "koreonctl-${{ i }}/bin"
-            mkdir -p "koreonctl-${{ i }}/config"
-            mkdir -p "koreonctl-${{ i }}/archive"
-            mkdir -p "koreonctl-${{ i }}/log"
-            cp bin/linux/amd64/koreonctl "koreonctl-${{ i }}/bin"
-            tar -cxvf "koreonctl-${{ i }}.tar.gz" "koreonctl-${{ i }}""
+            mkdir -p koreonctl-"$i"/bin
+            mkdir -p koreonctl-"$i"/config
+            mkdir -p koreonctl-"$i"/archive
+            mkdir -p koreonctl-"$i"/log
+            cp bin/linux/amd64/koreonctl koreonctl-"$i"/bin
+            tar -cxvf koreonctl-"$i".tar.gz koreonctl-"$i"
           done
           
       - name: Release
