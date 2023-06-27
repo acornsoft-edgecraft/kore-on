@@ -367,8 +367,6 @@ inventory.ini
 *.toml
 
 z-test-*
-internal/playbooks/koreon-playbook/download/*kubeconfig
-internal/playbooks/koreon-playbook/download/*.*
 *test.yaml
 __debug*
 koreon.toml*
