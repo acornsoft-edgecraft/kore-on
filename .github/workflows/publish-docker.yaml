@@ -72,7 +72,7 @@ jobs:
             mkdir -p koreonctl-"$i"/archive
             mkdir -p koreonctl-"$i"/log
             cp bin/linux/amd64/koreonctl koreonctl-"$i"/bin
-            tar -cxvf koreonctl-"$i".tar.gz koreonctl-"$i"
+            tar -czvf koreonctl-"$i".tar.gz koreonctl-"$i"
           done
           
       - name: Release
