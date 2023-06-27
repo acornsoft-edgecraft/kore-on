@@ -64,7 +64,7 @@ func (c *strCreateCmd) run() error {
 
 func (c *strCreateCmd) create(workDir string) error {
 	// Doker check
-	utils.CheckDocker()
+	utils.CheckPodman()
 
 	koreonImageName := conf.KoreOnImageName
 	koreOnImage := conf.KoreOnImage

@@ -168,7 +168,7 @@ func (c *strDestroyCmd) run() error {
 
 func (c *strDestroyCmd) destroy(workDir string) error {
 	// Doker check
-	utils.CheckDocker()
+	utils.CheckPodman()
 
 	koreonImageName := conf.KoreOnImageName
 	koreOnImage := conf.KoreOnImage

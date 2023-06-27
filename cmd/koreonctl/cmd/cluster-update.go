@@ -118,7 +118,7 @@ func updateInitCmd() *cobra.Command {
 
 func (c *strClusterUpdateCmd) clusterUpdate(workDir string) error {
 	// Doker check
-	utils.CheckDocker()
+	utils.CheckPodman()
 
 	koreonImageName := conf.KoreOnImageName
 	koreOnImage := conf.KoreOnImage

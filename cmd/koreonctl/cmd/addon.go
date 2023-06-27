@@ -69,7 +69,7 @@ func (c *strAddonCmd) run() error {
 
 func (c *strAddonCmd) addon(workDir string) error {
 	// Doker check
-	utils.CheckDocker()
+	utils.CheckPodman()
 
 	koreonImageName := conf.KoreOnImageName
 	koreOnImage := conf.KoreOnImage
