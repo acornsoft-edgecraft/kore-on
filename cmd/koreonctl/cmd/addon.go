@@ -107,7 +107,7 @@ func (c *strAddonCmd) addon(workDir string) error {
 	// }
 
 	commandArgs := []string{
-		"docker",
+		"podman",
 		"run",
 		"--rm",
 		"--privileged",
@@ -163,7 +163,7 @@ func (c *strAddonCmd) addon(workDir string) error {
 	commandArgs = append(commandArgs, commandArgsVol...)
 	commandArgs = append(commandArgs, commandArgsKoreonctl...)
 
-	binary, lookErr := exec.LookPath("docker")
+	binary, lookErr := exec.LookPath("podman")
 	if lookErr != nil {
 		logger.Fatal(lookErr)
 	}

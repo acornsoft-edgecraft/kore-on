@@ -12,15 +12,20 @@ import (
 
 	"kore-on/cmd/koreonctl/conf"
 
+	"github.com/elastic/go-sysinfo"
 	"github.com/spf13/cobra"
 )
 
 type strAirGapCmd struct {
-	dryRun     bool
-	verbose    bool
-	privateKey string
-	user       string
-	command    string
+	dryRun         bool
+	verbose        bool
+	privateKey     string
+	config         string
+	image          string
+	user           string
+	command        string
+	osRelease      string
+	osArchitecture string
 }
 
 func airGapCmd() *cobra.Command {
@@ -46,9 +51,11 @@ func airGapCmd() *cobra.Command {
 	utils.CheckCommand(cmd)
 
 	f := cmd.Flags()
-	f.BoolVarP(&prepareAirgap.dryRun, "dry-run", "d", false, "dryRun")
+	f.StringVar(&prepareAirgap.config, "config", "", "configuration file path")
 	f.StringVarP(&prepareAirgap.privateKey, "private-key", "p", "", "Specify ssh key path")
 	f.StringVarP(&prepareAirgap.user, "user", "u", "", "login user")
+	f.BoolVarP(&prepareAirgap.dryRun, "dry-run", "d", false, "dryRun")
+	f.SortFlags = false
 
 	return cmd
 }
@@ -101,11 +108,18 @@ func imageUploadCmd() *cobra.Command {
 
 func (c *strAirGapCmd) run() error {
 
+	// system info
+	host, err := sysinfo.Host()
+	if err != nil {
+		logger.Fatal(err)
+	}
+	c.osArchitecture = host.Info().Architecture
+	c.osRelease = host.Info().OS.Platform
+
 	workDir, _ := os.Getwd()
-	var err error = nil
 	logger.Infof("Start provisioning for preparing a kubernetes cluster and registry")
 
-	if err = c.airgap(workDir); err != nil {
+	if err := c.airgap(workDir); err != nil {
 		return err
 	}
 	return nil
@@ -126,22 +140,30 @@ func (c *strAirGapCmd) airgap(workDir string) error {
 		os.Exit(1)
 	}
 
-	commandArgs := []string{
-		"docker",
+	commandArgs := []string{}
+
+	cmdDefault := []string{
+		"podman",
 		"run",
-		"--pull",
 		"--privileged",
 		"-it",
 	}
+
+	if c.osRelease == "ubuntu" {
+		commandArgs = append(commandArgs, "sudo")
+	}
+
+	commandArgs = append(commandArgs, cmdDefault...)
 
 	if !koreonToml.KoreOn.ClosedNetwork {
 		commandArgs = append(commandArgs, "--pull")
 		commandArgs = append(commandArgs, "always")
 	}
 
+	configPath, _ := filepath.Abs(c.config)
 	commandArgsVol := []string{
-		"-v",
-		fmt.Sprintf("%s:%s", workDir, "/"+koreOnConfigFilePath),
+		"--mount",
+		fmt.Sprintf("type=bind,source=%s,target=%s,readonly", configPath, "/"+koreOnConfigFilePath),
 	}
 
 	commandArgsKoreonctl := []string{
@@ -150,7 +172,7 @@ func (c *strAirGapCmd) airgap(workDir string) error {
 		"prepare-airgap",
 	}
 
-	// docker commands
+	// podman commands
 	if c.privateKey != "" {
 		key := filepath.Base(c.privateKey)
 		keyPath, _ := filepath.Abs(c.privateKey)
@@ -194,7 +216,7 @@ func (c *strAirGapCmd) airgap(workDir string) error {
 	commandArgs = append(commandArgs, commandArgsVol...)
 	commandArgs = append(commandArgs, commandArgsKoreonctl...)
 
-	binary, lookErr := exec.LookPath("docker")
+	binary, lookErr := exec.LookPath("podman")
 	if lookErr != nil {
 		logger.Fatal(lookErr)
 	}
