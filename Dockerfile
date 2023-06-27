@@ -41,8 +41,12 @@ RUN mv linux-amd64/helm /usr/bin/helm
 # Copy binary and config files from /build to root folder of scratch container.
 COPY --from=builder ["/build/kore-on", "/"]
 COPY --from=builder ["/build/conf", "/conf"]
-COPY internal /internal
-COPY tools /tools
-COPY ansible.cfg /ansible.cfg
+COPY --from=builder ["/build/internal" "/internal"]
+COPY --from=builder ["/build/tools" "/tools"]
+COPY --from=builder ["/build/ansible.cfg" "/ansible.cfg"]
+RUN mkdir -p internal/playbooks/koreon-playbook/download/archive
+RUN mkdir -p internal/playbooks/koreon-playbook/download/config
+RUN mkdir -p internal/playbooks/koreon-playbook/download/bin
+RUN mkdir -p internal/playbooks/koreon-playbook/download/log
 
 # Command to run when starting the container.
