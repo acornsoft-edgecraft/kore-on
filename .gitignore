@@ -372,3 +372,4 @@ internal/playbooks/koreon-playbook/download/*.*
 *test.yaml
 __debug*
 koreon.toml*
+koreon.log*
