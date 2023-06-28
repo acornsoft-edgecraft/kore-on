@@ -46,7 +46,6 @@ COPY --from=builder ["/build/tools", "/tools"]
 COPY --from=builder ["/build/ansible.cfg", "/ansible.cfg"]
 RUN mkdir -p /internal/playbooks/koreon-playbook/download/archive
 RUN mkdir -p /internal/playbooks/koreon-playbook/download/config
-RUN mkdir -p /internal/playbooks/koreon-playbook/download/bin
 RUN mkdir -p /internal/playbooks/koreon-playbook/download/logs
 
 # Command to run when starting the container.

@@ -138,7 +138,6 @@ func (c *strAirGapCmd) airgap(workDir string) error {
 	koreonImageName := conf.KoreOnImageName
 	koreOnImage := conf.KoreOnImage
 	koreOnConfigFileName := conf.KoreOnConfigFile
-	koreOnConfigFilePath := conf.KoreOnConfigFileSubDir
 
 	koreonToml, err := utils.GetKoreonTomlConfig(workDir + "/" + koreOnConfigFileName)
 	if err != nil {
@@ -167,10 +166,13 @@ func (c *strAirGapCmd) airgap(workDir string) error {
 		commandArgs = append(commandArgs, "always")
 	}
 
-	configPath, _ := filepath.Abs(koreOnConfigFileName)
 	commandArgsVol := []string{
-		"--mount",
-		fmt.Sprintf("type=bind,source=%s,target=%s,readonly", configPath, "/"+koreOnConfigFilePath),
+		"-v",
+		fmt.Sprintf("%s:%s", workDir+"/archive", "/"+conf.KoreOnArchiveFileDir),
+		"-v",
+		fmt.Sprintf("%s:%s", workDir+"/config", "/"+conf.KoreOnConfigDir),
+		"-v",
+		fmt.Sprintf("%s:%s", workDir+"/logs", "/"+conf.KoreOnLogsDir),
 	}
 
 	commandArgsKoreonctl := []string{
