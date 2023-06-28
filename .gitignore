@@ -355,6 +355,7 @@ gows/
 tmp/
 temp/
 test__/
+conf__/
 *.gz
 *.tgz
 
@@ -371,3 +372,8 @@ z-test-*
 __debug*
 koreon.toml*
 koreon.log*
+
+cmd/koreonctl/config
+cmd/koreonctl/archive
+cmd/koreonctl/bin
+cmd/koreonctl/logs

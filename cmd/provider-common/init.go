@@ -3,13 +3,13 @@ package common
 import (
 	"fmt"
 	"io/ioutil"
+	"kore-on/cmd/koreonctl/conf"
 	"kore-on/pkg/config"
 	"kore-on/pkg/utils"
 	"os"
 	"time"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 type strInitCmd struct {
@@ -46,7 +46,7 @@ func (c *strInitCmd) run() error {
 	currTime := time.Now()
 	SUCCESS_FORMAT := "\033[1;32m%s\033[0m\n"
 
-	koreOnConfigFileName := viper.GetString("KoreOn.KoreOnConfigFile")
+	koreOnConfigFileName := conf.KoreOnConfigFile
 	koreOnConfigFilePath := utils.IskoreOnConfigFilePath(koreOnConfigFileName)
 
 	// if use check flag then validation for configfile

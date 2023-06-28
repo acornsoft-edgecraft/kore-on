@@ -7,10 +7,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+
+	"kore-on/cmd/koreonctl/conf"
 	"kore-on/cmd/koreonctl/conf/templates"
 	"kore-on/pkg/logger"
 	"kore-on/pkg/model"
 	"kore-on/pkg/utils"
+
 	"os"
 	"strings"
 	"text/template"
@@ -21,7 +24,6 @@ import (
 	"github.com/apenella/go-ansible/pkg/playbook"
 	"github.com/apenella/go-ansible/pkg/stdoutcallback/results"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"gopkg.in/yaml.v2"
 )
 
@@ -115,7 +117,7 @@ func AddonDeleteCmd() *cobra.Command {
 }
 
 func (c *strAddonCmd) run() error {
-	addonConfigFileName := viper.GetString("Addon.AddonConfigFile")
+	addonConfigFileName := conf.Addon["AddonConfigFile"]
 	addonPath := utils.IskoreOnConfigFilePath(addonConfigFileName)
 	addonToml, err := utils.GetAddonTomlConfig(addonPath)
 	if err != nil {
@@ -197,7 +199,8 @@ func (c *strAddonCmd) run() error {
 			addonToml.Addon.AddonDataDir = "/data/addon"
 		}
 
-		addonToml.Addon.KubeConfig = viper.GetString("Addon.KubeConfigDir") + "/" + viper.GetString("KoreOn.KoreOnKubeConfig")
+		// addonToml.Addon.KubeConfig = viper.GetString("Addon.KubeConfigDir") + "/" + viper.GetString("KoreOn.KoreOnKubeConfig")
+		addonToml.Addon.KubeConfig = conf.Addon["KubeConfigDir"] + "/" + conf.KoreOnKubeConfig
 
 		b, err := json.Marshal(addonToml)
 		if err != nil {
@@ -283,7 +286,7 @@ func (c *strAddonCmd) run() error {
 	if err != nil {
 		logger.Fatal(err)
 	}
-	subPath := viper.GetString("KoreOn.KoreOnConfigFileSubDir")
+	subPath := conf.KoreOnConfigFileSubDir
 
 	ioutil.WriteFile(subPath+"/extravars-file.yaml", []byte(bytes), 0600)
 

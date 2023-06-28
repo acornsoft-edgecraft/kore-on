@@ -12,14 +12,17 @@ import (
 
 	"kore-on/cmd/koreonctl/conf"
 
+	"github.com/elastic/go-sysinfo"
 	"github.com/spf13/cobra"
 )
 
 type strCreateCmd struct {
-	dryRun     bool
-	verbose    bool
-	privateKey string
-	user       string
+	dryRun         bool
+	verbose        bool
+	privateKey     string
+	user           string
+	osRelease      string
+	osArchitecture string
 }
 
 func createCmd() *cobra.Command {
@@ -51,20 +54,35 @@ func createCmd() *cobra.Command {
 }
 
 func (c *strCreateCmd) run() error {
+	// 설치 directory tree check
+	workDir, err := checkDirTree()
+	if err != nil {
+		logger.Error(err)
+		os.Exit(1)
+	}
 
-	workDir, _ := os.Getwd()
-	var err error = nil
+	// Check installed Podman
+	if err := installPodman(workDir); err != nil {
+		logger.Fatal(err)
+	}
+
+	// system info
+	host, err := sysinfo.Host()
+	if err != nil {
+		logger.Fatal(err)
+	}
+	c.osArchitecture = host.Info().Architecture
+	c.osRelease = host.Info().OS.Platform
+
 	logger.Infof("Start provisioning for cloud infrastructure")
 
-	if err = c.create(workDir); err != nil {
+	if err := c.create(workDir); err != nil {
 		return err
 	}
 	return nil
 }
 
 func (c *strCreateCmd) create(workDir string) error {
-	// Doker check
-	utils.CheckPodman()
 
 	koreonImageName := conf.KoreOnImageName
 	koreOnImage := conf.KoreOnImage
@@ -77,13 +95,21 @@ func (c *strCreateCmd) create(workDir string) error {
 		os.Exit(1)
 	}
 
-	commandArgs := []string{
+	commandArgs := []string{}
+
+	cmdDefault := []string{
 		"podman",
 		"run",
 		"--rm",
 		"--privileged",
 		"-it",
 	}
+
+	if c.osRelease == "ubuntu" {
+		commandArgs = append(commandArgs, "sudo")
+	}
+
+	commandArgs = append(commandArgs, cmdDefault...)
 
 	if !koreonToml.KoreOn.ClosedNetwork {
 		commandArgs = append(commandArgs, "--pull")

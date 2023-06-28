@@ -70,7 +70,7 @@ jobs:
             mkdir -p koreonctl-"$i"/bin
             mkdir -p koreonctl-"$i"/config
             mkdir -p koreonctl-"$i"/archive
-            mkdir -p koreonctl-"$i"/log
+            mkdir -p koreonctl-"$i"/logs
             cp bin/linux/amd64/koreonctl koreonctl-"$i"/bin
             tar -czvf koreonctl-"$i".tar.gz koreonctl-"$i"
           done

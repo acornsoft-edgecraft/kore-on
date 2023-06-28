@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"kore-on/cmd/koreonctl/conf"
 	"kore-on/pkg/logger"
 	"os"
 	"os/exec"
@@ -108,7 +109,7 @@ func CopyFile0600(source string, dest string) (err error) {
 
 func IskoreOnConfigFilePath(s string) string {
 	currDir, _ := os.Getwd()
-	sub := viper.GetString("KoreOn.KoreOnConfigFileSubDir")
+	sub := conf.KoreOnConfigFileSubDir
 	if sub != "" {
 		sub = "/" + sub + "/"
 	} else {
@@ -212,21 +213,6 @@ func ListSupportVersion(conf string) map[string][]string {
 
 }
 
-func CheckPodman() error {
-	//fmt.Println("Checking pre-requisition [" + runtime.GOOS + "]")
-	_, err := exec.Command("podman", "-v").Output()
-
-	if err != nil {
-		//fmt.Println(err.Error())
-		logger.Error("podman is not found. Install podman before proceeding.")
-		logger.Error("If it is a closed network, you can install it using the 'koreanctl init' command with the prepared package.")
-		logger.Error("Visit https://www.docker.com/get-started")
-		os.Exit(1)
-		return err
-	}
-	return nil
-}
-
 func CheckUserInput(prompt string, checkWord string) bool {
 	var res string
 	fmt.Print(prompt)
@@ -289,7 +275,7 @@ func SensitivePrompt(label string) string {
 }
 
 func SetValuesFile(key string, v map[string]interface{}) (map[string]interface{}, error) {
-	addonPath := viper.GetString("KoreOn.KoreOnConfigFileSubDir")
+	addonPath := conf.KoreOnConfigFileSubDir
 	var addonYaml string
 	var dataYaml map[string]interface{}
 	if v["ValuesFile"].(string) != "" {

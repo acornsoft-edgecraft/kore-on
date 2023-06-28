@@ -12,6 +12,7 @@ import (
 
 	"kore-on/cmd/koreonctl/conf"
 
+	"github.com/elastic/go-sysinfo"
 	"github.com/spf13/cobra"
 )
 
@@ -22,6 +23,8 @@ type strAddonCmd struct {
 	user           string
 	installHelm    bool
 	helmBinaryFile string
+	osRelease      string
+	osArchitecture string
 }
 
 func addonCmd() *cobra.Command {
@@ -56,20 +59,35 @@ func addonCmd() *cobra.Command {
 }
 
 func (c *strAddonCmd) run() error {
+	// 설치 directory tree check
+	workDir, err := checkDirTree()
+	if err != nil {
+		logger.Error(err)
+		os.Exit(1)
+	}
 
-	workDir, _ := os.Getwd()
-	var err error = nil
+	// Check installed Podman
+	if err := installPodman(workDir); err != nil {
+		logger.Fatal(err)
+	}
+
+	// system info
+	host, err := sysinfo.Host()
+	if err != nil {
+		logger.Fatal(err)
+	}
+	c.osArchitecture = host.Info().Architecture
+	c.osRelease = host.Info().OS.Platform
+
 	logger.Infof("Start deployment for k8s cluster")
 
-	if err = c.addon(workDir); err != nil {
+	if err := c.addon(workDir); err != nil {
 		return err
 	}
 	return nil
 }
 
 func (c *strAddonCmd) addon(workDir string) error {
-	// Doker check
-	utils.CheckPodman()
 
 	koreonImageName := conf.KoreOnImageName
 	koreOnImage := conf.KoreOnImage
@@ -80,39 +98,21 @@ func (c *strAddonCmd) addon(workDir string) error {
 		logger.Fatal(err)
 	}
 
-	// // Make provision data
-	// data := model.AddonText{}
-	// data.AddonTemp = addonToml
-	// data.Command = "addon"
+	commandArgs := []string{}
 
-	// // Processing template
-	// koreonctlText := template.New("AddonText")
-	// temp, err := koreonctlText.Parse(templates.AddonText)
-	// if err != nil {
-	// 	logger.Errorf("Template has errors. cause(%s)", err.Error())
-	// 	return err
-	// }
-
-	// // TODO: 진행상황을 어떻게 클라이언트에 보여줄 것인가?
-	// var buff bytes.Buffer
-	// err = temp.Execute(&buff, data)
-	// if err != nil {
-	// 	logger.Errorf("Template execution failed. cause(%s)", err.Error())
-	// 	return err
-	// }
-
-	// if !utils.CheckUserInput(buff.String(), "y") {
-	// 	fmt.Println("nothing to changed. exit")
-	// 	os.Exit(1)
-	// }
-
-	commandArgs := []string{
+	cmdDefault := []string{
 		"podman",
 		"run",
 		"--rm",
 		"--privileged",
 		"-it",
 	}
+
+	if c.osRelease == "ubuntu" {
+		commandArgs = append(commandArgs, "sudo")
+	}
+
+	commandArgs = append(commandArgs, cmdDefault...)
 
 	if !addonToml.Addon.ClosedNetwork {
 		commandArgs = append(commandArgs, "--pull")

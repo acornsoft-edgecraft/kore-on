@@ -1,7 +1,11 @@
 // Package logger - Common Logging (inspired https://www.mountedthoughts.com/golang-logger-interface/)
 package logger
 
-import "errors"
+import (
+	"errors"
+	"os"
+	"path/filepath"
+)
 
 // ===== [ Constants and Variables ] =====
 
@@ -72,6 +76,16 @@ type Config struct {
 
 // New - Create default logger
 func New() error {
+	executablePath, err := os.Executable()
+	if err != nil {
+		return err
+	}
+	// 실행 파일이 있는 디렉토리 경로 추출
+	executableDir := filepath.Dir(executablePath)
+
+	// 실행 파일의 상위 경로 추출
+	parentDir := filepath.Dir(executableDir)
+
 	// Sets the Common logging
 	logConf := Config{
 		EnableConsole: true,
@@ -80,7 +94,7 @@ func New() error {
 		EnableFile:     true,
 		FileLevel:      LevelInfo,
 		FileJSONFormat: true,
-		FileLocation:   "log.log",
+		FileLocation:   parentDir + "/logs/koreonctl.log",
 	}
 
 	return NewLogger(logConf, InstanceZapLogger)

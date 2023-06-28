@@ -53,26 +53,42 @@ func initCmd() *cobra.Command {
 }
 
 func (c *strInitCmd) run() error {
+	// work directory tree check
+	workDir, err := checkDirTree()
+	if err != nil {
+		logger.Error(err)
+		os.Exit(1)
+	}
 
-	workDir, _ := os.Getwd()
-	var err error = nil
+	// Check installed Podman
+	if err := installPodman(workDir); err != nil {
+		logger.Fatal(err)
+	}
+
+	// system info
+	host, err := sysinfo.Host()
+	if err != nil {
+		logger.Fatal(err)
+	}
+	c.osArchitecture = host.Info().Architecture
+	c.osRelease = host.Info().OS.Platform
+
 	logger.Infof("Start provisioning for cloud infrastructure")
 
-	if err = c.init(workDir); err != nil {
+	if err := c.init(workDir); err != nil {
 		return err
 	}
 	return nil
 }
 
 func (c *strInitCmd) init(workDir string) error {
+
 	currTime := time.Now()
 
 	SUCCESS_FORMAT := "\033[1;32m%s\033[0m\n"
 	koreOnConfigFile := conf.KoreOnConfigFile
 
 	infoStr := "Do you really want to init?\n" +
-		"If you proceed, it will install the podman package on your system. The podman package is a mandatory requirement.\n" +
-		"If you do not wish to install podman now, please manually install it and then run the process again!\n" +
 		"Is this ok [y/n]: "
 	if !utils.CheckUserInput(infoStr, "y") {
 		fmt.Println("nothing to changed. exit")
@@ -90,46 +106,41 @@ func (c *strInitCmd) init(workDir string) error {
 		fmt.Printf(SUCCESS_FORMAT, fmt.Sprintf("Initialize completed, Edit %s file according to your environment and run `koreonctl create`", koreOnConfigFile))
 	}
 
-	c.installPodman(workDir)
 	return nil
 }
 
-func (c *strInitCmd) installPodman(workDir string) error {
-	// system info
-	host, err := sysinfo.Host()
-	if err != nil {
-		logger.Fatal(err)
-	}
-	c.osArchitecture = host.Info().Architecture
-	c.osRelease = host.Info().OS.Platform
-
+func installPodman(workDir string) error {
 	// podmand installed check
 	_, podmanCheck := exec.LookPath("podman")
 	if podmanCheck == nil {
 		logger.Info("podman already.")
-		os.Exit(1)
+		return nil
 	}
 
 	if runtime.GOOS != "linux" {
-		errStr := "Installation of the podman package is only supported on Linux platforms." +
+		errStr := "Installation of the podman package is only supported on Linux platforms.\n" +
 			"If your system is not running on a Linux platform, please manually install the podman package and then run it again."
-		logger.Error(errStr)
-		os.Exit(1)
+
+		return fmt.Errorf("%s", errStr)
+	}
+
+	infoStr := "Installing Podman is mandatory. Do you want to proceed with the Podman installation? If not, please install it manually. Once the installation is complete, please run it again.\n" +
+		"Is this ok [y/n]: "
+	if !utils.CheckUserInput(infoStr, "y") {
+		return fmt.Errorf("nothing to changed. exit")
 	}
 
 	// tar.gz 압축 파일 열기
 	file, err := os.Open("./build/package/podman-linux-amd64.tar.gz")
 	if err != nil {
-		logger.Error("Error opening tar.gz file:", err)
-		os.Exit(1)
+		return err
 	}
 	defer file.Close()
 
 	// gzip 해제
 	gzipReader, err := gzip.NewReader(file)
 	if err != nil {
-		logger.Error("Error creating gzip reader:", err)
-		os.Exit(1)
+		return err
 	}
 	defer gzipReader.Close()
 
@@ -146,8 +157,7 @@ func (c *strInitCmd) installPodman(workDir string) error {
 			break
 		}
 		if err != nil {
-			logger.Error("Error reading tar header:", err)
-			os.Exit(1)
+			return err
 		}
 
 		// 풀어질 파일의 경로 생성 / 특정 경로 제거
@@ -164,27 +174,22 @@ func (c *strInitCmd) installPodman(workDir string) error {
 			// 디렉토리 생성
 			err := os.MkdirAll(targetPath, 0755)
 			if err != nil {
-				logger.Error("Error creating directory:", err)
-				os.Exit(1)
+				return err
 			}
 		} else if header.Typeflag == tar.TypeReg {
 			// 파일 생성
 			file, err := os.OpenFile(targetPath, os.O_CREATE|os.O_RDWR, os.FileMode(header.Mode))
 			if err != nil {
-				logger.Error("Error creating file:", err)
-				os.Exit(1)
+				return err
 			}
 			defer file.Close()
 
 			// 파일 내용을 복사
 			_, err = io.Copy(file, tarReader)
 			if err != nil {
-				logger.Error("Error extracting file contents:", err)
-				os.Exit(1)
+				return err
 			}
 		}
-
-		logger.Info("Extracted file:", targetPath)
 	}
 
 	return nil
@@ -207,4 +212,65 @@ func isDescendant(excludePath, path string) bool {
 		return false
 	}
 	return !strings.HasPrefix(relative, "..")
+}
+
+func checkDirTree() (string, error) {
+	executablePath, err := os.Executable()
+	if err != nil {
+		return "", err
+	}
+	// 실행 파일이 있는 디렉토리 경로 추출
+	executableDir := filepath.Dir(executablePath)
+
+	// 실행 파일의 상위 경로 추출
+	parentDir := filepath.Dir(executableDir)
+
+	dirTree := []string{
+		parentDir + "/bin",
+		parentDir + "/archive",
+		parentDir + "/config",
+		parentDir + "/logs",
+	}
+	currentDirTree := []string{}
+	err = filepath.WalkDir(parentDir, func(path string, info os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if info.IsDir() {
+			// Directory
+			// Check if the string contains a specific substring
+			for _, v := range dirTree {
+				if v == path {
+					currentDirTree = append(currentDirTree, v)
+				}
+			}
+		} else {
+			// File
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return "", err
+	}
+
+	if len(dirTree) != len(currentDirTree) {
+		errStr := ""
+		for _, dirValue := range dirTree {
+			found := false
+			for _, currentValue := range currentDirTree {
+				if dirValue == currentValue {
+					found = true
+					break
+				}
+			}
+			if !found {
+				errStr = errStr + fmt.Sprintf("%s No such directory ", dirValue)
+			}
+		}
+		return "", fmt.Errorf(errStr)
+	}
+	return parentDir, nil
 }

@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"kore-on/cmd/koreonctl/conf"
 	"kore-on/cmd/koreonctl/conf/templates"
 	"kore-on/pkg/logger"
 	"kore-on/pkg/model"
@@ -17,7 +18,6 @@ import (
 	"github.com/apenella/go-ansible/pkg/playbook"
 	"github.com/apenella/go-ansible/pkg/stdoutcallback/results"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 // Commands structure
@@ -195,7 +195,7 @@ func destroyStorageCmd() *cobra.Command {
 }
 
 func (c *strDestroyCmd) run() error {
-	koreOnConfigFileName := viper.GetString("KoreOn.KoreOnConfigFile")
+	koreOnConfigFileName := conf.KoreOnConfigFile
 	koreOnConfigFilePath := utils.IskoreOnConfigFilePath(koreOnConfigFileName)
 	koreonToml, value := utils.ValidateKoreonTomlConfig(koreOnConfigFilePath, c.tags)
 
