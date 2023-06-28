@@ -80,7 +80,7 @@ func New() error {
 		EnableFile:     true,
 		FileLevel:      LevelInfo,
 		FileJSONFormat: true,
-		FileLocation:   "log.log",
+		FileLocation:   "koreonctl.log",
 	}
 
 	return NewLogger(logConf, InstanceZapLogger)

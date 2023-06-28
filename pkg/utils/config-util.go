@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"kore-on/cmd/koreonctl/conf"
 	"kore-on/pkg/logger"
 	"kore-on/pkg/model"
 	"os"
@@ -13,7 +14,6 @@ import (
 	"strings"
 
 	"github.com/pelletier/go-toml"
-	"github.com/spf13/viper"
 )
 
 var errorCnt = 0
@@ -93,7 +93,7 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 	var koreon_toml model.KoreOnToml
 	errorCnt = 0
 	koreonToml, _ := GetKoreonTomlConfig(koreOnConfigFilePath)
-	subDir := viper.GetString("KoreOn.KoreOnConfigFileSubDir")
+	subDir := conf.KoreOnConfigFileSubDir
 
 	confK8sVersion := "SupportK8sVersion"
 	confHarborVersion := "SupportHarborVersion"
@@ -103,7 +103,7 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 	// confDockerVersion := "Support.SupportDockerVersion"
 	// confDockerComposeVersion := "Support.SupportDockerComposeVersion"
 	koreonToml.KoreOn.ImageArchivePath = subDir
-	koreonToml.KoreOn.HelmCubeRepoUrl = viper.GetString("KoreOn.HelmCubeRepoUrl")
+	koreonToml.KoreOn.HelmCubeRepoUrl = conf.HelmCubeRepoUrl
 
 	if nodePoolSSHPort == 0 {
 		// todo node pool ssh port check
@@ -114,7 +114,7 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 		k8sVersion := koreonToml.PrepareAirgap.K8sVersion
 		registryIP := koreonToml.PrepareAirgap.RegistryIP
 		registryVersion := koreonToml.PrepareAirgap.RegistryVersion
-		koreon_toml.KoreOn.HelmCubeRepoUrl = viper.GetString("KoreOn.HelmCubeRepoUrl")
+		koreon_toml.KoreOn.HelmCubeRepoUrl = conf.HelmCubeRepoUrl
 
 		supportK8sVersion := IsSupportVersion(k8sVersion, confK8sVersion)
 		supportHarborVersion := IsSupportVersion(registryVersion, confHarborVersion)

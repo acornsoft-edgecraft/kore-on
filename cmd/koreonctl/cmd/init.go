@@ -68,7 +68,7 @@ func (c *strInitCmd) init(workDir string) error {
 	currTime := time.Now()
 
 	SUCCESS_FORMAT := "\033[1;32m%s\033[0m\n"
-	koreOnConfigFile := conf.KoreOnConfigFile
+	koreOnConfigFile := "config/" + conf.KoreOnConfigFile
 
 	infoStr := "Do you really want to init?\n" +
 		"If you proceed, it will install the podman package on your system. The podman package is a mandatory requirement.\n" +
@@ -79,15 +79,18 @@ func (c *strInitCmd) init(workDir string) error {
 		os.Exit(1)
 	}
 
-	koreOnConfigFilePath, err := filepath.Abs(koreOnConfigFile)
+	koreOnConfigFilePath, _ := filepath.Abs(koreOnConfigFile)
+	_, err := os.Stat(koreOnConfigFilePath)
 	if err != nil {
-		ioutil.WriteFile(workDir+"/"+koreOnConfigFile, []byte(config.Template), 0600)
-		fmt.Printf(SUCCESS_FORMAT, fmt.Sprintf("Initialize completed, Edit %s file according to your environment and run `koreonctl create`", koreOnConfigFile))
-	} else {
-		fmt.Println("Previous " + koreOnConfigFile + " file exist and it will be backup")
-		os.Rename(koreOnConfigFilePath, koreOnConfigFilePath+"_"+currTime.Format("20060102150405"))
-		ioutil.WriteFile(workDir+"/"+koreOnConfigFile, []byte(config.Template), 0600)
-		fmt.Printf(SUCCESS_FORMAT, fmt.Sprintf("Initialize completed, Edit %s file according to your environment and run `koreonctl create`", koreOnConfigFile))
+		if os.IsNotExist(err) {
+			ioutil.WriteFile(workDir+"/"+koreOnConfigFile, []byte(config.Template), 0600)
+			fmt.Printf(SUCCESS_FORMAT, fmt.Sprintf("Initialize completed, Edit %s file according to your environment and run `koreonctl create`", koreOnConfigFile))
+		} else {
+			fmt.Println("Previous " + koreOnConfigFile + " file exist and it will be backup")
+			os.Rename(koreOnConfigFilePath, koreOnConfigFilePath+"_"+currTime.Format("20060102150405"))
+			ioutil.WriteFile(workDir+"/"+koreOnConfigFile, []byte(config.Template), 0600)
+			fmt.Printf(SUCCESS_FORMAT, fmt.Sprintf("Initialize completed, Edit %s file according to your environment and run `koreonctl create`", koreOnConfigFile))
+		}
 	}
 
 	c.installPodman(workDir)

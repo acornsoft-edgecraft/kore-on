@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"kore-on/cmd/koreonctl/conf"
 	"kore-on/pkg/logger"
 	"os"
 	"os/exec"
@@ -108,7 +109,7 @@ func CopyFile0600(source string, dest string) (err error) {
 
 func IskoreOnConfigFilePath(s string) string {
 	currDir, _ := os.Getwd()
-	sub := viper.GetString("KoreOn.KoreOnConfigFileSubDir")
+	sub := conf.KoreOnConfigFileSubDir
 	if sub != "" {
 		sub = "/" + sub + "/"
 	} else {
@@ -289,7 +290,7 @@ func SensitivePrompt(label string) string {
 }
 
 func SetValuesFile(key string, v map[string]interface{}) (map[string]interface{}, error) {
-	addonPath := viper.GetString("KoreOn.KoreOnConfigFileSubDir")
+	addonPath := conf.KoreOnConfigFileSubDir
 	var addonYaml string
 	var dataYaml map[string]interface{}
 	if v["ValuesFile"].(string) != "" {

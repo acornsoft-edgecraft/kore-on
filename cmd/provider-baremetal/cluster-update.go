@@ -5,12 +5,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"kore-on/cmd/koreonctl/conf"
 	"kore-on/cmd/koreonctl/conf/templates"
 	"kore-on/pkg/cluster/kubemethod"
 	"kore-on/pkg/logger"
 	"kore-on/pkg/model"
 	"kore-on/pkg/model/k8s"
 	"kore-on/pkg/utils"
+
 	"os"
 	"path/filepath"
 	"reflect"
@@ -23,7 +25,6 @@ import (
 	"github.com/apenella/go-ansible/pkg/playbook"
 	"github.com/apenella/go-ansible/pkg/stdoutcallback/results"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"k8s.io/client-go/tools/clientcmd"
 )
 
@@ -146,7 +147,7 @@ func UpdateInitCmd() *cobra.Command {
 }
 
 func (c *strClusterUpdateCmd) run() error {
-	koreOnConfigFileName := viper.GetString("KoreOn.KoreOnConfigFile")
+	koreOnConfigFileName := conf.KoreOnConfigFile
 	koreOnConfigFilePath := utils.IskoreOnConfigFilePath(koreOnConfigFileName)
 	koreonToml, errBool := utils.ValidateKoreonTomlConfig(koreOnConfigFilePath, "cluster-update")
 	if !errBool {
