@@ -20,7 +20,6 @@ type strAirGapCmd struct {
 	dryRun         bool
 	verbose        bool
 	privateKey     string
-	config         string
 	image          string
 	user           string
 	command        string
@@ -51,7 +50,6 @@ func airGapCmd() *cobra.Command {
 	utils.CheckCommand(cmd)
 
 	f := cmd.Flags()
-	f.StringVar(&prepareAirgap.config, "config", "", "configuration file path")
 	f.StringVarP(&prepareAirgap.privateKey, "private-key", "p", "", "Specify ssh key path")
 	f.StringVarP(&prepareAirgap.user, "user", "u", "", "login user")
 	f.BoolVarP(&prepareAirgap.dryRun, "dry-run", "d", false, "dryRun")
@@ -107,6 +105,17 @@ func imageUploadCmd() *cobra.Command {
 }
 
 func (c *strAirGapCmd) run() error {
+	// 설치 directory tree check
+	workDir, err := checkDirTree()
+	if err != nil {
+		logger.Error(err)
+		os.Exit(1)
+	}
+
+	// Check installed Podman
+	if err := installPodman(workDir); err != nil {
+		logger.Fatal(err)
+	}
 
 	// system info
 	host, err := sysinfo.Host()
@@ -116,7 +125,6 @@ func (c *strAirGapCmd) run() error {
 	c.osArchitecture = host.Info().Architecture
 	c.osRelease = host.Info().OS.Platform
 
-	workDir, _ := os.Getwd()
 	logger.Infof("Start provisioning for preparing a kubernetes cluster and registry")
 
 	if err := c.airgap(workDir); err != nil {
@@ -126,8 +134,6 @@ func (c *strAirGapCmd) run() error {
 }
 
 func (c *strAirGapCmd) airgap(workDir string) error {
-	// Doker check
-	utils.CheckPodman()
 
 	koreonImageName := conf.KoreOnImageName
 	koreOnImage := conf.KoreOnImage
@@ -145,6 +151,7 @@ func (c *strAirGapCmd) airgap(workDir string) error {
 	cmdDefault := []string{
 		"podman",
 		"run",
+		"--rm",
 		"--privileged",
 		"-it",
 	}
@@ -160,7 +167,7 @@ func (c *strAirGapCmd) airgap(workDir string) error {
 		commandArgs = append(commandArgs, "always")
 	}
 
-	configPath, _ := filepath.Abs(c.config)
+	configPath, _ := filepath.Abs(koreOnConfigFileName)
 	commandArgsVol := []string{
 		"--mount",
 		fmt.Sprintf("type=bind,source=%s,target=%s,readonly", configPath, "/"+koreOnConfigFilePath),

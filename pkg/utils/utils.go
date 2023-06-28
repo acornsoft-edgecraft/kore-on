@@ -213,21 +213,6 @@ func ListSupportVersion(conf string) map[string][]string {
 
 }
 
-func CheckPodman() error {
-	//fmt.Println("Checking pre-requisition [" + runtime.GOOS + "]")
-	_, err := exec.Command("podman", "-v").Output()
-
-	if err != nil {
-		//fmt.Println(err.Error())
-		logger.Error("podman is not found. Install podman before proceeding.")
-		logger.Error("If it is a closed network, you can install it using the 'koreanctl init' command with the prepared package.")
-		logger.Error("Visit https://www.docker.com/get-started")
-		os.Exit(1)
-		return err
-	}
-	return nil
-}
-
 func CheckUserInput(prompt string, checkWord string) bool {
 	var res string
 	fmt.Print(prompt)

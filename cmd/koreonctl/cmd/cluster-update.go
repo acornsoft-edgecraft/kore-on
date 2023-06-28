@@ -12,16 +12,19 @@ import (
 
 	"kore-on/cmd/koreonctl/conf"
 
+	"github.com/elastic/go-sysinfo"
 	"github.com/spf13/cobra"
 )
 
 type strClusterUpdateCmd struct {
-	dryRun     bool
-	verbose    bool
-	privateKey string
-	user       string
-	command    string
-	kubeconfig string
+	dryRun         bool
+	verbose        bool
+	privateKey     string
+	user           string
+	command        string
+	kubeconfig     string
+	osRelease      string
+	osArchitecture string
 }
 
 func clusterUpdateCmd() *cobra.Command {
@@ -57,8 +60,26 @@ func clusterUpdateCmd() *cobra.Command {
 }
 
 func (c *strClusterUpdateCmd) run() error {
-	workDir, _ := os.Getwd()
-	var err error = nil
+	// 설치 directory tree check
+	workDir, err := checkDirTree()
+	if err != nil {
+		logger.Error(err)
+		os.Exit(1)
+	}
+
+	// Check installed Podman
+	if err := installPodman(workDir); err != nil {
+		logger.Fatal(err)
+	}
+
+	// system info
+	host, err := sysinfo.Host()
+	if err != nil {
+		logger.Fatal(err)
+	}
+	c.osArchitecture = host.Info().Architecture
+	c.osRelease = host.Info().OS.Platform
+
 	logger.Infof("Start provisioning for cloud infrastructure")
 
 	if err = c.clusterUpdate(workDir); err != nil {
@@ -117,8 +138,6 @@ func updateInitCmd() *cobra.Command {
 }
 
 func (c *strClusterUpdateCmd) clusterUpdate(workDir string) error {
-	// Doker check
-	utils.CheckPodman()
 
 	koreonImageName := conf.KoreOnImageName
 	koreOnImage := conf.KoreOnImage
@@ -131,13 +150,21 @@ func (c *strClusterUpdateCmd) clusterUpdate(workDir string) error {
 		os.Exit(1)
 	}
 
-	commandArgs := []string{
+	commandArgs := []string{}
+
+	cmdDefault := []string{
 		"podman",
 		"run",
 		"--rm",
 		"--privileged",
 		"-it",
 	}
+
+	if c.osRelease == "ubuntu" {
+		commandArgs = append(commandArgs, "sudo")
+	}
+
+	commandArgs = append(commandArgs, cmdDefault...)
 
 	if !koreonToml.KoreOn.ClosedNetwork {
 		commandArgs = append(commandArgs, "--pull")

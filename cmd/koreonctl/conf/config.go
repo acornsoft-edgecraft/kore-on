@@ -5,8 +5,8 @@ const (
 	KoreOnImage            = "ghcr.io/acornsoft-edgecraft/kore-on:latest"
 	KoreOnImageArchive     = "koreon-image.tgz"
 	KoreOnKubeConfig       = "acloud-client-kubeconfig"
-	KoreOnConfigFile       = "koreon.toml"
-	AddOnConfigFile        = "addon.toml"
+	KoreOnConfigFile       = "config/koreon.toml"
+	AddOnConfigFile        = "config/addon.toml"
 	KoreOnConfigFileSubDir = "internal/playbooks/koreon-playbook/download"
 	KoreOnConfigDir        = "internal/playbooks/koreon-playbook/download/config"
 	KoreOnArchiveFileDir   = "internal/playbooks/koreon-playbook/download/archive"
@@ -17,5 +17,5 @@ const (
 
 var Addon = map[string]string{
 	"KubeConfigDir":   "/etc/kubernetes/acloud",
-	"AddonConfigFile": "addon.toml",
+	"AddonConfigFile": "config/addon.toml",
 }

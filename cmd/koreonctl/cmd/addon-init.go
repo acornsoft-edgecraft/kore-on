@@ -12,11 +12,14 @@ import (
 
 	"kore-on/cmd/koreonctl/conf"
 
+	"github.com/elastic/go-sysinfo"
 	"github.com/spf13/cobra"
 )
 
 type strAddonInitCmd struct {
-	verbose bool
+	verbose        bool
+	osRelease      string
+	osArchitecture string
 }
 
 func addonInitCmd() *cobra.Command {
@@ -44,18 +47,36 @@ func addonInitCmd() *cobra.Command {
 }
 
 func (c *strAddonInitCmd) run() error {
+	// 설치 directory tree check
+	workDir, err := checkDirTree()
+	if err != nil {
+		logger.Error(err)
+		os.Exit(1)
+	}
 
-	workDir, _ := os.Getwd()
-	var err error = nil
+	// Check installed Podman
+	if err := installPodman(workDir); err != nil {
+		logger.Fatal(err)
+	}
+
+	// system info
+	host, err := sysinfo.Host()
+	if err != nil {
+		logger.Fatal(err)
+	}
+	c.osArchitecture = host.Info().Architecture
+	c.osRelease = host.Info().OS.Platform
+
 	logger.Infof("Star Deployment in k8s cluster")
 
-	if err = c.init(workDir); err != nil {
+	if err := c.init(workDir); err != nil {
 		return err
 	}
 	return nil
 }
 
 func (c *strAddonInitCmd) init(workDir string) error {
+
 	currTime := time.Now()
 
 	SUCCESS_FORMAT := "\033[1;32m%s\033[0m\n"
