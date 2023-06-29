@@ -189,7 +189,7 @@ PublishScripts/
 # The packages folder can be ignored because of Package Restore
 **/[Pp]ackages/*
 # except build/, which is used as an MSBuild target.
-!**/[Pp]ackages/build/
+# !**/[Pp]ackages/build/
 # Uncomment if necessary however generally it will be regenerated when needed
 #!**/[Pp]ackages/repositories.config
 # NuGet v3's project.json files produces more ignorable files
@@ -358,6 +358,7 @@ test__/
 conf__/
 *.gz
 *.tgz
+!podman-linux-amd64.tar.gz
 
 basic.yaml
 expert.yaml
