@@ -17,6 +17,7 @@ const Template = `
 ## - debug-mode: Check mode is just a simulation, and if you have steps that use conditionals that depend on the results of prior commands,
 ##				 it may be less useful for you. (default: false)
 ## - closed-network: Enable Air Gap (default: false)
+## - cluster-api: Install Cluster API (default: false)
 #cluster-name = "test-cluster"
 #install-dir = "/var/lib/kore-on"
 #cert-validity-days = 36500
@@ -25,6 +26,7 @@ const Template = `
 #local-repository-install = true
 #local-repository-port = 8080
 #local-repository-url = "http://x.x.x.x"
+#cluster-api = true
 
 [kubernetes]
 ## Required
