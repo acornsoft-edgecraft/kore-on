@@ -26,6 +26,13 @@ prepare_airgap_images: [
   "ghcr.io/kore3lab/kore-board.frontend:v0.5.5",
   "ghcr.io/kore3lab/kore-board.metrics-scraper:v0.5.5",
   "ghcr.io/kore3lab/kore-board.terminal:v0.5.5"
+  ## ClusterAPI images
+  "registry.k8s.io/capi-openstack/capi-openstack-controller:v0.7.2",
+  "registry.k8s.io/cluster-api/kubeadm-bootstrap-controller:v1.4.3",
+  "registry.k8s.io/cluster-api/cluster-api-controller:v1.4.3",
+  "gcr.io/kubebuilder/kube-rbac-proxy:v0.8.0",
+  "docker.io/cdkbot/capi-bootstrap-provider-microk8s:0.5.0",
+  "docker.io/cdkbot/capi-control-plane-provider-microk8s:0.5.0"
 ]
 
 bastion_image: "ghcr.io/acornsoft-edgecraft/kore-on:latest"
