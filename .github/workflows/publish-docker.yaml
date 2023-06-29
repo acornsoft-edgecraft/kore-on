@@ -73,6 +73,7 @@ jobs:
             mkdir -p koreonctl-"$i"/archive
             mkdir -p koreonctl-"$i"/logs
             cp bin/"$new_string"/koreonctl koreonctl-"$i"/bin
+            cp build/package/podman-linux-amd64.tar.gz koreonctl-"$i"/archive
             tar -czvf koreonctl-"$i".tar.gz koreonctl-"$i"
           done
           
