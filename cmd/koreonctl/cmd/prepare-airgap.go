@@ -229,7 +229,7 @@ func (c *strAirGapCmd) airgap(workDir string) error {
 	if lookErr != nil {
 		logger.Fatal(lookErr)
 	}
-
+	logger.Info(commandArgs)
 	err = syscall.Exec(binary, commandArgs, os.Environ())
 	if err != nil {
 		log.Printf("Command finished with error: %v", err)
