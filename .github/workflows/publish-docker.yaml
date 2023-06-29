@@ -60,18 +60,19 @@ jobs:
           go-version: ^1.19.0
       - name: Build artifacts
         run: |
-          GOOS=linux GOARCH=amd64 go build -o bin/linux-amd64/koreonctl -ldflags="-X 'main.Version=${{ steps.variables.outputs.version }}' -X 'main.CommitId=$(git rev-parse HEAD)' -X 'main.BuildDate=$(date -u +%FT%T%Z)'" cmd/koreonctl/main.go
-          GOOS=darwin GOARCH=amd64 go build -o bin/darwin-amd64/koreonctl -ldflags="-X 'main.Version=${{ steps.variables.outputs.version }}' -X 'main.CommitId=$(git rev-parse HEAD)' -X 'main.BuildDate=$(date -u +%FT%T%Z)'" cmd/koreonctl/main.go
-          GOOS=windows GOARCH=amd64 go build -o bin/windows-amd64/koreonctl -ldflags="-X 'main.Version=${{ steps.variables.outputs.version }}' -X 'main.CommitId=$(git rev-parse HEAD)' -X 'main.BuildDate=$(date -u +%FT%T%Z)'" cmd/koreonctl/main.go
+          GOOS=linux GOARCH=amd64 go build -o bin/linux/amd64/koreonctl -ldflags="-X 'main.Version=${{ steps.variables.outputs.version }}' -X 'main.CommitId=$(git rev-parse HEAD)' -X 'main.BuildDate=$(date -u +%FT%T%Z)'" cmd/koreonctl/main.go
+          GOOS=darwin GOARCH=amd64 go build -o bin/darwin/amd64/koreonctl -ldflags="-X 'main.Version=${{ steps.variables.outputs.version }}' -X 'main.CommitId=$(git rev-parse HEAD)' -X 'main.BuildDate=$(date -u +%FT%T%Z)'" cmd/koreonctl/main.go
+          GOOS=windows GOARCH=amd64 go build -o bin/windows/amd64/koreonctl -ldflags="-X 'main.Version=${{ steps.variables.outputs.version }}' -X 'main.CommitId=$(git rev-parse HEAD)' -X 'main.BuildDate=$(date -u +%FT%T%Z)'" cmd/koreonctl/main.go
           chmod +x bin/linux/amd64/koreonctl
           chmod +x bin/darwin/amd64/koreonctl
           for i in "linux-amd64" "darwin-amd64" "windows-amd64"
           do
+            new_string=$(echo "$i" | sed "s/\-/\//")
             mkdir -p koreonctl-"$i"/bin
             mkdir -p koreonctl-"$i"/config
             mkdir -p koreonctl-"$i"/archive
             mkdir -p koreonctl-"$i"/logs
-            cp bin/"$i"/koreonctl koreonctl-"$i"/bin
+            cp bin/"$new_string"/koreonctl koreonctl-"$i"/bin
             tar -czvf koreonctl-"$i".tar.gz koreonctl-"$i"
           done
           
