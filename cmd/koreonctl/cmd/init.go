@@ -132,7 +132,6 @@ func installPodman(workDir string) error {
 
 	// tar.gz 압축 파일 열기
 	file, err := os.Open(workDir + "/archive/podman-linux-amd64.tar.gz")
-	logger.Fatal("asdfasdfa==== ", err)
 	if err != nil {
 		return err
 	}
