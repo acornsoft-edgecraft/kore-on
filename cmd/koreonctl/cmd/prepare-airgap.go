@@ -155,10 +155,6 @@ func (c *strAirGapCmd) airgap(workDir string) error {
 		"-it",
 	}
 
-	if c.osRelease == "ubuntu" {
-		commandArgs = append(commandArgs, "sudo")
-	}
-
 	commandArgs = append(commandArgs, cmdDefault...)
 
 	if !koreonToml.KoreOn.ClosedNetwork {
