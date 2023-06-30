@@ -163,10 +163,6 @@ func (c *strAirGapCmd) airgap(workDir string) error {
 		"-it",
 	}
 
-	if c.osRelease == "ubuntu" && c.osCurrentUser != "root" {
-		commandArgs = append(commandArgs, "sudo")
-	}
-
 	commandArgs = append(commandArgs, cmdDefault...)
 
 	if !koreonToml.KoreOn.ClosedNetwork {
@@ -233,11 +229,19 @@ func (c *strAirGapCmd) airgap(workDir string) error {
 	commandArgs = append(commandArgs, commandArgsVol...)
 	commandArgs = append(commandArgs, commandArgsKoreonctl...)
 
+	// podman 명령어 실행 경로 설정
 	binary, lookErr := exec.LookPath("podman")
 	if lookErr != nil {
 		logger.Fatal(lookErr)
 	}
 	logger.Info(commandArgs)
+
+	if c.osRelease == "ubuntu" && c.osCurrentUser != "root" {
+		// UID와 GID를 변경하여 root 권한으로 실행
+		syscall.Setuid(0)
+		syscall.Setgid(0)
+	}
+
 	err = syscall.Exec(binary, commandArgs, os.Environ())
 	if err != nil {
 		log.Printf("Command finished with error: %v", err)
