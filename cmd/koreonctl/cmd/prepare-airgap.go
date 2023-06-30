@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"os/user"
 	"path/filepath"
 	"syscall"
 
@@ -25,6 +26,7 @@ type strAirGapCmd struct {
 	command        string
 	osRelease      string
 	osArchitecture string
+	osCurrentUser  string
 }
 
 func airGapCmd() *cobra.Command {
@@ -122,6 +124,12 @@ func (c *strAirGapCmd) run() error {
 	if err != nil {
 		logger.Fatal(err)
 	}
+	currentUser, err := user.Current()
+	if err != nil {
+		logger.Fatal(err)
+	}
+
+	c.osCurrentUser = currentUser.Username
 	c.osArchitecture = host.Info().Architecture
 	c.osRelease = host.Info().OS.Platform
 
@@ -153,6 +161,10 @@ func (c *strAirGapCmd) airgap(workDir string) error {
 		"--rm",
 		"--privileged",
 		"-it",
+	}
+
+	if c.osRelease == "ubuntu" && c.osCurrentUser != "root" {
+		commandArgs = append(commandArgs, "sudo")
 	}
 
 	commandArgs = append(commandArgs, cmdDefault...)
