@@ -219,6 +219,7 @@ func checkDirTree() (string, error) {
 	if err != nil {
 		return "", err
 	}
+
 	// 실행 파일이 있는 디렉토리 경로 추출
 	executableDir := filepath.Dir(executablePath)
 
