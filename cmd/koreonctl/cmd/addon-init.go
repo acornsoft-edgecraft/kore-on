@@ -7,6 +7,7 @@ import (
 	"kore-on/pkg/logger"
 	"kore-on/pkg/utils"
 	"os"
+	"os/user"
 	"path/filepath"
 	"time"
 
@@ -20,6 +21,7 @@ type strAddonInitCmd struct {
 	verbose        bool
 	osRelease      string
 	osArchitecture string
+	osCurrentUser  string
 }
 
 func addonInitCmd() *cobra.Command {
@@ -64,6 +66,12 @@ func (c *strAddonInitCmd) run() error {
 	if err != nil {
 		logger.Fatal(err)
 	}
+	currentUser, err := user.Current()
+	if err != nil {
+		logger.Fatal(err)
+	}
+
+	c.osCurrentUser = currentUser.Username
 	c.osArchitecture = host.Info().Architecture
 	c.osRelease = host.Info().OS.Platform
 

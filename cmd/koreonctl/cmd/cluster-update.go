@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"os/user"
 	"path/filepath"
 	"syscall"
 
@@ -25,6 +26,7 @@ type strClusterUpdateCmd struct {
 	kubeconfig     string
 	osRelease      string
 	osArchitecture string
+	osCurrentUser  string
 }
 
 func clusterUpdateCmd() *cobra.Command {
@@ -77,6 +79,12 @@ func (c *strClusterUpdateCmd) run() error {
 	if err != nil {
 		logger.Fatal(err)
 	}
+	currentUser, err := user.Current()
+	if err != nil {
+		logger.Fatal(err)
+	}
+
+	c.osCurrentUser = currentUser.Username
 	c.osArchitecture = host.Info().Architecture
 	c.osRelease = host.Info().OS.Platform
 
@@ -142,7 +150,6 @@ func (c *strClusterUpdateCmd) clusterUpdate(workDir string) error {
 	koreonImageName := conf.KoreOnImageName
 	koreOnImage := conf.KoreOnImage
 	koreOnConfigFileName := conf.KoreOnConfigFile
-	koreOnConfigFilePath := conf.KoreOnConfigFileSubDir
 
 	koreonToml, err := utils.GetKoreonTomlConfig(workDir + "/" + koreOnConfigFileName)
 	if err != nil {
@@ -160,7 +167,7 @@ func (c *strClusterUpdateCmd) clusterUpdate(workDir string) error {
 		"-it",
 	}
 
-	if c.osRelease == "ubuntu" {
+	if c.osRelease == "ubuntu" && c.osCurrentUser != "root" {
 		commandArgs = append(commandArgs, "sudo")
 	}
 
@@ -173,7 +180,11 @@ func (c *strClusterUpdateCmd) clusterUpdate(workDir string) error {
 
 	commandArgsVol := []string{
 		"-v",
-		fmt.Sprintf("%s:%s", workDir, "/"+koreOnConfigFilePath),
+		fmt.Sprintf("%s:%s", workDir+"/archive", "/"+conf.KoreOnArchiveFileDir),
+		"-v",
+		fmt.Sprintf("%s:%s", workDir+"/config", "/"+conf.KoreOnConfigDir),
+		"-v",
+		fmt.Sprintf("%s:%s", workDir+"/logs", "/"+conf.KoreOnLogsDir),
 	}
 
 	commandArgsKoreonctl := []string{
@@ -182,7 +193,7 @@ func (c *strClusterUpdateCmd) clusterUpdate(workDir string) error {
 		"update",
 	}
 
-	// sub command
+	//- koreonctl commands
 	if c.command != "" {
 		if c.command == "update-init" {
 			c.command = "init"
@@ -223,15 +234,25 @@ func (c *strClusterUpdateCmd) clusterUpdate(workDir string) error {
 	} else {
 		logger.Fatal(fmt.Errorf("[ERROR]: %s", "To run ansible-playbook an ssh login user must be specified"))
 	}
+	//-end koreonctl commands
 
 	commandArgs = append(commandArgs, commandArgsVol...)
 	commandArgs = append(commandArgs, commandArgsKoreonctl...)
 
-	binary, lookErr := exec.LookPath("podman")
-	if lookErr != nil {
-		logger.Fatal(lookErr)
+	binary := ""
+	if c.osRelease == "ubuntu" && c.osCurrentUser != "root" {
+		binary, err = exec.LookPath("sudo")
+		if err != nil {
+			logger.Fatal(err)
+		}
+	} else {
+		binary, err = exec.LookPath("podman")
+		if err != nil {
+			logger.Fatal(err)
+		}
 	}
 
+	logger.Info(commandArgs)
 	err = syscall.Exec(binary, commandArgs, os.Environ())
 	if err != nil {
 		log.Printf("Command finished with error: %v", err)
