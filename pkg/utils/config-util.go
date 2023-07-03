@@ -19,7 +19,6 @@ import (
 var errorCnt = 0
 
 func GetKoreonTomlConfig(koreOnConfigFilePath string) (model.KoreOnToml, error) {
-
 	errorCnt = 0
 	// configFullPath := workDir + "/" + conf.KoreonConfigFile
 
