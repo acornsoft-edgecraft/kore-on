@@ -1,14 +1,13 @@
 ---
-- name: Get archive file names
-  ansible.builtin.find:
-    path: "{{ prepare_airgap_registry_data_dir }}/archive"
-    patterns: '*.*gz'
-    file_type: file
-  register: archive
+# - name: Get archive file names
+#   ansible.builtin.find:
+#     path: "{{ prepare_airgap_registry_data_dir }}/archive"
+#     patterns: '*.*gz'
+#     file_type: file
+#   register: archive
 
 - name: Archive copy to localhost
   ansible.builtin.fetch:
-    src: "{{ item.path }}"
-    dest: "download/"
+    src: "{{ prepare_airgap_registry_data_dir }}/{{ prepare_image | regex_replace('^(.*):(.*)$', '\\1_\\2')}}.tar.gz"
+    dest: "download/archive"
     flat: True
-  with_items: "{{ archive.files }}"
