@@ -183,18 +183,18 @@ func (c *strAirGapCmd) airgap(workDir string) error {
 		fmt.Sprintf("%s:%s", workDir+"/logs", "/"+conf.KoreOnLogsDir),
 	}
 
-	commandArgsKoreonctl := []string{
-		koreOnImage,
-		"./" + koreonImageName,
-		"prepare-airgap",
-	}
-
 	// podman commands
 	if c.privateKey != "" {
 		key := filepath.Base(c.privateKey)
 		keyPath, _ := filepath.Abs(c.privateKey)
 		commandArgsVol = append(commandArgsVol, "--mount")
 		commandArgsVol = append(commandArgsVol, fmt.Sprintf("type=bind,source=%s,target=/home/%s,readonly", keyPath, key))
+	}
+
+	commandArgsKoreonctl := []string{
+		koreOnImage,
+		"./" + koreonImageName,
+		"prepare-airgap",
 	}
 
 	//- koreonctl commands

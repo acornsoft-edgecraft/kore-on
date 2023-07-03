@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"os/user"
 	"path/filepath"
 	"syscall"
 
@@ -25,6 +26,7 @@ type strAddonCmd struct {
 	helmBinaryFile string
 	osRelease      string
 	osArchitecture string
+	osCurrentUser  string
 }
 
 func addonCmd() *cobra.Command {
@@ -76,6 +78,12 @@ func (c *strAddonCmd) run() error {
 	if err != nil {
 		logger.Fatal(err)
 	}
+	currentUser, err := user.Current()
+	if err != nil {
+		logger.Fatal(err)
+	}
+
+	c.osCurrentUser = currentUser.Username
 	c.osArchitecture = host.Info().Architecture
 	c.osRelease = host.Info().OS.Platform
 
@@ -91,7 +99,6 @@ func (c *strAddonCmd) addon(workDir string) error {
 
 	koreonImageName := conf.KoreOnImageName
 	koreOnImage := conf.KoreOnImage
-	koreOnConfigFilePath := conf.KoreOnConfigFileSubDir
 
 	addonToml, err := utils.GetAddonTomlConfig(workDir + "/" + conf.AddOnConfigFile)
 	if err != nil {
@@ -108,7 +115,7 @@ func (c *strAddonCmd) addon(workDir string) error {
 		"-it",
 	}
 
-	if c.osRelease == "ubuntu" {
+	if c.osRelease == "ubuntu" && c.osCurrentUser != "root" {
 		commandArgs = append(commandArgs, "sudo")
 	}
 
@@ -121,7 +128,19 @@ func (c *strAddonCmd) addon(workDir string) error {
 
 	commandArgsVol := []string{
 		"-v",
-		fmt.Sprintf("%s:%s", workDir, "/"+koreOnConfigFilePath),
+		fmt.Sprintf("%s:%s", workDir+"/archive", "/"+conf.KoreOnArchiveFileDir),
+		"-v",
+		fmt.Sprintf("%s:%s", workDir+"/config", "/"+conf.KoreOnConfigDir),
+		"-v",
+		fmt.Sprintf("%s:%s", workDir+"/logs", "/"+conf.KoreOnLogsDir),
+	}
+
+	// podman commands
+	if c.privateKey != "" {
+		key := filepath.Base(c.privateKey)
+		keyPath, _ := filepath.Abs(c.privateKey)
+		commandArgsVol = append(commandArgsVol, "--mount")
+		commandArgsVol = append(commandArgsVol, fmt.Sprintf("type=bind,source=%s,target=/home/%s,readonly", keyPath, key))
 	}
 
 	commandArgsKoreonctl := []string{
@@ -130,13 +149,7 @@ func (c *strAddonCmd) addon(workDir string) error {
 		"addon",
 	}
 
-	if c.privateKey != "" {
-		key := filepath.Base(c.privateKey)
-		keyPath, _ := filepath.Abs(c.privateKey)
-		commandArgsVol = append(commandArgsVol, "--mount")
-		commandArgsVol = append(commandArgsVol, fmt.Sprintf("type=bind,source=%s,target=/home/%s,readonly", keyPath, key))
-	}
-
+	//- koreonctl commands
 	if c.verbose {
 		commandArgsKoreonctl = append(commandArgsKoreonctl, "--verbose")
 	}
@@ -159,15 +172,25 @@ func (c *strAddonCmd) addon(workDir string) error {
 	} else {
 		logger.Fatal(fmt.Errorf("[ERROR]: %s", "To run ansible-playbook an ssh login user must be specified"))
 	}
+	//-end koreonctl commands
 
 	commandArgs = append(commandArgs, commandArgsVol...)
 	commandArgs = append(commandArgs, commandArgsKoreonctl...)
 
-	binary, lookErr := exec.LookPath("podman")
-	if lookErr != nil {
-		logger.Fatal(lookErr)
+	binary := ""
+	if c.osRelease == "ubuntu" && c.osCurrentUser != "root" {
+		binary, err = exec.LookPath("sudo")
+		if err != nil {
+			logger.Fatal(err)
+		}
+	} else {
+		binary, err = exec.LookPath("podman")
+		if err != nil {
+			logger.Fatal(err)
+		}
 	}
 
+	logger.Info(commandArgs)
 	err = syscall.Exec(binary, commandArgs, os.Environ())
 	if err != nil {
 		log.Printf("Command finished with error: %v", err)
