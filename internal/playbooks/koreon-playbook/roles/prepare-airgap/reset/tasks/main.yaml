@@ -37,7 +37,13 @@
 
 - name: Flush iptables
   iptables:
+    table: "{{ item }}"
     flush: yes
+  with_items:
+    - filter
+    - nat
+    - mangle
+  failed_when: false
   tags: ['iptables']
 
 - name: Delete some files and directories
