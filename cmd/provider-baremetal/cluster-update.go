@@ -346,7 +346,6 @@ func (c *strClusterUpdateCmd) run() error {
 			blankCnt := 2
 			v := reflect.ValueOf(item)
 
-			fmt.Println(" ==== ", v.Kind())
 			switch v.Kind() {
 			case reflect.Invalid:
 				return maxlen

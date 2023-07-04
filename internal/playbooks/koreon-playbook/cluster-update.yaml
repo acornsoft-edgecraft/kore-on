@@ -102,6 +102,7 @@
             - cri
       vars:
         param: "cluster"
+        registry_mirror: "{{ PrivateRegistry.MirrorUse }}"
     - name: Haproxy Installation
       ansible.builtin.include_role:
         name: haproxy

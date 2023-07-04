@@ -7,7 +7,7 @@
 
 - name: Extract local repository archive file into /data/localrepo
   unarchive:
-    src: "{{ playbook_dir }}/download/{{ local_repository_archive_file | basename }}"
+    src: "{{ playbook_dir }}/download/archive/{{ local_repository_archive_file | basename }}"
     dest: "{{ data_root_dir }}/localrepo"
     owner: "root"
     group: "root"
