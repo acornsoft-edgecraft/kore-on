@@ -143,6 +143,8 @@ func (c *strAirGapCmd) run() error {
 		logger.Fatal(fmt.Errorf("%s", message))
 	}
 
+	koreonToml.KoreOn.HelmChartProject = conf.HelmChartProject
+
 	// Make provision data
 	data := model.KoreonctlText{}
 	data.KoreOnTemp = koreonToml

@@ -45,5 +45,12 @@ prepare_airgap_helm_charts: [
 {%   endfor %}
 {% endfor %}
 {% endif %}
+{% if ListVersion.ListHelmChartVersion.CsiDriverNfs != None %}
+{% for item in (ListVersion.ListHelmChartVersion.CsiDriverNfs | dict2items) %}
+{%   for data in item.value %}
+  "https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts/{{ data }}/csi-driver-nfs-{{ data }}.tgz",
+{%   endfor %}
+{% endfor %}
+{% endif %}
 ]
 #-end Image List
