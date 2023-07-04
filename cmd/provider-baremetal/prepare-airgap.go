@@ -155,8 +155,6 @@ func (c *strAirGapCmd) run() error {
 		koreonToml.KoreOn.WorkDir = dir + "/internal/download"
 	}
 
-	logger.Fatal("==== ", koreonToml.KoreOn.WorkDir)
-
 	// Make provision data
 	data := model.KoreonctlText{}
 	data.KoreOnTemp = koreonToml
