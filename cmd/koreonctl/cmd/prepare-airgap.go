@@ -161,6 +161,8 @@ func (c *strAirGapCmd) airgap(workDir string) error {
 		"--rm",
 		"--privileged",
 		"-it",
+		"--env",
+		fmt.Sprintf("%s=%s", "WorkDir", workDir),
 	}
 
 	if c.osRelease == "ubuntu" && c.osCurrentUser != "root" {

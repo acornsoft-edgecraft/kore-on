@@ -323,6 +323,24 @@ func StrucToJson(s interface{}) (map[string]interface{}, error) {
 	return data, nil
 }
 
+// Filename is the __filename equivalent
+func filename() (string, error) {
+	_, filename, _, ok := runtime.Caller(1)
+	if !ok {
+		return "", fmt.Errorf("%s", "unable to get the current filename")
+	}
+	return filename, nil
+}
+
+// Dirname is the __dirname equivalent
+func Dirname(prePath string) (string, error) {
+	filename, err := filename()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(filepath.Dir(filename), prePath), nil
+}
+
 func prettyPrint(b []byte) ([]byte, error) {
 	var out bytes.Buffer
 	err := json.Indent(&out, b, "", "  ")

@@ -143,6 +143,20 @@ func (c *strAirGapCmd) run() error {
 		logger.Fatal(fmt.Errorf("%s", message))
 	}
 
+	// koreonToml Default value
+	koreonToml.KoreOn.HelmChartProject = conf.HelmChartProject
+	koreonToml.KoreOn.WorkDir = os.Getenv("WorkDir")
+
+	if koreonToml.KoreOn.WorkDir == "" {
+		dir, err := utils.Dirname("../..")
+		if err != nil {
+			logger.Fatal(err)
+		}
+		koreonToml.KoreOn.WorkDir = dir + "/internal/download"
+	}
+
+	logger.Fatal("==== ", koreonToml.KoreOn.WorkDir)
+
 	// Make provision data
 	data := model.KoreonctlText{}
 	data.KoreOnTemp = koreonToml

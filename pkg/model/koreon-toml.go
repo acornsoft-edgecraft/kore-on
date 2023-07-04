@@ -17,6 +17,7 @@ type KoreOnToml struct {
 		Create           bool
 		Upgrade          bool
 		CommandMode      string
+		WorkDir          string
 
 		//#Airgap
 		ClosedNetwork              bool   `toml:"closed-network,omitempty"`

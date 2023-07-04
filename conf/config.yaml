@@ -127,7 +127,10 @@ SupportHelmVersion: {
 #-- Helm Chart versions
 ## https://hcapital-harbor.acloud.run/chartrepo/cube
 ChartCsiDriverNfsVersion: {
-  "v4.1": ["0","1"]
+  "v4.1": ["0"],
+  "v4.2": ["0"],
+  "v4.3": ["0"],
+  "v4.4": ["0"]
 }
 ## https://github.com/kore3lab/dashboard/tree/master/scripts/install/kubernetes
 ChartKoreboardVersion: {
@@ -276,27 +279,27 @@ SupportVersion: {
       "koreboard": "v0.5",
     },
     "v1.21": {
-      "csi-driver-nfs": "v4.1",
+      "csi-driver-nfs": "v4.2",
       "koreboard": "v0.5",
     },
     "v1.22": {
-      "csi-driver-nfs": "v4.1",
+      "csi-driver-nfs": "v4.2",
       "koreboard": "v0.5",
     },
     "v1.23": {
-      "csi-driver-nfs": "v4.1",
+      "csi-driver-nfs": "v4.3",
       "koreboard": "v0.5",
     },
     "v1.24": {
-      "csi-driver-nfs": "v4.1",
+      "csi-driver-nfs": "v4.4",
       "koreboard": "v0.5",
     },
     "v1.25": {
-      "csi-driver-nfs": "v4.1",
+      "csi-driver-nfs": "v4.4",
       "koreboard": "v0.5",
     },
     "v1.26": {
-      "csi-driver-nfs": "v4.1",
+      "csi-driver-nfs": "v4.4",
       "koreboard": "v0.5",
     },
   }

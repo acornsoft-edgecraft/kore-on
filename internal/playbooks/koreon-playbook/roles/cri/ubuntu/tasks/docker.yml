@@ -17,8 +17,6 @@
 
 # Install docker package  --------------------------------------------------
 # For ubuntu
-- name: systemctl reset-failed
-  ansible.builtin.command: systemctl reset-failed
 
 - name: Get list of held packages
   command: apt-mark showhold
