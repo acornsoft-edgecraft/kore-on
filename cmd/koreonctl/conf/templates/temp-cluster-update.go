@@ -10,7 +10,7 @@ const ClusterUpdateText = `
 {{- $node_len := .Node | maxLength}}
 {{- $update_node_len := .UpdateNode | maxLength}}
 {{- $cluster_len := clusterLength $master_len $node_len}}
-{{- $total := total $node_len.Name  $update_node_len.IP $update_node_len.PrivateIP}}
+{{- $total := total $update_node_len.Name  $update_node_len.IP $update_node_len.PrivateIP}}
 
 Cluster Nodes
 --------------

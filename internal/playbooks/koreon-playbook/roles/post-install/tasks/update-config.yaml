@@ -21,7 +21,7 @@
 
 - name: Copy koreon-config config file
   vars:
-    koreon_toml: "{{ lookup('ansible.builtin.file', '{{ playbook_dir }}/download/koreon.toml') | b64encode }}"
+    koreon_toml: "{{ lookup('ansible.builtin.file', '{{ playbook_dir }}/download/config/koreon.toml') | b64encode }}"
   template:
     src: "{{ item.src }}"
     dest: "{{ kube_config_dir }}/{{ item.dest }}"
