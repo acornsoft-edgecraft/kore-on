@@ -152,7 +152,7 @@ func (c *strAirGapCmd) run() error {
 		if err != nil {
 			logger.Fatal(err)
 		}
-		koreonToml.KoreOn.WorkDir = dir + "/internal/download"
+		koreonToml.KoreOn.WorkDir = dir + "/" + conf.KoreOnConfigFileSubDir
 	}
 
 	// Make provision data
