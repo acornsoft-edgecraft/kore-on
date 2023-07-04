@@ -131,7 +131,7 @@ func (c *strAddonCmd) addon(workDir string) error {
 		fmt.Sprintf("%s:%s", workDir+"/config", "/"+conf.KoreOnConfigDir),
 		"-v",
 		fmt.Sprintf("%s:%s", workDir+"/logs", "/"+conf.KoreOnLogsDir),
-		"-mount",
+		"--mount",
 		fmt.Sprintf("type=bind,source=%s,target=%s,readonly", workDir+"/archive", "/"+conf.KoreOnArchiveFileDir),
 	}
 
