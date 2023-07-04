@@ -9,5 +9,5 @@
 - name: Archive copy to localhost
   ansible.builtin.fetch:
     src: "{{ prepare_airgap_registry_data_dir }}/{{ prepare_image | regex_replace('^(.*):(.*)$', '\\1_\\2')}}.tar.gz"
-    dest: "download/archive"
+    dest: "{{ KoreOn.WorkDir }}/archive"
     flat: True

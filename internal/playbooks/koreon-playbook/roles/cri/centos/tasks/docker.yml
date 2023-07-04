@@ -22,9 +22,6 @@
 - name: yum clean packages
   command: yum clean packages
   ignore_errors: true
-
-- name: systemctl reset-failed
-  ansible.builtin.command: systemctl reset-failed
   
 - name: Install Docker
   yum:
