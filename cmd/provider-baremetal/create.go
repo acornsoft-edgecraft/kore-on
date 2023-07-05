@@ -11,6 +11,7 @@ import (
 	"kore-on/pkg/model"
 	"kore-on/pkg/utils"
 	"os"
+	"strings"
 	"text/template"
 
 	"github.com/apenella/go-ansible/pkg/execute"
@@ -108,6 +109,13 @@ func (c *strCreateCmd) run() error {
 
 	// Processing template
 	koreonctlText := template.New("CreateText")
+
+	// template func
+	koreonctlText.Funcs(template.FuncMap(map[string]interface{}{
+		"ToUpper": strings.ToUpper,
+		"ToLower": strings.ToLower,
+	}))
+
 	temp, err := koreonctlText.Parse(templates.CreateText)
 	if err != nil {
 		logger.Errorf("Template has errors. cause(%s)", err.Error())

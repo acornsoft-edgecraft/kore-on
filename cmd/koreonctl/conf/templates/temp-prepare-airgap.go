@@ -10,6 +10,6 @@ const PrepareAirgapText = `
 ===========================================================================
 Node Name                      IP Address              Private IP Adderss
 ===========================================================================
-prepare-airgap-node             {{$PrepareAirgap.RegistryIP}}
+{{ "prepare-airgap-node" | printf "%-*s" 29 }}{{ $PrepareAirgap.RegistryIP }}
 ===========================================================================
 Is this ok [y/n]: `
