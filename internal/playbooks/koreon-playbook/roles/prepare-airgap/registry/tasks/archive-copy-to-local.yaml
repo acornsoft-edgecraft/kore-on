@@ -13,8 +13,11 @@
 #     flat: True
 #   with_items: "{{ archive.files }}"
 
+- debug:
+    msg: "dir === {{ KoreOn.WorkDir }}"
+
 - name: Archive copy to localhost
   ansible.builtin.fetch:
     src: "{{ prepare_airgap_registry_data_dir }}/{{ prepare_image | regex_replace('^(.*):(.*)$', '\\1_\\2')}}.tar.gz"
-    dest: "{{ KoreOn.WorkDir }}/archive/"
+    dest: "{{ KoreOn.WorkDir }}/archive/koreon/"
     flat: True
