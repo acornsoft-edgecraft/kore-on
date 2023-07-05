@@ -76,8 +76,9 @@ jobs:
             cp build/package/podman-linux-amd64.tar.gz koreonctl-"$i"/archive
             tar -czvf koreonctl-"$i".tar.gz koreonctl-"$i"
           done
-          
+      # release
       - name: Release
+        if:  ${{ github.event.inputs.version != '' }}
         uses: actions/create-release@v1
         id: create_release
         with:
@@ -88,6 +89,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
       - name: Upload linux artifact
+        if:  ${{ github.event.inputs.version != '' }}
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ github.token }}
@@ -97,6 +99,7 @@ jobs:
           asset_name: koreonctl-linux-amd64.tar.gz
           asset_content_type: application/octet-stream
       - name: Upload darwin artifact
+        if:  ${{ github.event.inputs.version != '' }}
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ github.token }}
@@ -106,6 +109,7 @@ jobs:
           asset_name: koreonctl-darwin-amd64.tar.gz
           asset_content_type: application/octet-stream
       - name: Upload windows artifact
+        if:  ${{ github.event.inputs.version != '' }}
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ github.token }}
