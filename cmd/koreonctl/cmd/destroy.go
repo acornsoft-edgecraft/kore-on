@@ -232,8 +232,8 @@ func (c *strDestroyCmd) destroy(workDir string) error {
 		fmt.Sprintf("%s:%s", workDir+"/config", "/"+conf.KoreOnConfigDir),
 		"-v",
 		fmt.Sprintf("%s:%s", workDir+"/logs", "/"+conf.KoreOnLogsDir),
-		"--mount",
-		fmt.Sprintf("type=bind,source=%s,target=%s,readonly", workDir+"/archive", "/"+conf.KoreOnArchiveFileDir),
+		"-v",
+		fmt.Sprintf("%s:%s", workDir+"/archive/koreon", "/"+conf.KoreOnArchiveFileDir+"/koreon"),
 	}
 
 	// podman commands
