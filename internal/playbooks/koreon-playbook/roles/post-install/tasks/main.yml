@@ -9,6 +9,7 @@
     - "{{ backup_dir }}/cluster"
     - "{{ backup_dir }}/registry"
     - "{{ kube_addon_dir }}/test"
+    - "{{ install_dir }}/config"
 
 ## Install Helm package
 - name: Get helm tgz file and uncompress it
