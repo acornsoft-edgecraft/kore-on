@@ -151,6 +151,9 @@ func (c *strAirGapCmd) run() error {
 	if err != nil {
 		logger.Fatal(err)
 	}
+	if dir == "/build" {
+		dir = ""
+	}
 	koreonToml.KoreOn.WorkDir = dir + "/" + conf.KoreOnConfigFileSubDir
 
 	// Make provision data
