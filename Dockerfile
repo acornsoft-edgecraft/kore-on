@@ -2,6 +2,8 @@ FROM golang:1.19-alpine AS builder
 
 LABEL maintainer="acornsoft"
 
+ARG VERSION
+
 # Move to working directory (/build).
 WORKDIR /build
 
@@ -14,7 +16,7 @@ COPY . .
 
 # Set necessary environment variables needed for our image and build the API server.
 ENV CGO_ENABLED=0 GOOS=linux GOARCH=amd64
-RUN go build -ldflags="-s -w" -o kore-on .
+RUN go build -ldflags="-s -w -X 'kore-on/cmd/koreonctl/conf.KoreOnVersion=${VERSION}}'" -o kore-on .
 
 FROM ubuntu:20.04
 

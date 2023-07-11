@@ -146,7 +146,6 @@ func (c *strAirGapCmd) airgap(workDir string) error {
 	koreonImageName := conf.KoreOnImageName
 	koreOnImage := conf.KoreOnImage
 	koreOnConfigFileName := conf.KoreOnConfigFile
-
 	koreonToml, err := utils.GetKoreonTomlConfig(workDir + "/" + koreOnConfigFileName)
 	if err != nil {
 		logger.Fatal(err)

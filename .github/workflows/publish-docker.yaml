@@ -49,6 +49,8 @@ jobs:
         with:
           context: .
           file: ./Dockerfile
+          build-args: |
+           VERSION=${{ steps.variables.outputs.version }}
           push: true
           tags: |
             ${{steps.variables.outputs.prefix}}/${{steps.variables.outputs.project}}:${{steps.variables.outputs.version}}

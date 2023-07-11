@@ -42,6 +42,7 @@ func GetKoreonTomlConfig(koreOnConfigFilePath string) (model.KoreOnToml, error) 
 	var koreonToml = model.KoreOnToml{}
 
 	// default values
+	koreonToml.KoreOn.Version = conf.KoreOnVersion
 	koreonToml.NodePool.Master.HaproxyInstall = true
 	koreonToml.Kubernetes.AuditLogEnable = true
 
@@ -185,6 +186,7 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 
 		koreonToml = koreon_toml
 		koreonToml.KoreOn.ImageArchivePath = subDir
+		koreonToml.KoreOn.Version = conf.KoreOnVersion
 		// koreonToml.SupportVersion.ImageVersion.Calico = IsSupportVersion(fmt.Sprintf("%v", supportK8sList["calico"]), confCalicoVersion)
 		// koreonToml.SupportVersion.ImageVersion.Coredns = IsSupportVersion(fmt.Sprintf("%v", supportK8sList["coredns"]), confCorednsVersion)
 
@@ -461,6 +463,7 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 		}
 
 		koreonToml = koreon_toml
+		koreonToml.KoreOn.Version = conf.KoreOnVersion
 	} else if cmd == "reset-all" {
 		koreonToml.PrepareAirgap.RegistryIP = ""
 	} else if cmd == "reset-cluster" {
