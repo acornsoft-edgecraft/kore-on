@@ -8,7 +8,6 @@ import (
 	"kore-on/pkg/logger"
 	"kore-on/pkg/model"
 	"os"
-	"path/filepath"
 	"reflect"
 	"regexp"
 	"strings"
@@ -297,7 +296,7 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 
 		if koreonToml.KoreOn.ClosedNetwork {
 			if koreonToml.KoreOn.LocalRepositoryInstall {
-				localRepositoryArchiveFile, err := searchOfDirectory(regexp.MustCompile("local"), subDir)
+				localRepositoryArchiveFile, err := SearchOfDirectory(regexp.MustCompile("local"), subDir)
 
 				if err != nil {
 					logger.Fatal(err)
@@ -314,7 +313,7 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 			}
 
 			if privateRegistryInstall {
-				registryArchiveFile, err := searchOfDirectory(regexp.MustCompile("harbor"), subDir)
+				registryArchiveFile, err := SearchOfDirectory(regexp.MustCompile("harbor"), subDir)
 
 				if err != nil {
 					logger.Fatal(err)
@@ -403,7 +402,7 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 
 		if koreonToml.KoreOn.ClosedNetwork {
 			if koreonToml.KoreOn.LocalRepositoryInstall {
-				localRepositoryArchiveFile, err := searchOfDirectory(regexp.MustCompile("local"), subDir)
+				localRepositoryArchiveFile, err := SearchOfDirectory(regexp.MustCompile("local"), subDir)
 
 				if err != nil {
 					logger.Fatal(err)
@@ -558,20 +557,4 @@ func setField(item interface{}, supportList map[string]interface{}) ([]byte, err
 		return nil, err
 	}
 	return data, nil
-}
-
-func searchOfDirectory(re *regexp.Regexp, dir string) (string, error) {
-	file_name := ""
-	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-
-		if re.MatchString(info.Name()) {
-			file_name = path
-		}
-
-		return nil
-	})
-	return file_name, err
 }

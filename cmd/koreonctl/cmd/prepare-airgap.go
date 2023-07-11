@@ -180,7 +180,7 @@ func (c *strAirGapCmd) airgap(workDir string) error {
 		"-v",
 		fmt.Sprintf("%s:%s", workDir+"/logs", "/"+conf.KoreOnLogsDir),
 		"-v",
-		fmt.Sprintf("%s:%s", workDir+"/archive/koreon", "/"+conf.KoreOnArchiveFileDir+"/koreon"),
+		fmt.Sprintf("%s:%s", workDir+"/archive", "/"+conf.KoreOnArchiveFileDir),
 	}
 
 	// podman commands

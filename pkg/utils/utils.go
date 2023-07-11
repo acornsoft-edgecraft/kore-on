@@ -12,6 +12,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"sort"
 	"strings"
@@ -339,6 +340,23 @@ func Dirname(prePath string) (string, error) {
 		return "", err
 	}
 	return filepath.Join(filepath.Dir(filename), prePath), nil
+}
+
+// Search of Directory
+func SearchOfDirectory(re *regexp.Regexp, dir string) (string, error) {
+	file_name := ""
+	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if re.MatchString(info.Name()) {
+			file_name = path
+		}
+
+		return nil
+	})
+	return file_name, err
 }
 
 func prettyPrint(b []byte) ([]byte, error) {
