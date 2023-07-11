@@ -12,6 +12,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strings"
 	"time"
@@ -130,8 +131,14 @@ func installPodman(workDir string) error {
 		return fmt.Errorf("nothing to changed. exit")
 	}
 
+	// file search of directory
+	podmanPath, err := utils.SearchOfDirectory(regexp.MustCompile("podman"), workDir+"/archive/")
+	if err != nil {
+		logger.Fatal(err)
+	}
+
 	// tar.gz 압축 파일 열기
-	file, err := os.Open(workDir + "/archive/podman-linux-amd64.tar.gz")
+	file, err := os.Open(podmanPath)
 	if err != nil {
 		return err
 	}

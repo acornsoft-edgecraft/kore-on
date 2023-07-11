@@ -104,16 +104,20 @@ func (c *strCreateCmd) create(workDir string) error {
 
 	commandArgs := []string{}
 
+	if c.osRelease == "ubuntu" && c.osCurrentUser != "root" {
+		commandArgs = append(commandArgs, "sudo")
+	}
+
+	if koreonToml.KoreOn.ClosedNetwork {
+		podmanLoad(workDir+"/archive/koreon/kore-on-k8s_v1.26.1.tar.gz", commandArgs)
+	}
+
 	cmdDefault := []string{
 		"podman",
 		"run",
 		"--rm",
 		"--privileged",
 		"-it",
-	}
-
-	if c.osRelease == "ubuntu" && c.osCurrentUser != "root" {
-		commandArgs = append(commandArgs, "sudo")
 	}
 
 	commandArgs = append(commandArgs, cmdDefault...)
@@ -125,7 +129,7 @@ func (c *strCreateCmd) create(workDir string) error {
 
 	commandArgsVol := []string{
 		"-v",
-		fmt.Sprintf("%s:%s", workDir+"/archive/koreon", "/"+conf.KoreOnArchiveFileDir+"/koreon"),
+		fmt.Sprintf("%s:%s", workDir+"/archive", "/"+conf.KoreOnArchiveFileDir),
 		"-v",
 		fmt.Sprintf("%s:%s", workDir+"/config", "/"+conf.KoreOnConfigDir),
 		"-v",
@@ -193,5 +197,29 @@ func (c *strCreateCmd) create(workDir string) error {
 		log.Printf("Command finished with error: %v", err)
 	}
 
+	return nil
+}
+
+func podmanLoad(koreon_img string, commandArgs []string) error {
+	commandPodman := []string{
+		"podman",
+		"load",
+		"--input",
+		koreon_img,
+	}
+
+	commandArgs = append(commandArgs, commandPodman...)
+
+	commandLen := len(commandArgs)
+	cmd := utils.ExecCommand(commandArgs[0], commandArgs[1:commandLen])
+	out, err := cmd.Output()
+	fmt.Println(string(out))
+	if err != nil {
+		if ee, ok := err.(*exec.ExitError); ok {
+			fmt.Println("ExitError:", string(ee.Stderr))
+		} else {
+			fmt.Println("err:", err)
+		}
+	}
 	return nil
 }
