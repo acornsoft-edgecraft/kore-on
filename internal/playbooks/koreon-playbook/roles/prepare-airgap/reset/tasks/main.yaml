@@ -9,6 +9,28 @@
   shell: "/usr/bin/docker ps -aq | xargs -r docker rm -fv"
   tags: ['docker']
 
+- name: Stop etcd services
+  systemd:
+    name: "{{ item }}"
+    state: stopped
+  with_items:
+    - dockerd
+    - containerd
+  failed_when: false
+  tags: [ 'services' ]
+
+- name: Remove etcd, docker, kubelet service file
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - /lib/systemd/system/docker.service
+    - /usr/lib/systemd/system/containerd.service
+    - /etc/default/docker
+    - /etc/systemd/system/docker
+  register: service_file_removed
+  tags: [ 'services' ]
+
 - name: Remove docker package in ["Ubuntu", "Debian"]
   ansible.builtin.apt:
     name: ['docker-ce', 'docker-ce-cli', 'containerd.io', 'nginx']
@@ -47,7 +69,9 @@
   tags: ['iptables']
 
 - name: Delete some files and directories
-  command: "rm -rf {{ item }}"
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
   with_items:
     - /usr/local/bin/docker-compose
     - /usr/bin/docker-compose
@@ -72,7 +96,7 @@
     - "{{ data_root_dir }}/docker"
     - "{{ data_root_dir }}/packages"
     - "{{ data_root_dir }}/Dockerfile"
-    - "{{ data_root_dir }}/{{ prepare_image | regex_replace('^(.*):(.*)$', '\\1_\\2')}}.tar.gz"
+    - "{{ data_root_dir }}/{{ prepare_image | bastion_image('^(.*):(.*)$', '\\1')}}.tar.gz"
     - "{{ install_dir }}"
   tags: ['files']
 
@@ -102,6 +126,7 @@
 - name: systemctl daemon-reload
   systemd:
     daemon_reload: yes
+  when: service_file_removed.changed
 
 - name: systemctl reset-failed
   ansible.builtin.command: systemctl reset-failed
