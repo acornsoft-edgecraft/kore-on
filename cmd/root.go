@@ -6,6 +6,7 @@ package cmd
 import (
 	"os"
 
+	"kore-on/cmd/koreonctl/conf"
 	baremetal "kore-on/cmd/provider-baremetal"
 	common "kore-on/cmd/provider-common"
 
@@ -16,11 +17,23 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var (
+	version bool
+)
+
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
-	Use:   "kore-on",
-	Short: "Install kubernetes cluster to on-premise system with registry and storage system",
-	Long:  `cube, It install kubernetes cluster.`,
+	Use:          "kore-on",
+	Short:        "Install kubernetes cluster to on-premise system with registry and storage system",
+	Long:         `cube, It install kubernetes cluster.`,
+	SilenceUsage: true,
+	Run: func(cmd *cobra.Command, args []string) {
+		// KoreOn Version
+		if version {
+			logger.Info("KoreOn Version: ", conf.KoreOnVersion)
+			os.Exit(1) // 다음 명령어 비활성화 후 프로그램 종료
+		}
+	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -43,6 +56,10 @@ func init() {
 		return nil
 	})
 
+	// 공용 플래그 설정
+	RootCmd.Flags().BoolVar(&version, "version", false, "Show KoreOn version")
+
+	// 하위 명령 추가
 	RootCmd.AddCommand(
 		common.InitCmd(),
 		baremetal.CreateCmd(),

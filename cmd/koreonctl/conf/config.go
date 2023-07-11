@@ -1,8 +1,9 @@
 package conf
 
-const (
+var (
+	KoreOnVersion          = "latest"
 	KoreOnImageName        = "kore-on"
-	KoreOnImage            = "ghcr.io/acornsoft-edgecraft/kore-on:latest"
+	KoreOnImage            = "ghcr.io/acornsoft-edgecraft/kore-on:" + KoreOnVersion
 	KoreOnImageArchive     = "koreon-image.tgz"
 	KoreOnKubeConfig       = "acloud-client-kubeconfig"
 	KoreOnConfigFile       = "config/koreon.toml"
