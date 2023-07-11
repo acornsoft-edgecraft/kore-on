@@ -16,9 +16,12 @@ COPY . .
 
 # Set necessary environment variables needed for our image and build the API server.
 ENV CGO_ENABLED=0 GOOS=linux GOARCH=amd64
-RUN go build -ldflags="-s -w -X 'kore-on/cmd/koreonctl/conf.KoreOnVersion=${VERSION}}'" -o kore-on .
+RUN go build -ldflags="-s -w" -o kore-on .
 
 FROM ubuntu:20.04
+
+LABEL maintainer="acornsoft"
+LABEL Version="${VERSION}"
 
 ENV TZ=Asia/Seoul
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
