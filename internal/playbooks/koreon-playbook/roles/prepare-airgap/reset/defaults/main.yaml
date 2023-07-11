@@ -1,0 +1,2 @@
+---
+prepare_image: "kore-on-k8s:{{ prepare_airgap_k8s_version }}"

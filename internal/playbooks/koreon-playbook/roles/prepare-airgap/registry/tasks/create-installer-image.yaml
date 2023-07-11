@@ -13,13 +13,13 @@
 - name: Prepare-airgap | Archive koreon image
   community.docker.docker_image:
     name: "{{ bastion_image }}"
-    archive_path: "{{ prepare_airgap_registry_data_dir }}/{{ prepare_image | regex_replace('^(.*):(.*)$', '\\1_\\2')}}.tar"
-    source: local
+    archive_path: "{{ prepare_airgap_registry_data_dir }}/{{ bastion_image | regex_replace('^(.*):(.*)$', '\\1')}}.tar"
+    source: pull
     timeout: 240
 
 - name: Prepare-airgap | Archive koreon image to Create tar.gz
   community.general.archive:
-    path: "{{ prepare_airgap_registry_data_dir }}/{{ prepare_image | regex_replace('^(.*):(.*)$', '\\1_\\2')}}.tar"
-    dest: "{{ prepare_airgap_registry_data_dir }}/{{ prepare_image | regex_replace('^(.*):(.*)$', '\\1_\\2')}}.tar.gz"
+    path: "{{ prepare_airgap_registry_data_dir }}/{{ bastion_image | regex_replace('^(.*):(.*)$', '\\1')}}.tar"
+    dest: "{{ prepare_airgap_registry_data_dir }}/{{ bastion_image | regex_replace('^(.*):(.*)$', '\\1')}}.tar.gz"
     format: gz
     remove: true
