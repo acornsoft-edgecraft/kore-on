@@ -13,6 +13,7 @@
 - name: Prepare-airgap | Archive koreon image
   community.docker.docker_image:
     name: "{{ bastion_image }}"
+    tag: "{{ KoreOn.Version }}"
     archive_path: "{{ prepare_airgap_registry_data_dir }}/{{ KoreOn.ImageName }}_{{ KoreOn.Version }}.tar"
     source: pull
     timeout: 240

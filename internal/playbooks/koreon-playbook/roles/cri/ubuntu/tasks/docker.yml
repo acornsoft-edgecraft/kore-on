@@ -17,22 +17,6 @@
 
 # Install docker package  --------------------------------------------------
 # For ubuntu
-
-- name: Get list of held packages
-  command: apt-mark showhold
-  register: held_packages
-  changed_when: false
-
-- name: Unhold docker packages
-  apt:
-    name:
-      - docker-ce
-      - docker-ce-cli
-      - containerd.io
-    state: present
-    unhold: yes
-  when: "'docker-ce' in held_packages.stdout | default('') | regex_search('.*') and 'docker-ce-cli' in held_packages.stdout | default('') | regex_search('.*') and 'containerd.io' in held_packages.stdout | default('') | regex_search('.*')"
-  
 - name: Install Docker
   ansible.builtin.apt:
     name:
@@ -40,6 +24,7 @@
       - docker-ce-cli
       - containerd.io
     state: present
+    allow_change_held_packages: true
     update_cache: true
   
 
