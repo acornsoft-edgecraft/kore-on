@@ -19,6 +19,8 @@ type KoreOnToml struct {
 		CommandMode      string
 		WorkDir          string
 		Version          string
+		Registry         string
+		ImageName        string
 
 		//#Airgap
 		ClosedNetwork              bool   `toml:"closed-network,omitempty"`

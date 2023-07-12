@@ -109,7 +109,7 @@ func (c *strCreateCmd) create(workDir string) error {
 	}
 
 	if koreonToml.KoreOn.ClosedNetwork {
-		podmanLoad(workDir+"/archive/koreon/kore-on-k8s_v1.26.1.tar.gz", commandArgs)
+		podmanLoad(workDir+"/archive/koreon/"+conf.KoreOnImageArchive, commandArgs)
 	}
 
 	cmdDefault := []string{
