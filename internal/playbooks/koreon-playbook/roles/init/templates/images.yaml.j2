@@ -35,7 +35,7 @@ prepare_airgap_images: [
   "docker.io/cdkbot/capi-control-plane-provider-microk8s:0.5.0"
 ]
 
-bastion_image: "ghcr.io/acornsoft-edgecraft/kore-on:{{ KoreOn.Version }}"
+bastion_image: "{{ KoreOn.Registry }}/{{ KoreOn.ImageName }}:{{ KoreOn.Version }}"
 
 prepare_airgap_helm_charts: [
 {% if ListVersion.ListHelmChartVersion.Koreboard != None %}

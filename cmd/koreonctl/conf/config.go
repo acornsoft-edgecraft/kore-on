@@ -3,8 +3,9 @@ package conf
 var (
 	KoreOnVersion          = "latest"
 	KoreOnImageName        = "kore-on"
-	KoreOnImage            = "ghcr.io/acornsoft-edgecraft/kore-on:" + KoreOnVersion
-	KoreOnImageArchive     = "koreon-image.tgz"
+	KoreOnRegistry         = "ghcr.io/acornsoft-edgecraft"
+	KoreOnImage            = KoreOnRegistry + "/" + KoreOnImageName + ":" + KoreOnVersion
+	KoreOnImageArchive     = KoreOnImageName + "_" + KoreOnVersion + ".tar.gz"
 	KoreOnKubeConfig       = "acloud-client-kubeconfig"
 	KoreOnConfigFile       = "config/koreon.toml"
 	AddOnConfigFile        = "config/addon.toml"
