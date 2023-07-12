@@ -9,17 +9,18 @@
   shell: "/usr/bin/docker ps -aq | xargs -r docker rm -fv"
   tags: ['docker']
 
-- name: Stop etcd services
+- name: Stop docker services
   systemd:
     name: "{{ item }}"
     state: stopped
   with_items:
-    - dockerd
-    - containerd
+    - docker.socket
+    - docker.service
+    - containerd.service
   failed_when: false
   tags: [ 'services' ]
 
-- name: Remove etcd, docker, kubelet service file
+- name: Remove docker service file
   ansible.builtin.file:
     path: "{{ item }}"
     state: absent
@@ -87,6 +88,9 @@
     - /var/log/harbor
     - /var/lib/docker
     - /var/lib/containerd
+    - /var/run/docker.sock
+    - /var/run/docker.pid
+    - /var/run/docker
     - /tmp/harbor-backup.tgz
     - /tmp/harbor
     - /tmp/registry-restore.sh
@@ -99,6 +103,13 @@
     - "{{ data_root_dir }}/{{ KoreOn.ImageName }}_{{ KoreOn.Version }}.tar.gz"
     - "{{ install_dir }}"
   tags: ['files']
+
+# - name: systemctl daemon-reload
+#   systemd:
+#     daemon_reload: yes
+
+# - name: systemctl daemon-reload
+#   ansible.builtin.command: systemctl reset-failed
 
 - name: Restart network
   systemd:
@@ -123,10 +134,10 @@
 #     daemon_reload: yes
 #   when: packages_removed.changed
 
-- name: systemctl daemon-reload
-  systemd:
-    daemon_reload: yes
-  when: service_file_removed.changed
+# - name: systemctl daemon-reload
+#   systemd:
+#     daemon_reload: yes
+#   when: service_file_removed.changed
 
-- name: systemctl reset-failed
-  ansible.builtin.command: systemctl reset-failed
+# - name: systemctl reset-failed
+#   ansible.builtin.command: systemctl reset-failed
