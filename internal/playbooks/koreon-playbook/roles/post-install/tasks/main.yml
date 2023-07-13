@@ -16,7 +16,7 @@
   block:
     - name: Get helm tgz file and uncompress it
       unarchive:
-        src: "{{ playbook_dir }}/download/helm-{{ package_helm_version }}-{{ ansible_system | lower }}-amd64.tar.gz"
+        src: "{{ playbook_dir }}/download/archive/helm-{{ package_helm_version }}-{{ ansible_system | lower }}-amd64.tar.gz"
         dest: /tmp
         owner: "root"
         group: "root"
@@ -186,7 +186,7 @@
 # Create koreon-config configmap -------------------------------------------------------------
 - name: Copy koreon.toml file
   ansible.builtin.copy:
-    src: "{{ playbook_dir }}/download/{{ KoreOn.FileName }}"
+    src: "{{ playbook_dir }}/download/config/{{ KoreOn.FileName }}"
     dest: "{{ install_dir }}/{{ KoreOn.FileName }}"
     owner: root
     group: root

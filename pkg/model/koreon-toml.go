@@ -8,7 +8,7 @@ type KoreOnToml struct {
 		InstallDir       string `toml:"install-dir,omitempty"`
 		CertValidityDays int    `toml:"cert-validity-days,omitempty"`
 		FileName         string
-		ImageArchivePath string
+		ArchiveFileDir   string
 		HelmCubeRepoUrl  string
 		HelmCubeRepoID   string
 		HelmCubeRepoPW   string

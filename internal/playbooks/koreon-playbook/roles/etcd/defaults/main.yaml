@@ -13,7 +13,7 @@ etcd_initial_cluster_state: new
 etcd_initial_cluster_token: etcd-k8-cluster
 etcd_get_url: "https://storage.googleapis.com/etcd/{{ package_etcd_version }}/etcd-{{ package_etcd_version }}-{{ ansible_system | lower }}-amd64.tar.gz"
 etcd_archive_name: "etcd-{{ package_etcd_version }}-{{ ansible_system | lower }}-amd64.tar.gz"
-etcd_src: "{{ playbook_dir }}/download/etcd-{{ etcd_version }}-linux-amd64.tar.gz"
+etcd_src: "{{ playbook_dir }}/download/archive/etcd-{{ etcd_version }}-linux-amd64.tar.gz"
 
 #etcd_interface: "{{ansible_default_ipv4.interface}}"
 #etcd_machine_address: "{{ hostvars[inventory_hostname]['ansible_' + etcd_interface].ipv4.address }}"
