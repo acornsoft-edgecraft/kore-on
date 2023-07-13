@@ -2,7 +2,7 @@
 # Create koreon-config configmap -------------------------------------------------------------
 - name: Copy koreon.toml file
   ansible.builtin.copy:
-    src: "{{ playbook_dir }}/download/{{ KoreOn.FileName }}"
+    src: "{{ playbook_dir }}/download/config/{{ KoreOn.FileName }}"
     dest: "{{ install_dir }}/{{ KoreOn.FileName }}"
     owner: root
     group: root

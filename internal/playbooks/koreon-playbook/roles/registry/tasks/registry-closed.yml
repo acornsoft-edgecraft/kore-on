@@ -12,7 +12,7 @@
 
 - name: Unarchive harbor 
   ansible.builtin.unarchive:
-    src: "{{playbook_dir}}/download/{{ registry_archive_file | basename}}"
+    src: "{{ playbook_dir }}/download/archive/{{ registry_archive_file | basename}}"
     dest: "{{ harbor_data_dir }}"
   when:
     - not registry_archive_file in ""

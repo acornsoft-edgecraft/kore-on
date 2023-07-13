@@ -94,7 +94,7 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 	var koreon_toml model.KoreOnToml
 	errorCnt = 0
 	koreonToml, _ := GetKoreonTomlConfig(koreOnConfigFilePath)
-	subDir := conf.KoreOnConfigFileSubDir
+	subDir := conf.KoreOnArchiveFileDir
 
 	confK8sVersion := "SupportK8sVersion"
 	confHarborVersion := "SupportHarborVersion"
@@ -103,7 +103,7 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 	// confCorednsVersion := "Support.SupportCorednsVersion"
 	// confDockerVersion := "Support.SupportDockerVersion"
 	// confDockerComposeVersion := "Support.SupportDockerComposeVersion"
-	koreonToml.KoreOn.ImageArchivePath = subDir
+	koreonToml.KoreOn.ArchiveFileDir = subDir
 	koreonToml.KoreOn.HelmCubeRepoUrl = conf.HelmCubeRepoUrl
 
 	if nodePoolSSHPort == 0 {
@@ -187,7 +187,7 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 		}
 
 		koreonToml = koreon_toml
-		koreonToml.KoreOn.ImageArchivePath = subDir
+		koreonToml.KoreOn.ArchiveFileDir = subDir
 		koreonToml.KoreOn.Version = conf.KoreOnVersion
 		koreonToml.KoreOn.ImageName = conf.KoreOnImageName
 		koreonToml.KoreOn.Registry = conf.KoreOnRegistry

@@ -73,7 +73,7 @@
 
 - name: Write registry certificate to disk from PublicCert - master
   ansible.builtin.copy:
-    src: "{{ playbook_dir }}/download/{{registry_ssl_cert }}"
+    src: "{{ playbook_dir }}/download/{{ registry_ssl_cert }}"
     dest: /etc/docker/certs.d/{{ registry_domain }}/ca.crt
     owner: "root"
     group: "root"

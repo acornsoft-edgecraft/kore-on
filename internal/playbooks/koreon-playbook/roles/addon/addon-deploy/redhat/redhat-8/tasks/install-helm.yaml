@@ -3,7 +3,7 @@
   block:
     - name: Get helm tgz file and uncompress it
       unarchive:
-        src: "{{ playbook_dir }}/download/{{Addon.HelmBinaryFile | basename }}"
+        src: "{{ playbook_dir }}/download/archive/{{ Addon.HelmBinaryFile | basename }}"
         dest: /tmp
         owner: "root"
         group: "root"
