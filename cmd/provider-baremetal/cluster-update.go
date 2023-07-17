@@ -155,7 +155,19 @@ func (c *strClusterUpdateCmd) run() error {
 		logger.Fatal(fmt.Errorf("%s", message))
 	}
 
+	// koreonToml Default value
 	koreonToml.KoreOn.FileName = koreOnConfigFileName
+
+	// current pocessing directory
+	dir, err := utils.Dirname("../..")
+	if err != nil {
+		logger.Fatal(err)
+	}
+	if dir == "/build" {
+		dir = ""
+	}
+	koreonToml.KoreOn.WorkDir = dir + "/" + conf.KoreOnConfigFileSubDir
+
 	koreonToml.KoreOn.CommandMode = c.command
 	if c.command == "get-kubeconfig" {
 		koreonToml.Kubernetes.GetKubeConfig = true

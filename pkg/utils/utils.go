@@ -112,9 +112,9 @@ func IskoreOnConfigFilePath(s string) string {
 	currDir, _ := os.Getwd()
 	sub := conf.KoreOnConfigFileSubDir
 	if sub != "" {
-		sub = "/" + sub + "/"
+		sub = "/" + sub + "/config/"
 	} else {
-		sub = "/"
+		sub = "/config/"
 	}
 	return currDir + sub + s
 }

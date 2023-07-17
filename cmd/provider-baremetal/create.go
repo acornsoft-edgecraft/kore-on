@@ -48,7 +48,9 @@ func CreateCmd() *cobra.Command {
 	}
 
 	// SubCommand add
-	cmd.AddCommand(emptyCmd())
+	cmd.AddCommand(
+		emptyCmd(),
+	)
 
 	// SubCommand validation
 	utils.CheckCommand(cmd)
@@ -89,7 +91,20 @@ func (c *strCreateCmd) run() error {
 	koreOnConfigFileName := conf.KoreOnConfigFile
 	koreOnConfigFilePath := utils.IskoreOnConfigFilePath(koreOnConfigFileName)
 	koreonToml, value := utils.ValidateKoreonTomlConfig(koreOnConfigFilePath, "create")
+
+	// koreonToml Default value
 	koreonToml.KoreOn.FileName = koreOnConfigFileName
+
+	// current pocessing directory
+	dir, err := utils.Dirname("../..")
+	if err != nil {
+		logger.Fatal(err)
+	}
+	if dir == "/build" {
+		dir = ""
+	}
+	koreonToml.KoreOn.WorkDir = dir + "/" + conf.KoreOnConfigFileSubDir
+
 	if value {
 		b, err := json.Marshal(koreonToml)
 		if err != nil {

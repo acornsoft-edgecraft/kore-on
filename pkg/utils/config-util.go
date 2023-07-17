@@ -210,7 +210,6 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 		privateRegistryInstall := koreonToml.PrivateRegistry.Install
 		privateRegistryRegistryIP := koreonToml.PrivateRegistry.RegistryIP
 		privateRegistryRegistryVersion := koreonToml.PrivateRegistry.RegistryVersion
-		privateRegistryRegistryDomain := koreonToml.PrivateRegistry.RegistryDomain
 		isPrivateRegistryPublicCert := koreonToml.PrivateRegistry.PublicCert
 		privateRegistryCrt := koreonToml.PrivateRegistry.CertFile.SslCert
 		privateRegistryKey := koreonToml.PrivateRegistry.CertFile.SslCertKey
@@ -275,10 +274,6 @@ func ValidateKoreonTomlConfig(koreOnConfigFilePath string, cmd string) (model.Ko
 			if privateRegistryRegistryIP == "" {
 				logger.Fatal("private-registry > registry-ip is required.")
 				errorCnt++
-			}
-
-			if privateRegistryRegistryDomain == "" {
-				koreonToml.PrivateRegistry.RegistryDomain = privateRegistryRegistryIP
 			}
 		}
 

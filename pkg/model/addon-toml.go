@@ -10,6 +10,7 @@ type AddonToml struct {
 		HelmVersion    string
 		HelmInstall    bool
 		HelmBinaryFile string
+		WorkDir        string
 	} `toml:"addon,omitempty"`
 
 	Apps struct {

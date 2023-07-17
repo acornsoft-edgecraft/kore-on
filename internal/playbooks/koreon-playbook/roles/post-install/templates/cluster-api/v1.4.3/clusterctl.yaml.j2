@@ -1,0 +1,17 @@
+---
+providers:
+  - name: "cluster-api"
+    url: "{{ kube_addon_dir }}/extends/cluster-api/core/cluster-api/{{ package_cluster_ctl_version }}/core-components.yaml"
+    type: "CoreProvider"
+  - name: "kubeadm"
+    url: "{{ kube_addon_dir }}/extends/cluster-api/provider/bootstrap-kubeadm/{{ package_cluster_ctl_version }}/bootstrap-components.yaml"
+    type: "BootstrapProvider"
+  - name: "kubeadm"
+    url: "{{ kube_addon_dir }}/extends/cluster-api/provider/control-plane-kubeadm/{{ package_cluster_ctl_version }}/control-plane-components.yaml"
+    type: "ControlPlaneProvider"
+  - name: "openstack"
+    url: "{{ kube_addon_dir }}/extends/cluster-api/infrastructure/infrastructure-openstack/{{ cluster_api_version[package_cluster_ctl_version]['openstack'] }}/infrastructure-components.yaml"
+    type: "InfrastructureProvider"
+
+cert-manager:
+  url: "{{ kube_addon_dir }}/extends/cluster-api/cert-manager/{{ cluster_api_version[package_cluster_ctl_version]['cert_manager'] }}/cert-manager.yaml"

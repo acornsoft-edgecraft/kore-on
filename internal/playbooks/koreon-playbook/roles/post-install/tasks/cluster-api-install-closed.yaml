@@ -1,5 +1,63 @@
 ---
 # Installation Cluster API on closed network --------------------------------------------------------------------
+# - name: Install clusterctl
+#   ansible.builtin.copy:
+#     src: "{{ KoreOn.WorkDir }}/extends/cluster-api/clusterctl-{{ ansible_system | lower }}-amd64"
+#     dest: "/usr/local/bin/clusterctl"
+#     owner: "root"
+#     group: "root"
+#     mode: "0755"
+
+# - name: Copy cluster api CRD
+#   ansible.builtin.copy:
+#     src: "{{ KoreOn.WorkDir }}/extends/{{ item.src }}"
+#     dest: "{{ kube_addon_dir }}/extends/{{ item.dest }}"
+#     owner: "root"
+#     group: "root"
+#     mode: "0644"
+#   with_items:
+#     - { src: "cluster-api/provider/kubeadm/", dest: "cluster-api/provider/kubeadm/{{ package_cluster_ctl_version }}/" }
+
+# Create cluster-api crd directory
+- name: Post | Create cluster-api crd directory
+  vars:
+    cluster_api_dir: "{{ kube_addon_dir }}/extends/cluster-api"
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  with_items:
+    - "{{ cluster_api_dir }}/core/cluster-api/{{ package_cluster_ctl_version }}/"
+    - "{{ cluster_api_dir }}/provider/bootstrap-kubeadm/{{ package_cluster_ctl_version }}/"
+    - "{{ cluster_api_dir }}/provider/control-plane-kubeadm/{{ package_cluster_ctl_version }}/"
+    - "{{ cluster_api_dir }}/infrastructure/infrastructure-openstack/{{ cluster_api_version[package_cluster_ctl_version]['openstack'] }}/"
+    - "{{ cluster_api_dir }}/cert-manager/{{ cluster_api_version[package_cluster_ctl_version]['cert_manager'] }}/"
+
+- name: Post | Copy cluster-api crd
+  vars:
+    cluster_api_dir: "{{ kube_addon_dir }}/extends/cluster-api"
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    backup: true
+    owner: root
+    group: root
+    mode: 0644
+  with_items:
+    - { src: "cluster-api/{{ package_cluster_ctl_version }}/clusterctl.yaml.j2", dest: "{{ cluster_api_dir }}/clusterctl.yaml" }
+    - { src: "cluster-api/{{ package_cluster_ctl_version }}/core/core-components.yaml.j2", dest: "{{ cluster_api_dir }}/core/cluster-api/{{ package_cluster_ctl_version }}/core-components.yaml" }
+    - { src: "cluster-api/{{ package_cluster_ctl_version }}/provider/kubeadm/bootstrap-components.yaml.j2", dest: "{{ cluster_api_dir }}/provider/bootstrap-kubeadm/{{ package_cluster_ctl_version }}/bootstrap-components.yaml" }
+    - { src: "cluster-api/{{ package_cluster_ctl_version }}/provider/kubeadm/control-plane-components.yaml.j2", dest: "{{ cluster_api_dir }}/provider/control-plane-kubeadm/{{ package_cluster_ctl_version }}/control-plane-components.yaml" }
+    - { src: "cluster-api/{{ package_cluster_ctl_version }}/infrastructure/openstack/infrastructure-components.yaml.j2", dest: "{{ cluster_api_dir }}/infrastructure/infrastructure-openstack/{{ cluster_api_version[package_cluster_ctl_version]['openstack'] }}/infrastructure-components.yaml" }
+    - { src: "cluster-api/{{ package_cluster_ctl_version }}/cert-manager/cert-manager.yaml.j2", dest: "{{ cluster_api_dir }}/cert-manager/{{ cluster_api_version[package_cluster_ctl_version]['cert_manager'] }}/cert-manager.yaml" }
+    - { src: "cluster-api/{{ package_cluster_ctl_version }}/core/metadata.yaml.j2", dest: "{{ cluster_api_dir }}/core/cluster-api/{{ package_cluster_ctl_version }}/metadata.yaml" }
+    - { src: "cluster-api/{{ package_cluster_ctl_version }}/core/metadata.yaml.j2", dest: "{{ cluster_api_dir }}/provider/bootstrap-kubeadm/{{ package_cluster_ctl_version }}/metadata.yaml" }
+    - { src: "cluster-api/{{ package_cluster_ctl_version }}/core/metadata.yaml.j2", dest: "{{ cluster_api_dir }}/provider/control-plane-kubeadm/{{ package_cluster_ctl_version }}/metadata.yaml" }
+    - { src: "cluster-api/{{ package_cluster_ctl_version }}/infrastructure/openstack/metadata.yaml.j2", dest: "{{ cluster_api_dir }}/infrastructure/infrastructure-openstack/{{ cluster_api_version[package_cluster_ctl_version]['openstack'] }}/metadata.yaml" }
+
+# Is running kubernetes cluster
 - name: Check cluster is running
   ansible.builtin.command: |
    kubectl --kubeconfig={{ kubeadminconfig }} cluster-info
@@ -8,27 +66,44 @@
   delegate_to: "{{ groups['masters'][0] }}"
   run_once: true
 
-- name: Copy clusterctl microk8s config file
-  ansible.builtin.template:
-    src: "{{ item.src }}"
-    dest: "{{ item.dest }}"
-  with_items:
-    - { src: "clusterctl.yaml.j2", dest: "/tmp/clusterctl.yaml" }
-  delegate_to: "{{ groups['masters'][0] }}"
-
-- name: Initialize the management cluster for microk8s
+# Install Cluster API
+- name: Post | Initialize the management cluster-api for closed-network
+  vars:
+    cluster_api_dir: "{{ kube_addon_dir }}/extends/cluster-api"
   ansible.builtin.command: |
-    clusterctl init --kubeconfig={{ kubeadminconfig }} --bootstrap microk8s --control-plane microk8s --infrastructure openstack --config /tmp/clusterctl.yaml 
+    clusterctl init --kubeconfig="{{ kubeadminconfig }}"
+    --bootstrap kubeadm
+    --control-plane kubeadm
+    --infrastructure openstack
+    --config "{{ cluster_api_dir }}/clusterctl.yaml"
   delegate_to: "{{ groups['masters'][0] }}"
   run_once: true
   when:
     - check_cluster_health.rc == 0
 
-- name: Initialize the management cluster for kubeadm
-  ansible.builtin.command: |
-    clusterctl init --kubeconfig={{ kubeadminconfig }} --bootstrap kubeadm --control-plane kubeadm
-  delegate_to: "{{ groups['masters'][0] }}"
-  run_once: true
-  when:
-    - check_cluster_health.rc == 0
-# --------------------------------------------------------------------------------------------
+# - name: Copy cluster api provider - kubeadm
+#   vars:
+#     kubeadm_dir: cluster-api/providers/kubeadm
+#   template:
+#     src: "{{ item.src }}"
+#     dest: "{{ kube_addon_dir }}/extends/{{ item.dest }}"
+#     mode: 0644
+#   with_items:
+#     - { src: "{{ kubeadm_dir }}/bootstrap-components.yaml.j2", dest: "{{kubeadm_dir}}/{{ package_cluster_ctl_version }}/values.yaml" }
+
+# - name: Check cluster is running
+#   ansible.builtin.command: |
+#    kubectl --kubeconfig={{ kubeadminconfig }} cluster-info
+#   register: check_cluster_health
+#   failed_when: false
+#   delegate_to: "{{ groups['masters'][0] }}"
+#   run_once: true
+
+# - name: Initialize the management cluster for kubeadm
+#   ansible.builtin.command: |
+#     clusterctl init --kubeconfig={{ kubeadminconfig }} --bootstrap kubeadm --control-plane kubeadm --infrastructure openstack
+#   delegate_to: "{{ groups['masters'][0] }}"
+#   run_once: true
+#   when:
+#     - check_cluster_health.rc == 0
+# # --------------------------------------------------------------------------------------------

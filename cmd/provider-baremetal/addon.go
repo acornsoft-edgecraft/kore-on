@@ -123,6 +123,17 @@ func (c *strAddonCmd) run() error {
 	if err != nil {
 		logger.Fatal(err)
 	} else {
+
+		// current pocessing directory
+		dir, err := utils.Dirname("../..")
+		if err != nil {
+			logger.Fatal(err)
+		}
+		if dir == "/build" {
+			dir = ""
+		}
+		addonToml.Addon.WorkDir = dir + "/" + conf.KoreOnConfigFileSubDir
+
 		// Make provision data
 		data := model.AddonText{}
 		data.AddonTemp = addonToml

@@ -16,3 +16,9 @@ backup_dir: "{{ data_root_dir }}/backup"
 maxbackup_day: 7
 
 helm_get_url: "https://get.helm.sh/helm-{{ package_helm_version }}-{{ ansible_system | lower }}-amd64.tar.gz"
+
+## Support versions
+cluster_api_version:
+  v1.4.3: 
+    openstack: v0.7.3
+    cert_manager: v1.12.1

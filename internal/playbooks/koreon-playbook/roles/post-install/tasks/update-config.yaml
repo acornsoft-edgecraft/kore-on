@@ -3,7 +3,7 @@
 - name: Copy koreon.toml file
   ansible.builtin.copy:
     src: "{{ playbook_dir }}/download/config/{{ KoreOn.FileName }}"
-    dest: "{{ install_dir }}/{{ KoreOn.FileName }}"
+    dest: "{{ install_dir }}/config/{{ KoreOn.FileName }}"
     owner: root
     group: root
     mode: '0644'

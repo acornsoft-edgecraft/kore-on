@@ -1,7 +1,7 @@
 ---
 - name : Get installed config file
   ansible.builtin.fetch:
-    src: "{{ install_dir }}/{{ KoreOn.FileName }}"
+    src: "{{ install_dir }}/config/{{ KoreOn.FileName }}"
     dest: "download/"
     flat: True
   delegate_to: "{{ groups['masters'][0] }}"

@@ -125,4 +125,12 @@
             - create-installer-image
       tags:
         - create-installer-image
+    - name: Extends Addon
+      ansible.builtin.include_role:
+        name: prepare-airgap/extends
+        apply:
+          tags:
+            - extends-addon
+      tags:
+        - extends-addon
   any_errors_fatal: true

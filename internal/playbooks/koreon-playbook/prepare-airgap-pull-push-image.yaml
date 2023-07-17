@@ -14,7 +14,7 @@
 
 # Clear gathered facts from all currently targeted hosts 
 - hosts: all
-  become: false
+  become: true
   gather_facts: false
   tasks:
     - name: Clear gathered facts
@@ -22,7 +22,7 @@
 
 # Pre-installation check network.
 - hosts: all
-  become: false
+  become: true
   gather_facts: true
   vars_files:
     - "{{ playbook_dir }}/inventory/group_vars/basic.yaml"
@@ -38,7 +38,7 @@
 
 # The pre-preparation stage of the air gap network.
 - hosts: prepare_airgap
-  become: false
+  become: true
   gather_facts: false
   vars_files:
     - "{{ playbook_dir }}/inventory/group_vars/basic.yaml"
@@ -54,4 +54,17 @@
             - pull-push-images
       tags:
         - pull-push-images
+      when:
+        - not closed_network
+    - name: Images Pull and Push to private registry in prepare-airgap host
+      ansible.builtin.include_role:
+        name: prepare-airgap/registry
+        tasks_from: pull-push-images-closed
+        apply:
+          tags:
+            - pull-push-images-closed
+      tags:
+        - pull-push-images-closed
+      when:
+        - closed_network
   any_errors_fatal: true
