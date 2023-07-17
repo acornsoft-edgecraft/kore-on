@@ -7,11 +7,12 @@ var (
 	KoreOnImage            = KoreOnRegistry + "/" + KoreOnImageName + ":" + KoreOnVersion
 	KoreOnImageArchive     = KoreOnImageName + "_" + KoreOnVersion + ".tar.gz"
 	KoreOnKubeConfig       = "acloud-client-kubeconfig"
-	KoreOnConfigFile       = "config/koreon.toml"
-	AddOnConfigFile        = "config/addon.toml"
+	KoreOnConfigFile       = "koreon.toml"
+	AddOnConfigFile        = "addon.toml"
 	KoreOnConfigFileSubDir = "internal/playbooks/koreon-playbook/download"
-	KoreOnConfigDir        = "internal/playbooks/koreon-playbook/download/config"
 	KoreOnArchiveFileDir   = "internal/playbooks/koreon-playbook/download/archive"
+	KoreOnConfigDir        = "internal/playbooks/koreon-playbook/download/config"
+	KoreOnExtendsFileDir   = "internal/playbooks/koreon-playbook/download/extends"
 	KoreOnLogsDir          = "internal/playbooks/koreon-playbook/download/logs"
 	HelmCubeRepoUrl        = "https://hcapital-harbor.acloud.run/chartrepo/cube"
 	HelmChartProject       = "helm-charts"
@@ -19,5 +20,5 @@ var (
 
 var Addon = map[string]string{
 	"KubeConfigDir":   "/etc/kubernetes/acloud",
-	"AddonConfigFile": "config/addon.toml",
+	"AddonConfigFile": "addon.toml",
 }

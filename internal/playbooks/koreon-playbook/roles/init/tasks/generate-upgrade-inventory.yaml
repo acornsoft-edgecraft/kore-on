@@ -1,0 +1,13 @@
+---
+- include_tasks: generate-inventory.yaml
+  when:
+    - not Kubernetes.GetKubeConfig
+    - not KoreOn.Update
+- include_tasks: generate-get-kubeconfig-inventory.yaml
+  when:
+    - Kubernetes.GetKubeConfig
+- include_tasks: generate-update-inventory.yaml
+  when:
+    - KoreOn.Update
+    
+- meta: refresh_inventory

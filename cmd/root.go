@@ -68,6 +68,7 @@ func init() {
 		baremetal.AirGapCmd(),
 		baremetal.ClusterUpdateCmd(),
 		baremetal.TestCmd(),
+		baremetal.RegistryCmd(),
 	)
 
 	// SubCommand validation

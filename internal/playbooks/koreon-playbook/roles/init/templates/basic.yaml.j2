@@ -42,7 +42,9 @@ service_ip_range: {{ (Kubernetes.ServiceCidr == "") | ternary("10.96.0.0/20", Ku
 pod_ip_range: {{ (Kubernetes.PodCidr == "") | ternary("10.4.0.0/20", Kubernetes.PodCidr) }}
 node_port_range: {{ (Kubernetes.NodePortRange == "") | ternary("30000-32767", Kubernetes.NodePortRange) }}
 audit_log_enable: {{ Kubernetes.AuditLogEnable }}
-api_sans: {{ (Kubernetes.ApiSans == None) | ternary([NodePool.Master.IP[0]], Kubernetes.ApiSans) }}
+api_sans: {{ (Kubernetes.ApiSans == None) | ternary([], Kubernetes.ApiSans) }}
+master_ip: {{ (KoreOn.ClosedNetwork) | ternary(NodePool.Master.PrivateIP, NodePool.Master.IP) }}
+
 #-end [kubernetes]
 
 #- [kubernetes.etcd]
@@ -51,8 +53,8 @@ api_sans: {{ (Kubernetes.ApiSans == None) | ternary([NodePool.Master.IP[0]], Kub
 ## external-etcd: used external etcd than input the ip and private-ip address (default: false)
 ##                not used than skip ip address. it is used control plane nodes as automatic.
 external_etcd: {{ Kubernetes.Etcd.ExternalEtcd }}
-external_etcd_ip: {{ ((Kubernetes.Etcd.IP != None) and (Kubernetes.Etcd.IP | length > 0))  | ternary(Kubernetes.Etcd.IP, [""]) }}
-external_etcd_private_ip: {{ ((Kubernetes.Etcd.PrivateIP != None) and (Kubernetes.Etcd.PrivateIP | length > 0))  | ternary(Kubernetes.Etcd.PrivateIP, [""]) }}
+external_etcd_ip: {{ ((Kubernetes.Etcd.IP != None) and (Kubernetes.Etcd.IP | length > 0))  | ternary(Kubernetes.Etcd.IP, []) }}
+external_etcd_private_ip: {{ ((Kubernetes.Etcd.PrivateIP != None) and (Kubernetes.Etcd.PrivateIP | length > 0))  | ternary(Kubernetes.Etcd.PrivateIP, []) }}
 #-end [kubernetes.etcd]
 
 #- [kubernetes.calico]
@@ -84,9 +86,9 @@ data_root_dir: {{ (NodePool.DataDir == "") | ternary("/data", NodePool.DataDir) 
 ## - api_lb_ip: authmatic input (only: lb_ip:lb_port)
 master_isolated: {{ NodePool.Master.Isolated | lower }}
 haproxy: {{ NodePool.Master.HaproxyInstall | lower }}
-lb_ip: {{ (NodePool.Master.LbIP == "" and NodePool.Master.IP != None) | ternary(NodePool.Master.IP[0], NodePool.Master.LbIP) }}
+lb_ip: {{ (NodePool.Master.LbIP == "" and NodePool.Master.IP != None) | ternary((KoreOn.ClosedNetwork) | ternary(NodePool.Master.PrivateIP[0], NodePool.Master.IP[0]), NodePool.Master.LbIP) }}
 lb_port: {{ (NodePool.Master.LbPort == 0) | ternary(6443, NodePool.Master.LbPort) }}
-api_lb_ip: {{ (NodePool.Master.LbIP == "" and NodePool.Master.IP != None) | ternary(NodePool.Master.IP[0], NodePool.Master.LbIP) }}:{{ (NodePool.Master.LbPort == 0) | ternary(6443, NodePool.Master.LbPort) }}
+api_lb_ip: {{ (NodePool.Master.IP != None) and (NodePool.Master.IP | length > 0) | ternary((KoreOn.ClosedNetwork) | ternary(NodePool.Master.PrivateIP[0], NodePool.Master.IP[0]), NodePool.Master.IP[0]) }}:{{ "6443" }}
 #-end [node-pool.master]
 
 #- [private-registry]
@@ -104,8 +106,14 @@ api_lb_ip: {{ (NodePool.Master.LbIP == "" and NodePool.Master.IP != None) | tern
 registry_install: {{ PrivateRegistry.Install }}
 registry_version: {{ PrivateRegistry.RegistryVersion }}
 registry_data_dir: {{ (PrivateRegistry.DataDir == "" ) | ternary("/data/harbor", PrivateRegistry.DataDir) }}
-registry_ip: {{ (PrivateRegistry.RegistryIP == "") | ternary("''", PrivateRegistry.RegistryIP) }}
-registry_domain: {{ (PrivateRegistry.RegistryDomain == "") | ternary((PrivateRegistry.RegistryIP == "") | ternary("''", PrivateRegistry.RegistryIP), PrivateRegistry.RegistryDomain) }}
+{% if KoreOn.ClosedNetwork -%}
+{% set registry_ip = (PrivateRegistry.RegistryIP == "") | ternary("''", ((PrivateRegistry.PrivateIP != None) and (PrivateRegistry.PrivateIP | length > 0)) | ternary(PrivateRegistry.PrivateIP, PrivateRegistry.RegistryIP)) %}
+{% else -%}
+{% set registry_ip = (PrivateRegistry.RegistryIP == "") | ternary("''", PrivateRegistry.RegistryIP) %}
+{% endif -%}
+
+registry_ip: {{ registry_ip }}
+registry_domain: {{ (PrivateRegistry.RegistryDomain == "") | ternary(registry_ip, PrivateRegistry.RegistryDomain) }}
 registry_archive_file: {{ (PrivateRegistry.RegistryArchiveFile == "") | ternary("''", PrivateRegistry.RegistryArchiveFile) }}
 registry_public_cert: {{ PrivateRegistry.PublicCert }}
 #-end [private-registry]
@@ -127,7 +135,7 @@ registry_ssl_cert_key: {{ PrivateRegistry.CertFile.SslCertKey | basename }}
 ## - 
 ## Optional
 storage_install: {{ SharedStorage.Install }}
-storage_ip: {{ SharedStorage.StorageIP }}
+storage_ip: {{ ((SharedStorage.PrivateIP != None) and (SharedStorage.PrivateIP | length > 0)) | ternary(SharedStorage.PrivateIP, SharedStorage.StorageIP) }}
 shared_volume_dir: {{ (SharedStorage.VolumeDir == "") | ternary("/data/storage", SharedStorage.VolumeDir) }}
 #-end [shared-storage]
 

@@ -96,7 +96,7 @@ func (c *strCreateCmd) create(workDir string) error {
 	koreOnImage := conf.KoreOnImage
 	koreOnConfigFileName := conf.KoreOnConfigFile
 
-	koreonToml, err := utils.GetKoreonTomlConfig(workDir + "/" + koreOnConfigFileName)
+	koreonToml, err := utils.GetKoreonTomlConfig(workDir + "/config/" + koreOnConfigFileName)
 	if err != nil {
 		logger.Fatal(err)
 		os.Exit(1)
@@ -132,6 +132,8 @@ func (c *strCreateCmd) create(workDir string) error {
 		fmt.Sprintf("%s:%s", workDir+"/archive", "/"+conf.KoreOnArchiveFileDir),
 		"-v",
 		fmt.Sprintf("%s:%s", workDir+"/config", "/"+conf.KoreOnConfigDir),
+		"-v",
+		fmt.Sprintf("%s:%s", workDir+"/extends", "/"+conf.KoreOnExtendsFileDir),
 		"-v",
 		fmt.Sprintf("%s:%s", workDir+"/logs", "/"+conf.KoreOnLogsDir),
 	}

@@ -1,0 +1,47 @@
+---
+- name: pull an image for prepare-airgap
+  community.docker.docker_image:
+    name: "{{ item }}"
+    source: pull
+  with_items: 
+    - "{{ prepare_airgap_images }}"
+
+- name: Create project
+  ansible.builtin.uri:
+    url: "https://{{ _url }}/projects"
+    method: POST
+    ca_path: "{{ harbor_data_dir }}/cert/ca.crt"
+    validate_certs: false
+    headers:
+      accept: application/json
+      Content-Type: application/json
+      Authorization: Basic {{ basic_auth | b64encode }}
+    body_format: json
+    body:
+      project_name: "{{ item | split('/') | first }}"
+      public: true
+      storage_limit: -1
+      metadata:
+        public: "true"
+  register: _result
+  failed_when: false
+  loop: "{{ prepare_airgap_images }}"
+
+- name: Docker login
+  community.docker.docker_login:
+    registry_url: "{{ hostvars[inventory_hostname]['ip'] }}"
+    username: "{{ registry_id }}"
+    password: "{{ registry_passwd }}"
+    reauthorize: True
+  delegate_to: "{{ groups['prepare_airgap'][0] }}"
+
+- name: Tag and push to local registry
+  community.docker.docker_image:
+    name: "{{ item }}"
+    repository: "{{ hostvars[inventory_hostname]['ip'] + '/' + item }}"
+    ca_cert: "{{ harbor_data_dir }}/cert/ca.crt"
+    push: true
+    source: local
+    timeout: 240
+  loop: "{{ prepare_airgap_images }}"
+  delegate_to: "{{ groups['prepare_airgap'][0] }}"

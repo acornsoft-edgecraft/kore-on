@@ -1,0 +1,16 @@
+---
+# Create extends cluster-api directory
+- name: Extends | Addon calico directory
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+    - "{{ extends_calico_dir }}/bin"
+
+- name: Extends | Download calicoctl binarys
+  ansible.builtin.get_url:
+    url: "{{ item }}"
+    dest: "{{ extends_calico_dir }}/bin"
+  with_items:
+    - "{{ calicoctl_get_url }}"
+  any_errors_fatal: true

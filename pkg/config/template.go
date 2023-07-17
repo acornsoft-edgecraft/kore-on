@@ -87,13 +87,11 @@ const Template = `
 ## Optional
 ## - lb-ip: loadbalancer ip address (default: master[0] node ip address)
 ## - isolated: K8s control plane nodes isolated (default: false)
-## - haproxy-install: used internal load-balancer (default: true)
 ## - lb-ip: Enter the IP address when using a load balancer (default: master[0] ip address)
 ## - lb-port: Enter the port when using a load balancer (default: 6443)
 #ip = ["x.x.x.x","x.x.x.x","x.x.x.x"]
 #private-ip = ["x.x.x.x","x.x.x.x","x.x.x.x"]
 #isolated = true
-#haproxy-install = true
 #lb-ip = "x.x.x.x"
 #lb-port = 6443
 

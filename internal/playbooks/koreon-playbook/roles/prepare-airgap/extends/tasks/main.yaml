@@ -1,0 +1,9 @@
+---
+- name: Extends addon calico
+  ansible.builtin.include_role:
+    name: prepare-airgap/extends/addon/calico
+
+
+- name: Extends addon cluster-api
+  ansible.builtin.include_role:
+    name: prepare-airgap/extends/addon/cluster-api

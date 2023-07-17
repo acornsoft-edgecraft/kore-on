@@ -1,0 +1,3 @@
+---
+extends_calico_dir: "{{ prepare_airgap_registry_data_dir }}/extends/calico"
+calicoctl_get_url: "https://github.com/projectcalico/calico/releases/download/{{ package_calico_ctl_version }}/calicoctl-{{ ansible_system | lower }}-amd64"
