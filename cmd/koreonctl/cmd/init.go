@@ -95,14 +95,14 @@ func (c *strInitCmd) init(workDir string) error {
 		os.Exit(1)
 	}
 
-	koreOnConfigFilePath, err := filepath.Abs("config/" + koreOnConfigFile)
+	koreOnConfigFilePath, err := filepath.Abs(workDir + "/config/" + koreOnConfigFile)
 	if err != nil {
-		ioutil.WriteFile(workDir+"/"+koreOnConfigFile, []byte(config.Template), 0600)
+		ioutil.WriteFile(koreOnConfigFilePath, []byte(config.Template), 0600)
 		fmt.Printf(SUCCESS_FORMAT, fmt.Sprintf("Initialize completed, Edit %s file according to your environment and run `koreonctl create`", koreOnConfigFile))
 	} else {
 		fmt.Println("Previous " + koreOnConfigFile + " file exist and it will be backup")
 		os.Rename(koreOnConfigFilePath, koreOnConfigFilePath+"_"+currTime.Format("20060102150405"))
-		ioutil.WriteFile(workDir+"/"+koreOnConfigFile, []byte(config.Template), 0600)
+		ioutil.WriteFile(koreOnConfigFilePath, []byte(config.Template), 0600)
 		fmt.Printf(SUCCESS_FORMAT, fmt.Sprintf("Initialize completed, Edit %s file according to your environment and run `koreonctl create`", koreOnConfigFile))
 	}
 
@@ -142,7 +142,6 @@ func installPodman(workDir string) error {
 		return err
 	}
 	defer file.Close()
-
 	// gzip 해제
 	gzipReader, err := gzip.NewReader(file)
 	if err != nil {

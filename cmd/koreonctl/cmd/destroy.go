@@ -208,16 +208,20 @@ func (c *strDestroyCmd) destroy(workDir string) error {
 
 	commandArgs := []string{}
 
+	if c.osRelease == "ubuntu" && c.osCurrentUser != "root" {
+		commandArgs = append(commandArgs, "sudo")
+	}
+
+	if koreonToml.KoreOn.ClosedNetwork {
+		podmanLoad(workDir+"/archive/koreon/"+conf.KoreOnImageArchive, commandArgs)
+	}
+
 	cmdDefault := []string{
 		"podman",
 		"run",
 		"--rm",
 		"--privileged",
 		"-it",
-	}
-
-	if c.osRelease == "ubuntu" && c.osCurrentUser != "root" {
-		commandArgs = append(commandArgs, "sudo")
 	}
 
 	commandArgs = append(commandArgs, cmdDefault...)

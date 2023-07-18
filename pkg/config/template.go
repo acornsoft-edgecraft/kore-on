@@ -152,11 +152,9 @@ const Template = `
 ## Optional
 ## - install: NFS Server Installation (default: false)
 #install = true
-#type = nfs
 #storage-ip = "x.x.x.x"
 #private-ip = "x.x.x.x"
 #volume-dir = "/data/storage"
-#nfs_version = "4.1"
 
 [prepare-airgap]
 ## Required

@@ -223,5 +223,6 @@ func podmanLoad(koreon_img string, commandArgs []string) error {
 			fmt.Println("err:", err)
 		}
 	}
+	logger.Info("The loading of Korean images has begun in a closed network.")
 	return nil
 }
