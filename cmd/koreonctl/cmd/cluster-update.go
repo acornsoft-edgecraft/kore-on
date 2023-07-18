@@ -159,16 +159,20 @@ func (c *strClusterUpdateCmd) clusterUpdate(workDir string) error {
 
 	commandArgs := []string{}
 
+	if c.osRelease == "ubuntu" && c.osCurrentUser != "root" {
+		commandArgs = append(commandArgs, "sudo")
+	}
+
+	if koreonToml.KoreOn.ClosedNetwork {
+		podmanLoad(workDir+"/archive/koreon/"+conf.KoreOnImageArchive, commandArgs)
+	}
+
 	cmdDefault := []string{
 		"podman",
 		"run",
 		"--rm",
 		"--privileged",
 		"-it",
-	}
-
-	if c.osRelease == "ubuntu" && c.osCurrentUser != "root" {
-		commandArgs = append(commandArgs, "sudo")
 	}
 
 	commandArgs = append(commandArgs, cmdDefault...)
@@ -254,7 +258,7 @@ func (c *strClusterUpdateCmd) clusterUpdate(workDir string) error {
 		}
 	}
 
-	logger.Info(commandArgs)
+	// logger.Info(commandArgs)
 	err = syscall.Exec(binary, commandArgs, os.Environ())
 	if err != nil {
 		log.Printf("Command finished with error: %v", err)

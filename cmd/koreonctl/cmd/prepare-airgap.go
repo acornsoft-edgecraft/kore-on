@@ -21,7 +21,7 @@ type strAirGapCmd struct {
 	dryRun         bool
 	verbose        bool
 	privateKey     string
-	image          string
+	imagesDir      string
 	user           string
 	command        string
 	osRelease      string
@@ -100,6 +100,7 @@ func imageUploadCmd() *cobra.Command {
 
 	f := cmd.Flags()
 	f.BoolVarP(&imageUpload.dryRun, "dry-run", "d", false, "dryRun")
+	f.StringVar(&imageUpload.imagesDir, "path", "", "images directory path")
 	f.StringVarP(&imageUpload.privateKey, "private-key", "p", "", "Specify ssh key path")
 	f.StringVarP(&imageUpload.user, "user", "u", "", "login user")
 

@@ -8,6 +8,7 @@ import (
 
 	"kore-on/cmd/koreonctl/conf"
 	"kore-on/pkg/logger"
+	"kore-on/pkg/utils"
 
 	"github.com/spf13/cobra"
 )
@@ -65,6 +66,8 @@ func init() {
 		addonCmd(),
 	)
 
+	// SubCommand validation
+	utils.CheckCommand(KoreOnCtlCmd)
 }
 
 func initConfig() {

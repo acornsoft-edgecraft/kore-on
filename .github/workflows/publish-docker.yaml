@@ -71,7 +71,8 @@ jobs:
           do
             new_string=$(echo "$i" | sed "s/\-/\//")
             mkdir -p koreonctl-"$i"/bin
-            mkdir -p koreonctl-"$i"/archive
+            mkdir -p koreonctl-"$i"/archive/koreon
+            mkdir -p koreonctl-"$i"/archive/images
             mkdir -p koreonctl-"$i"/config
             mkdir -p koreonctl-"$i"/extends
             mkdir -p koreonctl-"$i"/logs
