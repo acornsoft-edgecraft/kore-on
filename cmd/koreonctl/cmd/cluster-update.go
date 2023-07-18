@@ -254,7 +254,7 @@ func (c *strClusterUpdateCmd) clusterUpdate(workDir string) error {
 		}
 	}
 
-	logger.Info(commandArgs)
+	// logger.Info(commandArgs)
 	err = syscall.Exec(binary, commandArgs, os.Environ())
 	if err != nil {
 		log.Printf("Command finished with error: %v", err)

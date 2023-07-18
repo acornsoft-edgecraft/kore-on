@@ -95,7 +95,7 @@ func (c *strInitCmd) init(workDir string) error {
 		os.Exit(1)
 	}
 
-	koreOnConfigFilePath, err := filepath.Abs(koreOnConfigFile)
+	koreOnConfigFilePath, err := filepath.Abs("config/" + koreOnConfigFile)
 	if err != nil {
 		ioutil.WriteFile(workDir+"/"+koreOnConfigFile, []byte(config.Template), 0600)
 		fmt.Printf(SUCCESS_FORMAT, fmt.Sprintf("Initialize completed, Edit %s file according to your environment and run `koreonctl create`", koreOnConfigFile))
