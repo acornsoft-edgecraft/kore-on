@@ -10,6 +10,7 @@
         apply:
           tags:
             - init
+            - installer
       tags:
         - bootstrap-os
         - installer

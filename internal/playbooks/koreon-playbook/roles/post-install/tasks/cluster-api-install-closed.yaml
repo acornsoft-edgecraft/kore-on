@@ -7,6 +7,7 @@
     owner: "root"
     group: "root"
     mode: "0755"
+    remote_src: true
 
 # Create cluster-api crd directory
 - name: Post | Create cluster-api crd directory
