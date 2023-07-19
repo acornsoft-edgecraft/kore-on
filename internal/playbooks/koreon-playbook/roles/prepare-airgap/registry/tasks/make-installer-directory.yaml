@@ -28,14 +28,24 @@
     - "{{ prepare_airgap_registry_data_dir }}/koreonctl-{{ ansible_system | lower }}-amd64"
     - "{{ prepare_airgap_registry_data_dir }}/koreonctl-{{ ansible_system | lower }}-amd64.tar.gz"
 
+- name: Prepare-airgap | Create directory on Prepare-airgap installer
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "{{ prepare_airgap_registry_data_dir }}/koreonctl-{{ ansible_system | lower }}-amd64_{{ KoreOn.Version }}/"
+    owner: "root"
+    group: "root"
+    remote_src: true
+  with_items:
+    - "{{ prepare_airgap_registry_data_dir }}/archive"
+    - "{{ prepare_airgap_registry_data_dir }}/bin"
+    - "{{ prepare_airgap_registry_data_dir }}/config"
+    - "{{ prepare_airgap_registry_data_dir }}/extends"
+    - "{{ prepare_airgap_registry_data_dir }}/logs"
+
 - name: Prepare-airgap | Archive on Prepare-airgap installer directorys
   community.general.archive:
     path: 
-      - "{{ prepare_airgap_registry_data_dir }}/archive/"
-      - "{{ prepare_airgap_registry_data_dir }}/bin/"
-      - "{{ prepare_airgap_registry_data_dir }}/config/"
-      - "{{ prepare_airgap_registry_data_dir }}/extends/"
-      - "{{ prepare_airgap_registry_data_dir }}/logs/"
+      - "{{ prepare_airgap_registry_data_dir }}/koreonctl-{{ ansible_system | lower }}-amd64_{{ KoreOn.Version }}"
     dest: "{{ prepare_airgap_registry_data_dir }}/koreonctl-{{ ansible_system | lower }}-amd64_{{ KoreOn.Version }}.tar.gz"
     format: gz
-    remove: false
+    remove: true
