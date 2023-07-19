@@ -10,6 +10,7 @@
         apply:
           tags:
             - init
+            - installer
       tags:
         - bootstrap-os
         - installer
@@ -40,6 +41,7 @@
         apply:
           tags:
             - bootstrap-os
+            - installer
       tags:
         - bootstrap-os
         - installer
@@ -130,6 +132,7 @@
         apply:
           tags:
             - create-installer-image
+            - installer
       tags:
         - create-installer-image
         - installer
@@ -139,6 +142,7 @@
         apply:
           tags:
             - extends-addon
+            - installer
       tags:
         - extends-addon
         - installer
@@ -149,7 +153,19 @@
         apply:
           tags:
             - make-installer-directory
+            - installer
       tags:
         - make-installer-directory
+        - installer
+    - name: Remove Prepare Airgap container images
+      ansible.builtin.include_role:
+        name: prepare-airgap/registry
+        tasks_from: remove-images
+        apply:
+          tags:
+            - remove-images
+            - installer
+      tags:
+        - remove-images
         - installer
   any_errors_fatal: true
