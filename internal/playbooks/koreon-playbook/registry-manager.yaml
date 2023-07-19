@@ -47,7 +47,7 @@
   tasks:
     - name: Images Pull and Push to private registry in prepare-airgap host
       ansible.builtin.include_role:
-        name: registry-manager/registry
+        name: registry
         tasks_from: pull-push-images
         apply:
           tags:
@@ -58,7 +58,7 @@
         - not closed_network
     - name: Images Pull and Push to private registry in prepare-airgap host
       ansible.builtin.include_role:
-        name: registry-manager/registry
+        name: registry
         tasks_from: pull-push-images-closed
         apply:
           tags:
