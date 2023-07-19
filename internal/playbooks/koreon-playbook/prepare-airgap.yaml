@@ -119,7 +119,7 @@
     - name: Create Installer Image
       ansible.builtin.include_role:
         name: prepare-airgap/registry
-        tasks_from: create-installer-image.yaml
+        tasks_from: create-installer-image
         apply:
           tags:
             - create-installer-image
@@ -133,4 +133,13 @@
             - extends-addon
       tags:
         - extends-addon
+    - name: Make Prepare Airgap Installer Directory
+      ansible.builtin.include_role:
+        name: prepare-airgap/registry
+        tasks_from: make-installer-directory
+        apply:
+          tags:
+            - make-installer-directory
+      tags:
+        - make-installer-directory
   any_errors_fatal: true

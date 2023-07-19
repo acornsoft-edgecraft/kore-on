@@ -1,26 +1,33 @@
 ---
-# - name: Copy Dockerfile file
-#   ansible.builtin.template:
-#     src: "{{ item.src }}"
-#     dest: "{{ prepare_airgap_registry_data_dir }}/{{ item.dest }}"
-#   with_items:
-#     - { src: "dockerfile.j2", dest: "Dockerfile" }
-
-# - name: Prepare-airgap | docker build koreon image
-#   ansible.builtin.command: |
-#     docker build --tag {{ prepare_image }} {{prepare_airgap_registry_data_dir}}
+# Create Archive directory
+- name: Prepare-airgap | Create installer directory
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+    - "{{ prepare_airgap_registry_data_dir }}/archive/koreon"
+    - "{{ prepare_airgap_registry_data_dir }}/archive/images"
+    - "{{ prepare_airgap_registry_data_dir }}/config/"
+    - "{{ prepare_airgap_registry_data_dir }}/extends/"
+    - "{{ prepare_airgap_registry_data_dir }}/logs"
 
 - name: Prepare-airgap | Archive koreon image
   community.docker.docker_image:
     name: "{{ bastion_image }}"
     tag: "{{ KoreOn.Version }}"
-    archive_path: "{{ prepare_airgap_registry_data_dir }}/{{ KoreOn.ImageName }}_{{ KoreOn.Version }}.tar"
+    archive_path: "{{ prepare_airgap_registry_data_dir }}/archive/koreon/{{ KoreOn.ImageName }}_{{ KoreOn.Version }}.tar"
     source: pull
     timeout: 240
 
+- name: Prepare-airgap | Remove koreon image
+  community.docker.docker_image:
+    name: "{{ bastion_image }}"
+    tag: "{{ KoreOn.Version }}"
+    state: absent
+
 - name: Prepare-airgap | Archive koreon image to Create tar.gz
   community.general.archive:
-    path: "{{ prepare_airgap_registry_data_dir }}/{{ KoreOn.ImageName }}_{{ KoreOn.Version }}.tar"
-    dest: "{{ prepare_airgap_registry_data_dir }}/{{ KoreOn.ImageName }}_{{ KoreOn.Version }}.tar.gz"
+    path: "{{ prepare_airgap_registry_data_dir }}/archive/koreon/{{ KoreOn.ImageName }}_{{ KoreOn.Version }}.tar"
+    dest: "{{ prepare_airgap_registry_data_dir }}/archive/koreon/{{ KoreOn.ImageName }}_{{ KoreOn.Version }}.tar.gz"
     format: gz
     remove: true

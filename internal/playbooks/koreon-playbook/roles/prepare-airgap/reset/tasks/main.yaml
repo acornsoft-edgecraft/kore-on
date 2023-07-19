@@ -95,12 +95,16 @@
     - /tmp/harbor
     - /tmp/registry-restore.sh
     - "{{ data_root_dir }}/archive"
+    - "{{ data_root_dir }}/bin"
     - "{{ data_root_dir }}/bastion"
+    - "{{ data_root_dir }}/config"
+    - "{{ data_root_dir }}/extends"
     - "{{ data_root_dir }}/harbor"
     - "{{ data_root_dir }}/docker"
     - "{{ data_root_dir }}/packages"
+    - "{{ data_root_dir }}/logs"
     - "{{ data_root_dir }}/Dockerfile"
-    - "{{ data_root_dir }}/{{ KoreOn.ImageName }}_{{ KoreOn.Version }}.tar.gz"
+    - "{{ data_root_dir }}/koreonctl-{{ ansible_system | lower }}-amd64_{{ KoreOn.Version }}.tar.gz"
     - "{{ install_dir }}"
   tags: ['files']
 

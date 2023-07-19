@@ -1,36 +1,6 @@
 ---
-- name: Get archive file names
-  ansible.builtin.find:
-    path: "{{ prepare_airgap_registry_data_dir }}/archive"
-    patterns: '*'
-    file_type: file
-  register: archive
-
-- name: Archive copy to localhost
+- name: Prepare-airgap | Archive copy to localhost
   ansible.builtin.fetch:
-    src: "{{ item.path }}"
-    dest: "{{ KoreOn.WorkDir }}/archive/"
+    src: "{{ prepare_airgap_registry_data_dir }}/koreonctl-{{ ansible_system | lower }}-amd64_{{ KoreOn.Version }}.tar.gz"
+    dest: "{{ KoreOn.WorkDir }}/"
     flat: True
-  with_items: "{{ archive.files }}"
-
-- name: Archive copy to localhost
-  ansible.builtin.fetch:
-    src: "{{ prepare_airgap_registry_data_dir }}/{{ KoreOn.ImageName }}_{{ KoreOn.Version }}.tar.gz"
-    dest: "{{ KoreOn.WorkDir }}/archive/koreon/"
-    flat: True
-
-## get extends - calico, cluster-api
-- name: Get extends file names
-  ansible.builtin.find:
-    path: "{{ prepare_airgap_registry_data_dir }}/extends"
-    patterns: '*'
-    file_type: file
-    recurse: yes
-  register: extends
-
-- name: extends copy to localhost
-  ansible.builtin.fetch:
-    src: "{{ item.path }}"
-    dest: "{{ KoreOn.WorkDir }}{{ item.path | replace(prepare_airgap_registry_data_dir, '') }}"
-    flat: True
-  with_items: "{{ extends.files }}"
