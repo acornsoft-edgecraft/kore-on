@@ -1,0 +1,14 @@
+---
+- name: Remove image
+  community.docker.docker_image:
+    name: "{{ item }}"
+    state: absent
+  with_items: 
+    - "{{ prepare_airgap_images }}"
+
+- name: Remove image
+  community.docker.docker_image:
+    name: "{{ prepare_airgap_registry_ip + '/' + item }}"
+    state: absent
+  with_items: 
+    - "{{ prepare_airgap_images }}"

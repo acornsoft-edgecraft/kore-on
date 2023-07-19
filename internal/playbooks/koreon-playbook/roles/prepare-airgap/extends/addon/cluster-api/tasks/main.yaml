@@ -5,9 +5,6 @@
     path: "{{ item }}"
     state: directory
   with_items:
-    # - "{{ extends_cluster_api_dir }}/provider/kubeadm"
-    # - "{{ extends_cluster_api_dir }}/provider/openstack"
-    # - "{{ extends_cluster_api_dir }}/resources"
     - "{{ extends_cluster_api_dir }}/bin"
 
 - name: Extends | Download clusterctl binarys
@@ -17,29 +14,3 @@
   with_items:
     - "{{ clusterctl_get_url }}"
   any_errors_fatal: true
-
-# - name: Extends | Download clusterAPI provider - kubeadm
-#   ansible.builtin.get_url:
-#     url: "{{ item }}"
-#     dest: "{{ extends_cluster_api_dir }}/provider/kubeadm"
-#   with_items:
-#     - "{{ bootstrap_components }}"
-#     - "{{ control_plane_components }}"
-#   any_errors_fatal: true
-
-# - name: Extends | Download clusterAPI provider - openstack
-#   ansible.builtin.get_url:
-#     url: "{{ item }}"
-#     dest: "{{ extends_cluster_api_dir }}/provider/openstack"
-#   with_items:
-#     - "{{ infrastructure_components }}"
-#   any_errors_fatal: true
-
-# - name: Extends | Download clusterAPI crd
-#   ansible.builtin.get_url:
-#     url: "{{ item }}"
-#     dest: "{{ extends_cluster_api_dir }}/resources"
-#   with_items:
-#     - "{{ cluster_api_components }}"
-#     - "{{ cert_manager }}"
-#   any_errors_fatal: true
