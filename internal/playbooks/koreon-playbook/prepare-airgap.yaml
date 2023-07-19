@@ -12,6 +12,7 @@
             - init
       tags:
         - bootstrap-os
+        - installer
   any_errors_fatal: true
 
 # Clear gathered facts from all currently targeted hosts 
@@ -23,6 +24,7 @@
       meta: clear_facts
       tags:
         - bootstrap-os
+        - installer
 
 # Pre-installation check network.
 - hosts: all
@@ -40,6 +42,7 @@
             - bootstrap-os
       tags:
         - bootstrap-os
+        - installer
   any_errors_fatal: true
 
 # Configure system package repository
@@ -100,6 +103,8 @@
         apply:
           tags:
             - cri
+      tags:
+        - cri
       vars:
         param: "registry"
     - name: Registry | Installation \ Local Repository
@@ -107,7 +112,9 @@
         name: prepare-airgap/registry
         apply:
           tags:
-            - prepare-airgap  
+            - registry  
+      tags:
+        - registry
     - name: Package download
       ansible.builtin.include_role:
         name: prepare-airgap/package/{{ ansible_distribution | lower }}
@@ -125,6 +132,7 @@
             - create-installer-image
       tags:
         - create-installer-image
+        - installer
     - name: Extends Addon
       ansible.builtin.include_role:
         name: prepare-airgap/extends
@@ -133,6 +141,7 @@
             - extends-addon
       tags:
         - extends-addon
+        - installer
     - name: Make Prepare Airgap Installer Directory
       ansible.builtin.include_role:
         name: prepare-airgap/registry
@@ -142,4 +151,5 @@
             - make-installer-directory
       tags:
         - make-installer-directory
+        - installer
   any_errors_fatal: true

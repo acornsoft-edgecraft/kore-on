@@ -17,8 +17,6 @@
   with_items:
     - "{{ etcd_get_url }}"
     - "{{ helm_get_url }}"
-    - "{{ calicoctl_get_url }}"
-    - "{{ clusterctl_get_url }}"
   any_errors_fatal: true
 
 - name: Package | Install dnf
