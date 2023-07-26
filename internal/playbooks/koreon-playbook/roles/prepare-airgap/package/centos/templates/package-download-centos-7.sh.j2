@@ -25,7 +25,7 @@ make_yum_repo(){
     repoquery --qf=%{name} -g --list --grouppkgs=all [groups] | xargs repotrack -p ./ yum-utils
 
     repoquery --qf=%{name} -g --list --grouppkgs=all [groups] | xargs repotrack -a x86_64 -p ./ jq
-    repoquery --qf=%{name} -g --list --grouppkgs=all [groups] | xargs repotrack -p ././ nginx
+    repoquery --qf=%{name} -g --list --grouppkgs=all [groups] | xargs repotrack -p ./ nginx
     repoquery --qf=%{name} -g --list --grouppkgs=all [groups] | xargs repotrack -a x86_64 -p ./ telnet
     repoquery --qf=%{name} -g --list --grouppkgs=all [groups] | xargs repotrack -a x86_64 -p ./ net-tools
     repoquery --qf=%{name} -g --list --grouppkgs=all [groups] | xargs repotrack -a x86_64 -p ./ bind-utils
