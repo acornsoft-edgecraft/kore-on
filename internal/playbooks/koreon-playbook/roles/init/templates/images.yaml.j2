@@ -26,16 +26,24 @@ prepare_airgap_images: [
   "ghcr.io/kore3lab/kore-board.frontend:v0.5.5",
   "ghcr.io/kore3lab/kore-board.metrics-scraper:v0.5.5",
   "ghcr.io/kore3lab/kore-board.terminal:v0.5.5",
-  ## ClusterAPI images
+  ## ClusterAPI deployment images
   "registry.k8s.io/capi-openstack/capi-openstack-controller:v0.7.3",
   "registry.k8s.io/cluster-api/kubeadm-bootstrap-controller:v1.4.3",
+  "registry.k8s.io/cluster-api/kubeadm-control-plane-controller:v1.4.3",
   "registry.k8s.io/cluster-api/cluster-api-controller:v1.4.3",
   "gcr.io/kubebuilder/kube-rbac-proxy:v0.8.0",
   "docker.io/cdkbot/capi-bootstrap-provider-microk8s:0.5.0",
   "docker.io/cdkbot/capi-control-plane-provider-microk8s:0.5.0",
   "quay.io/jetstack/cert-manager-controller:v1.12.1",
   "quay.io/jetstack/cert-manager-webhook:v1.12.1",
-  "quay.io/jetstack/cert-manager-cainjector:v1.12.1"
+  "quay.io/jetstack/cert-manager-cainjector:v1.12.1",
+  ## ClusterAPI k8s images
+  "registry.k8s.io/coredns/coredns:v1.9.3",
+  "registry.k8s.io/etcd:3.5.6-0",
+  "docker.io/calico/cni:v3.25.1",
+  "docker.io/calico/kube-controllers:v3.25.1",
+  "docker.io/calico/node:v3.25.1",
+  "registry.k8s.io/provider-os/openstack-cloud-controller-manager:v1.27.1"
 ]
 
 bastion_image: "{{ KoreOn.Registry }}/{{ KoreOn.ImageName }}:{{ KoreOn.Version }}"

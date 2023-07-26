@@ -16,8 +16,6 @@
   ansible.builtin.copy:
     src: "{{ prepare_airgap_registry_data_dir }}/koreonctl-{{ ansible_system | lower }}-amd64/"
     dest: "{{ prepare_airgap_registry_data_dir }}/"
-    owner: "root"
-    group: "root"
     remote_src: true
 
 - name: Prepare-airgap | Delete some files and directories
@@ -32,8 +30,6 @@
   ansible.builtin.copy:
     src: "{{ item }}"
     dest: "{{ prepare_airgap_registry_data_dir }}/koreonctl-{{ ansible_system | lower }}-amd64_{{ KoreOn.Version }}/"
-    owner: "root"
-    group: "root"
     remote_src: true
   with_items:
     - "{{ prepare_airgap_registry_data_dir }}/archive"
