@@ -118,42 +118,49 @@
     chdir: "{{ harbor_install_dir }}"
 
 - name: "Copy ca.crt file to /etc/docker/certs.d/{{ prepare_airgap_registry_ip }}"
-  when: not registry_public_cert
   copy:
     src: "{{ harbor_cert_dir }}/ca.crt"
     dest: "/etc/docker/certs.d/{{ prepare_airgap_registry_ip }}"
     remote_src: yes
+  when: not registry_public_cert
 
-- stat:
-    path: "{{ harbor_install_dir }}/common/config/nginx/cert/ca.crt"
-  register: nginx_ca_stat
-
-- name: Create nginx cert directory
-  when: not registry_public_cert and not nginx_ca_stat.stat.exists
-  file:
-    path: "{{ harbor_install_dir }}/common/config/nginx/cert"
-    state: directory
-
-- name: Copy ca.crt to harbor nginx conf dir
-  when: not registry_public_cert and not nginx_ca_stat.stat.exists
+- name: Copy ca.crt to harbor ca_download dir
   copy:
     src: "{{ harbor_cert_dir }}/ca.crt"
-    dest: "{{ harbor_install_dir }}/common/config/nginx/cert/ca.crt"
+    dest: "{{ harbor_data_dir }}/ca_download/ca.crt"
     remote_src: yes
+  when: not registry_public_cert
 
-- name: Add nginx location for ca.crt download
-  when: not registry_public_cert and not nginx_ca_stat.stat.exists
-  blockinfile:
-    path: "{{ harbor_install_dir }}/common/config/nginx/nginx.conf"
-    insertafter: "chunked_transfer_encoding on;"
-    marker: "## {mark} added by kore-on --------------------"
-    block: |
-          location /ca.crt {
-            alias /etc/nginx/cert/ca.crt;
-          }
+# - stat:
+#     path: "{{ harbor_install_dir }}/common/config/nginx/cert/ca.crt"
+#   register: nginx_ca_stat
 
-- name: Reload nginx configuration
-  when: not registry_public_cert and not nginx_ca_stat.stat.exists
-  shell: "docker-compose exec -T proxy nginx -s reload"
-  args:
-    chdir: "{{ harbor_install_dir }}"
+# - name: Create nginx cert directory
+#   when: not registry_public_cert and not nginx_ca_stat.stat.exists
+#   file:
+#     path: "{{ harbor_install_dir }}/common/config/nginx/cert"
+#     state: directory
+
+# - name: Copy ca.crt to harbor nginx conf dir
+#   when: not registry_public_cert and not nginx_ca_stat.stat.exists
+#   copy:
+#     src: "{{ harbor_cert_dir }}/ca.crt"
+#     dest: "{{ harbor_install_dir }}/common/config/nginx/cert/ca.crt"
+#     remote_src: yes
+
+# - name: Add nginx location for ca.crt download
+#   when: not registry_public_cert and not nginx_ca_stat.stat.exists
+#   blockinfile:
+#     path: "{{ harbor_install_dir }}/common/config/nginx/nginx.conf"
+#     insertafter: "chunked_transfer_encoding on;"
+#     marker: "## {mark} added by kore-on --------------------"
+#     block: |
+#           location /ca.crt {
+#             alias /etc/nginx/cert/ca.crt;
+#           }
+
+# - name: Reload nginx configuration
+#   when: not registry_public_cert and not nginx_ca_stat.stat.exists
+#   shell: "docker-compose exec -T proxy nginx -s reload"
+#   args:
+#     chdir: "{{ harbor_install_dir }}"

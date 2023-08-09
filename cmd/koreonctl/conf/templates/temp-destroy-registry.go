@@ -15,7 +15,7 @@ Node Name                      IP Address              Private IP Adderss
 {{      if eq $PrivateRegistry.RegistryIP $SharedStorage.StorageIP}}
 node-regi-storage            {{$PrivateRegistry.RegistryIP}}
 {{      else}}
-node-regi                      {{$PrivateRegistry.RegistryIP}}                    {{if ne "" $PrivateRegistry.PrivateIP}}{{$PrivateRegistry.PrivateIP}}{{end}}
+node-regi                      {{$PrivateRegistry.RegistryIP}}                    {{if ne "" $PrivateRegistry.PrivateIP}}{{$PrivateRegistry.PrivateIP}}{{end -}}
 {{      end -}}
 {{    else}}
 node-regi                               {{$PrivateRegistry.RegistryIP}}           {{if ne "" $PrivateRegistry.PrivateIP}}{{$PrivateRegistry.PrivateIP}}{{end -}}

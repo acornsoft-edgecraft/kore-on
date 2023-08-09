@@ -19,13 +19,13 @@ node-{{ $index |printf "%-*v" 24 }}{{ $data | printf "%-*s" 28 }}{{if ne (len $N
 {{  if eq true $PrivateRegistry.Install -}}
 {{    if eq true $SharedStorage.Install -}}
 {{      if eq $PrivateRegistry.RegistryIP $SharedStorage.StorageIP}}
-{{ "node-regi-storage" | printf "%-*s" 29 }}{{ $PrivateRegistry.RegistryIP | printf "%-*s" 28 }}{{if ne "" $PrivateRegistry.PrivateIP}}{{$PrivateRegistry.PrivateIP}}{{end}}
+{{ "node-regi-storage" | printf "%-*s" 29 }}{{ $PrivateRegistry.RegistryIP | printf "%-*s" 28 }}{{if ne "" $PrivateRegistry.PrivateIP}}{{$PrivateRegistry.PrivateIP}}{{end -}}
 {{      else}}
-{{ "node-regi" | printf "%-*s" 29 }}{{ $PrivateRegistry.RegistryIP | printf "%-*s" 28 }}{{if ne "" $PrivateRegistry.PrivateIP}}{{$PrivateRegistry.PrivateIP}}{{end}}
+{{ "node-regi" | printf "%-*s" 29 }}{{ $PrivateRegistry.RegistryIP | printf "%-*s" 28 }}{{if ne "" $PrivateRegistry.PrivateIP}}{{$PrivateRegistry.PrivateIP}}{{end -}}
 {{ "node-storage" | printf "%-*s" 29 }}{{ $SharedStorage.StorageIP | printf "%-*s" 28 }}{{if ne "" $SharedStorage.PrivateIP}}{{$SharedStorage.PrivateIP}}{{end -}}
 {{      end -}}
 {{    else}}
-{ "node-regi" | printf "%-*s" 29 }}{{ $PrivateRegistry.RegistryIP | printf "%-*s" 28 }}{{if ne "" $PrivateRegistry.PrivateIP}}{{$PrivateRegistry.PrivateIP}}{{end -}}
+{{ "node-regi" | printf "%-*s" 29 }}{{ $PrivateRegistry.RegistryIP | printf "%-*s" 28 }}{{if ne "" $PrivateRegistry.PrivateIP}}{{$PrivateRegistry.PrivateIP}}{{end -}}
 {{    end -}}
 {{  else if eq true $SharedStorage.Install}}
 {{ "node-storage" | printf "%-*s" 29 }}{{ $SharedStorage.StorageIP | printf "%-*s" 28 }}{{if ne "" $SharedStorage.PrivateIP}}{{$SharedStorage.PrivateIP}}{{end -}}
