@@ -1,10 +1,10 @@
 ---
-- import_tasks: registry.yml
+- import_tasks: registry.yaml
   when: 
     - registry_install
     - not closed_network
 
-- import_tasks: registry-closed.yml
+- import_tasks: registry-closed.yaml
   when: 
     - registry_install
     - closed_network

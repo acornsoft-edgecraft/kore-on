@@ -18,6 +18,8 @@
   failed_when: false
   delegate_to: "{{ groups['masters'][0] }}"
   run_once: true
+  when:
+    - is_kube_master
 
 - name: Copy koreon-config config file
   vars:
@@ -31,13 +33,16 @@
   run_once: true
   when:
     - check_cluster_health.rc == 0
+    - is_kube_master
 
 - name: Create koreon-config configmap
-  when: check_cluster_health.rc == 0
   ansible.builtin.command: |
     kubectl apply --kubeconfig={{ kubeadminconfig }} -f {{ kube_config_dir }}/{{ item }}
   with_items:
     - "koreon-config-cm.yaml"
   delegate_to: "{{ groups['masters'][0] }}"
   run_once: true
+  when:
+    - check_cluster_health.rc == 0
+    - is_kube_master
 # --------------------------------------------------------------------------------------------

@@ -10,18 +10,13 @@
     - "{{ registry_data_dir }}/cert"
     - "/etc/docker/certs.d/{{ registry_domain }}"
 
-# download harbor offline installer
-- name: Download offline installer
-  ansible.builtin.get_url:
-    url: "https://github.com/goharbor/harbor/releases/download/{{ harbor_version }}/harbor-offline-installer-{{ harbor_version }}.tgz"
-    dest: "{{ harbor_data_dir }}/{{ harbor_offline_file }}"
+- name: Unarchive harbor 
+  ansible.builtin.unarchive:
+    src: "{{ playbook_dir }}/download/archive/{{ registry_archive_file | basename}}"
+    dest: "{{ harbor_data_dir }}"
+  when:
+    - not registry_archive_file in ""
   any_errors_fatal: true
-
-# Upload harbor offline installer and extract it when not exist
-- name: Check harbor tgz existence
-  stat:
-    path: "{{ harbor_data_dir }}/{{ harbor_offline_file }}"
-  register: harbor_tgz_stat
 
 - name: Unarchive harbor offline installer and extract it
   ansible.builtin.unarchive:
@@ -30,16 +25,25 @@
     remote_src: True
   any_errors_fatal: true
 
-# Download docker-compose binary
-- name: Download docker-compose binary
-  ansible.builtin.get_url:
-    url: https://github.com/docker/compose/releases/download/{{ package_docker_compose_version }}/docker-compose-linux-x86_64
+# Upload docker-compose binary
+- name: Check docker-compose existence
+  stat:
+    path: /usr/local/bin/docker-compose
+  register: docker_compose_stat
+
+- name: Get docker-compose binary
+  when: not docker_compose_stat.stat.exists
+  ansible.builtin.copy:
+    src: "{{ harbor_data_dir }}/docker-compose"
     dest: /usr/local/bin/docker-compose
-    mode: "0755"
+    remote_src: True
+    mode: 0755
     owner: "root"
     group: "root"
+  register: get_docker_compose
 
 - name: Create docker-compose symbolic link
+  when: not docker_compose_stat.stat.exists and get_docker_compose.changed
   file:
     src: /usr/local/bin/docker-compose
     dest: /usr/bin/docker-compose
@@ -55,11 +59,11 @@
 - name: Check registry private ca file existence
   stat:
     path: "{{ harbor_cert_dir }}/ca.crt"
-  when: 
-    - not registry_public_cert
+  when: not registry_public_cert
   register: registry_ca_stat
 
 - name: Create registry private certificate
+  when: not registry_public_cert and not registry_ca_stat.stat.exists
   shell: "{{ item }}"
   no_log: true
   with_items:
@@ -69,18 +73,15 @@
     - "openssl req -new -key {{ harbor_cert_dir }}/harbor.key -subj '/CN=harbor' |
       openssl x509 -req -CA {{ harbor_cert_dir }}/ca.crt -CAkey {{ harbor_cert_work_dir }}/ca.key -CAcreateserial -out {{ harbor_cert_dir }}/harbor.crt -days {{ cert_validity_days }} -extensions v3_req_server -extfile {{ harbor_cert_work_dir }}/openssl.conf"
   register: registry_cert
-  when: 
-   - not registry_public_cert and not registry_ca_stat.stat.exists
 
 - name: Copy registry public certificate file
+  when: registry_public_cert
   copy:
     src: "{{ playbook_dir }}/{{ item.src }}"
     dest: "{{ harbor_cert_dir }}/{{ item.dest }}"
   with_items:
-    - { src: "{{ playbook_dir }}/download/{{ registry_ssl_cert }}", dest: "harbor.crt" }
-    - { src: "{{ playbook_dir }}/download/{{ registry_ssl_cert_key }}", dest: "harbor.key" }
-  when: 
-    - registry_public_cert
+    - { src: "files/harbor.crt", dest: "harbor.crt" }
+    - { src: "files/harbor.key", dest: "harbor.key" }
 
 - name: Copy harbor.yml file
   template:
@@ -95,7 +96,7 @@
 # Install harbor
 - name: Populate service facts
   ansible.builtin.service_facts:
-
+  
 - name: Run harbor befor docker running check
   ansible.builtin.systemd:
     name: docker
@@ -106,7 +107,7 @@
   delay: 10
   when:
     - not ansible_facts.services["docker.service"].state in "running"
-
+    
 - name: Run harbor install script
   ansible.builtin.shell: >-
     ./install.sh
@@ -126,36 +127,56 @@
     dest: "/etc/docker/certs.d/{{ registry_domain }}"
     remote_src: yes
 
-- stat:
-    path: "{{ harbor_install_dir }}/common/config/nginx/cert/ca.crt"
-  register: nginx_ca_stat
-
-- name: Create nginx cert directory
-  when: not registry_public_cert and not nginx_ca_stat.stat.exists
-  file:
-    path: "{{ harbor_install_dir }}/common/config/nginx/cert"
-    state: directory
-
-- name: Copy ca.crt to harbor nginx conf dir
-  when: not registry_public_cert and not nginx_ca_stat.stat.exists
+- name: Copy ca.crt to harbor ca_download dir
   copy:
     src: "{{ harbor_cert_dir }}/ca.crt"
-    dest: "{{ harbor_install_dir }}/common/config/nginx/cert/ca.crt"
+    dest: "{{ harbor_data_dir }}/ca_download/ca.crt"
     remote_src: yes
+  when: not registry_public_cert
 
-- name: Add nginx location for ca.crt download
-  when: not registry_public_cert and not nginx_ca_stat.stat.exists
-  blockinfile:
-    path: "{{ harbor_install_dir }}/common/config/nginx/nginx.conf"
-    insertafter: "chunked_transfer_encoding on;"
-    marker: "## {mark} added by kore-on --------------------"
-    block: |
-          location /ca.crt {
-            alias /etc/nginx/cert/ca.crt;
-          }
+# - stat:
+#     path: "{{ harbor_install_dir }}/common/config/nginx/cert/ca.crt"
+#   register: nginx_ca_stat
 
-- name: Reload nginx configuration
-  when: not registry_public_cert and not nginx_ca_stat.stat.exists
-  shell: "docker-compose exec -T proxy nginx -s reload"
-  args:
-    chdir: "{{ harbor_install_dir }}"
+# - name: Create nginx cert directory
+#   when: not registry_public_cert and not nginx_ca_stat.stat.exists
+#   file:
+#     path: "{{ harbor_install_dir }}/common/config/nginx/cert"
+#     state: directory
+
+# - name: Copy ca.crt to harbor nginx conf dir
+#   when: not registry_public_cert and not nginx_ca_stat.stat.exists
+#   copy:
+#     src: "{{ harbor_cert_dir }}/ca.crt"
+#     dest: "{{ harbor_install_dir }}/common/config/nginx/cert/ca.crt"
+#     remote_src: yes
+
+# - name: Add nginx location for ca.crt download
+#   when: not registry_public_cert and not nginx_ca_stat.stat.exists
+#   blockinfile:
+#     path: "{{ harbor_install_dir }}/common/config/nginx/nginx.conf"
+#     insertafter: "chunked_transfer_encoding on;"
+#     marker: "## {mark} added by kore-on --------------------"
+#     block: |
+#           location /ca.crt {
+#             alias /etc/nginx/cert/ca.crt;
+#           }
+
+# - name: Reload nginx configuration
+#   when: not registry_public_cert and not nginx_ca_stat.stat.exists
+#   shell: "docker-compose exec -T proxy nginx -s reload"
+#   args:
+#     chdir: "{{ harbor_install_dir }}"
+
+#- import_tasks: backup.yml
+#  when: archive_repo
+
+# Scripts for restoring registry data when closed-network
+#- name: Check harbor restore log existence
+#  when: closed_network
+#  stat:
+#    path: "{{ install_dir }}/harbor-restore.log"
+#  register: restore_log_stat
+
+#- import_tasks: restore.yml
+#  when: closed_network and not restore_log_stat.stat.exists
