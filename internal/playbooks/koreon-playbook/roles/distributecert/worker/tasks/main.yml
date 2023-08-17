@@ -36,7 +36,7 @@
 
 - name: Write registry certificate to disk
   get_url:
-    url: https://{{ registry_domain }}/ca.crt
+    url: https://{{ registry_domain }}/api/v2.0/systeminfo/getcert
     dest: /etc/docker/certs.d/{{ registry_domain }}/ca.crt
     mode: 0600
     validate_certs: no
@@ -47,7 +47,7 @@
 
 - name: Write registry certificate to disk
   get_url:
-    url: https://{{ registry_domain }}/ca.crt
+    url: https://{{ registry_domain }}/api/v2.0/systeminfo/getcert
     dest: /etc/docker/certs.d/{{ registry_domain }}/ca.crt
     mode: 0600
     validate_certs: no

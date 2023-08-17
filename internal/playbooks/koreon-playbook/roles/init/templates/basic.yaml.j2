@@ -43,7 +43,8 @@ pod_ip_range: {{ (Kubernetes.PodCidr == "") | ternary("10.4.0.0/20", Kubernetes.
 node_port_range: {{ (Kubernetes.NodePortRange == "") | ternary("30000-32767", Kubernetes.NodePortRange) }}
 audit_log_enable: {{ Kubernetes.AuditLogEnable }}
 api_sans: {{ (Kubernetes.ApiSans == None) | ternary([], Kubernetes.ApiSans) }}
-master_ip: {{ (KoreOn.ClosedNetwork) | ternary(NodePool.Master.PrivateIP, NodePool.Master.IP) }}
+{% set master_ip = ((NodePool.Master.PrivateIP != None) and (NodePool.Master.PrivateIP | length > 0)) | ternary(NodePool.Master.PrivateIP, NodePool.Master.IP) %}
+master_ip: {{ (master_ip != None) | ternary(master_ip, []) }}
 
 #-end [kubernetes]
 
@@ -86,9 +87,9 @@ data_root_dir: {{ (NodePool.DataDir == "") | ternary("/data", NodePool.DataDir) 
 ## - api_lb_ip: authmatic input (only: lb_ip:lb_port)
 master_isolated: {{ NodePool.Master.Isolated | lower }}
 haproxy: {{ NodePool.Master.HaproxyInstall | lower }}
-lb_ip: {{ (NodePool.Master.LbIP == "" and NodePool.Master.IP != None) | ternary((KoreOn.ClosedNetwork) | ternary(NodePool.Master.PrivateIP[0], NodePool.Master.IP[0]), NodePool.Master.LbIP) }}
+lb_ip: {{ (NodePool.Master.LbIP == "" and (master_ip != None) ) | ternary(master_ip[0], NodePool.Master.LbIP) }}
 lb_port: {{ (NodePool.Master.LbPort == 0) | ternary(6443, NodePool.Master.LbPort) }}
-api_lb_ip: {{ (NodePool.Master.PrivateIP != None) and (NodePool.Master.PrivateIP | length > 0) | ternary(NodePool.Master.PrivateIP[0], NodePool.Master.IP[0]) }}:{{ "6443" }}
+api_lb_ip: {{ (master_ip != None) | ternary(master_ip[0], "") }}:{{ "6443" }}
 #-end [node-pool.master]
 
 #- [private-registry]
