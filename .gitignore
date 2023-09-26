@@ -378,3 +378,5 @@ cmd/koreonctl/config
 cmd/koreonctl/archive
 cmd/koreonctl/bin
 cmd/koreonctl/logs
+
+.DS_Store
