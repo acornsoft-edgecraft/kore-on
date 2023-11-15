@@ -86,7 +86,7 @@
     description: "Local Repo configure"
     gpgcheck: no
     enabled: yes
-    baseurl: "{{ (local_repository_url == '') | ternary('http://' + registry_ip + ':' + (local_repository_port | string), local_repository_url, omit) }}"
+    baseurl: "{{ (local_repository_url == '') | ternary('http://' + registry_ip + ':' + (local_repository_port | string), local_repository_url + ':' + (local_repository_port | string), omit) }}"
   notify: yum-clean-metadata
 
 - name: Remove repository (and clean up left-over metadata)
