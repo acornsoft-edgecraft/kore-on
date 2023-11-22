@@ -54,8 +54,8 @@ DNS.{{ idx+7 }} = {{ san }}
 {%   if not loop.last -%}{%- endif -%}
 {% endfor %}
 IP.1 = 127.0.0.1
-IP.2 = {{ hostvars[inventory_hostname]['ip'] | default(hostvars[inventory_hostname]['ansible_default_ipv4']['address']) }}
-IP.3 = {{ kubernetes_service_ip }}
+IP.2 = {{ kubernetes_service_ip }}
+IP.3 = {{ hostvars[inventory_hostname]['ip'] | default(hostvars[inventory_hostname]['ansible_default_ipv4']['address']) }}
 {% if lb_ip | ansible.utils.ipaddr -%}
 IP.4 = {{ lb_ip }}
 {% endif -%}
