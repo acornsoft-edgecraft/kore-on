@@ -41,7 +41,7 @@
 ## Add Local Repo ---------------------------------------------------------------
 - name: Add local repository
   ansible.builtin.apt_repository:
-    repo: "deb [trusted=yes]  {{ (local_repository_url == '') | ternary('http://' + registry_ip + ':' + (local_repository_port | string), local_repository_url, omit) }} ./"
+    repo: "deb [trusted=yes]  {{ (local_repository_url == '') | ternary('http://' + registry_ip + ':' + (local_repository_port | string), local_repository_url + ':' + (local_repository_port | string), omit) }} ./"
     state: present
     filename: local-repo
 

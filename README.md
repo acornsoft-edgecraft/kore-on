@@ -43,7 +43,7 @@ Documentation is in the `/docs` directory
   - harbor proxy mirroring
   
 ## Required packages
- * docker runtime
+ * Podman(container tools) - This is required, if not installed it will be installed automatically.
 
 ## go-ansible 
 Go-ansible is a package for running ansible-playbook or ansible commands from Golang applications.

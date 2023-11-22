@@ -105,7 +105,6 @@ nodeStatusUpdateFrequency: 4s
 readOnlyPort: 0
 clusterDNS:
 - {{ dns_ip }}
-rotateCertificates: true
 serverTLSBootstrap: true
 tlsCertFile: {{ cert_dir }}/kubelet-server.crt
 tlsPrivateKeyFile: {{ cert_dir }}/kubelet-server.key

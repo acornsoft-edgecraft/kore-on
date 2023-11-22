@@ -63,6 +63,10 @@ make_yum_bastion(){
     dnf -y download --resolve --alldeps --enablerepo=Docker-CE-Stable --arch x86_64 --downloaddir=./ docker-ce docker-ce-cli
     dnf -y download --resolve --arch x86_64 --downloaddir=./ audit
     createrepo .
+    
+    repo2module  -s stable -d . modules.yaml
+
+    modifyrepo_c --mdtype=modules modules.yaml repodata/
 }
 
 create_tarball() {
