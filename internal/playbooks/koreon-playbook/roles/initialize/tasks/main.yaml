@@ -24,6 +24,14 @@
   when:
     - inventory_hostname in groups['cluster']
 
+- name: Enable service systemd-resolved
+  ansible.builtin.service:
+    name: systemd-resolved
+    enabled: yes
+    state: started
+  when:
+    - ansible_facts.services["systemd-resolved.service"] is defined
+
 - name: Install nfs client
   when: ansible_distribution in ["Ubuntu", "Debian"]
   apt:

@@ -4567,6 +4567,8 @@ spec:
             # - name: CALICO_IPV4POOL_CIDR
             #   value: "192.168.0.0/16"
             # Disable file logging so `kubectl logs` works.
+            #- name: CALICO_IPV4POOL_CIDR
+            #  value: "{{ pod_ip_range }}"
             - name: CALICO_DISABLE_FILE_LOGGING
               value: "true"
             # Set Felix endpoint to host default action to ACCEPT.

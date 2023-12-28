@@ -105,6 +105,13 @@
   when:
     - not ansible_facts.services["docker.service"].state in "running"
 
+- name: Remove 80 port in docker-compse.yml
+  ansible.builtin.lineinfile:
+    path: "{{ install_dir }}/harbor/docker-compose.yml"
+    regexp: '- 80:8080'
+    backup: yes
+    state: absent
+
 - name: Run harbor install script
   ansible.builtin.shell: >-
     ./install.sh

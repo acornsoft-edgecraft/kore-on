@@ -24,7 +24,7 @@
     state: absent
   failed_when: false
   ignore_errors: "{{ ansible_check_mode }}"
-    
+
 - name: Import EPEL GPG key.
   rpm_key:
     key: "https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-{{ ansible_distribution_major_version }}"
@@ -56,10 +56,21 @@
     name: extras
     description: "CentOS {{ ansible_distribution_major_version }} - Extras"
     file: CentOS-{{ ansible_distribution_major_version }}-Extras
-    baseurl: "http://mirror.centos.org/centos/$releasever/extras/$basearch/"
+    baseurl: "http://vault.centos.org/$contentdir/$releasever/extras/$basearch/os/"
     enabled: yes
     gpgcheck: yes
-    gpgkey: "file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7"
+    gpgkey: "file:///etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial"
+  notify: yum-clean-metadata
+
+- name: Adding AppStream repository
+  yum_repository:
+    name: appstream
+    description: "CentOS {{ ansible_distribution_major_version }} - AppStream"
+    file: CentOS-{{ ansible_distribution_major_version }}-AppStream
+    baseurl: "http://vault.centos.org/$contentdir/$releasever/AppStream/$basearch/os/"
+    enabled: yes
+    gpgcheck: yes
+    gpgkey: "file:///etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial"
   notify: yum-clean-metadata
 
 - name: Adding BaseOS repository
@@ -67,10 +78,10 @@
     name: baseos
     description: "CentOS {{ ansible_distribution_major_version }} - BaseOS"
     file: CentOS-{{ ansible_distribution_major_version }}-BaseOS
-    baseurl: "http://mirror.centos.org/centos/$releasever/os/$basearch/"
+    baseurl: "http://vault.centos.org/$contentdir/$releasever/BaseOS/$basearch/os/"
     enabled: yes
     gpgcheck: yes
-    gpgkey: "file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7"
+    gpgkey: "file:///etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial"
   notify: yum-clean-metadata
 
 - name: Adding Nginx|nginx-stable repository
@@ -81,7 +92,6 @@
     baseurl: "http://nginx.org/packages/centos/$releasever/$basearch"
     enabled: yes
     gpgcheck: yes
-    repo_gpgcheck: false
     module_hotfixes: True
     gpgkey:
       - "https://nginx.org/keys/nginx_signing.key"
@@ -95,7 +105,6 @@
     baseurl: "http://nginx.org/packages/mainline/centos/$releasever/$basearch"
     enabled: False
     gpgcheck: yes
-    repo_gpgcheck: false
     module_hotfixes: True
     gpgkey:
       - "https://nginx.org/keys/nginx_signing.key"

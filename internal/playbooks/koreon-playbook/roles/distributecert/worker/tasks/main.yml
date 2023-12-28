@@ -1,6 +1,9 @@
 ---
 - name: Create kubernetes cert directory
-  file: path={{ cert_dir }}/etcd state=directory
+  ansible.builtin.file: 
+    path: "{{ cert_dir }}/etcd"
+    state: directory
+    mode: "0755"
 
 - name: Slurp kubernetes ca certificate
   slurp: src={{ master_cert_dir }}/{{ item }}
