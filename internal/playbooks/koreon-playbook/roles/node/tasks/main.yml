@@ -71,6 +71,7 @@
   file:
     path: /var/lib/kubelet
     state: directory
+    mode: "0755"
 
 - name: Create kubeadm token for joining nodes with 24h expiration (default)
   when: not kubelet_conf.stat.exists
@@ -86,6 +87,7 @@
   template:
     src: "kubeadm-client.conf.j2"
     dest: "{{ kube_config_dir }}/kubeadm-client.conf"
+    mode: "0644"
   vars:
     kubeadm_token: "{{ temp_token.stdout}}"
   register: kubeadm_client_conf

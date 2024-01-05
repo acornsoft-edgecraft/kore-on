@@ -4,6 +4,7 @@
   file:
     path: "{{ item }}"
     state: directory
+    mode: "0755"
   with_items:
     - "{{ harbor_archive_dir }}"
 
@@ -23,6 +24,7 @@
     remote_src: True
     src: "/usr/local/bin/docker-compose"
     dest: "{{ harbor_data_dir }}"
+    mode: "0755"
 
 ## Harbor Archive
 - name: Prepare-airgap | Archive registry

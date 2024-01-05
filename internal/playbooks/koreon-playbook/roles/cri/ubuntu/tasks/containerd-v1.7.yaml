@@ -17,6 +17,7 @@
   file:
     path: /etc/containerd/certs.d/{{ item }}
     state: directory
+    mode: "0755"
   with_items:
     - "{{ registry_domain }}"
   when:
@@ -26,6 +27,7 @@
   file:
     path: /etc/containerd/certs.d/{{ item | split('/') | first }}
     state: directory
+    mode: "0755"
   with_items:
     - "{{ prepare_airgap_images }}"
   when:
@@ -34,6 +36,7 @@
 - name: Add containerd config for mirrors
   ansible.builtin.copy:
     dest: /etc/containerd/certs.d/{{ item }}/hosts.toml
+    mode: "0644"
     content: |
       server = "https://{{ item }}"
 
@@ -47,6 +50,7 @@
 - name: Add containerd config for mirrors
   ansible.builtin.copy:
     dest: /etc/containerd/certs.d/{{ item | split('/') | first }}/hosts.toml
+    mode: "0644"
     content: |
       server = "https://{{ item | split('/') | first }}"
 
@@ -76,6 +80,7 @@
 - name: Configure crictl.yaml
   copy:
     dest: /etc/crictl.yaml
+    mode: "0644"
     content: |-
       runtime-endpoint: unix:///run/containerd/containerd.sock
       image-endpoint: unix:///run/containerd/containerd.sock

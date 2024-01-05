@@ -16,6 +16,7 @@
   copy:
     src: "{{ playbook_dir }}/files/{{ registry_archive_file }}"
     dest: "/tmp/{{ registry_archive_file | basename}}"
+    mode: "0644"
 
 - name: Stop harbor for restoring backup data
   shell: "docker-compose down -v"

@@ -25,6 +25,7 @@
   file:
     path: /etc/containerd
     state: directory
+    mode: "0755"
 
 - name: Copy containerd config file
   template:
@@ -43,6 +44,7 @@
 - name: Configure crictl.yaml
   copy:
     dest: /etc/crictl.yaml
+    mode: "0644"
     content: |-
       runtime-endpoint: unix:///run/containerd/containerd.sock
       image-endpoint: unix:///run/containerd/containerd.sock

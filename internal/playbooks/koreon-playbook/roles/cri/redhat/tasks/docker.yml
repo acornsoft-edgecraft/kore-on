@@ -3,6 +3,7 @@
   file:
     path: /etc/docker
     state: directory
+    mode: "0755"
 
 - name: Check data directory existence
   stat:
@@ -14,6 +15,7 @@
   file:
     path: "{{ data_root_dir }}"
     state: directory
+    mode: "0755"
 
 # Install docker package  --------------------------------------------------
 # For RedHat
@@ -48,6 +50,7 @@
   template:
     src: "{{ item.src }}"
     dest: /etc/docker/{{ item.dest }}
+    mode: "0644"
   with_items:
     - { src: "daemon.json.j2", dest: "daemon.json" }
   register: docker_daemon_json

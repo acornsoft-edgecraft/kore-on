@@ -9,6 +9,7 @@
   file:
     path: "{{ etcd_conf_dir }}"
     state: directory
+    mode: "0755"
 
 - name: create /var/lib/etcd
   file:
@@ -21,11 +22,13 @@
   file:
     path: "{{ etcd_download_dir }}"
     state: directory
+    mode: "0755"
 
 - name: Create etcd bin directory
   file:
     path: "{{ etcd_bin_dir }}"
     state: directory
+    mode: "0755"
 
 - name: Create etcd data directory
   file:
@@ -33,6 +36,7 @@
     state: directory
     owner: etcd
     group: etcd
+    mode: "0755"
 
 - name: Unzip etcd compressed file
   unarchive:
@@ -40,6 +44,7 @@
     dest: "{{ etcd_download_dir }}/"
     owner: "root"
     group: "root"
+    mode: "0755"
     creates: "{{ etcd_download_dir }}/etcd-{{ etcd_version }}-linux-amd64/etcd"
   when:
     - closed_network
@@ -87,18 +92,21 @@
   file:
     path: "{{ kube_config_dir }}"
     state: directory
+    mode: "0755"
   when: etcd_peer_url_scheme == 'https'
 
 - name: Write etcd config file
   template:
     src: etcd.conf.j2
     dest: /etc/etcd/etcd.conf
+    mode: "0644"
   register: etcd_config
 
 - name: Copy etcd openssl conf file to create certificate
   template:
     src: "openssl-etcd.conf.j2"
     dest: "{{ master_cert_dir }}/openssl-etcd.conf"
+    mode: "0644"
 
 - stat:
     path: "{{ cert_dir }}/etcd/server.crt"

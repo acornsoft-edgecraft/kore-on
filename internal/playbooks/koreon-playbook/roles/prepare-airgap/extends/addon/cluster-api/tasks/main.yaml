@@ -4,6 +4,7 @@
   file:
     path: "{{ item }}"
     state: directory
+    mode: "0755"
   with_items:
     - "{{ extends_cluster_api_dir }}/bin"
 

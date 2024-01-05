@@ -3,6 +3,7 @@
   file:
     path: "{{ item }}"
     state: directory
+    mode: "0755"
   with_items:
     - "{{ scripts_dir }}"
     - "{{ backup_dir }}/db"
@@ -66,6 +67,7 @@
   template:
     src: "{{ item.src }}"
     dest: "{{ kube_addon_dir }}/{{ item.dest }}"
+    mode: "0644"
   with_items:
     - { src: "dnsutils.yaml.j2", dest: "test/dnsutils.yaml" }
     - { src: "nginx.yaml.j2", dest: "test/nginx.yaml" }
