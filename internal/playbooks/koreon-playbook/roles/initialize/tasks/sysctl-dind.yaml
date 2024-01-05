@@ -6,6 +6,7 @@
       ansible.builtin.file:
         path: /etc/sysctl.d/99-dind.conf
         state: touch
+        mode: "0755"
     - name: Initialize | add line configure
       lineinfile:
         path: /etc/sysctl.d/99-dind.conf

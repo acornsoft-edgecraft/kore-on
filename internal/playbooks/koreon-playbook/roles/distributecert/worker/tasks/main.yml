@@ -1,6 +1,9 @@
 ---
 - name: Create kubernetes cert directory
-  file: path={{ cert_dir }}/etcd state=directory
+  ansible.builtin.file: 
+    path: "{{ cert_dir }}/etcd"
+    state: directory
+    mode: "0755"
 
 - name: Slurp kubernetes ca certificate
   slurp: src={{ master_cert_dir }}/{{ item }}
@@ -13,6 +16,7 @@
 
 - name: Write kubernetes ca certificate to disk
   copy: dest={{ cert_dir }}/{{ item.item }} content="{{ item.content | b64decode }}"
+  mode: "{{ (item.item in ['.key']) | ternary('0600', '0644')}}"
   register: openssl_cert
   with_items: "{{ pki_certs.results }}"
   no_log: true
@@ -30,6 +34,7 @@
 
 - name: Write etcd ca.crt and ca.key to cert dir
   copy: dest={{ cert_dir }}/etcd/{{ item.item }} content="{{ item.content | b64decode }}"
+  mode: "{{ (item.item in ['.key']) | ternary('0644', '0644')}}"
   register: etcd_pki_certs
   with_items: "{{ etcd_pki_certs.results }}"
   no_log: true
@@ -63,7 +68,7 @@
     dest: /etc/docker/certs.d/{{ registry_domain }}/ca.crt
     owner: "root"
     group: "root"
-    mode: "0600"
+    mode: "0644"
   when:
     - registry_public_cert 
     - not registry_install

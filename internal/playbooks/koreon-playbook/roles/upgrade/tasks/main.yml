@@ -78,6 +78,7 @@
   template:
     src: "kubeadm.yaml.j2"
     dest: "{{ kube_config_dir }}/kubeadm.yaml"
+    mode: "0644"
 
 - name: kubeadm | upgrage kubernetes cluster
   import_tasks: kubeadm-upgrade.yml
@@ -181,6 +182,7 @@
   template:
     src: "{{ item.src }}"
     dest: "{{ kube_addon_dir }}/{{ item.dest }}"
+    mode: "0644"
   with_items:
   - { src: "calico/calico-{{ calico_version | regex_replace('^v([0-9])+\\.([0-9]+)\\.[0-9]+', 'v\\1.\\2') }}.yaml.j2", dest: "calico/calico.yaml" }
   delegate_to: "{{ groups['masters'][0] }}"

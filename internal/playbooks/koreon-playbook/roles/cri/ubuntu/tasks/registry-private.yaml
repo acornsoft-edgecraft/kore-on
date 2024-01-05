@@ -2,12 +2,14 @@
   file:
     path: /etc/containerd/certs.d/{{ item }}
     state: directory
+    mode: "0755"
   with_items:
     - "{{ registry_domain }}"
 
 - name: Add containerd config for mirrors
   ansible.builtin.copy:
     dest: /etc/containerd/certs.d/{{ item }}/hosts.toml
+    mode: "0644"
     content: |
       server = "https://{{ item }}"
 

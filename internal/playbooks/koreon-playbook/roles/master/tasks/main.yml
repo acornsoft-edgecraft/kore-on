@@ -3,6 +3,7 @@
   file:
     path: "{{ kube_config_dir }}/acloud"
     state: directory
+    mode: "0755"
 
 - stat:
     path: "{{ cert_dir }}/apiserver.key"
@@ -100,6 +101,7 @@
   template:
     src: "{{ item }}"
     dest: "/etc/kubernetes/{{ item }}"
+    mode: "0644"
   with_items:
     - audit-policy.yaml
     - audit-webhook
@@ -109,6 +111,7 @@
   template:
     src: "{{ item }}"
     dest: "/etc/kubernetes/{{ item }}"
+    mode: "0644"
   with_items:
     - secrets_encryption.yaml
 
@@ -126,11 +129,13 @@
   file:
     path: /var/lib/kubelet
     state: directory
+    mode: "0755"
 
 - name: Copy kubeadm conf file
   template:
     src: "{{ 'kubernetes/kubeadm.yaml.j2' if (k8s_version is version('v1.24.0', '<')) else 'kubernetes/kubeadm-v1.24_v1.26.yaml.j2' }}"
     dest: "{{ kube_config_dir }}/kubeadm.yaml"
+    mode: "0644"
   notify:
    - Master | wait for kube-scheduler
    - Master | wait for kube-controller-manager
@@ -202,6 +207,7 @@
   template:
     src: "{{ item.src }}"
     dest: "{{ kube_config_dir }}/{{ item.dest }}"
+    mode: "0644"
   with_items:
   - { src: "admin.conf.j2", dest: "admin.conf" }
   - { src: "controller-manager.conf.j2", dest: "controller-manager.conf" }
@@ -248,6 +254,7 @@
   template:
     src: "{{ item.src }}"
     dest: "{{ kube_config_dir }}/{{ item.dest }}"
+    mode: "0644"
   with_items:
   - { src: "acloud-client-kubeconfig.j2", dest: "acloud/acloud-client-kubeconfig" }
   - { src: "acloud-client-crb.yaml.j2", dest: "acloud/acloud-client-crb.yaml" }
@@ -341,6 +348,7 @@
   file:
     path: "{{ item }}"
     state: directory
+    mode: "0755"
   with_items:
   - "{{ kube_addon_dir }}/calico"
   - "{{ kube_addon_dir }}/metrics-server"
@@ -352,6 +360,7 @@
   template:
     src: "{{ item.src }}"
     dest: "{{ kube_addon_dir }}/{{ item.dest }}"
+    mode: "0644"
   with_items:
   - { src: "calico/calico-{{ calico_version }}.yaml.j2", dest: "calico/calico.yaml" }
   delegate_to: "{{ groups['masters'][0] }}"
@@ -385,6 +394,7 @@
   template:
     src: "{{ item.src }}"
     dest: "{{ kube_addon_dir }}/{{ item.dest }}"
+    mode: "0644"
   with_items:
   - { src: "metrics-server/metrics-server-secret.yaml.j2", dest: "metrics-server/metrics-server-secret.yaml" }
   delegate_to: "{{ groups['masters'][0] }}"
@@ -402,6 +412,7 @@
   template:
     src: "{{ item.src }}"
     dest: "{{ kube_addon_dir }}/{{ item.dest }}"
+    mode: "0644"
   with_items:
   - { src: "metrics-server/metrics-server-{{ image_metrics_server_version }}.yaml.j2", dest: "metrics-server/metrics-server.yaml" }
   delegate_to: "{{ groups['masters'][0] }}"

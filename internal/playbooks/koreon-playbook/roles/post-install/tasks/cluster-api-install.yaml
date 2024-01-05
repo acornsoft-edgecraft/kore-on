@@ -20,6 +20,7 @@
   template:
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
+    mode: "0644"
   with_items:
     - { src: "clusterctl.yaml.j2", dest: "/tmp/clusterctl.yaml" }
   delegate_to: "{{ groups['masters'][0] }}"

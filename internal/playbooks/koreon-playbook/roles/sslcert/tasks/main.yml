@@ -3,6 +3,7 @@
   file:
     path: "{{ item }}"
     state: directory
+    mode: "0755"
   with_items:
     - "{{ master_cert_dir }}/etcd"
     - "{{ cert_dir }}/metrics-server"
@@ -12,6 +13,7 @@
   template:
     src: "common-openssl.conf.j2"
     dest: "{{ master_cert_dir }}/common-openssl.conf"
+    mode: "0644"
 
 - stat:
     path: "{{ master_cert_dir }}/ca.key"

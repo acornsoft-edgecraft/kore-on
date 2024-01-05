@@ -4,12 +4,14 @@
   file:
     path: "{{ manifest_config_dir }}"
     state: directory
+    mode: "0755"
 
 - name: create haproxy config directory
   when: haproxy
   file:
     path: "{{ haproxy_dir }}"
     state: directory
+    mode: "0755"
   register: ha_dir
 
 - name: copy haproxy json config file
@@ -17,6 +19,7 @@
   template:
     src: "haproxy.yaml.j2"
     dest: "{{ manifest_config_dir }}/haproxy.yaml"
+    mode: "0644"
   register: ha_json
 
 - name: copy haproxy config file
@@ -24,4 +27,5 @@
   template:
     src: "haproxy.cfg.j2"
     dest: "{{ haproxy_dir }}/haproxy.cfg"
+    mode: "0644"
   register: ha_config

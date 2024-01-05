@@ -4,6 +4,7 @@
   file:
     path: "{{ item }}"
     state: directory
+    mode: "0755"
   with_items:
     - "{{ install_dir }}/harbor"
     - "{{ install_dir }}/cert"
@@ -54,6 +55,7 @@
   template:
     src: "openssl.conf.j2"
     dest: "{{ harbor_cert_work_dir }}/openssl.conf"
+    mode: "0644"
   register: ssl_config
 
 - name: Check registry private ca file existence
@@ -79,6 +81,7 @@
   copy:
     src: "{{ playbook_dir }}/{{ item.src }}"
     dest: "{{ harbor_cert_dir }}/{{ item.dest }}"
+    mode: "{{ (item.dest in ['.key']) | ternary('0600', '0644')}}"
   with_items:
     - { src: "files/harbor.crt", dest: "harbor.crt" }
     - { src: "files/harbor.key", dest: "harbor.key" }
@@ -92,6 +95,7 @@
       harbor2.yml.j2
       {%- endif %}
     dest: "{{ harbor_install_dir }}/harbor.yml"
+    mode: "0644"
 
 # Install harbor
 - name: Populate service facts
@@ -125,12 +129,14 @@
   copy:
     src: "{{ harbor_cert_dir }}/ca.crt"
     dest: "/etc/docker/certs.d/{{ registry_domain }}"
+    mode: "0644"
     remote_src: yes
 
 - name: Copy ca.crt to harbor ca_download dir
   copy:
     src: "{{ harbor_cert_dir }}/ca.crt"
     dest: "{{ harbor_data_dir }}/ca_download/ca.crt"
+    mode: "0644"
     remote_src: yes
   when: not registry_public_cert
 

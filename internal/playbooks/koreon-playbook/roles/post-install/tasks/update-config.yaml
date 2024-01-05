@@ -27,6 +27,7 @@
   template:
     src: "{{ item.src }}"
     dest: "{{ kube_config_dir }}/{{ item.dest }}"
+    mode: "0644"
   with_items:
     - { src: "koreon-config-cm.yaml.j2", dest: "koreon-config-cm.yaml" }
   delegate_to: "{{ groups['masters'][0] }}"

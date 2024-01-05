@@ -10,6 +10,7 @@
   file:
     path: "{{ data_root_dir }}/localrepo"
     state: directory
+    mode: "0755"
 
 - name: Extract local repository archive file into /data/localrepo
   unarchive:
@@ -40,7 +41,7 @@
     state: directory
     owner: root
     group: root
-    mode: "0644"
+    mode: "0755"
 
 - name: Add local repo for create nginx
   yum_repository:
