@@ -214,7 +214,7 @@ func (c *strClusterUpdateCmd) run() error {
 		var lbIP []string
 
 		if koreonToml.NodePool.Master.LbIP != "" {
-			lbIP[0] = koreonToml.NodePool.Master.LbIP
+			lbIP = append(lbIP, koreonToml.NodePool.Master.LbIP)
 		} else {
 			lbIP = koreonToml.NodePool.Master.IP
 		}

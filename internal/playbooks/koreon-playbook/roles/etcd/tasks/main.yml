@@ -71,7 +71,7 @@
   copy:
     src: "{{ etcd_download_dir }}/etcd-{{ etcd_version }}-linux-amd64/{{ item }}"
     dest: "{{ etcd_bin_dir }}/{{ item }}"
-    mode: 0755
+    mode: "0755"
     owner: root
     group: root
     remote_src: yes
@@ -85,7 +85,7 @@
     dest: /etc/systemd/system/etcd.service
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   register: etcd_system_unit
 
 - name: Create etcd cert directory
@@ -129,6 +129,10 @@
     - "openssl req -new -key {{ cert_dir }}/etcd/healthcheck-client.key -subj '/O=system:masters/CN=kube-etcd-healthcheck-client' |
       openssl x509 -req -CA {{ cert_dir }}/etcd/ca.crt -CAkey {{ cert_dir }}/etcd/ca.key -CAcreateserial -out {{ cert_dir }}/etcd/healthcheck-client.crt -days {{ cert_validity_days }} -extensions v3_req_client -extfile {{ master_cert_dir }}/openssl-etcd.conf"
   register: etcd_cert
+
+- name: Set permissions on certificate
+  ansible.builtin.command: |
+    find "{{ cert_dir }}/etcd" -type f -exec chmod 644 {} \;
 
 - name: Reload systemd
   systemd:

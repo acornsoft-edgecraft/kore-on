@@ -46,6 +46,7 @@ func GetKoreonTomlConfig(koreOnConfigFilePath string) (model.KoreOnToml, error) 
 	koreonToml.KoreOn.ImageName = conf.KoreOnImageName
 	koreonToml.KoreOn.Registry = conf.KoreOnRegistry
 	koreonToml.NodePool.Master.HaproxyInstall = true
+	koreonToml.NodePool.Master.Isolated = true
 	koreonToml.Kubernetes.AuditLogEnable = true
 
 	err = toml.Unmarshal(c, &koreonToml)
