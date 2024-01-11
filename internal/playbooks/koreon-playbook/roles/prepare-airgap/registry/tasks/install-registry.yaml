@@ -73,11 +73,26 @@
       openssl x509 -req -CA {{ harbor_cert_dir }}/ca.crt -CAkey {{ harbor_cert_work_dir }}/ca.key -CAcreateserial -out {{ harbor_cert_dir }}/harbor.crt -days {{ cert_validity_days }} -extensions v3_req_server -extfile {{ harbor_cert_work_dir }}/openssl.conf"
   register: registry_cert
 
+- name: Set permissions on certificate
+  ansible.builtin.command: |
+    find "{{ item }}" -type f -exec chmod 644 {} \;
+  with_items: 
+    - "{{ harbor_cert_work_dir }}"
+    - "{{ harbor_cert_dir }}"
+
+- name: Set permissions on certificate
+  ansible.builtin.command: |
+    find "{{ item }}" -maxdepth 1 -type f -name "*.key" -exec chmod 600 {} \;
+  with_items: 
+    - "{{ harbor_cert_work_dir }}"
+    - "{{ harbor_cert_dir }}"
+
 - name: Copy registry public certificate file
   when: registry_public_cert
-  copy:
+  ansible.builtin.copy:
     src: "{{ playbook_dir }}/{{ item.src }}"
     dest: "{{ harbor_cert_dir }}/{{ item.dest }}"
+    mode: "{{ (item.dest in ['.key']) | ternary('0600', '0644')}}"
   with_items:
     - { src: "files/harbor.crt", dest: "harbor.crt" }
     - { src: "files/harbor.key", dest: "harbor.key" }

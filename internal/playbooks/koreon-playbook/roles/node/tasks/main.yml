@@ -7,6 +7,14 @@
     - "openssl req -new -sha256 -key {{ cert_dir }}/kubelet-server.key -subj '/O=system:nodes/CN=system:node:{{ ansible_nodename }}' |
         openssl x509 -req -CA {{ cert_dir }}/ca.crt -CAkey {{ cert_dir }}/ca.key -CAcreateserial -out {{ cert_dir }}/kubelet-server.crt -days {{ cert_validity_days }} -extensions v3_req_apiserver -extfile {{ master_cert_dir }}/common-openssl.conf"
 
+- name: Set permissions on certificate
+  ansible.builtin.command: |
+    find "{{ cert_dir }}" -type f -exec chmod 644 {} \;
+
+- name: Set permissions on certificate
+  ansible.builtin.command: |
+    find "{{ cert_dir }}" -maxdepth 1 -type f -name "*.key" -exec chmod 600 {} \;
+
 # For ubuntu     -------------------------------------------------------------
 - name: Unhold Kubernetes packages (ubuntu)
   when: ansible_distribution in ["Ubuntu", "Debian"]

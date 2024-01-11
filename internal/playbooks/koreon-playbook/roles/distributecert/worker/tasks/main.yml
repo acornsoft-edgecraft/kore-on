@@ -15,8 +15,10 @@
   delegate_to: "{{ groups['sslhost'][0] }}"
 
 - name: Write kubernetes ca certificate to disk
-  copy: dest={{ cert_dir }}/{{ item.item }} content="{{ item.content | b64decode }}"
-  mode: "{{ (item.item in ['.key']) | ternary('0600', '0644')}}"
+  ansible.builtin.copy:
+    dest: "{{ cert_dir }}/{{ item.item }}"
+    content: "{{ item.content | b64decode }}"
+    mode: "{{ (item.item in ['.key']) | ternary('0600', '0644') }}"
   register: openssl_cert
   with_items: "{{ pki_certs.results }}"
   no_log: true
@@ -33,8 +35,10 @@
   delegate_to: "{{ groups['sslhost'][0] }}"
 
 - name: Write etcd ca.crt and ca.key to cert dir
-  copy: dest={{ cert_dir }}/etcd/{{ item.item }} content="{{ item.content | b64decode }}"
-  mode: "{{ (item.item in ['.key']) | ternary('0644', '0644')}}"
+  ansible.builtin.copy:
+    dest: "{{ cert_dir }}/etcd/{{ item.item }}"
+    content: "{{ item.content | b64decode }}"
+    mode: "{{ (item.item in ['.key']) | ternary('0644', '0644')}}"
   register: etcd_pki_certs
   with_items: "{{ etcd_pki_certs.results }}"
   no_log: true
@@ -43,7 +47,7 @@
   get_url:
     url: https://{{ registry_domain }}/api/v2.0/systeminfo/getcert
     dest: /etc/docker/certs.d/{{ registry_domain }}/ca.crt
-    mode: 0600
+    mode: "0600"
     validate_certs: no
   when: 
     - not registry_public_cert 
@@ -54,7 +58,7 @@
   get_url:
     url: https://{{ registry_domain }}/api/v2.0/systeminfo/getcert
     dest: /etc/docker/certs.d/{{ registry_domain }}/ca.crt
-    mode: 0600
+    mode: "0600"
     validate_certs: no
   when:
     - not registry_public_cert 

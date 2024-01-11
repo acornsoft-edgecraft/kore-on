@@ -86,7 +86,7 @@ const Template = `
 ##               If you use the same IP address, you can skip it.
 ## Optional
 ## - lb-ip: loadbalancer ip address (default: master[0] node ip address)
-## - isolated: K8s control plane nodes isolated (default: false)
+## - isolated: K8s control plane nodes isolated (default: true)
 ## - lb-ip: Enter the IP address when using a load balancer (default: master[0] ip address)
 ## - lb-port: Enter the port when using a load balancer (default: 6443)
 #ip = ["x.x.x.x","x.x.x.x","x.x.x.x"]

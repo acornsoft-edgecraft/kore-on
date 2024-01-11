@@ -55,3 +55,16 @@
     - "openssl genrsa -out {{ master_cert_dir }}/apiserver-etcd-client.key 2048"
     - "openssl req -new -key {{ master_cert_dir }}/apiserver-etcd-client.key -subj '/O=system:masters/CN=kube-apiserver-etcd-client' |
       openssl x509 -req -CA {{ master_cert_dir }}/etcd/ca.crt -CAkey {{ master_cert_dir }}/etcd/ca.key -CAcreateserial -out {{ master_cert_dir }}/apiserver-etcd-client.crt -days {{ cert_validity_days }} -extensions v3_req_client -extfile {{ master_cert_dir }}/common-openssl.conf"
+
+
+- name: Set permissions on certificate
+  ansible.builtin.command: |
+    find "{{ master_cert_dir }}" -type f -exec chmod 644 {} \;
+
+- name: Set permissions on certificate
+  ansible.builtin.command: |
+    find "{{ master_cert_dir }}" -maxdepth 1 -type f -name "*.key" -exec chmod 600 {} \;
+
+- name: Set permissions on certificate
+  ansible.builtin.command: |
+    find "{{ master_cert_dir }}/etcd" -type f -exec chmod 644 {} \;
