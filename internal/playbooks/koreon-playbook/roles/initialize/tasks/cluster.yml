@@ -71,7 +71,7 @@
   copy:
     content: |
       [keyfile]
-      unmanaged-devices=interface-name:cali*;interface-name:tunl*;interface-name:vxlan.calico
+      unmanaged-devices=interface-name:cali*;interface-name:tunl*;interface-name:vxlan.calico;interface-name:vxlan-v6.calico;interface-name:wireguard.cali;interface-name:wg-v6.cali
     dest: /etc/NetworkManager/conf.d/calico.conf
     mode: "0644"
   notify: Reload NetworkManager
@@ -146,8 +146,6 @@
       xt_sctp
       xt_set
       ipip
-      nf_conntrack_netlink
-      ipt_rpfilter
 # Not found in Kernel 4.18.0-193
 #      xt_u32
 #      sctp
@@ -177,8 +175,6 @@
       xt_sctp
       xt_set
       ipip
-      nf_conntrack_netlink
-      ipt_rpfilter
 # Not found in Kernel 4.18.0-193
 #      xt_u32
 #      sctp
@@ -211,7 +207,7 @@
 
 # -----------------------------------------------------------------------------------------------------
 # IPVS configuration when kube_proxy_mode is ipvs
-- name: Modprode Kernel Module for IPVS
+- name: Modprobe Kernel Module for IPVS
   when: kube_proxy_mode == 'ipvs'
   modprobe:
     name: "{{ item }}"

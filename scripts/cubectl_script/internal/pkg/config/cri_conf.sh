@@ -1,9 +1,25 @@
+#!/bin/sh
+# CRI Config Data
+
+## container images url
+function _conf_cri_dirs() {
+cat <<EOF 
+/etc/containerd/certs.d/docker.io
+/etc/containerd/certs.d/gcr.io
+/etc/containerd/certs.d/regi.acloud.run
+/etc/containerd/certs.d/registry.k8s.io
+EOF
+}
+
+## containerd config.toml
+function _conf_cri_config_toml() {
+cat <<EOF
 disabled_plugins = []
 imports = []
 oom_score = 0
 plugin_dir = ""
 required_plugins = []
-root = "{{ data_root_dir }}/containerd"
+root = "/var/lib/containerd"
 state = "/run/containerd"
 temp = ""
 version = 2
@@ -58,11 +74,7 @@ version = 2
     max_container_log_line_size = 16384
     netns_mounts_under_state_dir = false
     restrict_oom_score_adj = false
-{% if closed_network %}
-    sandbox_image = "{{ registry_domain }}/registry.k8s.io/pause:{{ image_pause_version | regex_replace('^v', '') }}"
-{% else %}
-    sandbox_image = "registry.k8s.io/pause:{{ image_pause_version | regex_replace('^v', '') }}"
-{% endif %}
+    sandbox_image = "registry.k8s.io/pause:3.9"
     selinux_category_range = 1024
     stats_collect_period = 10
     stream_idle_timeout = "4h0m0s"
@@ -252,3 +264,26 @@ version = 2
   address = ""
   gid = 0
   uid = 0
+EOF
+}
+
+## containerd hosts.toml
+function _conf_containerd_hosts_toml() {
+cat <<EOF
+server = "SERVER_URL"
+
+[host."HOST_URL"]
+  capabilities = ["pull", "resolve"]
+  ca = "CA_PATH"
+  override_path = true
+EOF
+}
+
+## containerd crictl.yaml
+function _conf_containerd_crictl_yaml() {
+cat <<EOF
+runtime-endpoint: unix:///run/containerd/containerd.sock
+image-endpoint: unix:///run/containerd/containerd.sock
+timeout: 10
+EOF
+}

@@ -1,15 +1,25 @@
 ---
+# - name: Create kubernetes cert directory
+#   ansible.builtin.file: 
+#     path: "{{ cert_dir }}/etcd"
+#     state: directory
+#     mode: "0755"
+#
 - name: Create kubernetes cert directory
   ansible.builtin.file: 
-    path: "{{ cert_dir }}/etcd"
+    path: "{{ item }}"
     state: directory
     mode: "0755"
+  with_items:
+    - "{{ master_cert_dir }}"
+    - "{{ cert_dir }}"
 
 - name: Slurp kubernetes ca certificate
   slurp: src={{ master_cert_dir }}/{{ item }}
   with_items:
     - ca.crt
     - ca.key
+    - common-openssl.conf
   register: pki_certs
   run_once: true
   delegate_to: "{{ groups['sslhost'][0] }}"

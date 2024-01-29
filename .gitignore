@@ -380,3 +380,8 @@ cmd/koreonctl/bin
 cmd/koreonctl/logs
 
 .DS_Store
+
+ca.crt
+ca.key
+
+backup/
