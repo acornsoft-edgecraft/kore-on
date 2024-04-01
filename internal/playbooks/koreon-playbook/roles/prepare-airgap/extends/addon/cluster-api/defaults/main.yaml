@@ -1,6 +1,6 @@
 ---
 extends_cluster_api_dir: "{{ prepare_airgap_registry_data_dir }}/extends/cluster-api"
-clusterctl_get_url: "https://github.com/kubernetes-sigs/cluster-api/releases/download/{{ package_cluster_ctl_version }}/clusterctl-{{ ansible_system | lower }}-amd64"
+clusterctl_get_url: "https://github.com/kubernetes-sigs/cluster-api/releases/download/{{ package_cluster_ctl_version }}/clusterctl-{{ ansible_system | lower }}-{{ 'amd64' if ansible_architecture == 'x86_64' else 'arm64' if ansible_architecture == 'aarch64' }}"
 
 ## cluster api core
 cluster_api_components: "https://github.com/kubernetes-sigs/cluster-api/releases/download/{{ package_cluster_ctl_version }}/cluster-api-components.yaml"

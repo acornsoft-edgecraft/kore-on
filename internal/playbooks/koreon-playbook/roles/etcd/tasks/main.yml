@@ -45,7 +45,7 @@
     owner: "root"
     group: "root"
     mode: "0755"
-    creates: "{{ etcd_download_dir }}/etcd-{{ etcd_version }}-linux-amd64/etcd"
+    creates: "{{ etcd_download_dir }}/etcd-{{ etcd_version }}-linux-{{ 'amd64' if ansible_architecture == 'x86_64' else 'arm64' if ansible_architecture == 'aarch64' }}/etcd"
   when:
     - closed_network
   
@@ -62,14 +62,14 @@
         dest: "{{ etcd_download_dir }}/"
         owner: "root"
         group: "root"
-        creates: "{{ etcd_download_dir }}/etcd-{{ etcd_version }}-linux-amd64/etcd"
+        creates: "{{ etcd_download_dir }}/etcd-{{ etcd_version }}-linux-{{ 'amd64' if ansible_architecture == 'x86_64' else 'arm64' if ansible_architecture == 'aarch64' }}/etcd"
         remote_src: true
   when:
     - not closed_network
 
 - name: Copy etcd binaries to destination directory
   copy:
-    src: "{{ etcd_download_dir }}/etcd-{{ etcd_version }}-linux-amd64/{{ item }}"
+    src: "{{ etcd_download_dir }}/etcd-{{ etcd_version }}-linux-{{ 'amd64' if ansible_architecture == 'x86_64' else 'arm64' if ansible_architecture == 'aarch64' }}/{{ item }}"
     dest: "{{ etcd_bin_dir }}/{{ item }}"
     mode: "0755"
     owner: root

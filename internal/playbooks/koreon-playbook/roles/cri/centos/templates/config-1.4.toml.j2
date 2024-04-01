@@ -152,7 +152,7 @@ oom_score = 0
     no_shim = false
     shim_debug = false
   [plugins."io.containerd.runtime.v2.task"]
-    platforms = ["linux/amd64"]
+    platforms = ["linux/{{ 'amd64' if ansible_architecture == 'x86_64' else 'arm64' if ansible_architecture == 'aarch64' }}"]
   [plugins."io.containerd.service.v1.diff-service"]
     default = ["walking"]
   [plugins."io.containerd.snapshotter.v1.devmapper"]

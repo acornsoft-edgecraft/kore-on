@@ -48,13 +48,6 @@ make_yum_repo(){
     dnf -y download --resolve --alldeps --arch x86_64 --downloaddir=./ --disableexcludes=kubernetes kubectl${K8S_VERIONS} kubelet${K8S_VERIONS} kubeadm${K8S_VERIONS}
 
     createrepo .
-
-    curl -O http://mirror.centos.org/centos/8-stream/AppStream/x86_64/os/Packages/modulemd-tools-0.7-4.el8.noarch.rpm
-    dnf -y install modulemd-tools-0.7-4.el8.noarch.rpm
-
-    repo2module  -s stable -d . modules.yaml
-
-    modifyrepo_c --mdtype=modules modules.yaml repodata/
 }
 
 make_yum_bastion(){
@@ -63,11 +56,6 @@ make_yum_bastion(){
     dnf -y download --resolve --alldeps --enablerepo=Docker-CE-Stable --arch x86_64 --downloaddir=./ docker-ce docker-ce-cli
     dnf -y download --resolve --arch x86_64 --downloaddir=./ audit
     createrepo .
-    
-    repo2module  -s stable -d . modules.yaml
-
-    modifyrepo_c --mdtype=modules modules.yaml repodata/
-}
 
 create_tarball() {
  	cd $REPO_DIR

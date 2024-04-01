@@ -51,7 +51,7 @@
   ansible.builtin.copy:
     dest: "{{ cert_dir }}/etcd/{{ item.item }}"
     content: "{{ item.content | b64decode }}"
-    mode: "{{ (item.item in ['.key']) | ternary('0644', '0644')}}"
+    mode: "{{ (item.item in ['.key']) | ternary('0600', '0644')}}"
   with_items: "{{ etcd_pki_certs.results }}"
   no_log: true
 

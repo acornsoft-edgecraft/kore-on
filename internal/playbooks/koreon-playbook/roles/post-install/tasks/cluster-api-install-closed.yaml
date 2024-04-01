@@ -2,7 +2,7 @@
 # Installation Cluster API on closed network --------------------------------------------------------------------
 - name: Post | Install clusterctl
   ansible.builtin.copy:
-    src: "{{ KoreOn.WorkDir }}/extends/cluster-api/clusterctl-{{ ansible_system | lower }}-amd64"
+    src: "{{ KoreOn.WorkDir }}/extends/cluster-api/clusterctl-{{ ansible_system | lower }}-{{ 'amd64' if ansible_architecture == 'x86_64' else 'arm64' if ansible_architecture == 'aarch64' }}"
     dest: "/usr/local/bin/clusterctl"
     owner: "root"
     group: "root"

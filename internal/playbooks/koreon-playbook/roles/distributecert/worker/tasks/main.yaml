@@ -1,10 +1,10 @@
 ---
-# - name: Create kubernetes cert directory
-#   ansible.builtin.file: 
-#     path: "{{ cert_dir }}/etcd"
-#     state: directory
-#     mode: "0755"
-#
+- name: Create kubernetes cert directory
+  ansible.builtin.file: 
+    path: "{{ cert_dir }}/etcd"
+    state: directory
+    mode: "0755"
+
 - name: Create kubernetes cert directory
   ansible.builtin.file: 
     path: "{{ item }}"
@@ -23,6 +23,12 @@
   register: pki_certs
   run_once: true
   delegate_to: "{{ groups['sslhost'][0] }}"
+
+- name: Copy openssl conf file to create certificate
+  ansible.builtin.template:
+    src: "{{ playbook_dir }}/roles/sslcert/templates/common-openssl.conf.j2"
+    dest: "{{ master_cert_dir }}/common-openssl.conf"
+    mode: "644"
 
 - name: Write kubernetes ca certificate to disk
   ansible.builtin.copy:
@@ -48,8 +54,7 @@
   ansible.builtin.copy:
     dest: "{{ cert_dir }}/etcd/{{ item.item }}"
     content: "{{ item.content | b64decode }}"
-    mode: "{{ (item.item in ['.key']) | ternary('0644', '0644')}}"
-  register: etcd_pki_certs
+    mode: "{{ (item.item in ['.key']) | ternary('0600', '0644') }}"
   with_items: "{{ etcd_pki_certs.results }}"
   no_log: true
 

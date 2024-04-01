@@ -17,14 +17,14 @@
   block:
     - name: Get helm tgz file and uncompress it
       unarchive:
-        src: "{{ playbook_dir }}/download/archive/helm-{{ package_helm_version }}-{{ ansible_system | lower }}-amd64.tar.gz"
+        src: "{{ playbook_dir }}/download/archive/helm-{{ package_helm_version }}-{{ ansible_system | lower }}-{{ 'amd64' if ansible_architecture == 'x86_64' else 'arm64' if ansible_architecture == 'aarch64' }}.tar.gz"
         dest: /tmp
         owner: "root"
         group: "root"
         remote_src: false
     - name: Copy to heml in /usr/bin
       ansible.builtin.copy:
-        src: /tmp/{{ ansible_system | lower }}-amd64/helm
+        src: /tmp/{{ ansible_system | lower }}-{{ 'amd64' if ansible_architecture == 'x86_64' else 'arm64' if ansible_architecture == 'aarch64' }}/helm
         dest: /usr/bin
         owner: "root"
         group: "root"
@@ -43,14 +43,14 @@
       any_errors_fatal: true
     - name: Get helm tgz file and uncompress it
       unarchive:
-        src: "/tmp/helm-{{ package_helm_version }}-{{ ansible_system | lower }}-amd64.tar.gz"
+        src: "/tmp/helm-{{ package_helm_version }}-{{ ansible_system | lower }}-{{ 'amd64' if ansible_architecture == 'x86_64' else 'arm64' if ansible_architecture == 'aarch64' }}.tar.gz"
         dest: /tmp
         owner: "root"
         group: "root"
         remote_src: True
     - name: Copy to heml in /usr/bin
       ansible.builtin.copy:
-        src: /tmp/{{ ansible_system | lower }}-amd64/helm
+        src: /tmp/{{ ansible_system | lower }}-{{ 'amd64' if ansible_architecture == 'x86_64' else 'arm64' if ansible_architecture == 'aarch64' }}/helm
         dest: /usr/bin
         owner: "root"
         group: "root"

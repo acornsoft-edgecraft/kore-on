@@ -1,6 +1,6 @@
 ---
 - name: Prepare-airgap | Archive copy to localhost
   ansible.builtin.fetch:
-    src: "{{ prepare_airgap_registry_data_dir }}/koreonctl-{{ ansible_system | lower }}-amd64_{{ KoreOn.Version }}.tar.gz"
+    src: "{{ prepare_airgap_registry_data_dir }}/koreonctl-{{ ansible_system | lower }}-{{ 'amd64' if ansible_architecture == 'x86_64' else 'arm64' if ansible_architecture == 'aarch64' }}_{{ KoreOn.Version }}.tar.gz"
     dest: "{{ KoreOn.WorkDir }}/"
     flat: True

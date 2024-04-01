@@ -30,7 +30,7 @@
 - name: Install Kubernetes packages (kubectl, kubelet)
   when: ansible_distribution in ["Ubuntu", "Debian"] and not is_kube_master
   apt:
-    name: ['kubectl={{ k8s_version_int }}-00', 'kubelet={{ k8s_version_int }}-00', 'kubeadm={{ k8s_version_int }}-00']
+    name: ['kubectl={{ k8s_version_int }}-1.1', 'kubelet={{ k8s_version_int }}-1.1', 'kubeadm={{ k8s_version_int }}-1.1']
     state: present
 
 - name: Prevent auto-upgrade Kubernetes packages

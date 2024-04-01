@@ -1,0 +1,75 @@
+#!/bin/bash
+set -e
+
+function _add_repo() {
+  ## add nvidia repo
+  curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg \
+  && curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
+    sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
+    sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
+}
+
+function _make_apt_repo() {
+  local result=()
+  local list=(
+    # "containerd.io="
+    # "kubelet="
+    # "kubeadm="
+    # "kubectl="
+    "docker-ce"
+    "docker-ce-cli"
+    "docker-compose-plugin"
+    # "nvidia-container-toolkit"
+    "nginx"
+    "jq"
+    "ipvsadm"
+    "ipset"
+    "auditd"
+    "python3"
+    "wget"
+    # "libonig2"
+    "telnet"
+    "vim"
+    "curl"
+    "net-tools"
+    "nfs-kernel-server"
+    # "libnfsidmap2"
+    "libtirpc3"
+    "rpcbind"
+    "keyutils"
+    "libtirpc-common"
+    "dnsutils"
+    "dpkg-dev"
+    "tcpdump"
+    "conntrack"
+    "ebtables"
+    "iproute2"
+    "util-linux"
+    "udev"
+    "ethtool"
+  )
+
+  local total_len="${#list[@]}"
+
+  cd /root/test
+
+  for (( i=0; i<=${total_len}-1; i++ )); do
+    echo "download: ${list[i]}"
+    result+=("$(apt-rdepends "${list[i]}")")
+    apt download $(apt-rdepends "${list[i]}" | grep -v "^ " | sed 's/debconf-2.0/debconf/g' | sed 's/systemd-tmpfiles/systemd/g' | grep -v "^host")
+  done
+
+  apt-get install -y dpkg-dev
+  rm -rf lock partial pkgcache.bin srcpkgcache.bin Packages.gz
+  dpkg-scanpackages -m . | gzip -9c > Packages.gz
+}
+
+main() {
+
+  ## add repo
+  _add_repo
+
+  ## download package all dependences
+  _make_apt_repo
+}
+main "${@}"

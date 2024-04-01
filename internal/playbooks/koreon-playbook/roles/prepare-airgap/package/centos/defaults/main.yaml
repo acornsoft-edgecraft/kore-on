@@ -5,5 +5,5 @@ package_archive_dir: "{{ prepare_airgap_registry_data_dir }}/archive"
 package_bastion_dir: "{{ prepare_airgap_registry_data_dir }}/bastion"
 
 containerd_io: "containerd.io-{{ package_containerd_version | regex_replace('^v', '') }}-3.1.el{{ ansible_distribution_major_version }}"
-etcd_get_url: "https://storage.googleapis.com/etcd/{{ package_etcd_version }}/etcd-{{ package_etcd_version }}-{{ ansible_system | lower }}-amd64.tar.gz"
-helm_get_url: "https://get.helm.sh/helm-{{ package_helm_version }}-{{ ansible_system | lower }}-amd64.tar.gz"
+etcd_get_url: "https://storage.googleapis.com/etcd/{{ package_etcd_version }}/etcd-{{ package_etcd_version }}-{{ ansible_system | lower }}-{{ 'amd64' if ansible_architecture == 'x86_64' else 'arm64' if ansible_architecture == 'aarch64' }}.tar.gz"
+helm_get_url: "https://get.helm.sh/helm-{{ package_helm_version }}-{{ ansible_system | lower }}-{{ 'amd64' if ansible_architecture == 'x86_64' else 'arm64' if ansible_architecture == 'aarch64' }}.tar.gz"

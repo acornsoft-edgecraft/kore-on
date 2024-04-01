@@ -1,13 +1,20 @@
 ---
 # For ubuntu     -------------------------------------------------------------
+- name: Create keyrings directory if it does not exist
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: "0755"
+
 - name: Add Kubernetes APT GPG key
   ansible.builtin.apt_key:
-    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    url: "{{ kubernetes_repo }}/deb/Release.key"
     state: present
+    keyring: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
 
 - name: Adding Kubernetes repository
   ansible.builtin.apt_repository:
-    repo: "deb http://apt.kubernetes.io/ kubernetes-xenial main"
+    repo: "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] {{ kubernetes_repo }}/deb/ /"
     state: present
     filename: kubernetes
 
@@ -15,12 +22,23 @@
   ansible.builtin.apt_key:
     url: https://download.docker.com/linux/{{ ansible_distribution | lower }}/gpg
     state: present
+    keyring: /etc/apt/keyrings/docker-ce-keyring.gpg
 
 - name: Adding Docker-ce repository
   ansible.builtin.apt_repository:
-    repo: "deb [arch=amd64] https://download.docker.com/linux/{{ansible_distribution|lower}} {{ansible_distribution_release}} stable"
+    repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker-ce-keyring.gpg] https://download.docker.com/linux/{{ansible_distribution|lower}} {{ansible_distribution_release}} stable"
     state: present
     filename: docker
+  when:
+    - ansible_architecture in ["x86_64"]
+
+- name: Adding Docker-ce repository
+  ansible.builtin.apt_repository:
+    repo: "deb [arch=arm64 signed-by=/etc/apt/keyrings/docker-ce-keyring.gpg] https://download.docker.com/linux/{{ansible_distribution|lower}} {{ansible_distribution_release}} stable"
+    state: present
+    filename: docker
+  when:
+    - ansible_architecture in ["aarch64"]
 
 # - name: Add Nvidia APT GPG key
 #   ansible.builtin.apt_key:
@@ -37,10 +55,11 @@
   ansible.builtin.apt_key:
     url: https://nginx.org/keys/nginx_signing.key
     state: present
+    keyring: /etc/apt/keyrings/nginx-archive-keyring.gpg
 
 - name: Adding Nginx repository
   ansible.builtin.apt_repository:
-    repo: "deb https://nginx.org/packages/ubuntu/ {{ ansible_distribution_release }} nginx"
+    repo: "deb [signed-by=/etc/apt/keyrings/nginx-archive-keyring.gpg] http://nginx.org/packages/ubuntu {{ ansible_distribution_release }} nginx"
     state: present
     filename: nginx
 # ----------------------------------------------------------------

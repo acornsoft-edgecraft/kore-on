@@ -1,4 +1,4 @@
-apiVersion: kubeadm.k8s.io/v1beta2
+apiVersion: kubeadm.k8s.io/v1beta3
 kind: InitConfiguration
 localAPIEndpoint:
   advertiseAddress: {{ hostvars[inventory_hostname]['ip'] | default(hostvars[inventory_hostname]['ansible_default_ipv4']['address']) }}
@@ -8,7 +8,7 @@ nodeRegistration:
   criSocket: /run/containerd/containerd.sock
 {% endif %}
 ---
-apiVersion: kubeadm.k8s.io/v1beta2
+apiVersion: kubeadm.k8s.io/v1beta3
 kind: ClusterConfiguration
 etcd:
   external:

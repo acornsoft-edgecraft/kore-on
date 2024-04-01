@@ -60,8 +60,6 @@ version = 2
     restrict_oom_score_adj = false
 {% if closed_network %}
     sandbox_image = "{{ registry_domain }}/registry.k8s.io/pause:{{ image_pause_version | regex_replace('^v', '') }}"
-{% elif not registry_domain | ansible.utils.ipaddr %}
-    sandbox_image = "{{ registry_domain }}/registry.k8s.io/pause:{{ image_pause_version | regex_replace('^v', '') }}"
 {% else %}
     sandbox_image = "registry.k8s.io/pause:{{ image_pause_version | regex_replace('^v', '') }}"
 {% endif %}
@@ -186,7 +184,7 @@ version = 2
     shim_debug = false
 
   [plugins."io.containerd.runtime.v2.task"]
-    platforms = ["linux/amd64"]
+    platforms = ["linux/{{ 'amd64' if ansible_architecture == 'x86_64' else 'arm64' if ansible_architecture == 'aarch64' }}"]
     sched_core = false
 
   [plugins."io.containerd.service.v1.diff-service"]

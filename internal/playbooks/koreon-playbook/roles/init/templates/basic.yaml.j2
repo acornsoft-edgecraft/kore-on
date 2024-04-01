@@ -38,8 +38,8 @@ k8s_version: {{ (Kubernetes.Version == "") | ternary("v1.23.12", Kubernetes.Vers
 cluster_id: {{ (KoreOn.ClusterName == "") | ternary("kubernetes", KoreOn.ClusterName) }}
 container_runtime: {{ (Kubernetes.ContainerRuntime == "") | ternary("containerd", Kubernetes.ContainerRuntime) }}
 kube_proxy_mode: {{ (Kubernetes.KubeProxyMode == "") | ternary("ipvs", Kubernetes.KubeProxyMode) }}
-service_ip_range: {{ (Kubernetes.ServiceCidr == "") | ternary("10.96.0.0/20", Kubernetes.ServiceCidr) }}
-pod_ip_range: {{ (Kubernetes.PodCidr == "") | ternary("10.4.0.0/20", Kubernetes.PodCidr) }}
+service_ip_range: {{ (Kubernetes.ServiceCidr == "") | ternary("10.96.0.0/16", Kubernetes.ServiceCidr) }}
+pod_ip_range: {{ (Kubernetes.PodCidr == "") | ternary("10.4.0.0/16", Kubernetes.PodCidr) }}
 node_port_range: {{ (Kubernetes.NodePortRange == "") | ternary("30000-32767", Kubernetes.NodePortRange) }}
 audit_log_enable: {{ Kubernetes.AuditLogEnable }}
 api_sans: {{ (Kubernetes.ApiSans == None) | ternary([], Kubernetes.ApiSans) }}
